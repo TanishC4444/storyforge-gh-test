@@ -10,20 +10,20 @@
       "characters": 46344
     },
     {
-      "role": "humanizer",
-      "characters": 38507
+      "role": "architect",
+      "characters": 34177
     },
     {
-      "role": "humanizer",
-      "characters": 38297
+      "role": "story_quality",
+      "characters": 33661
     },
     {
-      "role": "humanizer",
-      "characters": 38285
+      "role": "story_quality",
+      "characters": 33661
     },
     {
-      "role": "humanizer",
-      "characters": 36676
+      "role": "story_quality",
+      "characters": 33661
     }
   ],
   "primary_source": "The Iliad (Homer)",
@@ -33,5 +33,5 @@
     "narrative_mechanism_match": 0.25
   },
   "stress_prose_words_per_scene": 1400,
-  "warning": "Synthetic 1,400-word scenes test orchestration and character budgets, not live literary quality or exact model token counts."
+  "warning": "Synthetic 1,400-word scenes test orchestration and character budgets, not literary quality or exact model token counts."
 }

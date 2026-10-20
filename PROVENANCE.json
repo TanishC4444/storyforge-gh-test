@@ -41,5 +41,13 @@
       "resolved local ingestion merge conflicts",
       "portable launcher (not copied)"
     ]
+  },
+  "live_library_release": {
+    "name": "gh-inference",
+    "version": "0.6.1",
+    "source_commit": "df6bebe",
+    "wheel_url": "https://files.pythonhosted.org/packages/57/db/ba16b4158729255973217f74424f613615859ebe1c1cbfa43018bcda735f/gh_inference-0.6.1-py3-none-any.whl",
+    "sha256": "5d4bfd21b4559bd7dcb43cc8d10add889d782679b35d024f5aff6ffac8876a90",
+    "note": "Native live workflow uses the published release. The older vendored snapshot remains for compatibility only."
   }
 }

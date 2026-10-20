@@ -59,9 +59,9 @@ def _path(document,path):
     return current
 
 
-def design_review(value,document):
+def design_review(value,document,required=DESIGN_CHECKS):
     require(isinstance(value,dict) and type(value.get('pass')) is bool,'Invalid design review')
-    checks(value.get('checks'),DESIGN_CHECKS,lambda c:_path(document,c.get('path')))
+    checks(value.get('checks'),required,lambda c:_path(document,c.get('path')))
     require(all(c['verdict']!='not_applicable' for c in value['checks']),'Creative categories must be assessed, not skipped')
     require(isinstance(value.get('issues'),list),'Design review needs issues')
     for issue in value['issues']:

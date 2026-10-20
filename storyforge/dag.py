@@ -125,7 +125,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         return
     if task == 'edit':
         draft = (source / 'draft/draft.txt').read_text()
-        result = executor.call('humanizer', {'context': scene_packet, 'prose': draft, 'craft':application_packet(req,state['retrieval'],'humanizer',card['id'])}, 'Edit only what needs improvement. Preserve events, evidence, knowledge, POV, deliberate style, and approximate length. Return complete prose alone.', tokens=budget, skill=(ROOT / 'skills/distinct_writing.md').read_text())
+        result = executor.call('humanizer', {'context':{k:scene_packet[k] for k in ['scene','characters','pov_profile','pov_visible_memory','recent_ending','style_and_controls']},'style':req['style'],'world_rules':req['world_rules'],'genre':req.get('genre'),'prose': draft, 'craft':application_packet(req,state['retrieval'],'humanizer',card['id'])}, 'Edit only what needs improvement. Preserve events, evidence, knowledge, POV, deliberate style, and approximate length. Return complete prose alone.', tokens=budget, skill=(ROOT / 'skills/distinct_writing.md').read_text())
         save(out / 'prose.txt', result)
         return
     if task == 'repair':
@@ -163,7 +163,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
                     save(out / 'memory.json', contracts.delta(load(source / 'initial-memory/memory.json'), prose, [c['id'] for c in req['characters']]))
                 return
         if task in {'story_review', 'verify'}:
-            verdict=executor.call('story_quality',{**evidence_payload(prose),'required_checks':STORY_CHECKS,'scene':card,'creative_controls':controls(req),'world':req['world_design'],'plot':req['plot_design'],'characters':[c for c in req['characters'] if c['id'] in card['participants']],'world_rules':req['world_rules'],'initial_facts':req['initial_facts'],'accepted_memories':compact(state['memories'],36),'previous_scene':{'id':state['accepted'][-1]['id'],'prose_excerpt':state['accepted'][-1]['prose'][-4500:]} if state['accepted'] else None,'craft':application_packet(req,state['retrieval'],'story_quality',card['id'])},
+            verdict=executor.call('story_quality',{**evidence_payload(prose),'required_checks':STORY_CHECKS,'scene':card,'creative_controls':{k:v for k,v in controls(req).items() if k!='style'},'world':req['world_design'],'plot':req['plot_design'],'characters':[c for c in req['characters'] if c['id'] in card['participants']],'world_rules':req['world_rules'],'initial_facts':req['initial_facts'],'accepted_memories':compact(state['memories'],36),'previous_scene':{'id':state['accepted'][-1]['id'],'prose_excerpt':state['accepted'][-1]['prose'][-4500:]} if state['accepted'] else None,'craft':application_packet(req,state['retrieval'],'story_quality',card['id'])},
                 'Assess the complete scene in evidence_passages against accepted knowledge and the user brief. Return the required editorial JSON.',tokens=2400,validator=lambda x:editorial_review(x,prose,STORY_CHECKS),skill=quality_skill)
             words = len(prose.split())
             if backend != 'fixture' and req['length_policy']['scene_words']=='strict' and not req['words_per_scene'] * req['min_words_ratio'] <= words <= req['words_per_scene'] * req['max_words_ratio']:

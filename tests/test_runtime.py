@@ -29,7 +29,7 @@ class RuntimeTests(unittest.TestCase):
         root=Path(__file__).resolve().parents[1]
         text=(root/'storyforge/local_worker.py').read_text()
         self.assertNotIn('timeout=2100',text)
-        self.assertIn('timeout=worker_timeout_seconds()',text)
+        self.assertIn('signal.setitimer(signal.ITIMER_REAL,worker_timeout_seconds())',text)
         self.assertIn('job_timeout_minutes=JOB_TIMEOUT_MINUTES',text)
     def test_normalized_refinement_paths_are_real(self):
         document={'request':{},'candidate':{'expanded_story_elements':[{'name':'medium_length','value':'Four scenes'}],'refined_prompt':'A premise'}}

@@ -8,6 +8,8 @@ def respond(role, packet, req):
         value.update(original_prompt=req['premise'], refined_prompt=req['premise'], central_conflict='FIXTURE conflict', reader_experience='FIXTURE only')
         return json.dumps(value)
     if role == 'development_editor':
+        if packet.get('candidate_evidence'):
+            return json.dumps({'pass':True,'checks':[{'id':key,'verdict':'pass','evidence_id':packet['candidate_evidence'][0]['id'],'reason':'Synthetic fixture assessment validates transport only, not literary quality.'} for key in packet['required_checks']],'issues':[]})
         candidate=packet['review_document']['candidate']
         path='candidate.refined_prompt' if 'refined_prompt' in candidate else 'candidate.scenes.0.intended_change'
         return json.dumps({'pass':True,'checks':[{'id':key,'verdict':'pass','path':path,'reason':'Synthetic fixture assessment validates transport only, not literary quality.'} for key in packet['required_checks']],'issues':[]})

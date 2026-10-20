@@ -1,45 +1,38 @@
-"""Run the existing GH-INFERENCE worker on this already-allocated Actions runner.
-
-No GitHub API, no workflow dispatch, and no nested runner allocation.
-"""
+"""Resident inference within the job already allocated by GitHub Actions."""
 from __future__ import annotations
-import json
+import atexit
 import os
-from pathlib import Path
-import subprocess
-import sys
-import tempfile
-from .inference import ROOT
+import signal
 from .runtime import JOB_TIMEOUT_MINUTES, JOB_TIMEOUT_SECONDS, DOWNLOAD_TIMEOUT_SECONDS, worker_timeout_seconds
 
+_SESSIONS={}
 
-def execute(model, system, prompt, tokens, n_ctx, role):
-    sys.path.insert(0, str(ROOT / 'vendor/gh-inference'))
-    from gh_ai_runner.runner import INFERENCE_SCRIPT
-    from gh_ai_runner.limits import Limits
-    from gh_ai_runner.validation import _validate
-    from gh_ai_runner.models import MODELS
-    limits = Limits(job_timeout_minutes=JOB_TIMEOUT_MINUTES, provider_timeout_seconds=JOB_TIMEOUT_SECONDS, download_timeout_seconds=DOWNLOAD_TIMEOUT_SECONDS)
-    _validate(model, tokens, .7, n_ctx, runner_ram_gb=16, runner_disk_gb=14, cache=False, limits=limits)
-    config = {'model': model, 'n_ctx': n_ctx, 'max_tokens': tokens,
-              'job_timeout_minutes': JOB_TIMEOUT_MINUTES, 'temperature': .7 if role in {'writer', 'humanizer'} else .25,
-              'cache_weights': False, 'limits': limits.to_dict(),
-              'agent': {'remember': False, 'history': [], 'tasks': [], 'refine_prompt': False, 'track_time': True},
-              'model_options': {'chat_template_options': {'enable_thinking': False}} if model.startswith('gemma-4') else {}}
-    with tempfile.TemporaryDirectory(prefix='story-worker-') as temp:
-        path = Path(temp)
-        (path / 'worker.py').write_text(INFERENCE_SCRIPT)
-        # Reuse downloaded files only within this job. No model cache artifact upload.
-        (path / 'model_cache').symlink_to((ROOT / 'model_cache').resolve(), target_is_directory=True)
-        (ROOT / 'model_cache').mkdir(exist_ok=True)
-        env = {**os.environ, 'JOB_ID': role, 'ATTEMPT': '1', 'BACKEND': 'local',
-               'LOCAL_MODEL': model, 'CACHE': 'false', 'SYSTEM': system, 'PROMPT': prompt,
-               'CONFIG_JSON': json.dumps(config)}
-        process = subprocess.run([sys.executable, str(path / 'worker.py')], cwd=path, env=env, timeout=worker_timeout_seconds())
-        result_path = path / 'result.json'
-        result = json.loads(result_path.read_text()) if result_path.exists() else {}
-        if process.returncode:
-            raise RuntimeError('Worker failed: ' + str(result.get('error', f'exit {process.returncode}')))
-        item = result['agent']['results'][-1]
-        return item['output'], {**item, 'resources': result.get('resources', {}), 'integrity': result.get('integrity', {}), 'workflow_run_id': os.getenv('GITHUB_RUN_ID'),
-                               'workflow_job': os.getenv('GITHUB_JOB'), 'model_revision': MODELS[model].get('revision', 'main')}
+
+def close_sessions():
+    for session in _SESSIONS.values():session.close()
+    _SESSIONS.clear()
+
+
+atexit.register(close_sessions)
+
+
+def execute(model, system, prompt, tokens, n_ctx, role, response_schema=None):
+    from gh_inference import ResidentSession, Limits
+    key=(model,n_ctx)
+    if key not in _SESSIONS:
+        # One model resident per job; do not accumulate multiple 12B models.
+        close_sessions()
+        options={'chat_template_options':{'enable_thinking':False}} if model.startswith('gemma-4') else {}
+        _SESSIONS[key]=ResidentSession(model,n_ctx=n_ctx,
+            limits=Limits(job_timeout_minutes=JOB_TIMEOUT_MINUTES,provider_timeout_seconds=JOB_TIMEOUT_SECONDS,download_timeout_seconds=DOWNLOAD_TIMEOUT_SECONDS),
+            model_options=options,runner_ram_gb=16,runner_disk_gb=14)
+    def expired(*args):raise TimeoutError('Shared job time budget exhausted; preserving cleanup time.')
+    previous=signal.signal(signal.SIGALRM,expired)
+    signal.setitimer(signal.ITIMER_REAL,worker_timeout_seconds())
+    try:
+        output,diagnostic=_SESSIONS[key].complete(prompt,system=system,max_tokens=tokens,
+            temperature=.7 if role in {'writer','humanizer'} else .25,response_schema=response_schema)
+        return output,{**diagnostic,'workflow_run_id':os.getenv('GITHUB_RUN_ID'),'workflow_job':os.getenv('GITHUB_JOB')}
+    finally:
+        signal.setitimer(signal.ITIMER_REAL,0)
+        signal.signal(signal.SIGALRM,previous)

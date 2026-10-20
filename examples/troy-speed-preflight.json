@@ -1,0 +1,47 @@
+{
+  "source_run": 39488246237,
+  "fixture_judgments_only": true,
+  "real_saved_candidate": true,
+  "old_review_input_chars": 33716,
+  "new_review_packets": [
+    {
+      "checks": [
+        "medium_length",
+        "themes_tensions",
+        "genre",
+        "tone_mood"
+      ],
+      "characters": 2177,
+      "evidence_cards": 3
+    },
+    {
+      "checks": [
+        "scene_design",
+        "information_order",
+        "causal_alternatives"
+      ],
+      "characters": 4956,
+      "evidence_cards": 2
+    },
+    {
+      "checks": [
+        "world_rules",
+        "character_depth"
+      ],
+      "characters": 7068,
+      "evidence_cards": 6
+    },
+    {
+      "checks": [
+        "plot_subplots",
+        "references_adaptation",
+        "figurative_language"
+      ],
+      "characters": 6433,
+      "evidence_cards": 3
+    }
+  ],
+  "largest_packet_chars": 7068,
+  "all_evidence_locations_valid": true,
+  "no_live_speed_claim": true
+}
