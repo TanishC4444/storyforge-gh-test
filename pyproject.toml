@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "storyforge-gh-test"
+version = "0.1.0"
+description = "File-based, fresh-runner fiction orchestration testbed"
+requires-python = ">=3.11"
+dependencies = []
+[project.optional-dependencies]
+rag = ["sentence-transformers>=5,<6", "numpy>=2,<3", "python-dotenv>=1,<2"]
+docx = ["python-docx>=1.1,<2"]
+[project.scripts]
+storyforge = "storyforge.cli:main"
+[tool.setuptools.packages.find]
+include = ["storyforge*"]

@@ -1,0 +1,45 @@
+{
+  "library": {
+    "source": "https://github.com/TanishC4444/github-ai",
+    "base_commit": "2ac0fbdba448c9d7171c9f49ec54765437effcf2",
+    "note": "Snapshot includes local uncommitted source required for current Agent API; upstream checkout was not modified.",
+    "files_sha256": {
+      "LICENSE": "2913b094761b7455460995de90cab3bb2387143b47c80d8d21ba620f04c7376c",
+      "pyproject.toml": "d7af4ac34d5e72a3f7937e47e9502642187905eed6c23dddedb9a1dd33ae6b1a",
+      "MANIFEST.in": "39f6d45d9ac0e0d4a4b32f90c8dbed8305717f7211f1d1635d02aac720c7be18",
+      "README.md": "f5c0aa4a5512cea43474db76255549a5e5517e58aa2e69ef77360185abdbdc94",
+      "gh_inference/__init__.py": "88954a390f21a1d3884f2c77bb2b8cf229d527452e7bfce843614d79ae56a496",
+      "gh_inference/__main__.py": "390f22e8192441d826ddf970becd1d1aa08042fabbc4865705c26d5daecd31ff",
+      "gh_ai_runner/runner.py": "7bfd015ff96dcbaeb500c07b420a6ae6a1a467dd48d18a027f5b157fc0569da3",
+      "gh_ai_runner/metadata.py": "72e5bccb0ca4d24d6c75a5e8c3d00d2719eee84c7958254cc7a1f9a2d5cb7376",
+      "gh_ai_runner/artifact.py": "58943ae4e7b924b56e77aad6de92fe79a16a834236edb9dd82ecb2c03a640b3e",
+      "gh_ai_runner/models.py": "e00080eaade07edd902429d2ef3b627d5769dfdaf12646174bb9b4da9e93ecbc",
+      "gh_ai_runner/worker_agent.py": "e282d1683b4735ef1ea143f4739bdecc159d2ffa4beddf4f19c6c5f15f7c1977",
+      "gh_ai_runner/limits.py": "dc35b145fa51eb37f29403ce4e0f32e1cc1664237fbd03ac82f882291f8373ed",
+      "gh_ai_runner/job.py": "4800283f97c0739e96fbfd7d773696c2ba89459f4abc4445fec4f8f07967da4e",
+      "gh_ai_runner/client.py": "9205b168b987305d83ae5a13f782984e1b417dab4d69ea849b7712e849a53775",
+      "gh_ai_runner/batch.py": "7beacbe2406ae39ca0a7ff3a6d246b555367e9d0d08dfb24a994549c91467f79",
+      "gh_ai_runner/__init__.py": "2df45a63f6b99b83704d09dea8f2ab1e244141eafe291be32b98c3d5c306ac0e",
+      "gh_ai_runner/core.py": "586bd1aa511f9a73b436e6bb2e3653913e6c7f6419865830cac5f123bfd1dd13",
+      "gh_ai_runner/types.py": "9f924340e2821dcff1c8ca7612f13d6b2d2e775c21a1a1bcd8393a731e869754",
+      "gh_ai_runner/logger.py": "ea6ccaa709a3e1f210cc483064749e1e72e5d2896190b50206e1048f5e3789d0",
+      "gh_ai_runner/hub.py": "4b7c20a48e94f168c7695dd1d023a26931a8be7f4d8b2f60a92f30a6e439a6ad",
+      "gh_ai_runner/stress.py": "0a544607958a98828c6a0279a44dbd18c3150b9455255d47ab3b77c8853c8a40",
+      "gh_ai_runner/pipeline.py": "30e8b314752dd500daccf2e434396f93c71bd6f4296e94025db111b80c58e9e9",
+      "gh_ai_runner/repo.py": "917af593283dcfab67a0464423b104bf8c97516364b497f2f766e42bbe7c0cce",
+      "gh_ai_runner/agent.py": "91f0f3c9220104ff63548aaa663f437aebd8364cf599ec4c8446d19f98f5f5c2",
+      "gh_ai_runner/polling.py": "bd9c5b8ecbbb6e389d8d914efec4683232c480f7d926159b1c0b7b7a9895e998",
+      "gh_ai_runner/agent_types.py": "5fd861067af8d215bfd38a1f4b123930869df93061a4b3c8ab5a4533d8059efd",
+      "gh_ai_runner/integrity.py": "44c5df9944fc59123026fb8f0896698680ea04b856bf2bd2accecb14397b41ee",
+      "gh_ai_runner/validation.py": "2286e9ab506ca9267200880f628e52f6876d85cf4a6eea7ba0aa7566d5acd706"
+    }
+  },
+  "rag": {
+    "source": "https://github.com/ronmin11/hacktxprep",
+    "commit": "e27e40c6eecc0bae98002434cc9bc5da5459cda7",
+    "local_fixes": [
+      "resolved local ingestion merge conflicts",
+      "portable launcher (not copied)"
+    ]
+  }
+}

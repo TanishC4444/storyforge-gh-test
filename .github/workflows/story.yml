@@ -1,0 +1,50 @@
+name: Story coordinator
+on:
+  workflow_dispatch:
+    inputs:
+      backend:
+        description: 'fixture tests plumbing; github starts real fresh inference jobs'
+        type: choice
+        options: [fixture, github]
+        default: fixture
+      profile:
+        description: Model profile for live runs
+        type: choice
+        options: [balanced, expressive, small]
+        default: balanced
+permissions:
+  contents: read
+concurrency:
+  group: story-coordinator
+  cancel-in-progress: false
+jobs:
+  story:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    env:
+      GH_AI_TOKEN: ${{ secrets.GH_AI_TOKEN }}
+      STORY_PROFILE: ${{ inputs.profile }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install ./vendor/gh-inference -e .
+      - name: Configure example
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          request = json.loads(Path('examples/harbor.json').read_text())
+          request['profile'] = os.environ['STORY_PROFILE']
+          Path('request-run.json').write_text(json.dumps(request))
+          PY
+      - name: Coordinate story
+        run: python -m storyforge.cli --request request-run.json --out runs/harbor --backend '${{ inputs.backend }}'
+      - name: Save checkpoints, prompts, and outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: story-run-${{ github.run_id }}
+          path: runs/
+          retention-days: 7
