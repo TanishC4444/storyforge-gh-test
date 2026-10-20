@@ -104,6 +104,20 @@ class WorkflowTests(unittest.TestCase):
             state = run(req, d, approve_plan=True, stop_after=1)
             self.assertEqual(len(state['accepted']), 1)
 
+    def test_refinement_preserves_input_and_precedes_plan(self):
+        from storyforge.contracts import refinement
+        req = example()
+        refined = json.loads(respond('refiner', {}, req))
+        refinement(refined, req)
+        refined['original_prompt'] = 'Changed user premise'
+        with self.assertRaises(ContractError):
+            refinement(refined, req)
+        with tempfile.TemporaryDirectory() as d, redirect_stdout(io.StringIO()):
+            state = run(req, d, stop_after=1)
+            self.assertEqual(state['refinement']['original_prompt'], req['premise'])
+            architect = next((Path(d) / 'packets').glob('architect-*.json'))
+            self.assertEqual(load(architect)['input']['refinement'], state['refinement'])
+
     def test_live_adapter_uses_fresh_scoped_agents(self):
         from dataclasses import dataclass
         import types
