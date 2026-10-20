@@ -84,9 +84,18 @@ def delta(value, prose, ids):
 
 def refinement(value, req):
     require(isinstance(value, dict), 'Refinement must be an object')
+    # Canonicalize losslessly equivalent presentation shapes, never invent content.
+    value = dict(value)
+    experience = value.get('reader_experience')
+    if isinstance(experience, list) and experience and all(isinstance(x, str) and x.strip() for x in experience):
+        value['reader_experience'] = '; '.join(experience)
+    arrays = ['preserved_user_choices', 'expanded_story_elements', 'character_tensions', 'subplot_possibilities', 'world_constraints', 'suggested_techniques', 'retrieval_references', 'assumptions', 'open_decisions']
+    for key in arrays:
+        if isinstance(value.get(key), dict):
+            value[key] = [{'name': name, 'value': item} for name, item in value[key].items()]
     require(value.get('original_prompt') == req['premise'], 'Refinement must preserve original prompt verbatim')
     for key in ['refined_prompt', 'central_conflict', 'reader_experience']:
-        require(isinstance(value.get(key), str) and bool(value[key].strip()), f'Refinement needs {key}')
-    for key in ['preserved_user_choices', 'expanded_story_elements', 'character_tensions', 'subplot_possibilities', 'world_constraints', 'suggested_techniques', 'retrieval_references', 'assumptions', 'open_decisions']:
-        require(isinstance(value.get(key), list), f'Refinement needs {key} array')
+        require(isinstance(value.get(key), str) and bool(value[key].strip()), f'Refinement {key} must be a nonempty string (received {type(value.get(key)).__name__})')
+    for key in arrays:
+        require(isinstance(value.get(key), list), f'Refinement {key} must be an array (received {type(value.get(key)).__name__})')
     return value

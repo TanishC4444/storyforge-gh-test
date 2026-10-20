@@ -15,6 +15,13 @@ MEMORY_INSTRUCTION = '''Return only JSON {"memories": [{"kind": "event"|"belief"
 Extract at most 6 consequential updates. Facts, claims, and beliefs are distinct. A spoken claim is not objective truth. Only record knowledge acquisition supported in this scene; presence alone is not proof. Use public only for a public in-world disclosure, never just because the reader knows. No hypothetical, planned, rejected, or inferred offstage event. Preserve uncertainty. Only current prose is evidence.'''
 
 
+def planning_packet(req, refinement, retrieval):
+    operational = {'profile', 'max_repairs', 'max_stage_retries', 'context_chars', 'n_ctx', 'runner_repo', 'retrieval_mode', 'auto_approve_plan', 'min_words_ratio', 'max_words_ratio'}
+    return {'request': {k: v for k, v in req.items() if k not in operational},
+            'refinement': {k: refinement[k] for k in ['refined_prompt', 'central_conflict', 'character_tensions', 'subplot_possibilities', 'world_constraints']},
+            'inspiration': [{'id': s['id'], 'mechanism': s.get('mechanism')} for s in retrieval['sources']]}
+
+
 def visible(memories, character=None):
     return [m for m in memories if 'public' in m['known_by'] or (character is not None and character in m['known_by'])]
 
@@ -73,8 +80,8 @@ def run(req, folder, backend='fixture', *, stop_after=None, approve_plan=False):
             save(folder / 'refinement.json', state['refinement'])
             save(state_path, state)
         if 'plan' not in state:
-            planner_packet = {'request': req, 'refinement': state['refinement'], 'inspiration': state['retrieval']}
-            state['plan'] = executor.call('architect', planner_packet, PLAN_INSTRUCTION, tokens=3800,
+            planner_packet = planning_packet(req, state['refinement'], state['retrieval'])
+            state['plan'] = executor.call('architect', planner_packet, PLAN_INSTRUCTION, tokens=2800,
                                          validator=lambda x: contracts.plan(x, req),
                                          skill=(ROOT / 'skills/story_architect.md').read_text().split('TECHNIQUE LIBRARY')[0])
             state['plan_approved'] = bool(req['auto_approve_plan'] or approve_plan)

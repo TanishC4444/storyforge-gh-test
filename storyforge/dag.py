@@ -7,8 +7,8 @@ import json
 import os
 from pathlib import Path
 from . import contracts
-from .coordinator import compact, packet, visible, PLAN_INSTRUCTION, MEMORY_INSTRUCTION
-from .inference import Executor, ROOT
+from .coordinator import compact, packet, visible, planning_packet, PLAN_INSTRUCTION, MEMORY_INSTRUCTION
+from .inference import Executor, ROOT, parse_json
 from .retrieval import retrieve
 from .storage import load, save, export
 
@@ -49,13 +49,36 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
     state = load(source / 'state' / 'snapshot.json')
     req = state['request']
     executor = Executor(req, out, backend)
+    if task == 'refine' and (source / 'seed').exists():
+        # Old failed attempts may have valid content rejected only for formatting.
+        # Require the exact original story request; max_repairs is an execution-only setting.
+        for call_path in sorted((source / 'seed').rglob('calls/refiner-*.json')):
+            saved = load(call_path)
+            packet_path = call_path.parent.parent / 'packets' / call_path.name
+            if not packet_path.exists():
+                continue
+            previous = load(packet_path).get('input', {}).get('request', {})
+            comparable = lambda x: {k: v for k, v in x.items() if k != 'max_repairs'}
+            if comparable(previous) != comparable(req):
+                continue
+            try:
+                recovered = contracts.refinement(parse_json(saved['output']), req)
+            except contracts.ContractError:
+                continue
+            state['refinement'] = recovered
+            state['refinement_recovery'] = {'source_artifact_call': call_path.name, 'source_run': os.getenv('REFINEMENT_SEED_RUN'), 'normalization': 'String-list reader experience joined; labelled objects represented as name/value entries; no story content invented.'}
+            save(out / 'refinement.json', recovered)
+            save(out / 'recovered-raw-call.json', saved)
+            save(out / 'snapshot.json', state)
+            return state
+        raise contracts.ContractError('Seed artifact did not contain a compatible valid refinement; no silent replacement or fresh regeneration.')
     if task == 'refine':
         state['refinement'] = executor.call('refiner', {'request': req, 'inspiration': state['retrieval']}, REFINE, tokens=2400, validator=lambda x: contracts.refinement(x, req))
         save(out / 'refinement.json', state['refinement'])
         save(out / 'snapshot.json', state)
         return state
     if task == 'plan':
-        state['plan'] = executor.call('architect', {'request': req, 'refinement': state['refinement'], 'inspiration': state['retrieval']}, PLAN_INSTRUCTION, tokens=3800, validator=lambda x: contracts.plan(x, req), skill=(ROOT / 'skills/story_architect.md').read_text().split('TECHNIQUE LIBRARY')[0])
+        state['plan'] = executor.call('architect', planning_packet(req, state['refinement'], state['retrieval']), PLAN_INSTRUCTION, tokens=2800, validator=lambda x: contracts.plan(x, req), skill=(ROOT / 'skills/story_architect.md').read_text().split('TECHNIQUE LIBRARY')[0])
         state['plan_approved'] = True
         save(out / 'plan.json', state['plan'])
         save(out / 'snapshot.json', state)

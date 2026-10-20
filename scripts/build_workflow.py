@@ -20,6 +20,10 @@ on:
         type: choice
         options: [silent-bell-full, harbor]
         default: silent-bell-full
+      refinement_seed_run:
+        type: string
+        default: ''
+        description: Optional prior run with saved refinement output to recover
       scene_limit:
         type: choice
         options: ['9', '3', '1']
@@ -27,6 +31,7 @@ on:
         description: Nine scenes is the full three-chapter test
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: story-runners
   cancel-in-progress: false
@@ -49,10 +54,13 @@ def build():
             lines += ['    strategy:', '      fail-fast: false', '      max-parallel: 3', '      matrix:', f'        character: ${{{{ fromJSON(needs.{matrix}.outputs.characters) }}}}']
         if state_output:
             lines += ['    outputs:', '      characters: ${{ steps.task.outputs.characters }}']
-        lines += ['    steps:', '      - uses: actions/checkout@v4', '      - uses: ./.github/actions/setup-worker', '        with:', '          backend: ${{ inputs.backend }}']
+        setup_backend = "fixture" if task == "prepare" or (task == "accept" and (index + 1) % 3 != 0) else ("${{ inputs.refinement_seed_run != '' && 'fixture' || inputs.backend }}" if task == "refine" else "${{ inputs.backend }}")
+        lines += ['    steps:', '      - uses: actions/checkout@v4', '      - uses: ./.github/actions/setup-worker', '        with:', '          backend: ' + setup_backend]
+        if task == 'refine':
+            lines += ['      - uses: actions/download-artifact@v4', "        if: inputs.refinement_seed_run != ''", '        with:', '          name: refine', '          path: inputs/seed', '          run-id: ${{ inputs.refinement_seed_run }}', '          github-token: ${{ github.token }}']
         for artifact, path, pattern in downloads:
             lines += ['      - uses: actions/download-artifact@v4', '        with:', f'          {"pattern" if pattern else "name"}: {artifact}', f'          path: inputs/{path}']
-        lines += ['      - name: Run scoped story task', '        id: task', '        env:', '          STORY_BACKEND: ${{ inputs.backend }}', '          STORY_PROFILE: ${{ inputs.profile }}', '          STORY_REQUEST: ${{ inputs.request_file }}']
+        lines += ['      - name: Run scoped story task', '        id: task', '        env:', '          STORY_BACKEND: ${{ inputs.backend }}', '          STORY_PROFILE: ${{ inputs.profile }}', '          STORY_REQUEST: ${{ inputs.request_file }}', '          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}']
         if matrix:
             lines += ['          STORY_CHARACTER: ${{ matrix.character }}']
         args = f'{task} --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"'

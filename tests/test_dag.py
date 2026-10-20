@@ -68,6 +68,24 @@ class DagTests(unittest.TestCase):
             self.assertTrue(final['complete'])
             self.assertEqual(len(list((state/'chapters').glob('*.txt'))),3)
 
+    def test_failed_refinement_is_recovered_without_regeneration(self):
+        from storyforge.fixture import respond
+        with tempfile.TemporaryDirectory() as d, redirect_stdout(io.StringIO()):
+            root = Path(d)
+            initial = stage('prepare', root/'unused', root/'prepare', backend='worker')
+            shutil.copytree(root/'prepare', root/'inputs/state')
+            seed = root/'inputs/seed'
+            (seed/'calls').mkdir(parents=True)
+            (seed/'packets').mkdir()
+            raw = json.loads(respond('refiner', {}, initial['request']))
+            raw['reader_experience'] = ['Investigation', 'Costly hope']
+            (seed/'calls/refiner-seed.json').write_text(json.dumps({'output':json.dumps(raw)}))
+            (seed/'packets/refiner-seed.json').write_text(json.dumps({'input':{'request':initial['request']}}))
+            with patch('storyforge.dag.Executor.call', side_effect=AssertionError('Must reuse saved generation')):
+                recovered = stage('refine', root/'inputs', root/'recovered', backend='worker')
+            self.assertEqual(recovered['refinement']['reader_experience'], 'Investigation; Costly hope')
+            self.assertIn('refinement_recovery', recovered)
+
     def test_worker_backend_does_not_dispatch_remote_workflows(self):
         with tempfile.TemporaryDirectory() as folder, redirect_stdout(io.StringIO()), patch('storyforge.local_worker.execute',return_value=('Complete artifact',{'finish_reason':'stop'})) as worker:
             result = Executor(example(),folder,'worker').call('writer',{'only':'scoped context'},'write')

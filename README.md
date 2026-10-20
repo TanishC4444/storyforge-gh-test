@@ -109,3 +109,7 @@ Its optional github backend uses the library's older separate-workflow dispatch 
 The prototype retains all accepted prose and memory, but working memory currently selects recent records within count and character budgets. Important old facts can be missed. There is no perfect-memory claim, unrestricted world simulation, UI, DOCX export, automatic early-scene dependency repair, or guaranteed originality.
 
 See PROVENANCE.json for source commits and vendored-library file hashes. The user's upstream library checkout was not modified. Original orchestration code is MIT licensed; the vendored library retains its MIT license. Corpus/guide provenance and downloaded model terms remain separate. Confirm permitted hosting use before treating any test arrangement as production inference infrastructure.
+
+## Refinement recovery
+
+Equivalent structured presentation is normalized without inventing content: a reader-experience list becomes a joined string, and labelled mappings become name/value entries. Missing required information still fails validation. The optional refinement_seed_run workflow input reuses a prior refine artifact only when its original story request matches and its content passes current validation; this avoids regenerating an already-written refinement after a formatting-only rejection. The raw model output and recovery provenance are preserved.

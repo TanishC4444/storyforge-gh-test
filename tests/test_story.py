@@ -116,7 +116,21 @@ class WorkflowTests(unittest.TestCase):
             state = run(req, d, stop_after=1)
             self.assertEqual(state['refinement']['original_prompt'], req['premise'])
             architect = next((Path(d) / 'packets').glob('architect-*.json'))
-            self.assertEqual(load(architect)['input']['refinement'], state['refinement'])
+            self.assertEqual(load(architect)['input']['refinement']['refined_prompt'], state['refinement']['refined_prompt'])
+
+    def test_refinement_normalizes_equivalent_shapes_without_inventing_fields(self):
+        from storyforge.contracts import refinement
+        req = example()
+        raw = json.loads(respond('refiner', {}, req))
+        raw['reader_experience'] = ['Investigation', 'Costly hope']
+        raw['expanded_story_elements'] = {'conflict': {'owner': 'mara', 'cost': 'trust'}}
+        normalized = refinement(raw, req)
+        self.assertEqual(normalized['reader_experience'], 'Investigation; Costly hope')
+        self.assertEqual(normalized['expanded_story_elements'], [{'name': 'conflict', 'value': {'owner':'mara','cost':'trust'}}])
+        self.assertIsInstance(raw['reader_experience'], list)
+        del raw['reader_experience']
+        with self.assertRaises(ContractError):
+            refinement(raw, req)
 
     def test_live_adapter_uses_fresh_scoped_agents(self):
         from dataclasses import dataclass
