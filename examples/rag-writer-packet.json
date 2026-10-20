@@ -1,0 +1,50 @@
+{
+  "references": [
+    {
+      "id": "work_152",
+      "title": "Antigone (Sophocles)",
+      "mechanism": "incompatible_obligations",
+      "guidance": {
+        "instruction": "Give opposing characters intelligible obligations, identify a possible compromise, and show the choices that make it unavailable."
+      },
+      "limits": [],
+      "purposes": [
+        "Conflicting obligations with genuine counterarguments; do not borrow the burial plot or require tragedy."
+      ]
+    },
+    {
+      "id": "work_018",
+      "title": "Old Sultan",
+      "mechanism": "conflicting_debts",
+      "guidance": {
+        "instruction": "Let one rescue create two incompatible loyalties, and force the beneficiary to choose which obligation has moral priority."
+      },
+      "limits": [],
+      "purposes": [
+        "Rescue or protection creates incompatible debts rather than an automatic obligation to obey."
+      ]
+    }
+  ],
+  "craft": [
+    {
+      "id": "SCENE-03",
+      "chapter": 9,
+      "heading": "SCENE-03 — Use beats as changes in action or interpretation",
+      "content": "### SCENE-03 — Use beats as changes in action or interpretation\n\nA beat is a useful drafting unit when a tactic, emotional posture, perception, or relationship changes. Do not make every sentence a new beat.\n\nExample sequence: ask politely → offer payment → discover payment would insult → disclose the real need → receive a conditional offer. The dialogue should enact those changes rather than merely discuss them afterward."
+    },
+    {
+      "id": "FIG-01",
+      "chapter": 20,
+      "heading": "FIG-01 — Comparison, association, and symbolic meaning",
+      "content": "### FIG-01 — Comparison, association, and symbolic meaning\n\n| Device | What it does | Construction and original example | Failure check |\n|---|---|---|---|\n| Metaphor | Understands one thing through another | Select a consequential shared relation: “The permit office was a lock on a public well.” | Does the comparison clarify rather than merely decorate? |\n| Simile | Makes an explicit comparison | “The rumor traveled like water through a cracked wall.” | Is the chosen resemblance specific? |\n| Extended metaphor | Develops a comparison across several details | Continue the lock image through keys, access, and ownership | Do extensions remain coherent? |\n| Conceit | Sustains an unusual or elaborate comparison | Compare a family agreement to a hydraulic system with unequal pressure | Does elaboration generate insight? |\n| Analogy | Uses a mapped comparison to explain or argue | A witness compares archival gaps to missing stitches in a seam | Which parts correspond, and where does the comparison fail? |\n| Personification | Attributes human action or qualities to nonhuman things | “The ar"
+    }
+  ],
+  "adaptation": {
+    "strength": 0.3,
+    "mode": "mechanisms",
+    "max_active_sources_per_scene": 2,
+    "preserve_user_choices": true,
+    "policy": "Use a small mechanism or relationship move; do not force reference material into every scene or treat adaptation strength as a measured similarity percentage."
+  },
+  "instruction": "Use only what serves the scene. Cite source IDs in planning/review metadata, never device labels in story prose. Preserve user choices; do not transplant plots or force every reference into every scene."
+}

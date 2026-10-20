@@ -1,0 +1,2 @@
+Check proposed memory against current prose and prior memory. Verify information acquisition, actual speaker attribution, beliefs versus facts, resources, and chronology. An exact quotation or valid paragraph ID does not prove the conclusion follows.
+Return only JSON {"pass":boolean,"issues":[{"severity":"blocking"|"advisory","category":string,"quote":exact current-prose quotation,"problem":string,"fix":string}]}. A blocking issue means pass=false.

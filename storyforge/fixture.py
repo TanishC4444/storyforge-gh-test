@@ -7,6 +7,14 @@ def respond(role, packet, req):
         value = {k: [] for k in ['preserved_user_choices', 'expanded_story_elements', 'character_tensions', 'subplot_possibilities', 'world_constraints', 'suggested_techniques', 'retrieval_references', 'assumptions', 'open_decisions']}
         value.update(original_prompt=req['premise'], refined_prompt=req['premise'], central_conflict='FIXTURE conflict', reader_experience='FIXTURE only')
         return json.dumps(value)
+    if role == 'development_editor':
+        candidate=packet['review_document']['candidate']
+        path='candidate.refined_prompt' if 'refined_prompt' in candidate else 'candidate.scenes.0.intended_change'
+        return json.dumps({'pass':True,'checks':[{'id':key,'verdict':'pass','path':path,'reason':'Synthetic fixture assessment validates transport only, not literary quality.'} for key in packet['required_checks']],'issues':[]})
+    if role == 'scene_designer':
+        card=dict(packet['proposed_scene'])
+        card.update(choice='FIXTURE attempt a practical check',consequence='FIXTURE cooperation changes the next task',new_development='FIXTURE transition '+card['id'],reference_uses=[])
+        return json.dumps(card)
     if role == 'architect':
         ids = [c['id'] for c in req['characters']]
         scenes = []
@@ -16,7 +24,10 @@ def respond(role, packet, req):
                                'location': 'bell tower', 'time': f'day {ch}, interval {sc}', 'goal': 'inspect the bell mechanism',
                                'obstacle': 'access requires cooperation', 'intended_change': 'a practical decision changes the inspection'})
         return json.dumps({'title': req.get('title'), 'threads': ['bell repair', 'trust'], 'technique_stack': ['consequential choice'], 'scenes': scenes})
-    if role in {'story_quality', 'memory_quality', 'chapter_quality'}:
+    if role in {'story_quality', 'rhetoric_quality', 'memory_quality', 'chapter_quality'}:
+        if packet.get('required_checks'):
+            evidence_id=packet['evidence_passages'][0]['id']
+            return json.dumps({'pass':True,'checks':[{'id':key,'verdict':'pass','evidence_ids':[evidence_id],'reason':'Synthetic fixture assessment validates the contract only, not literary quality.'} for key in packet['required_checks']],'issues':[]})
         return json.dumps({'pass': True, 'issues': []})
     if role == 'memory':
         return json.dumps({'memories': [{'kind': 'event', 'text': 'Mara checked the tower latch.', 'evidence': 'Mara checked the tower latch.', 'known_by': ['mara']} ]})

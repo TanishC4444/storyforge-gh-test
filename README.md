@@ -9,11 +9,11 @@ The **Story runners** workflow declares the runner jobs directly inside one GitH
 The graph is explicit:
 
 1. Prepare request and literary retrieval.
-2. Refine the initial prompt, then plan three chapters.
+2. Refine the initial prompt, critique it, revise if needed and recheck; repeat that development loop for the three-chapter outline. Reconcile each scene against accepted events before character proposals.
 3. Fan out participating characters into a matrix with up to three parallel fresh runners.
 4. Reconcile their proposals, draft the scene, and apply the supplied distinct-writing brief.
-5. Run **story quality and memory extraction in parallel** against the same edited scene and accepted-state snapshot.
-6. If story review requests corrections, make one bounded repair. Verify changed prose and refresh extracted memory before proceeding. Unchanged candidates reuse their hash-matched review/extraction.
+5. Run **story quality, rhetoric quality and memory extraction in parallel** against the same edited scene and accepted-state snapshot.
+6. If story or rhetoric review requests corrections, make one bounded repair. Verify changed prose and refresh extracted memory before proceeding. Unchanged candidates reuse their hash-matched review/extraction.
 7. Independently verify memory, then commit accepted state. At chapter boundaries, review the complete chapter before committing its final scene.
 8. Start the next scene from that committed state. At the end, collect per-job artifacts, chapters, and checkpoints.
 
@@ -27,7 +27,8 @@ Open Actions → **Story runners** → Run workflow.
 
 - backend=fixture: deterministic plumbing test; no models or credentials required.
 - backend=live: actual model inference **inside these jobs**; no GH_AI_TOKEN secret required.
-- request_file=silent-bell-full: full story input, three characters, three chapters, nine scenes.
+- request_file=silent-bell-deep: default detailed brief with character arcs, owned subplots, physical causality, scoped classic references and figurative-language controls; three chapters, nine scenes.
+- request_file=silent-bell-full: earlier compatible test brief.
 - profile=balanced: Gemma 4 for control, writing, editing, and review.
 - profile=expressive: Glitter for writing, Gemma 4 for other roles.
 - profile=small: Qwen 3B baseline.
@@ -71,13 +72,13 @@ To retry infrastructure or malformed-output failures, use GitHub's failed-job re
 ## RAG: what is included
 
 - data/literary-corpus.json: 605 analysis records with provenance and disabled-record flags.
-- data/literary_rag.db: 605 precomputed MiniLM vectors, source JSON, and older retrieval projections.
+- data/literary_rag.db: 605 freshly rebuilt MiniLM vectors, source JSON, and revision-pinned retrieval projections (603 eligible records).
 - data/MASTER_GUIDE.md: indexed craft reference, selected by small section-level keyword matching.
 - skills/story_architect.md: the supplied architect brief in full; the planner receives its task-focused craft excerpt to reserve context for the outline.
 - skills/distinct_writing.md: the user's complete editing brief. This is an editing role, not an authorship detector.
 - skills/story_quality.md: evidence-based quality-review contract.
 
-All 605 bundled embedded projections are older than the current document builder, even though their source record JSON matches. Default keyword mode builds a current-source FTS index and does not use stale vectors. For hybrid retrieval, rebuild first:
+The bundled index has been rebuilt against the current document builder, with zero stale projections. The deep brief uses hybrid retrieval; preparation installs the optional retrieval dependencies. To rebuild after changing the corpus:
 
 ```bash
 python -m pip install -e '.[rag]'
@@ -117,3 +118,7 @@ Equivalent structured presentation is normalized without inventing content: a re
 ## Source-bound memory evidence
 
 Memory extraction now selects stable paragraph IDs from an ordered evidence catalog; the application resolves exact source text, offsets, and prose hash. Legacy quotes allow only unique source matches after whitespace/typographic-quote normalization or removal of an enclosing quote wrapper. Paraphrases, unknown IDs, ambiguous normalized matches, and stale-prose evidence remain rejected. A source match does not prove the proposed fact or speaker attribution; the separate memory-quality gate still applies.
+
+## Creative coverage and editorial audit
+
+See [the pipeline audit](docs/CREATIVE_PIPELINE_AUDIT.md), [deep test input](examples/silent-bell-deep.json), [actual hybrid retrieval output](examples/rag-output-deep.json) and [scoped writer packet](examples/rag-writer-packet.json). Story and rhetoric reviews require complete evidence-linked check coverage; initial design and outline reviews cover the creative categories before drafting. These automated gates remain fallible. The compatibility CLI does not implement the full DAG editorial pipeline.

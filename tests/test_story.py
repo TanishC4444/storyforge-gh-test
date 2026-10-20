@@ -91,8 +91,16 @@ class WorkflowTests(unittest.TestCase):
         self.assertTrue(all(r['id'] in enabled for r in result['sources']))
         req = example()
         req['retrieval_mode'] = 'hybrid'
-        with self.assertRaisesRegex(ValueError, 'stale'):
-            retrieve(req)
+        # Corrupt only a temporary index to test stale-vector rejection after rebuilding.
+        import shutil, sqlite3
+        with tempfile.TemporaryDirectory() as d, patch('storyforge.retrieval.ROOT', Path(d)):
+            (Path(d)/'data').mkdir()
+            for name in ['literary-corpus.json','literary_rag.db','MASTER_GUIDE.md']:
+                shutil.copy2(ROOT/'data'/name,Path(d)/'data'/name)
+            with sqlite3.connect(Path(d)/'data/literary_rag.db') as db:
+                db.execute("UPDATE rag_documents SET content='stale' WHERE record_id=(SELECT min(record_id) FROM rag_documents)")
+            with self.assertRaisesRegex(ValueError,'stale'):
+                retrieve(req)
 
     def test_plan_requires_approval_unless_explicit(self):
         req = example()

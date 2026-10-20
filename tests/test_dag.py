@@ -30,9 +30,16 @@ class DagTests(unittest.TestCase):
                 return result
             state = task('prepare', 'prepare')
             state = task('refine', 'refine', state)
+            state = task('refine-review','refine_review',state)
+            state = task('refine-revision','refine_revision',state,[(state,'design-review')])
+            state = task('refine-gate','refine_gate',state)
             state = task('plan', 'plan', state)
+            state = task('plan-review','plan_review',state)
+            state = task('plan-revision','plan_revision',state,[(state,'design-review')])
+            state = task('plan-gate','plan_gate',state)
             for i in range(9):
                 prefix = f's{i}'
+                state = task(prefix+'design','scene_design',state,index=i)
                 ids = load(state / 'snapshot.json')['plan']['scenes'][i]['participants']
                 with ThreadPoolExecutor(max_workers=3) as pool:
                     futures = [pool.submit(task, prefix+c, 'character', state, (), i, c) for c in ids]
@@ -43,26 +50,28 @@ class DagTests(unittest.TestCase):
                 direction = task(prefix+'direction','director',state,extras,i)
                 draft = task(prefix+'draft','writer',state,[(direction,'direction')],i)
                 edit = task(prefix+'edit','edit',state,[(draft,'draft')],i)
-                with ThreadPoolExecutor(max_workers=2) as pool:
+                with ThreadPoolExecutor(max_workers=3) as pool:
                     story_future = pool.submit(task,prefix+'story','story_review',state,[(draft,'draft'),(edit,'edited')],i)
+                    rhetoric_future = pool.submit(task,prefix+'rhetoric','rhetoric_review',state,[(edit,'edited')],i)
                     memory_future = pool.submit(task,prefix+'memory','memory',state,[(edit,'edited')],i)
-                    story, memory = story_future.result(), memory_future.result()
-                repaired = task(prefix+'repair','repair',state,[(edit,'edited'),(story,'diagnosis')],i)
+                    story, memory, rhetoric = story_future.result(), memory_future.result(), rhetoric_future.result()
+                repaired = task(prefix+'repair','repair',state,[(edit,'edited'),(story,'diagnosis'),(rhetoric,'rhetoric')],i)
                 with ThreadPoolExecutor(max_workers=2) as pool:
                     verified_future = pool.submit(task,prefix+'verify','verify',state,[(repaired,'edited'),(story,'diagnosis'),(draft,'draft')],i)
+                    rhetoric_verify_future = pool.submit(task,prefix+'rhetoric_verify','verify_rhetoric',state,[(repaired,'edited'),(rhetoric,'rhetoric')],i)
                     final_memory_future = pool.submit(task,prefix+'final_memory','memory_final',state,[(repaired,'edited'),(memory,'initial-memory')],i)
-                    story, memory = verified_future.result(), final_memory_future.result()
+                    story, memory, rhetoric = verified_future.result(), final_memory_future.result(), rhetoric_verify_future.result()
                 edit = repaired
                 memory_review = task(prefix+'memory_review','memory_review',state,[(edit,'edited'),(memory,'memory')],i)
                 if i == 0:
                     rejected = load(story/'review.json')
-                    (story/'review.json').write_text(json.dumps({'pass':False,'issues':[]}))
+                    (story/'review.json').write_text(json.dumps({**rejected,'pass':False}))
                     with self.assertRaises(ContractError):
-                        task('rejected','accept',state,[(edit,'edited'),(story,'story-review'),(memory,'memory'),(memory_review,'memory-review')],i)
+                        task('rejected','accept',state,[(edit,'edited'),(story,'story-review'),(rhetoric,'rhetoric-review'),(memory,'memory'),(memory_review,'memory-review')],i)
                     self.assertFalse((root/'rejected/out/snapshot.json').exists())
                     self.assertEqual(load(state/'snapshot.json')['version'],0)
                     (story/'review.json').write_text(json.dumps(rejected))
-                state = task(prefix+'accept','accept',state,[(edit,'edited'),(story,'story-review'),(memory,'memory'),(memory_review,'memory-review')],i)
+                state = task(prefix+'accept','accept',state,[(edit,'edited'),(story,'story-review'),(rhetoric,'rhetoric-review'),(memory,'memory'),(memory_review,'memory-review')],i)
             final = load(state/'snapshot.json')
             self.assertEqual(final['version'],9)
             self.assertTrue(final['complete'])

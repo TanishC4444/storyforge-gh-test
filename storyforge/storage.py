@@ -55,5 +55,6 @@ def export(folder, state, req):
         chapters.append(text)
     if len(chapters) == req['chapters']:
         save(folder / 'story.txt', req.get('title', req['project_id']) + '\n\n' + '\n\n'.join(chapters))
+    save(folder / 'reference-usage.json', [{'scene_id':s['id'],'planned_uses':s.get('reference_uses',[]),'model_assessment':next((c for c in s.get('review',{}).get('checks',[]) if c['id']=='reference_application'),None)} for s in state['accepted']])
     for scene in state['accepted']:
         save(folder / 'scenes' / f'{scene["id"]}.txt', prefix + scene['prose'])

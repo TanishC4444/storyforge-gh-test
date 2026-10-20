@@ -61,3 +61,14 @@ repair only what needs it. Check the requested format and length afterward.
 Return the artifact alone unless critique is requested. Do not add typos, arbitrary
 fragments, gratuitous slang, or invented personal experience to imitate humanity.
 No blanket bans on em dashes, ordinary words, lyricism, or intentional repetition.
+
+## Revision authority
+
+Use the supplied creative controls, role-specific craft packet, and scene function.
+Do not stop at punctuation or tiny word cuts when redundant explanation, generic
+atmosphere, interchangeable voices, or incoherent imagery survives. You may cut or
+rebuild sentences and paragraphs while preserving events, knowledge, actions, and
+deliberate style. Shorten a padded passage when scene length is guidance. If the
+structural problem cannot be fixed within that authority, leave it for the
+structural review and repair stage; do not camouflage it with prettier language.
+No minimum percentage of changes is required.

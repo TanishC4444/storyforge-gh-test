@@ -1,0 +1,395 @@
+{
+  "query": "loyalty versus complicity repair without reconciliation conflicting obligations private choice public cost | dependence becoming negotiation loyalty Inspect first, ask guarded questions second keeping his household safe Practical help coupled with partial explanations Keeping agreements workers can rely on Offer help with concrete conditions | evidence changes a relationship conflicting obligations evidence trails dramatic irony setup/payoff changing dependence",
+  "queries": [
+    {
+      "id": "themes_conflicts",
+      "text": "loyalty versus complicity repair without reconciliation conflicting obligations private choice public cost",
+      "weight": 1.375
+    },
+    {
+      "id": "character_relationships",
+      "text": "dependence becoming negotiation loyalty Inspect first, ask guarded questions second keeping his household safe Practical help coupled with partial explanations Keeping agreements workers can rely on Offer help with concrete conditions",
+      "weight": 1.5
+    },
+    {
+      "id": "craft",
+      "text": "evidence changes a relationship conflicting obligations evidence trails dramatic irony setup/payoff changing dependence",
+      "weight": 1.25
+    }
+  ],
+  "sources": [
+    {
+      "id": "work_152",
+      "title": "Antigone (Sophocles)",
+      "mode": "hybrid",
+      "canonical_id": "work_152",
+      "mechanism": "incompatible_obligations",
+      "analysis": "Antigone's burial duty conflicts with Creon's decree; each side's absolutism narrows opportunities for correction.",
+      "themes": [
+        "law",
+        "kinship",
+        "authority"
+      ],
+      "techniques": [
+        "tragic_choices_and_irreversibility"
+      ],
+      "guidance": {
+        "instruction": "Give opposing characters intelligible obligations, identify a possible compromise, and show the choices that make it unavailable."
+      },
+      "limits": [],
+      "retrieval_hits": [
+        {
+          "query": "themes_conflicts",
+          "channel": "keyword",
+          "rank": 22,
+          "bm25": -8.043761731181654
+        },
+        {
+          "query": "themes_conflicts",
+          "channel": "controlled_mechanism",
+          "matched_terms": [
+            "conflict",
+            "obligation"
+          ]
+        },
+        {
+          "query": "craft",
+          "channel": "controlled_mechanism",
+          "matched_terms": [
+            "conflict",
+            "obligation"
+          ]
+        }
+      ],
+      "requested_scopes": [
+        {
+          "record_id": "work_152",
+          "scope": "story",
+          "purpose": "Conflicting obligations with genuine counterarguments; do not borrow the burial plot or require tragedy.",
+          "do_not_borrow": [
+            "plot events",
+            "Greek setting",
+            "character equivalents"
+          ]
+        }
+      ],
+      "selection": "explicit_reference"
+    },
+    {
+      "id": "work_136",
+      "title": "The Iliad (Homer)",
+      "mode": "hybrid",
+      "canonical_id": "work_136",
+      "mechanism": "private_choice_public_cost",
+      "analysis": "Achilles' quarrel with Agamemnon removes a crucial fighter; Patroclus' death redirects wounded honor into devastating grief and revenge.",
+      "themes": [
+        "honor",
+        "grief",
+        "war"
+      ],
+      "techniques": [
+        "escalation_and_causal_chains",
+        "tragic_choices_and_irreversibility"
+      ],
+      "guidance": {
+        "instruction": "Connect a protagonist's personal grievance to a collective dependency, then make the cost fall on someone whose loss changes the grievance's meaning."
+      },
+      "limits": [
+        "Expanded into selected independently useful narrative units; not an exhaustive chapter-by-chapter or regional-variant catalogue."
+      ],
+      "retrieval_hits": [
+        {
+          "query": "themes_conflicts",
+          "channel": "keyword",
+          "rank": 4,
+          "bm25": -13.285560212911964
+        },
+        {
+          "query": "themes_conflicts",
+          "channel": "hybrid",
+          "rank": 6,
+          "score": 0.012652598535054065
+        },
+        {
+          "query": "themes_conflicts",
+          "channel": "controlled_mechanism",
+          "matched_terms": [
+            "choice",
+            "cost",
+            "private",
+            "public"
+          ]
+        }
+      ],
+      "requested_scopes": [
+        {
+          "record_id": "work_136",
+          "scope": "chapter",
+          "target": "ch02",
+          "purpose": "A private decision changes what a working community can safely do.",
+          "do_not_borrow": [
+            "war plot",
+            "epic diction"
+          ]
+        }
+      ],
+      "selection": "explicit_reference"
+    },
+    {
+      "id": "work_018",
+      "title": "Old Sultan",
+      "mode": "hybrid",
+      "canonical_id": "work_018",
+      "mechanism": "conflicting_debts",
+      "analysis": "A staged rescue preserves the old dog's place, but the wolf expects repayment that conflicts with the dog's duty to his household.",
+      "themes": [
+        "aging",
+        "loyalty",
+        "gratitude"
+      ],
+      "techniques": [
+        "generic_causal_development"
+      ],
+      "guidance": {
+        "instruction": "Let one rescue create two incompatible loyalties, and force the beneficiary to choose which obligation has moral priority."
+      },
+      "limits": [],
+      "retrieval_hits": [
+        {
+          "query": "themes_conflicts",
+          "channel": "keyword",
+          "rank": 21,
+          "bm25": -8.185626909051962
+        },
+        {
+          "query": "character_relationships",
+          "channel": "hybrid",
+          "rank": 2,
+          "score": 0.012097891334462058
+        }
+      ],
+      "requested_scopes": [
+        {
+          "record_id": "work_018",
+          "scope": "scene",
+          "target": "ch01-sc02",
+          "purpose": "Rescue or protection creates incompatible debts rather than an automatic obligation to obey.",
+          "do_not_borrow": [
+            "animal cast",
+            "fable ending"
+          ]
+        }
+      ],
+      "selection": "explicit_reference"
+    },
+    {
+      "id": "work_350_ep005",
+      "title": "Lancelot and Guinevere exposed",
+      "mode": "hybrid",
+      "canonical_id": "work_350_ep005",
+      "mechanism": "private_exception_becomes_public_case",
+      "analysis": "Exposure forces private attachment into public procedures and competing loyalties that make secrecy's former compromises unsustainable.",
+      "themes": [
+        "love",
+        "loyalty",
+        "law"
+      ],
+      "techniques": [
+        "recognition_and_revelation",
+        "bargains_vows_and_constraints",
+        "limited_or_competing_perspectives"
+      ],
+      "guidance": {
+        "instruction": "Give revelation a named agent, evidence, and procedure, then trace how friends' obligations pull them into opposing responses."
+      },
+      "limits": [
+        "Editorial retrieval label; not asserted to be an original chapter heading.",
+        "Parent notes about versions and textual limits also apply."
+      ],
+      "retrieval_hits": [
+        {
+          "query": "themes_conflicts",
+          "channel": "keyword",
+          "rank": 2,
+          "bm25": -13.953625271638327
+        },
+        {
+          "query": "themes_conflicts",
+          "channel": "hybrid",
+          "rank": 1,
+          "score": 0.01564516129032258
+        },
+        {
+          "query": "craft",
+          "channel": "hybrid",
+          "rank": 3,
+          "score": 0.013262910798122064
+        }
+      ],
+      "requested_scopes": [],
+      "selection": "ranked_match"
+    },
+    {
+      "id": "work_368_12",
+      "title": "The Franklin's Tale",
+      "mode": "hybrid",
+      "canonical_id": "work_368_12",
+      "mechanism": "conflicting_obligations_released",
+      "analysis": "An impossible-looking condition becomes apparently fulfilled, forcing several people to decide whether to enforce claims or release others from them.",
+      "themes": [
+        "promises",
+        "appearance",
+        "generosity"
+      ],
+      "techniques": [
+        "bargains_vows_and_constraints",
+        "riddle_and_paradox"
+      ],
+      "guidance": {
+        "instruction": "Build a chain of enforceable obligations, then let each participant's voluntary release change what the next person can choose."
+      },
+      "limits": [
+        "Editorial retrieval label; not asserted to be an original chapter heading.",
+        "Parent notes about versions and textual limits also apply."
+      ],
+      "retrieval_hits": [
+        {
+          "query": "craft",
+          "channel": "keyword",
+          "rank": 15,
+          "bm25": -7.59286695899432
+        },
+        {
+          "query": "themes_conflicts",
+          "channel": "hybrid",
+          "rank": 2,
+          "score": 0.015228713768115942
+        },
+        {
+          "query": "craft",
+          "channel": "hybrid",
+          "rank": 1,
+          "score": 0.015958768007948335
+        }
+      ],
+      "requested_scopes": [],
+      "selection": "ranked_match"
+    }
+  ],
+  "craft_by_role": {
+    "refiner": [
+      {
+        "id": "PREM-03",
+        "chapter": 2,
+        "heading": "PREM-03 — Choose a continuing engine",
+        "content": "### PREM-03 — Choose a continuing engine\n\n| Engine | How it generates further material | Main exhaustion risk |\n|---|---|---|\n| Pursuit | New routes, costs, competitors, and changing destinations | Travel without development |\n| Investigation | Evidence revises a model of past or present events | Clues that merely delay the answer |\n| Relationship | Choices alter trust, obligation, intimacy, or control | Repeated misunderstanding without change |\n| Institutional struggle | Policy, resources, and coalitions alter feasible action | Abstract politics without human effects |\n| Survival | Scarcity forces prioritization and adaptation | Identical emergencies |\n| Apprenticeship | Practice, correction, and responsibility change capacity | Effortless competence or endless training |\n| Social ascent or decline | Access changes incentives and compromises | Status markers without consequences |\n| Return | Arrival reveals altered people, places, and claims | Nostalgia without a present dilemma |\n| Recurring practice | Work, ritual, visits, seasons, or meals accumulate meaning | Undifferentiated r"
+      },
+      {
+        "id": "CHAR-04",
+        "chapter": 5,
+        "heading": "CHAR-04 — Distinguish arc types",
+        "content": "### CHAR-04 — Distinguish arc types\n\n| Arc | What changes or holds | Evidence to dramatize |\n|---|---|---|\n| Growth | A strategy or understanding becomes more adequate | A later choice under comparable pressure |\n| Corruption | The person increasingly sacrifices a value to obtain another | Escalating justifications and costly crossed lines |\n| Disillusionment | A sustaining belief fails, with no guaranteed replacement | New perception and changed conduct |\n| Recovery | Lost capacity, connection, or agency is partly rebuilt | Uneven practice and a revised relationship to limitation |\n| Steadfastness | A commitment survives changed conditions | Its increasing cost and effect on others |\n| Accommodation | A person learns to live with an unresolved condition | New routines, boundaries, and tradeoffs |\n| Revelation | Readers discover complexity that was already present | Recontextualized earlier behavior |\n| Oscillation | Competing strategies recur without a clean synthesis | Changes in frequency, context, and consequence |\n\nA stable protagonist can transform a community. A changing prota"
+      }
+    ],
+    "architect": [
+      {
+        "id": "THREAD-09",
+        "chapter": 8,
+        "heading": "THREAD-09 — Keep a thread matrix",
+        "content": "### THREAD-09 — Keep a thread matrix\n\n| Thread | Question | Owner | Current state | Next change | Main-plot effect | Planned outcome |\n|---|---|---|---|---|---|---|\n| Water records | Who benefits from the omissions? | Archivist | Partial map | Discover revision authority | Changes target of inquiry | Evidence plus contested reform |\n| Engagement | What must the family surrender for access? | Brother | Conditional alliance | Receive public loyalty demand | Threatens access and trust | Boundary chosen at a cost |\n| Maintenance work | Can workers remain safe while resisting? | Pump mechanic | Unpaid hazard | Vote on shutdown | Creates a physical deadline | Negotiated participation |\n\nThe matrix describes interacting change; it is not a demand to give equal space to every thread.\n\n---"
+      },
+      {
+        "id": "SCENE-02",
+        "chapter": 9,
+        "heading": "SCENE-02 — Build a dramatic scene around incompatible local aims",
+        "content": "### SCENE-02 — Build a dramatic scene around incompatible local aims\n\nUse a practical sequence:\n\n1. Someone enters wanting something now.\n2. The setting and other participants restrict how it can be obtained.\n3. An attempt produces a response.\n4. Tactics, information, or relative leverage changes.\n5. A choice or event alters the immediate outcome.\n6. The exit leaves a consequence or a changed question.\n\nThe obstacle can be embarrassment, a bureaucratic condition, a person's refusal, or the protagonist's own inability to speak. A disaster is optional."
+      }
+    ],
+    "scene_designer": [
+      {
+        "id": "SCENE-01",
+        "chapter": 9,
+        "heading": "SCENE-01 — Decide what this scene changes",
+        "content": "### SCENE-01 — Decide what this scene changes\n\nA scene can change action, knowledge, relationship, emotional orientation, or the reader's interpretation. A contemplative scene may make no external event occur but still transform how a previous event is understood.\n\nState a primary purpose before drafting. If nothing changes, ask whether stillness, ritual, entrapment, or atmosphere is deliberately the point; otherwise summarize, combine, or remove the passage."
+      },
+      {
+        "id": "STATE-02",
+        "chapter": 26,
+        "heading": "STATE-02 — Track the minimum consequential state",
+        "content": "### STATE-02 — Track the minimum consequential state\n\nFor each relevant point in the story, record:\n\n- Location, time, and travel feasibility.\n- Bodily condition, age, fatigue, injuries, and recovery.\n- Skills demonstrated and capabilities actually available.\n- Possessions, money, access, weapons, documents, and consumed resources.\n- Relationship states, promises, debts, boundaries, and obligations.\n- Knowledge, beliefs, suspicions, and evidence available to each actor.\n- Active institutional rules and any exceptions established.\n- Open questions, setup/payoff commitments, and thread status.\n- Visual state if panels or images are generated.\n\nTrack facts because they affect future work, not because every detail deserves equal storage."
+      }
+    ],
+    "writer": [
+      {
+        "id": "SCENE-03",
+        "chapter": 9,
+        "heading": "SCENE-03 — Use beats as changes in action or interpretation",
+        "content": "### SCENE-03 — Use beats as changes in action or interpretation\n\nA beat is a useful drafting unit when a tactic, emotional posture, perception, or relationship changes. Do not make every sentence a new beat.\n\nExample sequence: ask politely → offer payment → discover payment would insult → disclose the real need → receive a conditional offer. The dialogue should enact those changes rather than merely discuss them afterward."
+      },
+      {
+        "id": "FIG-01",
+        "chapter": 20,
+        "heading": "FIG-01 — Comparison, association, and symbolic meaning",
+        "content": "### FIG-01 — Comparison, association, and symbolic meaning\n\n| Device | What it does | Construction and original example | Failure check |\n|---|---|---|---|\n| Metaphor | Understands one thing through another | Select a consequential shared relation: “The permit office was a lock on a public well.” | Does the comparison clarify rather than merely decorate? |\n| Simile | Makes an explicit comparison | “The rumor traveled like water through a cracked wall.” | Is the chosen resemblance specific? |\n| Extended metaphor | Develops a comparison across several details | Continue the lock image through keys, access, and ownership | Do extensions remain coherent? |\n| Conceit | Sustains an unusual or elaborate comparison | Compare a family agreement to a hydraulic system with unequal pressure | Does elaboration generate insight? |\n| Analogy | Uses a mapped comparison to explain or argue | A witness compares archival gaps to missing stitches in a seam | Which parts correspond, and where does the comparison fail? |\n| Personification | Attributes human action or qualities to nonhuman things | “The ar"
+      }
+    ],
+    "humanizer": [
+      {
+        "id": "PROSE-01",
+        "chapter": 19,
+        "heading": "PROSE-01 — Establish a voice system",
+        "content": "### PROSE-01 — Establish a voice system\n\nChoose diction, sentence movement, degree of judgment, preferred comparisons, humor, directness, rhythm, and relation to the audience. These choices can vary by speaker and circumstance without becoming random.\n\nA narrator's voice should govern selection as well as phrasing: what is worth noticing, what is taken for granted, and what requires explanation."
+      },
+      {
+        "id": "FIG-04",
+        "chapter": 20,
+        "heading": "FIG-04 — Irony, emphasis, and semantic tension",
+        "content": "### FIG-04 — Irony, emphasis, and semantic tension\n\n| Device | What it does | Construction and original example | Failure check |\n|---|---|---|---|\n| Verbal irony | A statement invites a meaning different from its surface | “A generous arrangement,” she says of compulsory service | Is the implied stance recoverable? |\n| Situational irony | Outcome conflicts meaningfully with expectation | A flood-control ceremony is interrupted by a preventable leak | Is the reversal causally prepared? |\n| Dramatic irony | Audience knowledge exceeds a participant's | We know the map is altered while the officer swears by it | Does the gap affect current choices? |\n| Structural irony | An organizing voice or frame creates sustained interpretive distance | A celebratory history repeatedly reveals who was excluded | Is the alternate understanding supported? |\n| Hyperbole | Deliberate exaggeration | “The queue had outlived three governments.” | Does tone make exaggeration legible? |\n| Understatement | Minimizes wording to intensify contrast | “Some inconvenience,” after a public bridge disappears | Is th"
+      }
+    ],
+    "story_quality": [
+      {
+        "id": "PLOT-01",
+        "chapter": 3,
+        "heading": "PLOT-01 — Distinguish sequence from causation",
+        "content": "### PLOT-01 — Distinguish sequence from causation\n\nAn event happening after another does not establish that it follows because of it. Forster's discussion of plot emphasizes causal connection rather than mere succession. Use that distinction as a drafting question, not a rule excluding every episodic form. [Forster, *Aspects of the Novel*, “The Plot”](https://www.gutenberg.org/files/70492/70492-h/70492-h.htm)\n\nBuild a consequential chain:\n\n> Need → interpretation → decision → action → response → altered conditions → new decision.\n\nA discovery can be the cause of a choice; a relationship can be a cause of access; a habit can be a cause of misinterpretation. Physical action is not the only kind of causation.\n\n**Weak:** The archivist finds a map. A protest begins. Her brother loses his position.\n\n**Connected:** Publishing the map exposes unauthorized withdrawals. Workers whose wages depend on those withdrawals protest. Her brother's patron withdraws his sponsorship because the family is now politically costly."
+      },
+      {
+        "id": "CHAR-04",
+        "chapter": 5,
+        "heading": "CHAR-04 — Distinguish arc types",
+        "content": "### CHAR-04 — Distinguish arc types\n\n| Arc | What changes or holds | Evidence to dramatize |\n|---|---|---|\n| Growth | A strategy or understanding becomes more adequate | A later choice under comparable pressure |\n| Corruption | The person increasingly sacrifices a value to obtain another | Escalating justifications and costly crossed lines |\n| Disillusionment | A sustaining belief fails, with no guaranteed replacement | New perception and changed conduct |\n| Recovery | Lost capacity, connection, or agency is partly rebuilt | Uneven practice and a revised relationship to limitation |\n| Steadfastness | A commitment survives changed conditions | Its increasing cost and effect on others |\n| Accommodation | A person learns to live with an unresolved condition | New routines, boundaries, and tradeoffs |\n| Revelation | Readers discover complexity that was already present | Recontextualized earlier behavior |\n| Oscillation | Competing strategies recur without a clean synthesis | Changes in frequency, context, and consequence |\n\nA stable protagonist can transform a community. A changing prota"
+      }
+    ],
+    "rhetoric_quality": [
+      {
+        "id": "PROSE-01",
+        "chapter": 19,
+        "heading": "PROSE-01 — Establish a voice system",
+        "content": "### PROSE-01 — Establish a voice system\n\nChoose diction, sentence movement, degree of judgment, preferred comparisons, humor, directness, rhythm, and relation to the audience. These choices can vary by speaker and circumstance without becoming random.\n\nA narrator's voice should govern selection as well as phrasing: what is worth noticing, what is taken for granted, and what requires explanation."
+      },
+      {
+        "id": "FIG-01",
+        "chapter": 20,
+        "heading": "FIG-01 — Comparison, association, and symbolic meaning",
+        "content": "### FIG-01 — Comparison, association, and symbolic meaning\n\n| Device | What it does | Construction and original example | Failure check |\n|---|---|---|---|\n| Metaphor | Understands one thing through another | Select a consequential shared relation: “The permit office was a lock on a public well.” | Does the comparison clarify rather than merely decorate? |\n| Simile | Makes an explicit comparison | “The rumor traveled like water through a cracked wall.” | Is the chosen resemblance specific? |\n| Extended metaphor | Develops a comparison across several details | Continue the lock image through keys, access, and ownership | Do extensions remain coherent? |\n| Conceit | Sustains an unusual or elaborate comparison | Compare a family agreement to a hydraulic system with unequal pressure | Does elaboration generate insight? |\n| Analogy | Uses a mapped comparison to explain or argue | A witness compares archival gaps to missing stitches in a seam | Which parts correspond, and where does the comparison fail? |\n| Personification | Attributes human action or qualities to nonhuman things | “The ar"
+      }
+    ]
+  },
+  "guide_sections": [
+    "### PREM-03 — Choose a continuing engine\n\n| Engine | How it generates further material | Main exhaustion risk |\n|---|---|---|\n| Pursuit | New routes, costs, competitors, and changing destinations | Travel without development |\n| Investigation | Evidence revises a model of past or present events | Clues that merely delay the answer |\n| Relationship | Choices alter trust, obligation, intimacy, or control | Repeated misunderstanding without change |\n| Institutional struggle | Policy, resources, and coalitions alter feasible action | Abstract politics without human effects |\n| Survival | Scarcity forces prioritization and adaptation | Identical emergencies |\n| Apprenticeship | Practice, correction, and responsibility change capacity | Effortless competence or endless training |\n| Social ascent or decline | Access changes incentives and compromises | Status markers without consequences |\n| Return | Arrival reveals altered people, places, and claims | Nostalgia without a present dilemma |\n| Recurring practice | Work, ritual, visits, seasons, or meals accumulate meaning | Undifferentiated r",
+    "### CHAR-04 — Distinguish arc types\n\n| Arc | What changes or holds | Evidence to dramatize |\n|---|---|---|\n| Growth | A strategy or understanding becomes more adequate | A later choice under comparable pressure |\n| Corruption | The person increasingly sacrifices a value to obtain another | Escalating justifications and costly crossed lines |\n| Disillusionment | A sustaining belief fails, with no guaranteed replacement | New perception and changed conduct |\n| Recovery | Lost capacity, connection, or agency is partly rebuilt | Uneven practice and a revised relationship to limitation |\n| Steadfastness | A commitment survives changed conditions | Its increasing cost and effect on others |\n| Accommodation | A person learns to live with an unresolved condition | New routines, boundaries, and tradeoffs |\n| Revelation | Readers discover complexity that was already present | Recontextualized earlier behavior |\n| Oscillation | Competing strategies recur without a clean synthesis | Changes in frequency, context, and consequence |\n\nA stable protagonist can transform a community. A changing prota"
+  ],
+  "corpus_sha256": "536afdc2c3000e7733c9dc7526ae3741de95a6033ab5b7b3b51327acd7ccb113",
+  "index_version": "sentence-transformers/all-MiniLM-L6-v2@1110a243fdf4706b3f48f1d95db1a4f5529b4d41:chunk-mean-v1",
+  "stale_embedding_records": 0,
+  "mode": "hybrid",
+  "adaptation_policy": {
+    "strength": 0.3,
+    "mode": "mechanisms",
+    "max_active_sources_per_scene": 2,
+    "preserve_user_choices": true,
+    "policy": "Use a small mechanism or relationship move; do not force reference material into every scene or treat adaptation strength as a measured similarity percentage."
+  },
+  "warning": "Model-authored analyses with source limits. Retrieval selects reference material; it does not establish historical influence, originality, or successful application."
+}

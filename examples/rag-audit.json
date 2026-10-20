@@ -1,0 +1,79 @@
+{
+  "indexed_records": 605,
+  "eligible_records": 603,
+  "stale_records": 0,
+  "encoder": "sentence-transformers/all-MiniLM-L6-v2@1110a243fdf4706b3f48f1d95db1a4f5529b4d41:chunk-mean-v1",
+  "probes": [
+    {
+      "name": "conflicting obligations",
+      "query": "family loyalty public law incompatible duties burial obedience",
+      "expected_record": "work_152",
+      "selected_records": [
+        {
+          "id": "work_152",
+          "title": "Antigone (Sophocles)",
+          "mechanism": "incompatible_obligations"
+        },
+        {
+          "id": "work_197_ep001",
+          "title": "Gisli's killing and outlawry",
+          "mechanism": "obligation_closes_options"
+        },
+        {
+          "id": "work_350_ep005",
+          "title": "Lancelot and Guinevere exposed",
+          "mechanism": "private_exception_becomes_public_case"
+        }
+      ],
+      "expected_in_selected": true
+    },
+    {
+      "name": "conflicting rescue debts",
+      "query": "a rescue creates incompatible debts gratitude to a protector versus loyalty to a friend",
+      "expected_record": "work_018",
+      "selected_records": [
+        {
+          "id": "work_018",
+          "title": "Old Sultan",
+          "mechanism": "conflicting_debts"
+        },
+        {
+          "id": "work_044",
+          "title": "The Three Snake-Leaves",
+          "mechanism": "reversed_life_debt"
+        },
+        {
+          "id": "work_330",
+          "title": "The Four Friends and the Hunter (Deer, Turtle, Crow, Mouse)",
+          "mechanism": "complementary_rescue"
+        }
+      ],
+      "expected_in_selected": true
+    },
+    {
+      "name": "evidence and rescue",
+      "query": "forbidden knowledge exposes abuse investigation evidence rescue plan",
+      "expected_record": "work_056",
+      "selected_records": [
+        {
+          "id": "work_086",
+          "title": "Bluebeard (Perrault)",
+          "mechanism": "forbidden_room"
+        },
+        {
+          "id": "work_056",
+          "title": "Fitcher's Bird",
+          "mechanism": "forensic_disobedience"
+        },
+        {
+          "id": "work_338",
+          "title": "Ali Baba and the Forty Thieves",
+          "mechanism": "access_phrase_and_counterplot"
+        }
+      ],
+      "expected_in_selected": true
+    }
+  ],
+  "ranking_change": "Generic controlled-mechanism matching and declared keyword priorities; no title-specific rules. The initial unboosted test missed Antigone in the selected three.",
+  "limitations": "Three handpicked mechanism probes used during development, not an independent general retrieval benchmark or evidence of successful literary application."
+}

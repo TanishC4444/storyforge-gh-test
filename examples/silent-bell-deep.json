@@ -1,0 +1,455 @@
+{
+  "project_id": "silent-bell-deep",
+  "title": "The Silent Bell",
+  "premise": "A harbor apprentice discovers that the city's rescue bell is being silenced before a storm. Her guardian is implicated, but exposing him may leave the harbor without its only trained bell keeper.",
+  "genre": "Grounded coastal fantasy mystery",
+  "reader_experience": "Investigation, growing distrust, practical ingenuity, and costly hope",
+  "pov": "limited third person, Mara, past tense",
+  "chapters": 3,
+  "scenes_per_chapter": 3,
+  "words_per_scene": 850,
+  "min_words_ratio": 0.75,
+  "max_words_ratio": 1.3,
+  "auto_approve_plan": true,
+  "characters": [
+    {
+      "id": "mara",
+      "name": "Mara",
+      "goal": "protect the harbor",
+      "value": "loyalty",
+      "voice": "concrete observations and guarded questions",
+      "fear": "Remaining dependent on a guardian she cannot fully trust",
+      "habitual_strategy": "Inspect first, ask guarded questions second",
+      "limits": "Apprentice authority, limited supplies",
+      "proposed_arc": "Test loyalty through independent judgment",
+      "arc": {
+        "starting_belief": "Oren may evade officials but will not mislead her about their shared craft.",
+        "old_strategy": "Repeat his test and distrust her own result first.",
+        "pressure_test": "His useful correction is followed by an evasive request for her signature.",
+        "costly_choice": "Choose whether to stake her own certification or another crew’s equipment on protecting him.",
+        "possible_change": "Recognize care and coercion in the same relationship without claiming instant independence."
+      },
+      "contradiction": {
+        "values": [
+          "accurate work",
+          "repaying care"
+        ],
+        "conditions": "Accuracy is easy to demand until her own signature can protect Oren."
+      },
+      "emotional_behavior": {
+        "under_fear": "Checks the same fastening twice and avoids asking the direct question.",
+        "under_anger": "Stops accepting corrections silently.",
+        "care": "Leaves a tool oriented for the other person’s injured hand."
+      },
+      "voice_design": {
+        "diction": "Names objects before interpreting motives.",
+        "evasion": "Asks someone to demonstrate rather than accusing them.",
+        "examples": [
+          "Show me where you took the load off.",
+          "I can sign for what I checked. Not for yesterday."
+        ]
+      }
+    },
+    {
+      "id": "oren",
+      "name": "Oren",
+      "goal": "protect Mara and conceal his debt",
+      "value": "keeping his household safe",
+      "voice": "practical warnings and evasive short answers",
+      "fear": "Exposure of debt costing his household security",
+      "habitual_strategy": "Practical help coupled with partial explanations",
+      "limits": "Cannot operate and repair every station alone",
+      "proposed_arc": "Face the consequences of concealment",
+      "arc": {
+        "starting_belief": "His competence entitles him to manage the truth for people he protects.",
+        "old_strategy": "Give genuine practical help while withholding the consequential detail.",
+        "pressure_test": "Mara follows his method and reaches a result he cannot comfortably deny.",
+        "costly_choice": "Release control of an operation or ask her to become complicit.",
+        "possible_change": "Accept a limit on authority while remaining defensive about the debt."
+      },
+      "contradiction": {
+        "values": [
+          "physical safety",
+          "household security"
+        ],
+        "conditions": "Will protect Mara from an immediate injury while putting her professional future at risk."
+      },
+      "emotional_behavior": {
+        "under_fear": "Becomes unusually exact about a minor task.",
+        "under_shame": "Repairs something for her instead of apologizing.",
+        "care": "Anticipates a physical difficulty without drawing attention to it."
+      },
+      "voice_design": {
+        "diction": "Procedural and economical, with qualifications when cornered.",
+        "evasion": "Answers the safe part of a question and assigns a task.",
+        "examples": [
+          "Hold that end. Then tell me what you think you saw.",
+          "I said it would last the watch. I didn’t say it was sound."
+        ]
+      }
+    },
+    {
+      "id": "ilya",
+      "name": "Ilya",
+      "goal": "Protect her repair yard and workers",
+      "value": "Keeping agreements workers can rely on",
+      "fear": "Losing the yard to council restrictions",
+      "voice": "Direct, transactional; trusts demonstrations",
+      "habitual_strategy": "Offer help with concrete conditions",
+      "limits": "Scarce repair materials",
+      "proposed_arc": "Decide what cooperation is worth risking",
+      "arc": {
+        "starting_belief": "A promise that cannot be supplied is worth less than a refusal.",
+        "old_strategy": "Keep separate commitments separate and price every request.",
+        "pressure_test": "Mara’s request makes those commitments materially incompatible.",
+        "costly_choice": "Choose which crew bears the delay and take responsibility for telling them.",
+        "possible_change": "Negotiate shared liability instead of becoming a convenient helper."
+      },
+      "contradiction": {
+        "values": [
+          "fair allocation",
+          "loyalty to her workers"
+        ],
+        "conditions": "Will bend a council rule but resists asking her own crew to absorb an invisible cost."
+      },
+      "emotional_behavior": {
+        "under_fear": "Counts stock aloud.",
+        "under_anger": "Uses names and delivery times instead of insults.",
+        "care": "Offers an alternative before refusing."
+      },
+      "voice_design": {
+        "diction": "Quantities, names, deadlines.",
+        "evasion": "Insists the requester identify who loses something.",
+        "examples": [
+          "Which crew do you want me to disappoint?",
+          "Bring the keeper here. I’m not lending to his apprentice and calling it his promise."
+        ]
+      }
+    }
+  ],
+  "world_rules": [
+    "The rescue bell requires a physical keeper to sound it.",
+    "A storm is expected by the third night.",
+    "No magic can restore a severed rope."
+  ],
+  "initial_facts": [
+    {
+      "text": "Oren trained Mara to inspect the bell mechanism.",
+      "known_by": [
+        "mara",
+        "oren"
+      ]
+    },
+    {
+      "text": "Oren owes a private debt to the harbor collector.",
+      "known_by": [
+        "oren"
+      ]
+    },
+    {
+      "text": "Ilya knows the yard’s available supplies and council restrictions.",
+      "known_by": [
+        "ilya"
+      ]
+    },
+    {
+      "text": "The bell tower, repair yard, council office, and docks are within a working harbor.",
+      "known_by": [
+        "public"
+      ]
+    }
+  ],
+  "must_avoid": [
+    "An unprepared magical rescue",
+    "Instant reconciliation without a consequential choice",
+    "Convenient confessions",
+    "Arbitrary villains",
+    "Exposition-heavy dialogue",
+    "Unsupported solutions"
+  ],
+  "retrieval_query": "",
+  "retrieval_mode": "hybrid",
+  "profile": "balanced",
+  "max_repairs": 1,
+  "max_stage_retries": 2,
+  "context_chars": 32000,
+  "n_ctx": 12288,
+  "runner_repo": "storyforge-inference-runner",
+  "medium": "short_story",
+  "audience": "young adult/adult crossover",
+  "tone_mood": [
+    "intimate",
+    "tense",
+    "restrained",
+    "occasional dry humor"
+  ],
+  "theme_keywords": [
+    "loyalty",
+    "responsibility",
+    "debt",
+    "secrecy",
+    "public duty"
+  ],
+  "technique_keywords": [
+    "conflicting obligations",
+    "evidence trails",
+    "dramatic irony",
+    "setup/payoff",
+    "changing dependence"
+  ],
+  "main_plot": "Discover how and why the bell was disabled, then make a consequential decision before the storm arrives.",
+  "subplots": [
+    "Mara’s dependence on Oren affects what she investigates and risks.",
+    "Ilya’s threatened livelihood affects the materials and cooperation available for rescue."
+  ],
+  "scene_requirements": [
+    "An inspection",
+    "A failed attempt to obtain help",
+    "A confrontation supported by evidence",
+    "A practical rescue sequence"
+  ],
+  "setting": {
+    "locations": [
+      "working harbor",
+      "bell tower",
+      "repair yard",
+      "council office"
+    ],
+    "duration": "three days"
+  },
+  "reference_policy": "Combine mechanisms across sources; invent original circumstances and preserve causal function. Do not copy plots.",
+  "creative_freedom": "May invent minor complications; keep the supplied cast IDs and explicit facts, no new major characters.",
+  "surprise": "moderate; established possibilities must support surprises",
+  "sensory_detail": "moderate; details affect work, danger, or viewpoint attention",
+  "ending_tendency": "Resolve the bell crisis, preserve personal cost, allow incomplete reconciliation.",
+  "output_formats": [
+    "json",
+    "txt"
+  ],
+  "brief_version": 2,
+  "keywords": [
+    {
+      "term": "conflicting obligations",
+      "kind": "tension",
+      "priority": 3
+    },
+    {
+      "term": "private choice public cost",
+      "kind": "conflict",
+      "priority": 3
+    },
+    {
+      "term": "loyalty versus complicity",
+      "kind": "theme",
+      "priority": 3
+    },
+    {
+      "term": "dependence becoming negotiation",
+      "kind": "relationship",
+      "priority": 3
+    },
+    {
+      "term": "evidence changes a relationship",
+      "kind": "technique",
+      "priority": 2
+    },
+    {
+      "term": "repair without reconciliation",
+      "kind": "theme",
+      "priority": 2
+    }
+  ],
+  "scene_designs": [
+    {
+      "id": "ch01-sc01",
+      "location": "bell tower, inspection platform",
+      "setting": "Morning light, harbor crews below, a scheduled load test rather than a generic stormy room",
+      "dramatic_function": "A familiar shared task reveals a discrepancy that Oren initially helps investigate. Establish reciprocal competence before distrust.",
+      "sensory_actions": [
+        "A chalk mark moves when the brake slips.",
+        "Old grease transfers to the wrong tool."
+      ],
+      "constraints": [
+        "Do not identify an obvious sabotage device immediately.",
+        "End with an action or changed obligation, not an announced moral dilemma."
+      ]
+    },
+    {
+      "id": "ch01-sc02",
+      "location": "tower service landing and maintenance desk",
+      "setting": "An inspection signature is due while crews need the lifting line",
+      "dramatic_function": "Mara tries to protect both the harbor and Oren. Her workaround creates a new cost or complicity; she does not rediscover that he lied.",
+      "constraints": [
+        "Use accepted scene-one knowledge.",
+        "Test the obvious option of repairing quietly.",
+        "Make the availability of reporting, concealing, and repairing concrete."
+      ]
+    },
+    {
+      "id": "ch01-sc03",
+      "location": "repair yard at shift change",
+      "setting": "Ilya has workers and an unfinished boat demanding the same limited equipment",
+      "dramatic_function": "Mara’s chosen workaround intersects Ilya’s independent livelihood problem and changes what both can do."
+    }
+  ],
+  "world_design": {
+    "technology": "Mechanical maritime infrastructure: rope, brake, bell, hand tools, oil lamps. No electrical switches or magic resolving mechanical faults.",
+    "institutions": [
+      {
+        "id": "harbor_office",
+        "authority": "Schedules shared equipment and records inspections.",
+        "constraints": "A fault report suspends the keeper’s certification pending inspection; it does not automatically evict an apprentice.",
+        "cost": "Suspension removes Oren from an essential shift and delays Mara’s qualification."
+      }
+    ],
+    "physical_systems": [
+      {
+        "id": "warning_bell",
+        "purpose": "Warn approaching crews to turn toward the marked safe channel during poor visibility.",
+        "operation": [
+          "A keeper releases the brake and works the counterweighted rope.",
+          "The brake and the channel-watch signal are distinct from the bell’s clapper."
+        ],
+        "resources": [
+          "Sound rope",
+          "Serviceable brake shoe",
+          "A trained operator"
+        ],
+        "failure_modes": [
+          "Rope wear can leave the bell operable but unsafe for sustained ringing.",
+          "A temporary brace may conceal a worn brake; diagnosis requires an unloaded test."
+        ],
+        "alternatives": [
+          "A watch boat can carry the warning, but reallocating it leaves a crew without an escort."
+        ],
+        "limits": [
+          "Do not invent new gears as convenient solutions.",
+          "Removing one obstruction does not automatically repair worn components."
+        ]
+      }
+    ],
+    "deadlines": [
+      {
+        "id": "storm_watch",
+        "due": "Day 3 before the night watch",
+        "change_policy": "An earlier arrival needs an observed warning, an explicit revised time, and consequences reflected in later scene cards."
+      }
+    ],
+    "economic_dependencies": [
+      "Mara needs Oren’s assessed practical hours for certification.",
+      "Ilya controls a scarce replacement part already promised to a working crew."
+    ]
+  },
+  "plot_design": {
+    "central_question": "What does Mara owe a guardian whose protection is becoming a demand for complicity?",
+    "causal_dependencies": [
+      "Establish a legitimate mechanical danger before Oren uses it to justify concealment.",
+      "Mara’s attempt to repair quietly creates a documented cost.",
+      "That cost intersects Ilya’s independent obligation.",
+      "The ending uses a capacity or agreement established through earlier choices."
+    ],
+    "subplots": [
+      {
+        "id": "qualification",
+        "owner": "mara",
+        "question": "Will Mara accept competence that depends on Oren’s approval?",
+        "intersection": "Her attempt to act independently risks the assessed hours needed for qualification.",
+        "removal_cost": "Without this thread, her reliance on him is merely narrated."
+      },
+      {
+        "id": "yard_promise",
+        "owner": "ilya",
+        "question": "Which commitment will Ilya break when two crews require the same equipment?",
+        "intersection": "Mara’s rescue plan demands the part Ilya already promised elsewhere.",
+        "removal_cost": "Without this thread, Ilya becomes a supply dispenser serving the protagonist."
+      }
+    ],
+    "alternatives_and_costs": [
+      {
+        "option": "Repair secretly",
+        "cost": "Needs scarce equipment and an inaccurate inspection entry; test whether Mara will actually sign it."
+      },
+      {
+        "option": "Report immediately",
+        "cost": "A suspended keeper and interrupted work before another operator is available; no invented automatic homelessness."
+      },
+      {
+        "option": "Use the watch boat",
+        "cost": "Takes protection from a specific crew with whom Ilya has an obligation."
+      }
+    ],
+    "resolution_constraints": [
+      "A successful warning does not erase the broken inspection promise.",
+      "Forgiveness, professional trust, and personal loyalty may end in different states."
+    ]
+  },
+  "references": [
+    {
+      "record_id": "work_152",
+      "scope": "story",
+      "purpose": "Conflicting obligations with genuine counterarguments; do not borrow the burial plot or require tragedy.",
+      "do_not_borrow": [
+        "plot events",
+        "Greek setting",
+        "character equivalents"
+      ]
+    },
+    {
+      "record_id": "work_136",
+      "scope": "chapter",
+      "target": "ch02",
+      "purpose": "A private decision changes what a working community can safely do.",
+      "do_not_borrow": [
+        "war plot",
+        "epic diction"
+      ]
+    },
+    {
+      "record_id": "work_018",
+      "scope": "scene",
+      "target": "ch01-sc02",
+      "purpose": "Rescue or protection creates incompatible debts rather than an automatic obligation to obey.",
+      "do_not_borrow": [
+        "animal cast",
+        "fable ending"
+      ]
+    }
+  ],
+  "adaptation": {
+    "strength": 0.3,
+    "mode": "mechanisms",
+    "max_active_sources_per_scene": 2,
+    "preserve_user_choices": true,
+    "policy": "Use a small mechanism or relationship move; do not force reference material into every scene or treat adaptation strength as a measured similarity percentage."
+  },
+  "style": {
+    "figurative_language": {
+      "density": "sparse",
+      "devices": [
+        "metaphor",
+        "motif"
+      ],
+      "image_domains": [
+        "maintenance",
+        "weight and load",
+        "work agreements"
+      ],
+      "max_extended_images_per_scene": 1,
+      "avoid": [
+        "mixed images",
+        "personified weather announcing emotion",
+        "a metaphor after every revelation"
+      ]
+    },
+    "interiority": "Add a competing interpretation, mistaken inference, or tactical decision; omit explanation of an already legible gesture.",
+    "dialogue": "Each speaker pursues a different immediate objective. They need not answer the question asked.",
+    "explanation": "Trust the reader; do not restate the theme or dilemma at scene endings.",
+    "rhythm": "Follow pressure and thought rather than automatic triplets or not-X-but-Y pivots."
+  },
+  "length_policy": {
+    "scene_words": "guidance",
+    "chapter_words": "target",
+    "allow_compression": true,
+    "policy": "850 words is a planning estimate. Expand through action, negotiation, and consequences; never pad a repeated discovery to reach a minimum."
+  }
+}

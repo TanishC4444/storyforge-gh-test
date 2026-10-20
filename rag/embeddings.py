@@ -3,8 +3,7 @@ from functools import lru_cache
 
 import numpy as np
 
-MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-INDEX_VERSION = MODEL_NAME + ":chunk-mean-v1"
+from rag.identity import MODEL_NAME, MODEL_REVISION, INDEX_VERSION
 
 
 @lru_cache(maxsize=1)
@@ -12,7 +11,7 @@ def get_model():
     from sentence_transformers import SentenceTransformer
 
     print(f"Loading {MODEL_NAME} locally (first use downloads model files)…", flush=True)
-    return SentenceTransformer(MODEL_NAME, device="cpu", trust_remote_code=False)
+    return SentenceTransformer(MODEL_NAME, revision=MODEL_REVISION, device="cpu", trust_remote_code=False)
 
 
 def encode_texts(texts: list[str]) -> list[list[float]]:

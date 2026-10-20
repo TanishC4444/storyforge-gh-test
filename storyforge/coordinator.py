@@ -6,12 +6,13 @@ from pathlib import Path
 from . import contracts
 from .evidence import payload as evidence_payload
 from .inference import Executor, ROOT
-from .retrieval import retrieve
+from .retrieval import retrieve, application_packet
+from .brief import scene_controls
 from .storage import export, load, lock, save
 
 PLAN_INSTRUCTION = '''Return only JSON with keys title, threads (array of strings), technique_stack (array of strings), scenes.
 Create exactly the requested chapter and scene counts, in reading order. Scenes have keys id (ch01-sc01, etc.), chapter (integer), pov (character ID), participants (character IDs), location, time, goal, obstacle, intended_change.
-Honor requested length: each chapter is built from its scene word budgets. Follow PLAN mode, but this JSON contract overrides the attached brief's kickoff questions and free-form output rules. Intended changes are plans, not accepted events. Use only supplied character IDs. Build a complete local resolution by the final chapter. No prose chapter yet.'''
+Honor requested length: each chapter is built from its scene word budgets. Follow PLAN mode, but this JSON contract overrides the attached brief's kickoff questions and free-form output rules. Intended changes are plans, not accepted events. Use only supplied character IDs. Build a complete local resolution by the final chapter. Each scene must introduce a distinct consequential action, changed option, commitment, cost, or interpretation. Do not spend multiple scenes proving what is already established. Include the choice and consequence in intended_change. Treat scene word counts as guidance unless the user requires strict counts. Apply scoped references as mechanisms, not transplanted plots. No prose chapter yet.'''
 MEMORY_INSTRUCTION = '''Return only JSON {"memories": [{"kind": "event"|"belief"|"claim"|"resource"|"relationship"|"thread", "text": string, "evidence_ids": ["p001"], "known_by": [character IDs or "public"], "holder": character ID for beliefs, "claim_source": character ID for claims}]}.
 The ordered evidence_passages contain the complete CURRENT scene. Select 1–3 existing passage IDs per memory; do not copy or reconstruct quotations. The application resolves evidence directly from the source text. Extract at most 6 consequential updates. Distinguish facts, claims, and beliefs. Identify who actually makes a claim; another character quoting or challenging them is not the same speaker. Knowledge acquisition must be supported, not inferred from presence. Use public only for an in-world public disclosure. No plans, hypotheticals, rejected drafts, or inferred offstage facts. Preserve uncertainty.'''
 
@@ -20,7 +21,7 @@ def planning_packet(req, refinement, retrieval):
     operational = {'profile', 'max_repairs', 'max_stage_retries', 'context_chars', 'n_ctx', 'runner_repo', 'retrieval_mode', 'auto_approve_plan', 'min_words_ratio', 'max_words_ratio'}
     return {'request': {k: v for k, v in req.items() if k not in operational},
             'refinement': {k: refinement[k] for k in ['refined_prompt', 'central_conflict', 'character_tensions', 'subplot_possibilities', 'world_constraints']},
-            'inspiration': [{'id': s['id'], 'mechanism': s.get('mechanism')} for s in retrieval['sources']]}
+            'inspiration': application_packet(req, retrieval, 'architect')}
 
 
 def visible(memories, character=None):
@@ -44,12 +45,13 @@ def packet(req, state, card):
     return {
         'scene': card,
         'brief': {k: req.get(k) for k in ['premise', 'genre', 'reader_experience', 'pov', 'world_rules', 'must_avoid']},
-        'characters': [{k: c.get(k) for k in ['id', 'name', 'voice']} for c in req['characters'] if c['id'] in card['participants']],
+        'characters': [{k: c.get(k) for k in ['id', 'name', 'voice', 'voice_design']} for c in req['characters'] if c['id'] in card['participants']],
         'pov_profile': next(c for c in req['characters'] if c['id'] == card['pov']),
         'pov_visible_memory': compact(visible(state['memories'], card['pov'])),
         'recent_ending': state['accepted'][-1]['prose'][-1600:] if state['accepted'] and state['accepted'][-1]['pov'] == card['pov'] else '',
         'threads': state['plan']['threads'],
-        'refined_premise': state['refinement']['refined_prompt'],
+        'creative_controls': {**scene_controls(req, card['id']), 'subplots':[s for s in req['plot_design'].get('subplots',[]) if s.get('owner') in card['participants']]},
+        'literary_application': application_packet(req, state['retrieval'], 'writer', card['id']),
         'style_and_controls': {k: req.get(k) for k in ['tone_mood', 'sensory_detail', 'creative_freedom', 'surprise', 'ending_tendency', 'reference_policy']},
         'target_words': req['words_per_scene'],
     }
@@ -126,7 +128,7 @@ def run(req, folder, backend='fixture', *, stop_after=None, approve_plan=False):
                 verdict = executor.call('story_quality', critic_packet, 'Review current_prose. Return the required JSON only.', tokens=1400,
                                         validator=lambda x: contracts.review(x, polished), skill=(ROOT / 'skills/story_quality.md').read_text())
                 words = len(polished.split())
-                if backend != 'fixture' and not req['words_per_scene'] * req['min_words_ratio'] <= words <= req['words_per_scene'] * req['max_words_ratio']:
+                if backend != 'fixture' and req.get('length_policy',{}).get('scene_words')=='strict' and not req['words_per_scene'] * req['min_words_ratio'] <= words <= req['words_per_scene'] * req['max_words_ratio']:
                     verdict['pass'] = False
                     verdict['issues'].append({'severity': 'blocking', 'category': 'length', 'quote': polished[:80], 'problem': f'{words} words outside requested tolerance', 'fix': f'Return a complete scene near {req["words_per_scene"]} words.'})
                 save(scene_dir / f'review-{repair}.json', verdict)

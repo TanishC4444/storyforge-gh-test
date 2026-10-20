@@ -14,8 +14,8 @@ on:
         default: balanced
       request_file:
         type: choice
-        options: [silent-bell-full, harbor]
-        default: silent-bell-full
+        options: [silent-bell-deep, silent-bell-full, harbor]
+        default: silent-bell-deep
       refinement_seed_run:
         type: string
         default: ''
@@ -42,6 +42,17 @@ jobs:
       - uses: ./.github/actions/setup-worker
         with:
           backend: fixture
+      - name: Install local RAG encoder when requested
+        env:
+          STORY_REQUEST: ${{ inputs.request_file }}
+        run: |
+          python - <<'PY'
+          import json, os, subprocess, sys
+          from pathlib import Path
+          request=json.loads(Path('examples',os.environ['STORY_REQUEST']+'.json').read_text())
+          if request.get('retrieval_mode')=='hybrid':
+              subprocess.run([sys.executable,'-m','pip','install','-e','.[rag]'],check=True)
+          PY
       - name: Run scoped story task
         id: task
         env:
@@ -101,9 +112,112 @@ jobs:
           retention-days: 7
           overwrite: true
 
+  refine_review:
+    name: Development editor / critique initial story
+    needs: [refine]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: refine
+          path: inputs/state
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag refine_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: refine_review
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  refine_revision:
+    name: Revise initial story against development review
+    needs: [refine_review]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: refine_review
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: refine_review
+          path: inputs/design-review
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag refine_revision --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: refine_revision
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  refine_gate:
+    name: Approve developed story before outlining
+    needs: [refine_revision]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: refine_revision
+          path: inputs/state
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag refine_gate --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: refine_gate
+          path: out/
+          retention-days: 7
+          overwrite: true
+
   plan:
     name: Plan three chapters
-    needs: [refine]
+    needs: [refine_gate]
     runs-on: ubuntu-latest
     timeout-minutes: 45
     outputs:
@@ -115,7 +229,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: refine
+          name: refine_gate
           path: inputs/state
       - name: Run scoped story task
         id: task
@@ -136,17 +250,11 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s01_characters:
-    name: Chapter 1 scene 1 / character ${{ matrix.character }}
+  plan_review:
+    name: Development editor / critique scene progression
     needs: [plan]
-    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      max-parallel: 3
-      matrix:
-        character: ${{ fromJSON(needs.plan.outputs.characters) }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
@@ -155,6 +263,153 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: plan
+          path: inputs/state
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag plan_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: plan_review
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  plan_revision:
+    name: Revise chapter structure and causal choices
+    needs: [plan_review]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: plan_review
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: plan_review
+          path: inputs/design-review
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag plan_revision --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: plan_revision
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  plan_gate:
+    name: Approve causal outline before drafting
+    needs: [plan_revision]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: plan_revision
+          path: inputs/state
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag plan_gate --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: plan_gate
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s01_design:
+    name: Chapter 1 scene 1 / reconcile design with accepted state
+    needs: [plan_gate]
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: plan_gate
+          path: inputs/state
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag scene_design --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s01_design
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s01_characters:
+    name: Chapter 1 scene 1 / character ${{ matrix.character }}
+    needs: [s01_design]
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        character: ${{ fromJSON(needs.s01_design.outputs.characters) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s01_design
           path: inputs/state
       - name: Run scoped story task
         id: task
@@ -178,7 +433,7 @@ jobs:
 
   s01_direction:
     name: Chapter 1 scene 1 / reconcile character choices
-    needs: [plan, s01_characters]
+    needs: [s01_design, s01_characters]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -189,7 +444,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: plan
+          name: s01_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -216,7 +471,7 @@ jobs:
 
   s01_draft:
     name: Chapter 1 scene 1 / writer
-    needs: [plan, s01_direction]
+    needs: [s01_design, s01_direction]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -227,7 +482,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: plan
+          name: s01_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -254,7 +509,7 @@ jobs:
 
   s01_edit:
     name: Chapter 1 scene 1 / distinct writing
-    needs: [plan, s01_draft]
+    needs: [s01_design, s01_draft]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -265,7 +520,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: plan
+          name: s01_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -292,7 +547,7 @@ jobs:
 
   s01_story:
     name: Chapter 1 scene 1 / story quality
-    needs: [plan, s01_draft, s01_edit]
+    needs: [s01_design, s01_draft, s01_edit]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -303,7 +558,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: plan
+          name: s01_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -332,9 +587,9 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s01_memory:
-    name: Chapter 1 scene 1 / extract memory
-    needs: [plan, s01_edit]
+  s01_rhetoric:
+    name: Chapter 1 scene 1 / rhetoric and reader inference
+    needs: [s01_design, s01_edit]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -345,7 +600,45 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: plan
+          name: s01_design
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: s01_edit
+          path: inputs/edited
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag rhetoric_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s01_rhetoric
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s01_memory:
+    name: Chapter 1 scene 1 / extract memory
+    needs: [s01_design, s01_edit]
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s01_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -372,7 +665,7 @@ jobs:
 
   s01_repair:
     name: Chapter 1 scene 1 / repair if needed
-    needs: [plan, s01_edit, s01_story]
+    needs: [s01_design, s01_edit, s01_story, s01_rhetoric]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -383,7 +676,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: plan
+          name: s01_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -393,6 +686,10 @@ jobs:
         with:
           name: s01_story
           path: inputs/diagnosis
+      - uses: actions/download-artifact@v4
+        with:
+          name: s01_rhetoric
+          path: inputs/rhetoric
       - name: Run scoped story task
         id: task
         env:
@@ -414,7 +711,7 @@ jobs:
 
   s01_verify:
     name: Chapter 1 scene 1 / verify final prose
-    needs: [plan, s01_repair, s01_story, s01_draft]
+    needs: [s01_design, s01_repair, s01_story, s01_draft]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -425,7 +722,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: plan
+          name: s01_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -458,9 +755,9 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s01_final_memory:
-    name: Chapter 1 scene 1 / refresh memory if prose changed
-    needs: [plan, s01_repair, s01_memory]
+  s01_verify_rhetoric:
+    name: Chapter 1 scene 1 / verify rhetoric revision
+    needs: [s01_design, s01_repair, s01_rhetoric]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -471,7 +768,49 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: plan
+          name: s01_design
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: s01_repair
+          path: inputs/edited
+      - uses: actions/download-artifact@v4
+        with:
+          name: s01_rhetoric
+          path: inputs/rhetoric
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag verify_rhetoric --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s01_verify_rhetoric
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s01_final_memory:
+    name: Chapter 1 scene 1 / refresh memory if prose changed
+    needs: [s01_design, s01_repair, s01_memory]
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s01_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -502,7 +841,7 @@ jobs:
 
   s01_memory_review:
     name: Chapter 1 scene 1 / verify memory
-    needs: [plan, s01_repair, s01_final_memory]
+    needs: [s01_design, s01_repair, s01_final_memory]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -513,7 +852,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: plan
+          name: s01_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -544,7 +883,7 @@ jobs:
 
   s01_accept:
     name: Chapter 1 scene 1 / commit accepted state
-    needs: [plan, s01_repair, s01_verify, s01_final_memory, s01_memory_review]
+    needs: [s01_design, s01_repair, s01_verify, s01_verify_rhetoric, s01_final_memory, s01_memory_review]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -557,7 +896,7 @@ jobs:
           backend: fixture
       - uses: actions/download-artifact@v4
         with:
-          name: plan
+          name: s01_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -567,6 +906,10 @@ jobs:
         with:
           name: s01_verify
           path: inputs/story-review
+      - uses: actions/download-artifact@v4
+        with:
+          name: s01_verify_rhetoric
+          path: inputs/rhetoric-review
       - uses: actions/download-artifact@v4
         with:
           name: s01_final_memory
@@ -594,17 +937,14 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s02_characters:
-    name: Chapter 1 scene 2 / character ${{ matrix.character }}
+  s02_design:
+    name: Chapter 1 scene 2 / reconcile design with accepted state
     needs: [s01_accept]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      max-parallel: 3
-      matrix:
-        character: ${{ fromJSON(needs.s01_accept.outputs.characters) }}
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
@@ -613,6 +953,45 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: s01_accept
+          path: inputs/state
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag scene_design --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s02_design
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s02_characters:
+    name: Chapter 1 scene 2 / character ${{ matrix.character }}
+    needs: [s02_design]
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        character: ${{ fromJSON(needs.s02_design.outputs.characters) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s02_design
           path: inputs/state
       - name: Run scoped story task
         id: task
@@ -636,7 +1015,7 @@ jobs:
 
   s02_direction:
     name: Chapter 1 scene 2 / reconcile character choices
-    needs: [s01_accept, s02_characters]
+    needs: [s02_design, s02_characters]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -647,7 +1026,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s01_accept
+          name: s02_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -674,7 +1053,7 @@ jobs:
 
   s02_draft:
     name: Chapter 1 scene 2 / writer
-    needs: [s01_accept, s02_direction]
+    needs: [s02_design, s02_direction]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -685,7 +1064,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s01_accept
+          name: s02_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -712,7 +1091,7 @@ jobs:
 
   s02_edit:
     name: Chapter 1 scene 2 / distinct writing
-    needs: [s01_accept, s02_draft]
+    needs: [s02_design, s02_draft]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -723,7 +1102,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s01_accept
+          name: s02_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -750,7 +1129,7 @@ jobs:
 
   s02_story:
     name: Chapter 1 scene 2 / story quality
-    needs: [s01_accept, s02_draft, s02_edit]
+    needs: [s02_design, s02_draft, s02_edit]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -761,7 +1140,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s01_accept
+          name: s02_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -790,9 +1169,9 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s02_memory:
-    name: Chapter 1 scene 2 / extract memory
-    needs: [s01_accept, s02_edit]
+  s02_rhetoric:
+    name: Chapter 1 scene 2 / rhetoric and reader inference
+    needs: [s02_design, s02_edit]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -803,7 +1182,45 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s01_accept
+          name: s02_design
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: s02_edit
+          path: inputs/edited
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag rhetoric_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s02_rhetoric
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s02_memory:
+    name: Chapter 1 scene 2 / extract memory
+    needs: [s02_design, s02_edit]
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s02_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -830,7 +1247,7 @@ jobs:
 
   s02_repair:
     name: Chapter 1 scene 2 / repair if needed
-    needs: [s01_accept, s02_edit, s02_story]
+    needs: [s02_design, s02_edit, s02_story, s02_rhetoric]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -841,7 +1258,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s01_accept
+          name: s02_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -851,6 +1268,10 @@ jobs:
         with:
           name: s02_story
           path: inputs/diagnosis
+      - uses: actions/download-artifact@v4
+        with:
+          name: s02_rhetoric
+          path: inputs/rhetoric
       - name: Run scoped story task
         id: task
         env:
@@ -872,7 +1293,7 @@ jobs:
 
   s02_verify:
     name: Chapter 1 scene 2 / verify final prose
-    needs: [s01_accept, s02_repair, s02_story, s02_draft]
+    needs: [s02_design, s02_repair, s02_story, s02_draft]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -883,7 +1304,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s01_accept
+          name: s02_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -916,9 +1337,9 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s02_final_memory:
-    name: Chapter 1 scene 2 / refresh memory if prose changed
-    needs: [s01_accept, s02_repair, s02_memory]
+  s02_verify_rhetoric:
+    name: Chapter 1 scene 2 / verify rhetoric revision
+    needs: [s02_design, s02_repair, s02_rhetoric]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -929,7 +1350,49 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s01_accept
+          name: s02_design
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: s02_repair
+          path: inputs/edited
+      - uses: actions/download-artifact@v4
+        with:
+          name: s02_rhetoric
+          path: inputs/rhetoric
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag verify_rhetoric --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s02_verify_rhetoric
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s02_final_memory:
+    name: Chapter 1 scene 2 / refresh memory if prose changed
+    needs: [s02_design, s02_repair, s02_memory]
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s02_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -960,7 +1423,7 @@ jobs:
 
   s02_memory_review:
     name: Chapter 1 scene 2 / verify memory
-    needs: [s01_accept, s02_repair, s02_final_memory]
+    needs: [s02_design, s02_repair, s02_final_memory]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -971,7 +1434,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s01_accept
+          name: s02_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1002,7 +1465,7 @@ jobs:
 
   s02_accept:
     name: Chapter 1 scene 2 / commit accepted state
-    needs: [s01_accept, s02_repair, s02_verify, s02_final_memory, s02_memory_review]
+    needs: [s02_design, s02_repair, s02_verify, s02_verify_rhetoric, s02_final_memory, s02_memory_review]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1015,7 +1478,7 @@ jobs:
           backend: fixture
       - uses: actions/download-artifact@v4
         with:
-          name: s01_accept
+          name: s02_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1025,6 +1488,10 @@ jobs:
         with:
           name: s02_verify
           path: inputs/story-review
+      - uses: actions/download-artifact@v4
+        with:
+          name: s02_verify_rhetoric
+          path: inputs/rhetoric-review
       - uses: actions/download-artifact@v4
         with:
           name: s02_final_memory
@@ -1052,17 +1519,14 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s03_characters:
-    name: Chapter 1 scene 3 / character ${{ matrix.character }}
+  s03_design:
+    name: Chapter 1 scene 3 / reconcile design with accepted state
     needs: [s02_accept]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      max-parallel: 3
-      matrix:
-        character: ${{ fromJSON(needs.s02_accept.outputs.characters) }}
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
@@ -1071,6 +1535,45 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: s02_accept
+          path: inputs/state
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag scene_design --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 2
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s03_design
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s03_characters:
+    name: Chapter 1 scene 3 / character ${{ matrix.character }}
+    needs: [s03_design]
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        character: ${{ fromJSON(needs.s03_design.outputs.characters) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s03_design
           path: inputs/state
       - name: Run scoped story task
         id: task
@@ -1094,7 +1597,7 @@ jobs:
 
   s03_direction:
     name: Chapter 1 scene 3 / reconcile character choices
-    needs: [s02_accept, s03_characters]
+    needs: [s03_design, s03_characters]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1105,7 +1608,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s02_accept
+          name: s03_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1132,7 +1635,7 @@ jobs:
 
   s03_draft:
     name: Chapter 1 scene 3 / writer
-    needs: [s02_accept, s03_direction]
+    needs: [s03_design, s03_direction]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1143,7 +1646,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s02_accept
+          name: s03_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1170,7 +1673,7 @@ jobs:
 
   s03_edit:
     name: Chapter 1 scene 3 / distinct writing
-    needs: [s02_accept, s03_draft]
+    needs: [s03_design, s03_draft]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1181,7 +1684,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s02_accept
+          name: s03_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1208,7 +1711,7 @@ jobs:
 
   s03_story:
     name: Chapter 1 scene 3 / story quality
-    needs: [s02_accept, s03_draft, s03_edit]
+    needs: [s03_design, s03_draft, s03_edit]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1219,7 +1722,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s02_accept
+          name: s03_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1248,9 +1751,9 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s03_memory:
-    name: Chapter 1 scene 3 / extract memory
-    needs: [s02_accept, s03_edit]
+  s03_rhetoric:
+    name: Chapter 1 scene 3 / rhetoric and reader inference
+    needs: [s03_design, s03_edit]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1261,7 +1764,45 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s02_accept
+          name: s03_design
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: s03_edit
+          path: inputs/edited
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag rhetoric_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 2
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s03_rhetoric
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s03_memory:
+    name: Chapter 1 scene 3 / extract memory
+    needs: [s03_design, s03_edit]
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s03_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1288,7 +1829,7 @@ jobs:
 
   s03_repair:
     name: Chapter 1 scene 3 / repair if needed
-    needs: [s02_accept, s03_edit, s03_story]
+    needs: [s03_design, s03_edit, s03_story, s03_rhetoric]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1299,7 +1840,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s02_accept
+          name: s03_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1309,6 +1850,10 @@ jobs:
         with:
           name: s03_story
           path: inputs/diagnosis
+      - uses: actions/download-artifact@v4
+        with:
+          name: s03_rhetoric
+          path: inputs/rhetoric
       - name: Run scoped story task
         id: task
         env:
@@ -1330,7 +1875,7 @@ jobs:
 
   s03_verify:
     name: Chapter 1 scene 3 / verify final prose
-    needs: [s02_accept, s03_repair, s03_story, s03_draft]
+    needs: [s03_design, s03_repair, s03_story, s03_draft]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1341,7 +1886,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s02_accept
+          name: s03_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1374,9 +1919,9 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s03_final_memory:
-    name: Chapter 1 scene 3 / refresh memory if prose changed
-    needs: [s02_accept, s03_repair, s03_memory]
+  s03_verify_rhetoric:
+    name: Chapter 1 scene 3 / verify rhetoric revision
+    needs: [s03_design, s03_repair, s03_rhetoric]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1387,7 +1932,49 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s02_accept
+          name: s03_design
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: s03_repair
+          path: inputs/edited
+      - uses: actions/download-artifact@v4
+        with:
+          name: s03_rhetoric
+          path: inputs/rhetoric
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag verify_rhetoric --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 2
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s03_verify_rhetoric
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s03_final_memory:
+    name: Chapter 1 scene 3 / refresh memory if prose changed
+    needs: [s03_design, s03_repair, s03_memory]
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s03_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1418,7 +2005,7 @@ jobs:
 
   s03_memory_review:
     name: Chapter 1 scene 3 / verify memory
-    needs: [s02_accept, s03_repair, s03_final_memory]
+    needs: [s03_design, s03_repair, s03_final_memory]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1429,7 +2016,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s02_accept
+          name: s03_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1460,7 +2047,7 @@ jobs:
 
   s03_accept:
     name: Chapter 1 scene 3 / verify chapter and commit
-    needs: [s02_accept, s03_repair, s03_verify, s03_final_memory, s03_memory_review]
+    needs: [s03_design, s03_repair, s03_verify, s03_verify_rhetoric, s03_final_memory, s03_memory_review]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1473,7 +2060,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s02_accept
+          name: s03_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1483,6 +2070,10 @@ jobs:
         with:
           name: s03_verify
           path: inputs/story-review
+      - uses: actions/download-artifact@v4
+        with:
+          name: s03_verify_rhetoric
+          path: inputs/rhetoric-review
       - uses: actions/download-artifact@v4
         with:
           name: s03_final_memory
@@ -1510,17 +2101,14 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s04_characters:
-    name: Chapter 2 scene 1 / character ${{ matrix.character }}
+  s04_design:
+    name: Chapter 2 scene 1 / reconcile design with accepted state
     needs: [s03_accept]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      max-parallel: 3
-      matrix:
-        character: ${{ fromJSON(needs.s03_accept.outputs.characters) }}
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
@@ -1529,6 +2117,45 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: s03_accept
+          path: inputs/state
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag scene_design --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 3
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s04_design
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s04_characters:
+    name: Chapter 2 scene 1 / character ${{ matrix.character }}
+    needs: [s04_design]
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        character: ${{ fromJSON(needs.s04_design.outputs.characters) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s04_design
           path: inputs/state
       - name: Run scoped story task
         id: task
@@ -1552,7 +2179,7 @@ jobs:
 
   s04_direction:
     name: Chapter 2 scene 1 / reconcile character choices
-    needs: [s03_accept, s04_characters]
+    needs: [s04_design, s04_characters]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1563,7 +2190,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s03_accept
+          name: s04_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1590,7 +2217,7 @@ jobs:
 
   s04_draft:
     name: Chapter 2 scene 1 / writer
-    needs: [s03_accept, s04_direction]
+    needs: [s04_design, s04_direction]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1601,7 +2228,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s03_accept
+          name: s04_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1628,7 +2255,7 @@ jobs:
 
   s04_edit:
     name: Chapter 2 scene 1 / distinct writing
-    needs: [s03_accept, s04_draft]
+    needs: [s04_design, s04_draft]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1639,7 +2266,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s03_accept
+          name: s04_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1666,7 +2293,7 @@ jobs:
 
   s04_story:
     name: Chapter 2 scene 1 / story quality
-    needs: [s03_accept, s04_draft, s04_edit]
+    needs: [s04_design, s04_draft, s04_edit]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1677,7 +2304,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s03_accept
+          name: s04_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1706,9 +2333,9 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s04_memory:
-    name: Chapter 2 scene 1 / extract memory
-    needs: [s03_accept, s04_edit]
+  s04_rhetoric:
+    name: Chapter 2 scene 1 / rhetoric and reader inference
+    needs: [s04_design, s04_edit]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1719,7 +2346,45 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s03_accept
+          name: s04_design
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: s04_edit
+          path: inputs/edited
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag rhetoric_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 3
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s04_rhetoric
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s04_memory:
+    name: Chapter 2 scene 1 / extract memory
+    needs: [s04_design, s04_edit]
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s04_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1746,7 +2411,7 @@ jobs:
 
   s04_repair:
     name: Chapter 2 scene 1 / repair if needed
-    needs: [s03_accept, s04_edit, s04_story]
+    needs: [s04_design, s04_edit, s04_story, s04_rhetoric]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1757,7 +2422,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s03_accept
+          name: s04_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1767,6 +2432,10 @@ jobs:
         with:
           name: s04_story
           path: inputs/diagnosis
+      - uses: actions/download-artifact@v4
+        with:
+          name: s04_rhetoric
+          path: inputs/rhetoric
       - name: Run scoped story task
         id: task
         env:
@@ -1788,7 +2457,7 @@ jobs:
 
   s04_verify:
     name: Chapter 2 scene 1 / verify final prose
-    needs: [s03_accept, s04_repair, s04_story, s04_draft]
+    needs: [s04_design, s04_repair, s04_story, s04_draft]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1799,7 +2468,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s03_accept
+          name: s04_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1832,9 +2501,9 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s04_final_memory:
-    name: Chapter 2 scene 1 / refresh memory if prose changed
-    needs: [s03_accept, s04_repair, s04_memory]
+  s04_verify_rhetoric:
+    name: Chapter 2 scene 1 / verify rhetoric revision
+    needs: [s04_design, s04_repair, s04_rhetoric]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1845,7 +2514,49 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s03_accept
+          name: s04_design
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: s04_repair
+          path: inputs/edited
+      - uses: actions/download-artifact@v4
+        with:
+          name: s04_rhetoric
+          path: inputs/rhetoric
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag verify_rhetoric --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 3
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s04_verify_rhetoric
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s04_final_memory:
+    name: Chapter 2 scene 1 / refresh memory if prose changed
+    needs: [s04_design, s04_repair, s04_memory]
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s04_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1876,7 +2587,7 @@ jobs:
 
   s04_memory_review:
     name: Chapter 2 scene 1 / verify memory
-    needs: [s03_accept, s04_repair, s04_final_memory]
+    needs: [s04_design, s04_repair, s04_final_memory]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1887,7 +2598,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s03_accept
+          name: s04_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1918,7 +2629,7 @@ jobs:
 
   s04_accept:
     name: Chapter 2 scene 1 / commit accepted state
-    needs: [s03_accept, s04_repair, s04_verify, s04_final_memory, s04_memory_review]
+    needs: [s04_design, s04_repair, s04_verify, s04_verify_rhetoric, s04_final_memory, s04_memory_review]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -1931,7 +2642,7 @@ jobs:
           backend: fixture
       - uses: actions/download-artifact@v4
         with:
-          name: s03_accept
+          name: s04_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -1941,6 +2652,10 @@ jobs:
         with:
           name: s04_verify
           path: inputs/story-review
+      - uses: actions/download-artifact@v4
+        with:
+          name: s04_verify_rhetoric
+          path: inputs/rhetoric-review
       - uses: actions/download-artifact@v4
         with:
           name: s04_final_memory
@@ -1968,17 +2683,14 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s05_characters:
-    name: Chapter 2 scene 2 / character ${{ matrix.character }}
+  s05_design:
+    name: Chapter 2 scene 2 / reconcile design with accepted state
     needs: [s04_accept]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      max-parallel: 3
-      matrix:
-        character: ${{ fromJSON(needs.s04_accept.outputs.characters) }}
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
@@ -1987,6 +2699,45 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: s04_accept
+          path: inputs/state
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag scene_design --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 4
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s05_design
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s05_characters:
+    name: Chapter 2 scene 2 / character ${{ matrix.character }}
+    needs: [s05_design]
+    if: ${{ 4 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        character: ${{ fromJSON(needs.s05_design.outputs.characters) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s05_design
           path: inputs/state
       - name: Run scoped story task
         id: task
@@ -2010,7 +2761,7 @@ jobs:
 
   s05_direction:
     name: Chapter 2 scene 2 / reconcile character choices
-    needs: [s04_accept, s05_characters]
+    needs: [s05_design, s05_characters]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2021,7 +2772,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s04_accept
+          name: s05_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2048,7 +2799,7 @@ jobs:
 
   s05_draft:
     name: Chapter 2 scene 2 / writer
-    needs: [s04_accept, s05_direction]
+    needs: [s05_design, s05_direction]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2059,7 +2810,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s04_accept
+          name: s05_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2086,7 +2837,7 @@ jobs:
 
   s05_edit:
     name: Chapter 2 scene 2 / distinct writing
-    needs: [s04_accept, s05_draft]
+    needs: [s05_design, s05_draft]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2097,7 +2848,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s04_accept
+          name: s05_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2124,7 +2875,7 @@ jobs:
 
   s05_story:
     name: Chapter 2 scene 2 / story quality
-    needs: [s04_accept, s05_draft, s05_edit]
+    needs: [s05_design, s05_draft, s05_edit]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2135,7 +2886,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s04_accept
+          name: s05_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2164,9 +2915,9 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s05_memory:
-    name: Chapter 2 scene 2 / extract memory
-    needs: [s04_accept, s05_edit]
+  s05_rhetoric:
+    name: Chapter 2 scene 2 / rhetoric and reader inference
+    needs: [s05_design, s05_edit]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2177,7 +2928,45 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s04_accept
+          name: s05_design
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: s05_edit
+          path: inputs/edited
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag rhetoric_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 4
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s05_rhetoric
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s05_memory:
+    name: Chapter 2 scene 2 / extract memory
+    needs: [s05_design, s05_edit]
+    if: ${{ 4 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s05_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2204,7 +2993,7 @@ jobs:
 
   s05_repair:
     name: Chapter 2 scene 2 / repair if needed
-    needs: [s04_accept, s05_edit, s05_story]
+    needs: [s05_design, s05_edit, s05_story, s05_rhetoric]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2215,7 +3004,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s04_accept
+          name: s05_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2225,6 +3014,10 @@ jobs:
         with:
           name: s05_story
           path: inputs/diagnosis
+      - uses: actions/download-artifact@v4
+        with:
+          name: s05_rhetoric
+          path: inputs/rhetoric
       - name: Run scoped story task
         id: task
         env:
@@ -2246,7 +3039,7 @@ jobs:
 
   s05_verify:
     name: Chapter 2 scene 2 / verify final prose
-    needs: [s04_accept, s05_repair, s05_story, s05_draft]
+    needs: [s05_design, s05_repair, s05_story, s05_draft]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2257,7 +3050,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s04_accept
+          name: s05_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2290,9 +3083,9 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s05_final_memory:
-    name: Chapter 2 scene 2 / refresh memory if prose changed
-    needs: [s04_accept, s05_repair, s05_memory]
+  s05_verify_rhetoric:
+    name: Chapter 2 scene 2 / verify rhetoric revision
+    needs: [s05_design, s05_repair, s05_rhetoric]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2303,7 +3096,49 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s04_accept
+          name: s05_design
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: s05_repair
+          path: inputs/edited
+      - uses: actions/download-artifact@v4
+        with:
+          name: s05_rhetoric
+          path: inputs/rhetoric
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag verify_rhetoric --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 4
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s05_verify_rhetoric
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s05_final_memory:
+    name: Chapter 2 scene 2 / refresh memory if prose changed
+    needs: [s05_design, s05_repair, s05_memory]
+    if: ${{ 4 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s05_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2334,7 +3169,7 @@ jobs:
 
   s05_memory_review:
     name: Chapter 2 scene 2 / verify memory
-    needs: [s04_accept, s05_repair, s05_final_memory]
+    needs: [s05_design, s05_repair, s05_final_memory]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2345,7 +3180,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s04_accept
+          name: s05_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2376,7 +3211,7 @@ jobs:
 
   s05_accept:
     name: Chapter 2 scene 2 / commit accepted state
-    needs: [s04_accept, s05_repair, s05_verify, s05_final_memory, s05_memory_review]
+    needs: [s05_design, s05_repair, s05_verify, s05_verify_rhetoric, s05_final_memory, s05_memory_review]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2389,7 +3224,7 @@ jobs:
           backend: fixture
       - uses: actions/download-artifact@v4
         with:
-          name: s04_accept
+          name: s05_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2399,6 +3234,10 @@ jobs:
         with:
           name: s05_verify
           path: inputs/story-review
+      - uses: actions/download-artifact@v4
+        with:
+          name: s05_verify_rhetoric
+          path: inputs/rhetoric-review
       - uses: actions/download-artifact@v4
         with:
           name: s05_final_memory
@@ -2426,17 +3265,14 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s06_characters:
-    name: Chapter 2 scene 3 / character ${{ matrix.character }}
+  s06_design:
+    name: Chapter 2 scene 3 / reconcile design with accepted state
     needs: [s05_accept]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      max-parallel: 3
-      matrix:
-        character: ${{ fromJSON(needs.s05_accept.outputs.characters) }}
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
@@ -2445,6 +3281,45 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: s05_accept
+          path: inputs/state
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag scene_design --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 5
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s06_design
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s06_characters:
+    name: Chapter 2 scene 3 / character ${{ matrix.character }}
+    needs: [s06_design]
+    if: ${{ 5 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        character: ${{ fromJSON(needs.s06_design.outputs.characters) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s06_design
           path: inputs/state
       - name: Run scoped story task
         id: task
@@ -2468,7 +3343,7 @@ jobs:
 
   s06_direction:
     name: Chapter 2 scene 3 / reconcile character choices
-    needs: [s05_accept, s06_characters]
+    needs: [s06_design, s06_characters]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2479,7 +3354,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s05_accept
+          name: s06_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2506,7 +3381,7 @@ jobs:
 
   s06_draft:
     name: Chapter 2 scene 3 / writer
-    needs: [s05_accept, s06_direction]
+    needs: [s06_design, s06_direction]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2517,7 +3392,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s05_accept
+          name: s06_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2544,7 +3419,7 @@ jobs:
 
   s06_edit:
     name: Chapter 2 scene 3 / distinct writing
-    needs: [s05_accept, s06_draft]
+    needs: [s06_design, s06_draft]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2555,7 +3430,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s05_accept
+          name: s06_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2582,7 +3457,7 @@ jobs:
 
   s06_story:
     name: Chapter 2 scene 3 / story quality
-    needs: [s05_accept, s06_draft, s06_edit]
+    needs: [s06_design, s06_draft, s06_edit]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2593,7 +3468,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s05_accept
+          name: s06_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2622,9 +3497,9 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s06_memory:
-    name: Chapter 2 scene 3 / extract memory
-    needs: [s05_accept, s06_edit]
+  s06_rhetoric:
+    name: Chapter 2 scene 3 / rhetoric and reader inference
+    needs: [s06_design, s06_edit]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2635,7 +3510,45 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s05_accept
+          name: s06_design
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: s06_edit
+          path: inputs/edited
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag rhetoric_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 5
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s06_rhetoric
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s06_memory:
+    name: Chapter 2 scene 3 / extract memory
+    needs: [s06_design, s06_edit]
+    if: ${{ 5 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s06_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2662,7 +3575,7 @@ jobs:
 
   s06_repair:
     name: Chapter 2 scene 3 / repair if needed
-    needs: [s05_accept, s06_edit, s06_story]
+    needs: [s06_design, s06_edit, s06_story, s06_rhetoric]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2673,7 +3586,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s05_accept
+          name: s06_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2683,6 +3596,10 @@ jobs:
         with:
           name: s06_story
           path: inputs/diagnosis
+      - uses: actions/download-artifact@v4
+        with:
+          name: s06_rhetoric
+          path: inputs/rhetoric
       - name: Run scoped story task
         id: task
         env:
@@ -2704,7 +3621,7 @@ jobs:
 
   s06_verify:
     name: Chapter 2 scene 3 / verify final prose
-    needs: [s05_accept, s06_repair, s06_story, s06_draft]
+    needs: [s06_design, s06_repair, s06_story, s06_draft]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2715,7 +3632,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s05_accept
+          name: s06_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2748,9 +3665,9 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s06_final_memory:
-    name: Chapter 2 scene 3 / refresh memory if prose changed
-    needs: [s05_accept, s06_repair, s06_memory]
+  s06_verify_rhetoric:
+    name: Chapter 2 scene 3 / verify rhetoric revision
+    needs: [s06_design, s06_repair, s06_rhetoric]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2761,7 +3678,49 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s05_accept
+          name: s06_design
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: s06_repair
+          path: inputs/edited
+      - uses: actions/download-artifact@v4
+        with:
+          name: s06_rhetoric
+          path: inputs/rhetoric
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag verify_rhetoric --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 5
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s06_verify_rhetoric
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s06_final_memory:
+    name: Chapter 2 scene 3 / refresh memory if prose changed
+    needs: [s06_design, s06_repair, s06_memory]
+    if: ${{ 5 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s06_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2792,7 +3751,7 @@ jobs:
 
   s06_memory_review:
     name: Chapter 2 scene 3 / verify memory
-    needs: [s05_accept, s06_repair, s06_final_memory]
+    needs: [s06_design, s06_repair, s06_final_memory]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2803,7 +3762,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s05_accept
+          name: s06_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2834,7 +3793,7 @@ jobs:
 
   s06_accept:
     name: Chapter 2 scene 3 / verify chapter and commit
-    needs: [s05_accept, s06_repair, s06_verify, s06_final_memory, s06_memory_review]
+    needs: [s06_design, s06_repair, s06_verify, s06_verify_rhetoric, s06_final_memory, s06_memory_review]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2847,7 +3806,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s05_accept
+          name: s06_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2857,6 +3816,10 @@ jobs:
         with:
           name: s06_verify
           path: inputs/story-review
+      - uses: actions/download-artifact@v4
+        with:
+          name: s06_verify_rhetoric
+          path: inputs/rhetoric-review
       - uses: actions/download-artifact@v4
         with:
           name: s06_final_memory
@@ -2884,17 +3847,14 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s07_characters:
-    name: Chapter 3 scene 1 / character ${{ matrix.character }}
+  s07_design:
+    name: Chapter 3 scene 1 / reconcile design with accepted state
     needs: [s06_accept]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      max-parallel: 3
-      matrix:
-        character: ${{ fromJSON(needs.s06_accept.outputs.characters) }}
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
@@ -2903,6 +3863,45 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: s06_accept
+          path: inputs/state
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag scene_design --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 6
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s07_design
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s07_characters:
+    name: Chapter 3 scene 1 / character ${{ matrix.character }}
+    needs: [s07_design]
+    if: ${{ 6 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        character: ${{ fromJSON(needs.s07_design.outputs.characters) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s07_design
           path: inputs/state
       - name: Run scoped story task
         id: task
@@ -2926,7 +3925,7 @@ jobs:
 
   s07_direction:
     name: Chapter 3 scene 1 / reconcile character choices
-    needs: [s06_accept, s07_characters]
+    needs: [s07_design, s07_characters]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2937,7 +3936,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s06_accept
+          name: s07_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -2964,7 +3963,7 @@ jobs:
 
   s07_draft:
     name: Chapter 3 scene 1 / writer
-    needs: [s06_accept, s07_direction]
+    needs: [s07_design, s07_direction]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -2975,7 +3974,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s06_accept
+          name: s07_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3002,7 +4001,7 @@ jobs:
 
   s07_edit:
     name: Chapter 3 scene 1 / distinct writing
-    needs: [s06_accept, s07_draft]
+    needs: [s07_design, s07_draft]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3013,7 +4012,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s06_accept
+          name: s07_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3040,7 +4039,7 @@ jobs:
 
   s07_story:
     name: Chapter 3 scene 1 / story quality
-    needs: [s06_accept, s07_draft, s07_edit]
+    needs: [s07_design, s07_draft, s07_edit]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3051,7 +4050,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s06_accept
+          name: s07_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3080,9 +4079,9 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s07_memory:
-    name: Chapter 3 scene 1 / extract memory
-    needs: [s06_accept, s07_edit]
+  s07_rhetoric:
+    name: Chapter 3 scene 1 / rhetoric and reader inference
+    needs: [s07_design, s07_edit]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3093,7 +4092,45 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s06_accept
+          name: s07_design
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: s07_edit
+          path: inputs/edited
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag rhetoric_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 6
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s07_rhetoric
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s07_memory:
+    name: Chapter 3 scene 1 / extract memory
+    needs: [s07_design, s07_edit]
+    if: ${{ 6 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s07_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3120,7 +4157,7 @@ jobs:
 
   s07_repair:
     name: Chapter 3 scene 1 / repair if needed
-    needs: [s06_accept, s07_edit, s07_story]
+    needs: [s07_design, s07_edit, s07_story, s07_rhetoric]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3131,7 +4168,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s06_accept
+          name: s07_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3141,6 +4178,10 @@ jobs:
         with:
           name: s07_story
           path: inputs/diagnosis
+      - uses: actions/download-artifact@v4
+        with:
+          name: s07_rhetoric
+          path: inputs/rhetoric
       - name: Run scoped story task
         id: task
         env:
@@ -3162,7 +4203,7 @@ jobs:
 
   s07_verify:
     name: Chapter 3 scene 1 / verify final prose
-    needs: [s06_accept, s07_repair, s07_story, s07_draft]
+    needs: [s07_design, s07_repair, s07_story, s07_draft]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3173,7 +4214,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s06_accept
+          name: s07_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3206,9 +4247,9 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s07_final_memory:
-    name: Chapter 3 scene 1 / refresh memory if prose changed
-    needs: [s06_accept, s07_repair, s07_memory]
+  s07_verify_rhetoric:
+    name: Chapter 3 scene 1 / verify rhetoric revision
+    needs: [s07_design, s07_repair, s07_rhetoric]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3219,7 +4260,49 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s06_accept
+          name: s07_design
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: s07_repair
+          path: inputs/edited
+      - uses: actions/download-artifact@v4
+        with:
+          name: s07_rhetoric
+          path: inputs/rhetoric
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag verify_rhetoric --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 6
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s07_verify_rhetoric
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s07_final_memory:
+    name: Chapter 3 scene 1 / refresh memory if prose changed
+    needs: [s07_design, s07_repair, s07_memory]
+    if: ${{ 6 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s07_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3250,7 +4333,7 @@ jobs:
 
   s07_memory_review:
     name: Chapter 3 scene 1 / verify memory
-    needs: [s06_accept, s07_repair, s07_final_memory]
+    needs: [s07_design, s07_repair, s07_final_memory]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3261,7 +4344,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s06_accept
+          name: s07_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3292,7 +4375,7 @@ jobs:
 
   s07_accept:
     name: Chapter 3 scene 1 / commit accepted state
-    needs: [s06_accept, s07_repair, s07_verify, s07_final_memory, s07_memory_review]
+    needs: [s07_design, s07_repair, s07_verify, s07_verify_rhetoric, s07_final_memory, s07_memory_review]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3305,7 +4388,7 @@ jobs:
           backend: fixture
       - uses: actions/download-artifact@v4
         with:
-          name: s06_accept
+          name: s07_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3315,6 +4398,10 @@ jobs:
         with:
           name: s07_verify
           path: inputs/story-review
+      - uses: actions/download-artifact@v4
+        with:
+          name: s07_verify_rhetoric
+          path: inputs/rhetoric-review
       - uses: actions/download-artifact@v4
         with:
           name: s07_final_memory
@@ -3342,17 +4429,14 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s08_characters:
-    name: Chapter 3 scene 2 / character ${{ matrix.character }}
+  s08_design:
+    name: Chapter 3 scene 2 / reconcile design with accepted state
     needs: [s07_accept]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      max-parallel: 3
-      matrix:
-        character: ${{ fromJSON(needs.s07_accept.outputs.characters) }}
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
@@ -3361,6 +4445,45 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: s07_accept
+          path: inputs/state
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag scene_design --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s08_design
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s08_characters:
+    name: Chapter 3 scene 2 / character ${{ matrix.character }}
+    needs: [s08_design]
+    if: ${{ 7 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        character: ${{ fromJSON(needs.s08_design.outputs.characters) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s08_design
           path: inputs/state
       - name: Run scoped story task
         id: task
@@ -3384,7 +4507,7 @@ jobs:
 
   s08_direction:
     name: Chapter 3 scene 2 / reconcile character choices
-    needs: [s07_accept, s08_characters]
+    needs: [s08_design, s08_characters]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3395,7 +4518,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s07_accept
+          name: s08_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3422,7 +4545,7 @@ jobs:
 
   s08_draft:
     name: Chapter 3 scene 2 / writer
-    needs: [s07_accept, s08_direction]
+    needs: [s08_design, s08_direction]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3433,7 +4556,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s07_accept
+          name: s08_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3460,7 +4583,7 @@ jobs:
 
   s08_edit:
     name: Chapter 3 scene 2 / distinct writing
-    needs: [s07_accept, s08_draft]
+    needs: [s08_design, s08_draft]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3471,7 +4594,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s07_accept
+          name: s08_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3498,7 +4621,7 @@ jobs:
 
   s08_story:
     name: Chapter 3 scene 2 / story quality
-    needs: [s07_accept, s08_draft, s08_edit]
+    needs: [s08_design, s08_draft, s08_edit]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3509,7 +4632,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s07_accept
+          name: s08_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3538,9 +4661,9 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s08_memory:
-    name: Chapter 3 scene 2 / extract memory
-    needs: [s07_accept, s08_edit]
+  s08_rhetoric:
+    name: Chapter 3 scene 2 / rhetoric and reader inference
+    needs: [s08_design, s08_edit]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3551,7 +4674,45 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s07_accept
+          name: s08_design
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: s08_edit
+          path: inputs/edited
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag rhetoric_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s08_rhetoric
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s08_memory:
+    name: Chapter 3 scene 2 / extract memory
+    needs: [s08_design, s08_edit]
+    if: ${{ 7 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s08_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3578,7 +4739,7 @@ jobs:
 
   s08_repair:
     name: Chapter 3 scene 2 / repair if needed
-    needs: [s07_accept, s08_edit, s08_story]
+    needs: [s08_design, s08_edit, s08_story, s08_rhetoric]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3589,7 +4750,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s07_accept
+          name: s08_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3599,6 +4760,10 @@ jobs:
         with:
           name: s08_story
           path: inputs/diagnosis
+      - uses: actions/download-artifact@v4
+        with:
+          name: s08_rhetoric
+          path: inputs/rhetoric
       - name: Run scoped story task
         id: task
         env:
@@ -3620,7 +4785,7 @@ jobs:
 
   s08_verify:
     name: Chapter 3 scene 2 / verify final prose
-    needs: [s07_accept, s08_repair, s08_story, s08_draft]
+    needs: [s08_design, s08_repair, s08_story, s08_draft]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3631,7 +4796,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s07_accept
+          name: s08_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3664,9 +4829,9 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s08_final_memory:
-    name: Chapter 3 scene 2 / refresh memory if prose changed
-    needs: [s07_accept, s08_repair, s08_memory]
+  s08_verify_rhetoric:
+    name: Chapter 3 scene 2 / verify rhetoric revision
+    needs: [s08_design, s08_repair, s08_rhetoric]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3677,7 +4842,49 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s07_accept
+          name: s08_design
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: s08_repair
+          path: inputs/edited
+      - uses: actions/download-artifact@v4
+        with:
+          name: s08_rhetoric
+          path: inputs/rhetoric
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag verify_rhetoric --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 7
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s08_verify_rhetoric
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s08_final_memory:
+    name: Chapter 3 scene 2 / refresh memory if prose changed
+    needs: [s08_design, s08_repair, s08_memory]
+    if: ${{ 7 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s08_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3708,7 +4915,7 @@ jobs:
 
   s08_memory_review:
     name: Chapter 3 scene 2 / verify memory
-    needs: [s07_accept, s08_repair, s08_final_memory]
+    needs: [s08_design, s08_repair, s08_final_memory]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3719,7 +4926,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s07_accept
+          name: s08_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3750,7 +4957,7 @@ jobs:
 
   s08_accept:
     name: Chapter 3 scene 2 / commit accepted state
-    needs: [s07_accept, s08_repair, s08_verify, s08_final_memory, s08_memory_review]
+    needs: [s08_design, s08_repair, s08_verify, s08_verify_rhetoric, s08_final_memory, s08_memory_review]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3763,7 +4970,7 @@ jobs:
           backend: fixture
       - uses: actions/download-artifact@v4
         with:
-          name: s07_accept
+          name: s08_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3773,6 +4980,10 @@ jobs:
         with:
           name: s08_verify
           path: inputs/story-review
+      - uses: actions/download-artifact@v4
+        with:
+          name: s08_verify_rhetoric
+          path: inputs/rhetoric-review
       - uses: actions/download-artifact@v4
         with:
           name: s08_final_memory
@@ -3800,17 +5011,14 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s09_characters:
-    name: Chapter 3 scene 3 / character ${{ matrix.character }}
+  s09_design:
+    name: Chapter 3 scene 3 / reconcile design with accepted state
     needs: [s08_accept]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      max-parallel: 3
-      matrix:
-        character: ${{ fromJSON(needs.s08_accept.outputs.characters) }}
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
@@ -3819,6 +5027,45 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: s08_accept
+          path: inputs/state
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag scene_design --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 8
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s09_design
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s09_characters:
+    name: Chapter 3 scene 3 / character ${{ matrix.character }}
+    needs: [s09_design]
+    if: ${{ 8 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        character: ${{ fromJSON(needs.s09_design.outputs.characters) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s09_design
           path: inputs/state
       - name: Run scoped story task
         id: task
@@ -3842,7 +5089,7 @@ jobs:
 
   s09_direction:
     name: Chapter 3 scene 3 / reconcile character choices
-    needs: [s08_accept, s09_characters]
+    needs: [s09_design, s09_characters]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3853,7 +5100,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s08_accept
+          name: s09_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3880,7 +5127,7 @@ jobs:
 
   s09_draft:
     name: Chapter 3 scene 3 / writer
-    needs: [s08_accept, s09_direction]
+    needs: [s09_design, s09_direction]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3891,7 +5138,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s08_accept
+          name: s09_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3918,7 +5165,7 @@ jobs:
 
   s09_edit:
     name: Chapter 3 scene 3 / distinct writing
-    needs: [s08_accept, s09_draft]
+    needs: [s09_design, s09_draft]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3929,7 +5176,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s08_accept
+          name: s09_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3956,7 +5203,7 @@ jobs:
 
   s09_story:
     name: Chapter 3 scene 3 / story quality
-    needs: [s08_accept, s09_draft, s09_edit]
+    needs: [s09_design, s09_draft, s09_edit]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -3967,7 +5214,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s08_accept
+          name: s09_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -3996,9 +5243,9 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s09_memory:
-    name: Chapter 3 scene 3 / extract memory
-    needs: [s08_accept, s09_edit]
+  s09_rhetoric:
+    name: Chapter 3 scene 3 / rhetoric and reader inference
+    needs: [s09_design, s09_edit]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -4009,7 +5256,45 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s08_accept
+          name: s09_design
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: s09_edit
+          path: inputs/edited
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag rhetoric_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 8
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s09_rhetoric
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s09_memory:
+    name: Chapter 3 scene 3 / extract memory
+    needs: [s09_design, s09_edit]
+    if: ${{ 8 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s09_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -4036,7 +5321,7 @@ jobs:
 
   s09_repair:
     name: Chapter 3 scene 3 / repair if needed
-    needs: [s08_accept, s09_edit, s09_story]
+    needs: [s09_design, s09_edit, s09_story, s09_rhetoric]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -4047,7 +5332,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s08_accept
+          name: s09_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -4057,6 +5342,10 @@ jobs:
         with:
           name: s09_story
           path: inputs/diagnosis
+      - uses: actions/download-artifact@v4
+        with:
+          name: s09_rhetoric
+          path: inputs/rhetoric
       - name: Run scoped story task
         id: task
         env:
@@ -4078,7 +5367,7 @@ jobs:
 
   s09_verify:
     name: Chapter 3 scene 3 / verify final prose
-    needs: [s08_accept, s09_repair, s09_story, s09_draft]
+    needs: [s09_design, s09_repair, s09_story, s09_draft]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -4089,7 +5378,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s08_accept
+          name: s09_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -4122,9 +5411,9 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  s09_final_memory:
-    name: Chapter 3 scene 3 / refresh memory if prose changed
-    needs: [s08_accept, s09_repair, s09_memory]
+  s09_verify_rhetoric:
+    name: Chapter 3 scene 3 / verify rhetoric revision
+    needs: [s09_design, s09_repair, s09_rhetoric]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -4135,7 +5424,49 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s08_accept
+          name: s09_design
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: s09_repair
+          path: inputs/edited
+      - uses: actions/download-artifact@v4
+        with:
+          name: s09_rhetoric
+          path: inputs/rhetoric
+      - name: Run scoped story task
+        id: task
+        env:
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag verify_rhetoric --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 8
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: s09_verify_rhetoric
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  s09_final_memory:
+    name: Chapter 3 scene 3 / refresh memory if prose changed
+    needs: [s09_design, s09_repair, s09_memory]
+    if: ${{ 8 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s09_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -4166,7 +5497,7 @@ jobs:
 
   s09_memory_review:
     name: Chapter 3 scene 3 / verify memory
-    needs: [s08_accept, s09_repair, s09_final_memory]
+    needs: [s09_design, s09_repair, s09_final_memory]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -4177,7 +5508,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s08_accept
+          name: s09_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -4208,7 +5539,7 @@ jobs:
 
   s09_accept:
     name: Chapter 3 scene 3 / verify chapter and commit
-    needs: [s08_accept, s09_repair, s09_verify, s09_final_memory, s09_memory_review]
+    needs: [s09_design, s09_repair, s09_verify, s09_verify_rhetoric, s09_final_memory, s09_memory_review]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -4221,7 +5552,7 @@ jobs:
           backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
-          name: s08_accept
+          name: s09_design
           path: inputs/state
       - uses: actions/download-artifact@v4
         with:
@@ -4231,6 +5562,10 @@ jobs:
         with:
           name: s09_verify
           path: inputs/story-review
+      - uses: actions/download-artifact@v4
+        with:
+          name: s09_verify_rhetoric
+          path: inputs/rhetoric-review
       - uses: actions/download-artifact@v4
         with:
           name: s09_final_memory
@@ -4261,7 +5596,7 @@ jobs:
   results:
     name: Collect outputs and checkpoints
     if: always()
-    needs: [prepare, refine, plan, s01_characters, s01_direction, s01_draft, s01_edit, s01_story, s01_memory, s01_repair, s01_verify, s01_final_memory, s01_memory_review, s01_accept, s02_characters, s02_direction, s02_draft, s02_edit, s02_story, s02_memory, s02_repair, s02_verify, s02_final_memory, s02_memory_review, s02_accept, s03_characters, s03_direction, s03_draft, s03_edit, s03_story, s03_memory, s03_repair, s03_verify, s03_final_memory, s03_memory_review, s03_accept, s04_characters, s04_direction, s04_draft, s04_edit, s04_story, s04_memory, s04_repair, s04_verify, s04_final_memory, s04_memory_review, s04_accept, s05_characters, s05_direction, s05_draft, s05_edit, s05_story, s05_memory, s05_repair, s05_verify, s05_final_memory, s05_memory_review, s05_accept, s06_characters, s06_direction, s06_draft, s06_edit, s06_story, s06_memory, s06_repair, s06_verify, s06_final_memory, s06_memory_review, s06_accept, s07_characters, s07_direction, s07_draft, s07_edit, s07_story, s07_memory, s07_repair, s07_verify, s07_final_memory, s07_memory_review, s07_accept, s08_characters, s08_direction, s08_draft, s08_edit, s08_story, s08_memory, s08_repair, s08_verify, s08_final_memory, s08_memory_review, s08_accept, s09_characters, s09_direction, s09_draft, s09_edit, s09_story, s09_memory, s09_repair, s09_verify, s09_final_memory, s09_memory_review, s09_accept]
+    needs: [prepare, refine, refine_review, refine_revision, refine_gate, plan, plan_review, plan_revision, plan_gate, s01_design, s01_characters, s01_direction, s01_draft, s01_edit, s01_story, s01_rhetoric, s01_memory, s01_repair, s01_verify, s01_verify_rhetoric, s01_final_memory, s01_memory_review, s01_accept, s02_design, s02_characters, s02_direction, s02_draft, s02_edit, s02_story, s02_rhetoric, s02_memory, s02_repair, s02_verify, s02_verify_rhetoric, s02_final_memory, s02_memory_review, s02_accept, s03_design, s03_characters, s03_direction, s03_draft, s03_edit, s03_story, s03_rhetoric, s03_memory, s03_repair, s03_verify, s03_verify_rhetoric, s03_final_memory, s03_memory_review, s03_accept, s04_design, s04_characters, s04_direction, s04_draft, s04_edit, s04_story, s04_rhetoric, s04_memory, s04_repair, s04_verify, s04_verify_rhetoric, s04_final_memory, s04_memory_review, s04_accept, s05_design, s05_characters, s05_direction, s05_draft, s05_edit, s05_story, s05_rhetoric, s05_memory, s05_repair, s05_verify, s05_verify_rhetoric, s05_final_memory, s05_memory_review, s05_accept, s06_design, s06_characters, s06_direction, s06_draft, s06_edit, s06_story, s06_rhetoric, s06_memory, s06_repair, s06_verify, s06_verify_rhetoric, s06_final_memory, s06_memory_review, s06_accept, s07_design, s07_characters, s07_direction, s07_draft, s07_edit, s07_story, s07_rhetoric, s07_memory, s07_repair, s07_verify, s07_verify_rhetoric, s07_final_memory, s07_memory_review, s07_accept, s08_design, s08_characters, s08_direction, s08_draft, s08_edit, s08_story, s08_rhetoric, s08_memory, s08_repair, s08_verify, s08_verify_rhetoric, s08_final_memory, s08_memory_review, s08_accept, s09_design, s09_characters, s09_direction, s09_draft, s09_edit, s09_story, s09_rhetoric, s09_memory, s09_repair, s09_verify, s09_verify_rhetoric, s09_final_memory, s09_memory_review, s09_accept]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4

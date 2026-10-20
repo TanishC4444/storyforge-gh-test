@@ -18,8 +18,8 @@ on:
         default: balanced
       request_file:
         type: choice
-        options: [silent-bell-full, harbor]
-        default: silent-bell-full
+        options: [silent-bell-deep, silent-bell-full, harbor]
+        default: silent-bell-deep
       refinement_seed_run:
         type: string
         default: ''
@@ -56,6 +56,8 @@ def build():
             lines += ['    outputs:', '      characters: ${{ steps.task.outputs.characters }}']
         setup_backend = "fixture" if task == "prepare" or (task == "accept" and (index + 1) % 3 != 0) else ("${{ inputs.refinement_seed_run != '' && 'fixture' || inputs.backend }}" if task == "refine" else "${{ inputs.backend }}")
         lines += ['    steps:', '      - uses: actions/checkout@v4', '      - uses: ./.github/actions/setup-worker', '        with:', '          backend: ' + setup_backend]
+        if task == 'prepare':
+            lines += ['      - name: Install local RAG encoder when requested', '        env:', '          STORY_REQUEST: ${{ inputs.request_file }}', '        run: |', "          python - <<'PY'", '          import json, os, subprocess, sys', '          from pathlib import Path', "          request=json.loads(Path('examples',os.environ['STORY_REQUEST']+'.json').read_text())", "          if request.get('retrieval_mode')=='hybrid':", "              subprocess.run([sys.executable,'-m','pip','install','-e','.[rag]'],check=True)", '          PY']
         if task == 'refine':
             lines += ['      - uses: actions/download-artifact@v4', "        if: inputs.refinement_seed_run != ''", '        with:', '          name: refine', '          path: inputs/seed', '          run-id: ${{ inputs.refinement_seed_run }}', '          github-token: ${{ github.token }}']
         for artifact, path, pattern in downloads:
@@ -74,25 +76,35 @@ def build():
         blocks.append('\n'.join(lines) + '\n')
     job('prepare', 'Prepare request and literary retrieval', 'prepare')
     job('refine', 'Refine initial story prompt', 'refine', ['prepare'], [('prepare', 'state', False)])
-    job('plan', 'Plan three chapters', 'plan', ['refine'], [('refine', 'state', False)], state_output=True)
-    previous = 'plan'
+    job('refine_review','Development editor / critique initial story','refine_review',['refine'],[('refine','state',False)])
+    job('refine_revision','Revise initial story against development review','refine_revision',['refine_review'],[('refine_review','state',False),('refine_review','design-review',False)])
+    job('refine_gate','Approve developed story before outlining','refine_gate',['refine_revision'],[('refine_revision','state',False)])
+    job('plan', 'Plan three chapters', 'plan', ['refine_gate'], [('refine_gate', 'state', False)], state_output=True)
+    job('plan_review','Development editor / critique scene progression','plan_review',['plan'],[('plan','state',False)])
+    job('plan_revision','Revise chapter structure and causal choices','plan_revision',['plan_review'],[('plan_review','state',False),('plan_review','design-review',False)])
+    job('plan_gate','Approve causal outline before drafting','plan_gate',['plan_revision'],[('plan_revision','state',False)],state_output=True)
+    previous = 'plan_gate'
     for i in range(9):
         p = f's{i+1:02}'
         label = f'Chapter {i//3+1} scene {i%3+1}'
-        state = [(previous, 'state', False)]
-        job(p+'_characters', label+' / character ${{ matrix.character }}', 'character', [previous], state, i, matrix=previous)
-        job(p+'_direction', label+' / reconcile character choices', 'director', [previous, p+'_characters'], state+[(p+'_characters-*', 'characters', True)], i)
-        job(p+'_draft', label+' / writer', 'writer', [previous, p+'_direction'], state+[(p+'_direction','direction',False)], i)
-        job(p+'_edit', label+' / distinct writing', 'edit', [previous,p+'_draft'], state+[(p+'_draft','draft',False)], i)
+        job(p+'_design',label+' / reconcile design with accepted state','scene_design',[previous],[(previous,'state',False)],i,state_output=True)
+        scene_state=p+'_design'
+        state = [(scene_state, 'state', False)]
+        job(p+'_characters', label+' / character ${{ matrix.character }}', 'character', [scene_state], state, i, matrix=scene_state)
+        job(p+'_direction', label+' / reconcile character choices', 'director', [scene_state, p+'_characters'], state+[(p+'_characters-*', 'characters', True)], i)
+        job(p+'_draft', label+' / writer', 'writer', [scene_state, p+'_direction'], state+[(p+'_direction','direction',False)], i)
+        job(p+'_edit', label+' / distinct writing', 'edit', [scene_state,p+'_draft'], state+[(p+'_draft','draft',False)], i)
         common = state+[(p+'_edit','edited',False)]
-        job(p+'_story', label+' / story quality', 'story_review', [previous,p+'_draft',p+'_edit'], common+[(p+'_draft','draft',False)], i)
-        job(p+'_memory', label+' / extract memory', 'memory', [previous,p+'_edit'], common, i)
-        job(p+'_repair', label+' / repair if needed', 'repair', [previous,p+'_edit',p+'_story'], common+[(p+'_story','diagnosis',False)], i)
+        job(p+'_story', label+' / story quality', 'story_review', [scene_state,p+'_draft',p+'_edit'], common+[(p+'_draft','draft',False)], i)
+        job(p+'_rhetoric',label+' / rhetoric and reader inference','rhetoric_review',[scene_state,p+'_edit'],common,i)
+        job(p+'_memory', label+' / extract memory', 'memory', [scene_state,p+'_edit'], common, i)
+        job(p+'_repair', label+' / repair if needed', 'repair', [scene_state,p+'_edit',p+'_story',p+'_rhetoric'], common+[(p+'_story','diagnosis',False),(p+'_rhetoric','rhetoric',False)], i)
         repaired = state+[(p+'_repair','edited',False)]
-        job(p+'_verify', label+' / verify final prose', 'verify', [previous,p+'_repair',p+'_story',p+'_draft'], repaired+[(p+'_story','diagnosis',False),(p+'_draft','draft',False)], i)
-        job(p+'_final_memory', label+' / refresh memory if prose changed', 'memory_final', [previous,p+'_repair',p+'_memory'], repaired+[(p+'_memory','initial-memory',False)], i)
-        job(p+'_memory_review', label+' / verify memory', 'memory_review', [previous,p+'_repair',p+'_final_memory'], repaired+[(p+'_final_memory','memory',False)], i)
-        job(p+'_accept', label+(' / verify chapter and commit' if (i+1)%3==0 else ' / commit accepted state'), 'accept', [previous,p+'_repair',p+'_verify',p+'_final_memory',p+'_memory_review'], repaired+[(p+'_verify','story-review',False),(p+'_final_memory','memory',False),(p+'_memory_review','memory-review',False)], i, state_output=True)
+        job(p+'_verify', label+' / verify final prose', 'verify', [scene_state,p+'_repair',p+'_story',p+'_draft'], repaired+[(p+'_story','diagnosis',False),(p+'_draft','draft',False)], i)
+        job(p+'_verify_rhetoric',label+' / verify rhetoric revision','verify_rhetoric',[scene_state,p+'_repair',p+'_rhetoric'],repaired+[(p+'_rhetoric','rhetoric',False)],i)
+        job(p+'_final_memory', label+' / refresh memory if prose changed', 'memory_final', [scene_state,p+'_repair',p+'_memory'], repaired+[(p+'_memory','initial-memory',False)], i)
+        job(p+'_memory_review', label+' / verify memory', 'memory_review', [scene_state,p+'_repair',p+'_final_memory'], repaired+[(p+'_final_memory','memory',False)], i)
+        job(p+'_accept', label+(' / verify chapter and commit' if (i+1)%3==0 else ' / commit accepted state'), 'accept', [scene_state,p+'_repair',p+'_verify',p+'_verify_rhetoric',p+'_final_memory',p+'_memory_review'], repaired+[(p+'_verify','story-review',False),(p+'_verify_rhetoric','rhetoric-review',False),(p+'_final_memory','memory',False),(p+'_memory_review','memory-review',False)], i, state_output=True)
         previous = p+'_accept'
     blocks.append('''  results:
     name: Collect outputs and checkpoints
