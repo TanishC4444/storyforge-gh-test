@@ -33,6 +33,8 @@ def judgment_signature(text):
     try:value=parse_json(text)
     except ContractError:return None
     if not isinstance(value,dict) or 'checks' not in value:return None
+    if isinstance(value.get('checks'),dict):
+        value['checks']=[dict(c,id=key) for key,c in value['checks'].items()]
     return {'pass':value.get('pass'),
             'checks':[{k:c.get(k) for k in ['id','verdict','reason']} for c in value.get('checks',[]) if isinstance(c,dict)],
             'issues':[{k:i.get(k) for k in ['severity','category','problem','fix']} for i in value.get('issues',[]) if isinstance(i,dict)]}
@@ -108,6 +110,8 @@ class Executor:
                         raise ContractError('Formatting repair changed editorial judgments; rejected.')
                 parsed = parse_json(cached['output']) if validator else cached['output']
                 if validator:
+                    if isinstance(parsed,dict) and isinstance(parsed.get('checks'),dict):
+                        parsed['checks']=[dict(check,id=key) for key,check in parsed['checks'].items()]
                     parsed = validator(parsed)
                 if not isinstance(parsed, (str, dict)) or not parsed:
                     raise ContractError('Empty output')

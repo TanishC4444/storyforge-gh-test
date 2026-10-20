@@ -41,7 +41,7 @@ def assess(executor,state,kind):
         if 'causal_alternatives' in group:reqs['causal_alternatives']=state['request']['plot_design'].get('alternatives_and_costs',[])
         if 'information_order' in group:reqs['information_order']=requirements['scene_design']
         result=executor.call('development_editor',{'requirements':reqs,'candidate_evidence':selected,'required_checks':group},
-            'Compare candidate evidence with requirements. Return JSON pass, checks (one per required ID: id, verdict pass/fail, evidence_id, reason), issues (severity, category, evidence_id, problem, fix). Select evidence IDs; NEVER invent paths. Check what is actually developed, not just promised. Missing development fails with an actionable matching issue. Advisory issues alone do not require failure.',
+            'Compare candidate evidence with requirements. Return JSON pass, checks (an object keyed by EVERY required check name; each value has verdict pass/fail, evidence_id, reason), issues (severity, category, evidence_id, problem, fix). Select evidence IDs; NEVER invent paths. Check what is actually developed, not just promised. Missing development fails with an actionable matching issue. Advisory issues alone do not require failure.',
             tokens=1100,validator=lambda x,c=selected,g=group:resolve_review(x,data,c,g),response_schema=review_schema(selected,group))
         results.append(result)
     return design_review({'pass':all(r['pass'] for r in results),'checks':[c for r in results for c in r['checks']],'issues':[i for r in results for i in r['issues']]},data)
@@ -131,14 +131,18 @@ def evidence_cards(data):
 
 def review_schema(cards,required=DESIGN_CHECKS):
     ids=[c['id'] for c in cards]
-    check={'type':'object','properties':{'id':{'type':'string','enum':required},'verdict':{'type':'string','enum':['pass','fail']},'evidence_id':{'type':'string','enum':ids},'reason':{'type':'string'}},'required':['id','verdict','evidence_id','reason'],'additionalProperties':False}
+    assessment={'type':'object','properties':{'verdict':{'type':'string','enum':['pass','fail']},'evidence_id':{'type':'string','enum':ids},'reason':{'type':'string'}},'required':['verdict','evidence_id','reason'],'additionalProperties':False}
+    checks={'type':'object','properties':{key:assessment for key in required},'required':list(required),'additionalProperties':False}
     issue={'type':'object','properties':{'severity':{'type':'string','enum':['blocking','advisory']},'category':{'type':'string','enum':required},'evidence_id':{'type':'string','enum':ids},'problem':{'type':'string'},'fix':{'type':'string'}},'required':['severity','category','evidence_id','problem','fix'],'additionalProperties':False}
-    return {'type':'object','properties':{'pass':{'type':'boolean'},'checks':{'type':'array','items':check,'minItems':len(required),'maxItems':len(required)},'issues':{'type':'array','items':issue}},'required':['pass','checks','issues'],'additionalProperties':False}
+    return {'type':'object','properties':{'pass':{'type':'boolean'},'checks':checks,'issues':{'type':'array','items':issue}},'required':['pass','checks','issues'],'additionalProperties':False}
 
 
 def resolve_review(value,data,cards,required=DESIGN_CHECKS):
     import copy
-    value=copy.deepcopy(value);lookup={c['id']:c for c in cards}
+    value=copy.deepcopy(value)
+    if isinstance(value.get('checks'),dict):
+        value['checks']=[dict(check,id=key) for key,check in value['checks'].items()]
+    lookup={c['id']:c for c in cards}
     for item in value.get('checks',[])+value.get('issues',[]):
         evidence_id=item.get('evidence_id')
         contracts.require(evidence_id in lookup,'Unknown design evidence ID')

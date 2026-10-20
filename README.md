@@ -144,3 +144,7 @@ The expressive profile keeps Glitter drafting and Gemma literary editing/review.
 Code validates counts, identifiers, source bindings and context budgets. Formatting repairs receive only the invalid output, validation error and allowed IDs; a parseable review's judgments and reasons must remain unchanged. Failed content checks do not become formatting passes. Resident sessions count tokenized content, reserve requested output and template allowance, and reject overflow without truncation. Six-hour job budgets remain in place.
 
 The library's real GitHub resident-session smoke test passed two isolated constrained-JSON calls using one loaded model. Standard runners remain CPU-only; optional GPU offload requires a separately provisioned compatible host. No GPU speedup is claimed. Fixture tests do not establish literary quality or live Troy performance.
+
+### Duplicate-check regression
+
+Run 39503852240 failed because the reviewer produced two world-rule assessments and omitted character depth. The previous array schema constrained IDs and count but did not enforce one assessment per distinct ID. Developmental and prose-review decoding now require a checks object with each category as a mandatory named property. The application converts these keyed assessments into stored review records. The actual failed response is preserved as a regression fixture; missing checks remain rejected. This contract change has not yet been tested in another live story run.

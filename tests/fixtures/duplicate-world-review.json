@@ -1,0 +1,18 @@
+{
+  "pass": true,
+  "checks": [
+    {
+      "id": "world_rules",
+      "verdict": "pass",
+      "evidence_id": "e880a3d3cfd",
+      "reason": "Weapons are single-shot, produce smoke, and have a fixed charge count, aligning with the rule that weapons are single-shot, produce smoke, and have a fixed charge count."
+    },
+    {
+      "id": "world_rules",
+      "verdict": "pass",
+      "evidence_id": "e40f42660f2",
+      "reason": "Divine intervention is not 'deus ex machina' but a result of a specific bargain, aligning with the rule that divine aid never grants perfect knowledge, unlimited supplies or immunity."
+    }
+  ],
+  "issues": []
+}
