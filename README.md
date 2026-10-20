@@ -1,151 +1,111 @@
 # Storyforge GH Test
 
-A public experimental testbed for developing fiction with literary retrieval, fresh GH-AI runners, distinct-writing editing, story-quality review, and file-backed memory. No Gemini and no UI.
+A public, file-based storytelling testbed using literary retrieval, fresh model runners, distinct-writing editing, and reviewed story memory. No Gemini and no UI.
 
-**Status:** deterministic three-chapter coordination and failure/resume tests pass locally. The fixture backend does not generate fiction or measure model quality. The live adapter is implemented but has not been end-to-end validated on three chapters in this repo. Treat model reviews as fallible.
+## Current workflow: one run, multiple runners, real parallel branches
 
-## How it works
+The **Story runners** workflow declares the runner jobs directly inside one GitHub workflow run. There are no nested inference-workflow dispatches. Every model role executes the included GH-INFERENCE worker on the runner GitHub has already allocated to that job.
 
-One local coordinator owns state. Every uncached role call dispatches a **fresh GitHub runner job** through the included GH-INFERENCE source snapshot. Each receives only its explicit packet; there is no shared chat history.
+The graph is explicit:
 
-1. Retrieve a few literary mechanisms and master-guide sections, then run a dedicated initial-prompt refinement stage. Refinement preserves explicit choices and labels proposals before chapter planning.
-2. Story Architect creates a structured plan.
-3. Participating characters each propose one outward action using scoped knowledge.
-4. Director turns the proposals into a bounded scene direction.
-5. Writer drafts complete prose.
-6. Distinct-writing editor improves voice, detail, subtext, and rhythm while preserving events.
-7. Story Quality checks the revised scene and, where needed, requests one bounded repair.
-8. Memory extractor proposes evidence-linked updates; a separate fresh reviewer checks the proposed memory.
-9. At chapter boundaries, a fresh reviewer checks the full chapter.
-10. Only an accepted scene and its reviewed memory become the next atomic state version. Export assembles three chapter files and story.txt.
+1. Prepare request and literary retrieval.
+2. Refine the initial prompt, then plan three chapters.
+3. Fan out participating characters into a matrix with up to three parallel fresh runners.
+4. Reconcile their proposals, draft the scene, and apply the supplied distinct-writing brief.
+5. Run **story quality and memory extraction in parallel** against the same edited scene and accepted-state snapshot.
+6. If story review requests corrections, make one bounded repair. Verify changed prose and refresh extracted memory before proceeding. Unchanged candidates reuse their hash-matched review/extraction.
+7. Independently verify memory, then commit accepted state. At chapter boundaries, review the complete chapter before committing its final scene.
+8. Start the next scene from that committed state. At the end, collect per-job artifacts, chapters, and checkpoints.
 
-The character round is deliberately bounded. It is not an open-ended group chat. The director can decline a proposal; character proposals do not become canon simply because an agent generated them.
+Characters share an immutable starting state version and have scoped model inputs. Only the acceptance job writes the next authoritative state. A rejected scene or memory does not become canon. Model checks remain fallible.
 
-Fresh workers reset inference state; they do not increase model context capacity. Every worker still has its configured context window. Relevant memory is selected explicitly. The prototype retains all accepted prose and memory on disk but currently uses a recent-memory selection policy bounded by both item count and 4,500 characters; it can miss important old facts. It does not claim perfect long-form continuity.
+Actual simultaneous execution depends on available GitHub runners and account concurrency limits. Later scenes are deliberately sequential because their starting facts depend on earlier accepted scenes. Fresh runners reset context; they do not increase a model's context window.
 
-## Quick start: no credentials or model downloads
+## Run it
 
-Python 3.11+ with SQLite FTS5 is recommended.
+Open Actions → **Story runners** → Run workflow.
 
-```bash
-python -m storyforge.cli --request examples/harbor.json --out runs/fixture --backend fixture
-python -m unittest discover -s tests -v
+- backend=fixture: deterministic plumbing test; no models or credentials required.
+- backend=live: actual model inference **inside these jobs**; no GH_AI_TOKEN secret required.
+- request_file=silent-bell-full: full story input, three characters, three chapters, nine scenes.
+- profile=balanced: Gemma 4 for control, writing, editing, and review.
+- profile=expressive: Glitter for writing, Gemma 4 for other roles.
+- profile=small: Qwen 3B baseline.
+- scene_limit=1: check one scene's full runner graph first.
+- scene_limit=9: full three-chapter run.
+
+The live target is approximately 850 words per scene, about 2,550 words per chapter. Fixture scenes are deliberately short and labelled; they are not model-generated fiction or evidence of literary quality.
+
+The workflow has explicit slots for this three-chapter, three-scene-per-chapter test. `scripts/build_workflow.py` generates its checked-in YAML. The many visible jobs correspond to actual role boundaries, file transfers, optional repair checks, and canon commits. Lightweight forwarding stages avoid new model calls when their candidate is unchanged.
+
+Runtime setup uses Python 3.11, the vendored GH-INFERENCE library, and its llama-cpp-python 0.3.36 worker. The larger models require adequately provisioned runners; model/context RAM and free disk are checked. The public ubuntu-latest budget is configured as 16 GB; the worker checks actual available resources too. Initial model/runtime downloads and repeated fresh-runner startup can make the full test take hours.
+
+## Files and artifacts
+
+Each job uploads its own artifact, containing only its products plus its scoped packets and diagnostics. Downstream jobs download required artifacts. Runners do not rely on another runner's uncommitted working directory.
+
+```text
+prepare / refine / plan
+  snapshot.json          # request, refinement, plan, accepted state
+s01_characters-mara
+  proposal.json
+  packets/               # actual scoped model input
+  calls/                 # raw output, timing, workflow/job identifiers
+s01_edit
+  prose.txt
+s01_story
+  review.json
+s01_memory
+  memory.json
+s01_accept
+  snapshot.json          # next authoritative version, only after checks pass
+  scenes/
+  chapters/
+  story.txt              # present when all three chapters are accepted
 ```
 
-The fixture backend uses real current-corpus keyword retrieval and deterministic synthetic responses for the model stages. It writes nine short fixture scenes, three chapter files, and labelled test output. Fixture length checks are intentionally bypassed. These files prove coordination only, and must not be presented as a generated novel.
+Final artifact: `story-run-<workflow run ID>`. Its folders preserve the per-job products, including failure evidence. Intermediate artifacts are also downloadable individually. Artifacts expire after seven days; download what you need. This is a public testbed: use story material you intend to share.
 
-The example live target is three chapters × three scenes × 850 words, around 2,550 words per chapter. Each accepted live scene must pass the configured length range. Natural-language and model checks do not guarantee literary quality.
+To retry infrastructure or malformed-output failures, use GitHub's failed-job rerun facilities; previously successful upstream artifacts remain available. Semantic review failures need actual corrections, not repeated acceptance of the same rejected draft. One automatic prose-repair round is declared in the graph. A still-rejected scene, a rejected memory update, or a chapter-level rejection stops continuation. There is no claim of unrestricted automatic recovery or precise dependency-based manuscript rewriting.
 
-## Run actual inference
+## RAG: what is included
 
-```bash
-python -m venv .venv
-# Activate the environment for your OS.
-python -m pip install -e . ./vendor/gh-inference
-# Set GH_AI_TOKEN in your shell; never put it in a request JSON.
-python -m storyforge.cli --request examples/harbor.json --out runs/live --backend github --stop-after 1
-python -m storyforge.cli --out runs/live --resume --backend github
-```
+- data/literary-corpus.json: 605 analysis records with provenance and disabled-record flags.
+- data/literary_rag.db: 605 precomputed MiniLM vectors, source JSON, and older retrieval projections.
+- data/MASTER_GUIDE.md: indexed craft reference, selected by small section-level keyword matching.
+- skills/story_architect.md: the supplied architect brief in full; the planner receives its task-focused craft excerpt to reserve context for the outline.
+- skills/distinct_writing.md: the user's complete editing brief. This is an editing role, not an authorship detector.
+- skills/story_quality.md: evidence-based quality-review contract.
 
-Start with one live scene. A PAT must have the repository/workflow access required by GH-INFERENCE, including permission to create/update and dispatch its dedicated inference repository. Fine-grained token support depends on those operations and account policy. The ordinary automatic GITHUB_TOKEN is not a substitute for cross-repository setup permissions. See the included library README for token and worker setup.
-
-The GH-AI library prepares a separate inference repository named by runner_repo (default storyforge-inference-runner). Run only one coordinator per inference repo at first: different coordinators can otherwise race workflow updates. A timeout can leave a remote job still running; inspect last-job.json and its Actions run before resuming. The coordinator does not cancel timed-out remote work.
-
-The request defaults to automatic plan approval only in the provided example. To inspect the plan before any scene starts, set auto_approve_plan to false, run once, then resume with --approve-plan. Approval accepts the generated plan as development direction; it does not turn planned events into accepted prose.
-
-Do not change the request or accepted state in-place during a run. Start a new run folder for changed premises or accepted early scenes. Dependency-based surgical revisions are not implemented yet. If a pending stage repeatedly fails, inspect its work and calls; a new run with corrected inputs is the safe recovery path. Resume is for the same request and backend. It reuses completed calls and accepted scenes.
-
-## Model routing
-
-| Profile | Planning, character, direction, review, memory | Writer | Distinct-writing editor |
-|---|---|---|---|
-| balanced (default) | gemma-4-12b | gemma-4-12b | gemma-4-12b |
-| expressive | gemma-4-12b | glitter-12b | gemma-4-12b |
-| small | qwen3b | qwen3b | qwen3b |
-
-These are initial configurations, not proven optimal rankings. Earlier project tests at 4,096 context and Q4_K_M found Gemma 4 complied with three out of three small constrained tasks, while Glitter complied with one out of three; a separate single screenplay sample suggested lively Glitter banter. Neither study establishes long-form quality. This repo's default 8,192 context and longer outputs are different settings and need measurement.
-
-The 12B weights are roughly 7–8 GB and prior tested process peaks were around 9–10 GB. They are unsuitable for assuming an 8 GB worker. GH-INFERENCE performs resource checks; use an adequately provisioned worker and measure at the requested context. The included library disables weight-cache storage above its configured cache size, so repeated fresh 12B jobs can redownload weights. Fresh-runner isolation is significantly slower than its resident pipeline API.
-
-With two character proposals, a normal scene uses eight fresh jobs; three chapter reviews, planning, and a compact final audit bring nine scenes to roughly 77 jobs, before repairs or validation retries. There is no claim this finishes in a few minutes. The coordinator timeout is six hours in the optional Actions workflow; if it times out, resume from its artifact using resume_run_id on the next manual workflow run, or download the artifacts and resume locally. Keep the same backend; the saved request controls the profile on resume. Larger workloads need a separately measured execution strategy.
-
-## Can embedded files just be put in a folder?
-
-Only with their matching index, source IDs, encoder, and retrieval code. An embedding is a vector, not the original story analysis. Query vectors must use the same encoder and pooling method as the stored vectors.
-
-Included:
-
-- data/literary-corpus.json: 605 source analysis records, including disabled records and provenance limits.
-- data/literary_rag.db: 605 precomputed vectors, source JSON, old retrieval projections, FTS tables, and encoder identifiers.
-- data/MASTER_GUIDE.md: craft reference, selected by small section-level keyword matching.
-- rag/: local MiniLM encoder, ingestion, and hybrid retrieval code.
-
-**Important discovery:** all 605 bundled retrieval projections are older than the current document builder. The corresponding record JSON matches the current corpus, but newer fields were not part of the embedded text. Default keyword mode builds a temporary FTS index from the current source, so it does not need a model or use those stale vectors. It does not claim semantic retrieval.
-
-For real hybrid retrieval, rebuild locally first:
+All 605 bundled embedded projections are older than the current document builder, even though their source record JSON matches. Default keyword mode builds a current-source FTS index and does not use stale vectors. For hybrid retrieval, rebuild first:
 
 ```bash
 python -m pip install -e '.[rag]'
 python -m rag.ingest --json data/literary-corpus.json
 ```
 
-Set retrieval_mode to hybrid in a new request. Rebuilding downloads the MiniLM encoder on first use, then computes vectors locally. Model files are cached by Hugging Face; they are not included in this repo. Ingestion resumes changed-content work and refreshes nonembedded record metadata. Hybrid mode refuses to run while the current document projections disagree with the index. The source JSON remains the authoritative record metadata.
+The encoder downloads on first use, then embeddings compute locally. No hosted embedding key is required. Hybrid mode refuses stale projections. Copying arbitrary vectors into a folder is insufficient: source IDs, encoder, dimensions, and pooling must match. Corpus analyses are model-authored drafts with recorded source limitations.
 
-No hosted embedding API key is needed. Merely copying a differently generated vector file into data/ will not make it compatible. The shipped corpus contains model-authored analytical drafts; source limitations and disabled records must remain visible.
+## Local checks and compatibility CLI
 
-## Inputs and communication files
+Python 3.11+ with SQLite FTS5:
 
-Edit examples/harbor.json for premise, audience experience, character profiles, rules, initial knowledge, length, profile, and bounded retries. Use unique stable character IDs. initial_facts includes known_by, so an undisclosed fact need not enter every character's context. world_rules are treated as public constraints; place secrets in scoped initial_facts instead.
-
-Each run produces:
-
-```text
-runs/project/
-  request.json             # frozen input
-  retrieval.json           # source IDs, mechanisms, guide excerpts, index status
-  refinement.json          # developed first prompt, assumptions, and preserved choices
-  plan.json                # planned developments; not canon
-  state.json               # sole atomic authoritative accepted state
-  packets/                 # exact scoped role inputs, instructions, and budgets
-  calls/                   # per-role raw outputs, diagnostics, content-addressed IDs
-  work/ch01-sc01/
-    draft.txt
-    distinct-0.txt
-    review-0.json
-    memory.json
-    memory-review.json
-    chapter-review.json    # only at chapter boundaries
-  checkpoints/             # accepted state snapshots
-  scenes/                  # recoverable text projections
-  chapters/                # assembled chapter text
-  final-review.txt         # compact audit, not full manuscript review
-  story.txt
+```bash
+python -m unittest discover -s tests -v
 ```
 
-Only one process can write a run folder. state.json is replaced atomically; scene/chapter text files are regenerated from it after interruption. A hard kill can leave .lock; remove it only after confirming the coordinator stopped. If a process dies immediately after committing state, its human-readable checkpoint file may lag, but state.json still owns accepted progress.
+The local tests exercise all nine scenes with isolated parallel branches, provenance/evidence validation, failure leaving canon unchanged, private knowledge filtering, refinement handoff, and worker-backend routing without remote workflow dispatch. They do not establish live literary quality.
 
-Packets contain exact scoped prompts for debugging; calls contain model output and diagnostics. Both can contain private story facts. Do not commit run folders or share their artifacts without checking their contents. The CLI never stores tokens. User-authored initial facts, claims, beliefs, and accepted events are distinguished; quotation checks and model memory review reduce unsupported promotion but cannot prove truth.
+The older sequential CLI is retained for comparison and local checkpoint debugging:
 
-## One workflow
+```bash
+python -m storyforge.cli --request examples/harbor.json --out runs/fixture --backend fixture
+```
 
-The optional Story coordinator workflow is manual-only. Set its GH_AI_TOKEN repository secret for live execution, choose fixture or github and a model profile. It runs the same local coordinator and uploads output/checkpoints even when a step fails. Its optional resume_run_id restores an earlier coordinator artifact before continuing; artifacts expire after seven days. It does not auto-publish story text to the repository. Artifacts from public repositories can be accessible to others; use only material you intend to share there.
+Its optional github backend uses the library's older separate-workflow dispatch path and requires GH_AI_TOKEN. **That CLI is not the implementation used by the current Story runners graph.** Earlier launch notes and fixture examples describe the previous path; they are not evidence for the current live run.
 
-The separate Tests workflow exercises deterministic local checks on pushes and PRs. It does not dispatch inference or receive the inference secret.
+## Scope and provenance
 
-## Implemented and remaining
+The prototype retains all accepted prose and memory, but working memory currently selects recent records within count and character budgets. Important old facts can be missed. There is no perfect-memory claim, unrestricted world simulation, UI, DOCX export, automatic early-scene dependency repair, or guaranteed originality.
 
-Implemented: structured request/plan/review/memory validation; fresh role calls; supplied architect and distinct-writing briefs; scoped character memory; bounded scene repair; full-chapter review; evidence-linked memory with a second reviewer; frozen-input resume; atomic accepted state; current-source keyword retrieval; stale-vector guard; chapter/text export; live adapter; public CI recipes.
-
-Not implemented: a UI, automatic lore extraction from arbitrary manuscripts, precise dependency-based rewrites, a complete character simulation, adaptive old-memory retrieval, unbounded multi-agent debate, DOCX export, concurrent scene generation, guaranteed originality, or a definitive human-authorship test. The “humanizer” role means editing for distinct writing, exactly as its brief states.
-
-Tests cover three-chapter assembly/resume, rejected prose/memory leaving canon unchanged, private-context filtering, evidence validation, lock exclusion, request/backend isolation, approval gates, disabled retrieval, stale embeddings, and truncated-response repair, and mocked live-adapter freshness/model routing. They do not establish live model reliability.
-
-## Source provenance and license
-
-See PROVENANCE.json for the GH-INFERENCE source snapshot and file hashes. It includes the user's current local library changes, not just a released PyPI package. The upstream working tree was not modified. RAG source came from ronmin11/hacktxprep at the recorded commit, with explicit integration fixes. The original literary source texts are not bundled as story bodies.
-
-Original orchestration code is MIT licensed. The vendored library retains its MIT license. Corpus analysis and guide provenance are documented rather than assigning new rights to third-party underlying works. Downloaded model weights have their own model terms; this code's license does not license those weights. Before deploying beyond a testbed, confirm the hosting service permits the intended inference workload; GitHub Actions is not assumed to be unrestricted production inference hosting.
-
-## Full live test input
-
-Select examples/silent-bell-full.json (or request_file=silent-bell-full in the workflow) for the comprehensive three-character, three-chapter test. The dedicated refinement result is passed into chapter planning. The attached architect brief remains on disk in full; its task-focused craft rules are sent to the planning worker to reserve context for the structured outline. The library runner is configured for a public 16 GB ubuntu-latest worker; each remote worker also checks actual available resources.
+See PROVENANCE.json for source commits and vendored-library file hashes. The user's upstream library checkout was not modified. Original orchestration code is MIT licensed; the vendored library retains its MIT license. Corpus/guide provenance and downloaded model terms remain separate. Confirm permitted hosting use before treating any test arrangement as production inference infrastructure.

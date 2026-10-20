@@ -55,6 +55,9 @@ class Executor:
                         from .fixture import respond
                         output = respond(role, packet, self.req)
                         diagnostic = {'finish_reason': 'stop', 'fixture': True}
+                    elif self.backend == 'worker':
+                        from .local_worker import execute
+                        output, diagnostic = execute(model, system, prompt, tokens, self.req['n_ctx'], role)
                     else:
                         sys.path.insert(0, str(ROOT / 'vendor/gh-inference'))
                         from gh_ai_runner import Agent, GitHubAIRunner

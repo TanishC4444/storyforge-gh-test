@@ -89,7 +89,7 @@
   "retrieval_query": "conflicting loyalty evidence discovery responsibility debt rescue consequences",
   "retrieval_mode": "keyword",
   "profile": "balanced",
-  "max_repairs": 2,
+  "max_repairs": 1,
   "max_stage_retries": 2,
   "context_chars": 22000,
   "n_ctx": 8192,

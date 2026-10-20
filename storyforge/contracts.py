@@ -52,7 +52,7 @@ def plan(value, req):
         expected = f'ch{chapter:02}-sc{i % req["scenes_per_chapter"] + 1:02}'
         require(scene.get('id') == expected and scene.get('chapter') == chapter, f'Expected scene {expected}')
         require(scene.get('pov') in ids, 'Unknown POV')
-        require(isinstance(scene.get('participants'), list) and bool(scene['participants']) and set(scene['participants']) <= ids and scene['pov'] in scene['participants'], 'Invalid participants')
+        require(isinstance(scene.get('participants'), list) and bool(scene['participants']) and len(scene['participants']) == len(set(scene['participants'])) and set(scene['participants']) <= ids and scene['pov'] in scene['participants'], 'Invalid participants')
         for name in ['goal', 'obstacle', 'intended_change', 'location', 'time']:
             require(isinstance(scene.get(name), str) and bool(scene[name].strip()), f'Scene needs {name}')
     require(isinstance(value.get('threads'), list) and all(isinstance(x, str) for x in value['threads']), 'Plan needs thread strings')

@@ -1,0 +1,30 @@
+name: Set up this story runner
+description: Install the inference runtime on the runner already allocated to this job
+inputs:
+  backend:
+    required: true
+    description: fixture or live
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - uses: actions/cache@v4
+      if: inputs.backend == 'live'
+      id: runtime
+      with:
+        path: .venv
+        key: story-worker-${{ runner.os }}-${{ runner.arch }}-py311-llamacpp036-v1
+    - name: Install worker runtime
+      if: inputs.backend == 'live' && steps.runtime.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        python -m venv .venv
+        .venv/bin/pip install --only-binary=llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu 'llama-cpp-python==0.3.36' -q || CMAKE_ARGS='-DGGML_METAL=off' .venv/bin/pip install 'llama-cpp-python==0.3.36' -q
+    - name: Install library snapshot
+      if: inputs.backend == 'live'
+      shell: bash
+      run: |
+        .venv/bin/pip install ./vendor/gh-inference -e . -q
+        echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
