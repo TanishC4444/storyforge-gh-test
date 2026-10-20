@@ -22,7 +22,7 @@ runs:
       run: |
         python -m venv .venv
         .venv/bin/pip install --only-binary=llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu 'llama-cpp-python==0.3.36' -q || CMAKE_ARGS='-DGGML_METAL=off' .venv/bin/pip install 'llama-cpp-python==0.3.36' -q
-    - name: Install library snapshot
+    - name: Install published inference library (0.6.1)
       if: inputs.backend == 'live'
       shell: bash
       run: |

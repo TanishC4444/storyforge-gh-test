@@ -68,7 +68,7 @@ def build(total=9, per_chapter=3, troy=False):
             lines += ['      - uses: actions/download-artifact@v4', "        if: inputs.refinement_seed_run != ''", '        with:', '          name: refine', '          path: inputs/seed', '          run-id: ${{ inputs.refinement_seed_run }}', '          github-token: ${{ github.token }}']
         for artifact, path, pattern in downloads:
             lines += ['      - uses: actions/download-artifact@v4', '        with:', f'          {"pattern" if pattern else "name"}: {artifact}', f'          path: inputs/{path}']
-        lines += ['      - name: Run scoped story task', '        id: task', '        env:', '          STORY_BACKEND: ${{ inputs.backend }}', '          STORY_PROFILE: ${{ inputs.profile }}', '          STORY_REQUEST: ${{ inputs.request_file }}', '          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}']
+        lines += [f'      - name: Execute {title}', '        id: task', '        env:', '          PYTHONUNBUFFERED: 1', '          STORY_BACKEND: ${{ inputs.backend }}', '          STORY_PROFILE: ${{ inputs.profile }}', '          STORY_REQUEST: ${{ inputs.request_file }}', '          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}']
         if matrix:
             lines += ['          STORY_CHARACTER: ${{ matrix.character }}']
         args = f'{task} --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"'
@@ -78,7 +78,8 @@ def build(total=9, per_chapter=3, troy=False):
             args += ' --character "$STORY_CHARACTER"'
         lines += ['        run: |', '          backend=fixture', '          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi', f'          python -m storyforge.dag {args}']
         artifact_name = key + ('-${{ matrix.character }}' if matrix else '')
-        lines += ['      - uses: actions/upload-artifact@v4', '        if: always()', '        with:', f'          name: {artifact_name}', '          path: out/', '          retention-days: 7', '          overwrite: true']
+        lines += ['      - name: Save outputs and execution timeline', '        uses: actions/upload-artifact@v4', '        id: artifact', '        if: always()', '        with:', f'          name: {artifact_name}', '          path: out/', '          retention-days: 7', '          overwrite: true']
+        lines += ['      - name: Job status and artifact link', '        if: always()', '        env:', '          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}', '          TASK_RESULT: ${{ job.status }}', '        run: python -m storyforge.tracking report --out out']
         blocks.append('\n'.join(lines) + '\n')
     job('prepare', 'Prepare request and literary retrieval', 'prepare')
     job('refine', 'Refine initial story prompt', 'refine', ['prepare'], [('prepare', 'state', False)])
@@ -136,6 +137,21 @@ def build(total=9, per_chapter=3, troy=False):
           import json, os
           results = json.loads(os.environ['JOB_RESULTS'])
           failed = [k for k, v in results.items() if v['result'] in ['failure', 'cancelled']]
+          from pathlib import Path
+          statuses=[]
+          for path in Path('results').rglob('status.json'):
+              statuses.append(json.loads(path.read_text()))
+          rows=['## Story workflow progress', '', '| Job | Status | Last phase | Seconds |', '|---|---|---|---:|']
+          by_job={s.get('details',{}).get('job'):s for s in statuses}
+          for key,value in results.items():
+              state=by_job.get(key,{})
+              phase=state.get('phase','No task status; inspect setup/input steps' if value['result']=='failure' else value['result'])
+              rows.append('| %s | %s | %s | %s |'%(key,value['result'],phase,state.get('elapsed_seconds','—')))
+          progress=[s.get('story_progress',{}) for s in statuses]
+          accepted=max((p.get('accepted_scenes',0) for p in progress),default=0)
+          rows+=['','Accepted scenes: **%s**'%accepted]
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as summary:
+              summary.write('\\n'.join(rows)+'\\n')
           print('Failed/cancelled jobs:', failed)
           if failed:
               raise SystemExit(1)

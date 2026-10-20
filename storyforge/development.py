@@ -7,6 +7,7 @@ from .editorial import DESIGN_CHECKS, design_review
 from .inference import ROOT
 from .retrieval import application_packet
 from .storage import save, load
+from .tracking import event
 
 
 def document(state,kind):
@@ -32,7 +33,8 @@ def assess(executor,state,kind):
     requirements=compact_requirements(state['request'])
     groups=[['medium_length','themes_tensions','genre','tone_mood'],['scene_design','information_order','causal_alternatives'],['world_rules','character_depth'],['plot_subplots','references_adaptation','figurative_language']]
     results=[]
-    for group in groups:
+    for group_index,group in enumerate(groups,1):
+        event('review_group','Development review group %s/%s: %s'%(group_index,len(groups),', '.join(group)),group=group_index,total_groups=len(groups))
         wanted=set(group)
         for key in group:wanted.update(ALIASES.get(key,[]))
         selected=[c for c in cards if c['label'] in wanted or (kind=='plan' and c['path'].startswith('candidate.scenes.'))]
@@ -43,6 +45,7 @@ def assess(executor,state,kind):
         result=executor.call('development_editor',{'requirements':reqs,'candidate_evidence':selected,'required_checks':group},
             'Compare candidate evidence with requirements. Return JSON pass, checks (an object keyed by EVERY required check name; each value has verdict pass/fail, evidence_id, reason), issues (severity, category, evidence_id, problem, fix). Select evidence IDs; NEVER invent paths. Check what is actually developed, not just promised. Missing development fails with an actionable matching issue. Advisory issues alone do not require failure.',
             tokens=1100,validator=lambda x,c=selected,g=group:resolve_review(x,data,c,g),response_schema=review_schema(selected,group))
+        event('review_group_complete','Review group %s/%s finished'%(group_index,len(groups)),passed=result['pass'],issues=len(result['issues']))
         results.append(result)
     return design_review({'pass':all(r['pass'] for r in results),'checks':[c for r in results for c in r['checks']],'issues':[i for r in results for i in r['issues']]},data)
 
@@ -58,6 +61,7 @@ def development_stage(task,source,out,state,executor,plan_instruction,refine_ins
     if task.endswith('_revision'):
         verdict=load(source/'design-review/review.json')
         state.setdefault('development_history',[]).append({'kind':kind,'review':verdict})
+        event('revision_decision','Revising design against failed checks' if not verdict['pass'] else 'Design passed; no revision model call',kind=kind,issues=len(verdict['issues']))
         if not verdict['pass']:
             if kind=='refine':
                 candidate=executor.call('refiner',{'request':state['request'],'candidate':state['refinement'],'revision_requests':verdict['issues']},
@@ -74,6 +78,7 @@ def development_stage(task,source,out,state,executor,plan_instruction,refine_ins
         import hashlib, json
         digest=hashlib.sha256(json.dumps(document(state,kind),sort_keys=True).encode()).hexdigest()
         prior=state.get('development_assessments',{}).get(kind,{})
+        event('gate','Reusing unchanged passing review' if prior.get('sha256')==digest and prior.get('review',{}).get('pass') else 'Assessing revised candidate',kind=kind)
         verdict=prior['review'] if prior.get('sha256')==digest and prior.get('review',{}).get('pass') else assess(executor,state,kind)
         save(out/'review.json',verdict)
         contracts.require(verdict['pass'],kind+' development review rejected after one revision; no story generation starts')

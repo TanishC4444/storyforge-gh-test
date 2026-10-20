@@ -8,6 +8,7 @@ import sys
 import time
 from .contracts import ContractError
 from .storage import load, save
+from .tracking import event, heartbeat
 from .runtime import JOB_TIMEOUT_MINUTES, JOB_TIMEOUT_SECONDS, DOWNLOAD_TIMEOUT_SECONDS
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -68,6 +69,7 @@ class Executor:
             path = self.folder / 'calls' / f'{role}-{digest[:20]}.json'
             save(self.folder / 'packets' / f'{role}-{digest[:20]}.json', {'role': role, 'model': model, 'system': system, 'input': packet, 'validation_error': last_error, 'max_tokens': tokens, 'n_ctx': n_ctx,'response_schema':response_schema,'format_repair_only':bool(last_error and response_schema)})
             cached = load(path) if path.exists() else None
+            event('model_start','Starting %s attempt %s/%s'%(role,attempt+1,self.req['max_stage_retries']+1),model=model,role=role,input_characters=len(prompt),system_characters=len(system),context_tokens=n_ctx,output_budget=tokens,checks=packet.get('required_checks',[]),cached=bool(cached),format_repair=bool(last_error and response_schema),call_id=digest[:20])
             try:
                 if cached is None:
                     started = time.monotonic()
@@ -78,7 +80,8 @@ class Executor:
                         diagnostic = {'finish_reason': 'stop', 'fixture': True}
                     elif self.backend == 'worker':
                         from .local_worker import execute
-                        output, diagnostic = execute(model, system, prompt, tokens, n_ctx, role, response_schema=response_schema)
+                        with heartbeat('Waiting for %s response; model preparation, prompt evaluation or generation is in progress'%role):
+                            output, diagnostic = execute(model, system, prompt, tokens, n_ctx, role, response_schema=response_schema)
                     else:
                         sys.path.insert(0, str(ROOT / 'vendor/gh-inference'))
                         from gh_ai_runner import Agent, GitHubAIRunner
@@ -102,6 +105,7 @@ class Executor:
                     cached = {'role': role, 'model': model, 'output': output, 'diagnostic': diagnostic,
                               'seconds': round(time.monotonic() - started, 3), 'digest': digest}
                     save(path, cached)
+                event('model_returned','Model response received; validating before acceptance',role=role,seconds=cached.get('seconds'),usage=cached['diagnostic'].get('usage'),timings=cached['diagnostic'].get('timings'),weights_reused=cached['diagnostic'].get('model_reused'),finish_reason=cached['diagnostic'].get('finish_reason'))
                 if cached['diagnostic'].get('finish_reason') not in {'stop', 'eos'}:
                     raise ContractError('Generation did not stop naturally; possible truncated artifact')
                 if last_error and response_schema is not None and repair_output is not None:
@@ -115,8 +119,10 @@ class Executor:
                     parsed = validator(parsed)
                 if not isinstance(parsed, (str, dict)) or not parsed:
                     raise ContractError('Empty output')
+                event('validated','Response passed format and source validation',role=role,passed=parsed.get('pass') if isinstance(parsed,dict) else None,issues=len(parsed.get('issues',[])) if isinstance(parsed,dict) else 0,words=len(parsed.split()) if isinstance(parsed,str) else None)
                 return parsed
             except ContractError as exc:
+                event('validation_failed','Response rejected: '+str(exc),role=role,next_action='Bounded retry' if attempt<self.req['max_stage_retries'] else 'Stop; no canon update')
                 last_error = str(exc)
                 repair_output = cached.get('output') if cached else None
         raise ContractError(f'{role} failed after bounded retries: {last_error}')

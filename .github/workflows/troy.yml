@@ -55,9 +55,10 @@ jobs:
           if request.get('retrieval_mode')=='hybrid':
               subprocess.run([sys.executable,'-m','pip','install','-e','.[rag]'],check=True)
           PY
-      - name: Run scoped story task
+      - name: Execute Prepare request and literary retrieval
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -66,13 +67,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag prepare --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: prepare
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   refine:
     name: Refine initial story prompt
@@ -97,9 +106,10 @@ jobs:
         with:
           name: prepare
           path: inputs/state
-      - name: Run scoped story task
+      - name: Execute Refine initial story prompt
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -108,13 +118,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag refine --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: refine
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   refine_review:
     name: Development editor / critique initial story
@@ -132,9 +150,10 @@ jobs:
         with:
           name: refine
           path: inputs/state
-      - name: Run scoped story task
+      - name: Execute Development editor / critique initial story
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -143,13 +162,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag refine_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: refine_review
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   refine_revision:
     name: Revise initial story against development review
@@ -171,9 +198,10 @@ jobs:
         with:
           name: refine_review
           path: inputs/design-review
-      - name: Run scoped story task
+      - name: Execute Revise initial story against development review
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -182,13 +210,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag refine_revision --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: refine_revision
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   refine_gate:
     name: Approve developed story before outlining
@@ -206,9 +242,10 @@ jobs:
         with:
           name: refine_revision
           path: inputs/state
-      - name: Run scoped story task
+      - name: Execute Approve developed story before outlining
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -217,13 +254,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag refine_gate --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: refine_gate
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   plan:
     name: Plan requested chapters
@@ -243,9 +288,10 @@ jobs:
         with:
           name: refine_gate
           path: inputs/state
-      - name: Run scoped story task
+      - name: Execute Plan requested chapters
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -254,13 +300,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag plan --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: plan
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   plan_review:
     name: Development editor / critique scene progression
@@ -278,9 +332,10 @@ jobs:
         with:
           name: plan
           path: inputs/state
-      - name: Run scoped story task
+      - name: Execute Development editor / critique scene progression
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -289,13 +344,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag plan_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: plan_review
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   plan_revision:
     name: Revise chapter structure and causal choices
@@ -317,9 +380,10 @@ jobs:
         with:
           name: plan_review
           path: inputs/design-review
-      - name: Run scoped story task
+      - name: Execute Revise chapter structure and causal choices
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -328,13 +392,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag plan_revision --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: plan_revision
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   plan_gate:
     name: Approve causal outline before drafting
@@ -354,9 +426,10 @@ jobs:
         with:
           name: plan_revision
           path: inputs/state
-      - name: Run scoped story task
+      - name: Execute Approve causal outline before drafting
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -365,13 +438,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag plan_gate --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: plan_gate
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s01_design:
     name: Chapter 1 scene 1 / reconcile design with accepted state
@@ -392,9 +473,10 @@ jobs:
         with:
           name: plan_gate
           path: inputs/state
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 1 / reconcile design with accepted state
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -403,13 +485,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag scene_design --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 0
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s01_design
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s01_characters:
     name: Chapter 1 scene 1 / character ${{ matrix.character }}
@@ -433,9 +523,10 @@ jobs:
         with:
           name: s01_design
           path: inputs/state
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 1 / character ${{ matrix.character }}
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -445,13 +536,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag character --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 0 --character "$STORY_CHARACTER"
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s01_characters-${{ matrix.character }}
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s01_direction:
     name: Chapter 1 scene 1 / reconcile character choices
@@ -474,9 +573,10 @@ jobs:
         with:
           pattern: s01_characters-*
           path: inputs/characters
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 1 / reconcile character choices
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -485,13 +585,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag director --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 0
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s01_direction
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s01_draft:
     name: Chapter 1 scene 1 / writer
@@ -514,9 +622,10 @@ jobs:
         with:
           name: s01_direction
           path: inputs/direction
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 1 / writer
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -525,13 +634,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag writer --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 0
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s01_draft
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s01_edit:
     name: Chapter 1 scene 1 / distinct writing
@@ -554,9 +671,10 @@ jobs:
         with:
           name: s01_draft
           path: inputs/draft
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 1 / distinct writing
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -565,13 +683,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag edit --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 0
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s01_edit
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s01_story:
     name: Chapter 1 scene 1 / story quality
@@ -598,9 +724,10 @@ jobs:
         with:
           name: s01_draft
           path: inputs/draft
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 1 / story quality
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -609,13 +736,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag story_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 0
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s01_story
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s01_rhetoric:
     name: Chapter 1 scene 1 / rhetoric and reader inference
@@ -638,9 +773,10 @@ jobs:
         with:
           name: s01_edit
           path: inputs/edited
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 1 / rhetoric and reader inference
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -649,13 +785,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag rhetoric_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 0
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s01_rhetoric
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s01_memory:
     name: Chapter 1 scene 1 / extract memory
@@ -678,9 +822,10 @@ jobs:
         with:
           name: s01_edit
           path: inputs/edited
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 1 / extract memory
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -689,13 +834,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag memory --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 0
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s01_memory
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s01_repair:
     name: Chapter 1 scene 1 / repair if needed
@@ -726,9 +879,10 @@ jobs:
         with:
           name: s01_rhetoric
           path: inputs/rhetoric
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 1 / repair if needed
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -737,13 +891,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag repair --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 0
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s01_repair
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s01_verify:
     name: Chapter 1 scene 1 / verify final prose
@@ -774,9 +936,10 @@ jobs:
         with:
           name: s01_draft
           path: inputs/draft
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 1 / verify final prose
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -785,13 +948,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag verify --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 0
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s01_verify
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s01_verify_rhetoric:
     name: Chapter 1 scene 1 / verify rhetoric revision
@@ -818,9 +989,10 @@ jobs:
         with:
           name: s01_rhetoric
           path: inputs/rhetoric
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 1 / verify rhetoric revision
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -829,13 +1001,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag verify_rhetoric --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 0
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s01_verify_rhetoric
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s01_final_memory:
     name: Chapter 1 scene 1 / refresh memory if prose changed
@@ -862,9 +1042,10 @@ jobs:
         with:
           name: s01_memory
           path: inputs/initial-memory
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 1 / refresh memory if prose changed
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -873,13 +1054,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag memory_final --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 0
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s01_final_memory
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s01_memory_review:
     name: Chapter 1 scene 1 / verify memory
@@ -906,9 +1095,10 @@ jobs:
         with:
           name: s01_final_memory
           path: inputs/memory
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 1 / verify memory
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -917,13 +1107,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag memory_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 0
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s01_memory_review
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s01_accept:
     name: Chapter 1 scene 1 / commit accepted state
@@ -964,9 +1162,10 @@ jobs:
         with:
           name: s01_memory_review
           path: inputs/memory-review
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 1 / commit accepted state
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -975,13 +1174,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag accept --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 0
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s01_accept
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s02_design:
     name: Chapter 1 scene 2 / reconcile design with accepted state
@@ -1002,9 +1209,10 @@ jobs:
         with:
           name: s01_accept
           path: inputs/state
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 2 / reconcile design with accepted state
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1013,13 +1221,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag scene_design --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 1
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s02_design
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s02_characters:
     name: Chapter 1 scene 2 / character ${{ matrix.character }}
@@ -1043,9 +1259,10 @@ jobs:
         with:
           name: s02_design
           path: inputs/state
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 2 / character ${{ matrix.character }}
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1055,13 +1272,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag character --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 1 --character "$STORY_CHARACTER"
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s02_characters-${{ matrix.character }}
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s02_direction:
     name: Chapter 1 scene 2 / reconcile character choices
@@ -1084,9 +1309,10 @@ jobs:
         with:
           pattern: s02_characters-*
           path: inputs/characters
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 2 / reconcile character choices
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1095,13 +1321,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag director --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 1
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s02_direction
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s02_draft:
     name: Chapter 1 scene 2 / writer
@@ -1124,9 +1358,10 @@ jobs:
         with:
           name: s02_direction
           path: inputs/direction
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 2 / writer
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1135,13 +1370,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag writer --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 1
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s02_draft
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s02_edit:
     name: Chapter 1 scene 2 / distinct writing
@@ -1164,9 +1407,10 @@ jobs:
         with:
           name: s02_draft
           path: inputs/draft
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 2 / distinct writing
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1175,13 +1419,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag edit --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 1
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s02_edit
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s02_story:
     name: Chapter 1 scene 2 / story quality
@@ -1208,9 +1460,10 @@ jobs:
         with:
           name: s02_draft
           path: inputs/draft
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 2 / story quality
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1219,13 +1472,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag story_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 1
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s02_story
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s02_rhetoric:
     name: Chapter 1 scene 2 / rhetoric and reader inference
@@ -1248,9 +1509,10 @@ jobs:
         with:
           name: s02_edit
           path: inputs/edited
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 2 / rhetoric and reader inference
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1259,13 +1521,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag rhetoric_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 1
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s02_rhetoric
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s02_memory:
     name: Chapter 1 scene 2 / extract memory
@@ -1288,9 +1558,10 @@ jobs:
         with:
           name: s02_edit
           path: inputs/edited
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 2 / extract memory
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1299,13 +1570,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag memory --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 1
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s02_memory
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s02_repair:
     name: Chapter 1 scene 2 / repair if needed
@@ -1336,9 +1615,10 @@ jobs:
         with:
           name: s02_rhetoric
           path: inputs/rhetoric
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 2 / repair if needed
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1347,13 +1627,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag repair --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 1
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s02_repair
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s02_verify:
     name: Chapter 1 scene 2 / verify final prose
@@ -1384,9 +1672,10 @@ jobs:
         with:
           name: s02_draft
           path: inputs/draft
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 2 / verify final prose
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1395,13 +1684,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag verify --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 1
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s02_verify
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s02_verify_rhetoric:
     name: Chapter 1 scene 2 / verify rhetoric revision
@@ -1428,9 +1725,10 @@ jobs:
         with:
           name: s02_rhetoric
           path: inputs/rhetoric
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 2 / verify rhetoric revision
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1439,13 +1737,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag verify_rhetoric --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 1
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s02_verify_rhetoric
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s02_final_memory:
     name: Chapter 1 scene 2 / refresh memory if prose changed
@@ -1472,9 +1778,10 @@ jobs:
         with:
           name: s02_memory
           path: inputs/initial-memory
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 2 / refresh memory if prose changed
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1483,13 +1790,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag memory_final --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 1
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s02_final_memory
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s02_memory_review:
     name: Chapter 1 scene 2 / verify memory
@@ -1516,9 +1831,10 @@ jobs:
         with:
           name: s02_final_memory
           path: inputs/memory
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 2 / verify memory
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1527,13 +1843,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag memory_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 1
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s02_memory_review
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s02_accept:
     name: Chapter 1 scene 2 / commit accepted state
@@ -1574,9 +1898,10 @@ jobs:
         with:
           name: s02_memory_review
           path: inputs/memory-review
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 2 / commit accepted state
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1585,13 +1910,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag accept --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 1
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s02_accept
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s03_design:
     name: Chapter 1 scene 3 / reconcile design with accepted state
@@ -1612,9 +1945,10 @@ jobs:
         with:
           name: s02_accept
           path: inputs/state
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 3 / reconcile design with accepted state
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1623,13 +1957,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag scene_design --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 2
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s03_design
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s03_characters:
     name: Chapter 1 scene 3 / character ${{ matrix.character }}
@@ -1653,9 +1995,10 @@ jobs:
         with:
           name: s03_design
           path: inputs/state
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 3 / character ${{ matrix.character }}
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1665,13 +2008,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag character --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 2 --character "$STORY_CHARACTER"
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s03_characters-${{ matrix.character }}
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s03_direction:
     name: Chapter 1 scene 3 / reconcile character choices
@@ -1694,9 +2045,10 @@ jobs:
         with:
           pattern: s03_characters-*
           path: inputs/characters
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 3 / reconcile character choices
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1705,13 +2057,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag director --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 2
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s03_direction
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s03_draft:
     name: Chapter 1 scene 3 / writer
@@ -1734,9 +2094,10 @@ jobs:
         with:
           name: s03_direction
           path: inputs/direction
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 3 / writer
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1745,13 +2106,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag writer --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 2
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s03_draft
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s03_edit:
     name: Chapter 1 scene 3 / distinct writing
@@ -1774,9 +2143,10 @@ jobs:
         with:
           name: s03_draft
           path: inputs/draft
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 3 / distinct writing
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1785,13 +2155,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag edit --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 2
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s03_edit
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s03_story:
     name: Chapter 1 scene 3 / story quality
@@ -1818,9 +2196,10 @@ jobs:
         with:
           name: s03_draft
           path: inputs/draft
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 3 / story quality
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1829,13 +2208,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag story_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 2
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s03_story
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s03_rhetoric:
     name: Chapter 1 scene 3 / rhetoric and reader inference
@@ -1858,9 +2245,10 @@ jobs:
         with:
           name: s03_edit
           path: inputs/edited
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 3 / rhetoric and reader inference
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1869,13 +2257,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag rhetoric_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 2
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s03_rhetoric
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s03_memory:
     name: Chapter 1 scene 3 / extract memory
@@ -1898,9 +2294,10 @@ jobs:
         with:
           name: s03_edit
           path: inputs/edited
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 3 / extract memory
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1909,13 +2306,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag memory --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 2
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s03_memory
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s03_repair:
     name: Chapter 1 scene 3 / repair if needed
@@ -1946,9 +2351,10 @@ jobs:
         with:
           name: s03_rhetoric
           path: inputs/rhetoric
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 3 / repair if needed
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -1957,13 +2363,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag repair --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 2
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s03_repair
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s03_verify:
     name: Chapter 1 scene 3 / verify final prose
@@ -1994,9 +2408,10 @@ jobs:
         with:
           name: s03_draft
           path: inputs/draft
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 3 / verify final prose
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -2005,13 +2420,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag verify --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 2
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s03_verify
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s03_verify_rhetoric:
     name: Chapter 1 scene 3 / verify rhetoric revision
@@ -2038,9 +2461,10 @@ jobs:
         with:
           name: s03_rhetoric
           path: inputs/rhetoric
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 3 / verify rhetoric revision
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -2049,13 +2473,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag verify_rhetoric --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 2
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s03_verify_rhetoric
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s03_final_memory:
     name: Chapter 1 scene 3 / refresh memory if prose changed
@@ -2082,9 +2514,10 @@ jobs:
         with:
           name: s03_memory
           path: inputs/initial-memory
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 3 / refresh memory if prose changed
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -2093,13 +2526,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag memory_final --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 2
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s03_final_memory
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s03_memory_review:
     name: Chapter 1 scene 3 / verify memory
@@ -2126,9 +2567,10 @@ jobs:
         with:
           name: s03_final_memory
           path: inputs/memory
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 3 / verify memory
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -2137,13 +2579,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag memory_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 2
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s03_memory_review
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s03_accept:
     name: Chapter 1 scene 3 / commit accepted state
@@ -2184,9 +2634,10 @@ jobs:
         with:
           name: s03_memory_review
           path: inputs/memory-review
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 3 / commit accepted state
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -2195,13 +2646,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag accept --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 2
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s03_accept
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s04_design:
     name: Chapter 1 scene 4 / reconcile design with accepted state
@@ -2222,9 +2681,10 @@ jobs:
         with:
           name: s03_accept
           path: inputs/state
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 4 / reconcile design with accepted state
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -2233,13 +2693,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag scene_design --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 3
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s04_design
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s04_characters:
     name: Chapter 1 scene 4 / character ${{ matrix.character }}
@@ -2263,9 +2731,10 @@ jobs:
         with:
           name: s04_design
           path: inputs/state
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 4 / character ${{ matrix.character }}
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -2275,13 +2744,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag character --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 3 --character "$STORY_CHARACTER"
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s04_characters-${{ matrix.character }}
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s04_direction:
     name: Chapter 1 scene 4 / reconcile character choices
@@ -2304,9 +2781,10 @@ jobs:
         with:
           pattern: s04_characters-*
           path: inputs/characters
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 4 / reconcile character choices
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -2315,13 +2793,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag director --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 3
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s04_direction
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s04_draft:
     name: Chapter 1 scene 4 / writer
@@ -2344,9 +2830,10 @@ jobs:
         with:
           name: s04_direction
           path: inputs/direction
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 4 / writer
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -2355,13 +2842,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag writer --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 3
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s04_draft
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s04_edit:
     name: Chapter 1 scene 4 / distinct writing
@@ -2384,9 +2879,10 @@ jobs:
         with:
           name: s04_draft
           path: inputs/draft
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 4 / distinct writing
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -2395,13 +2891,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag edit --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 3
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s04_edit
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s04_story:
     name: Chapter 1 scene 4 / story quality
@@ -2428,9 +2932,10 @@ jobs:
         with:
           name: s04_draft
           path: inputs/draft
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 4 / story quality
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -2439,13 +2944,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag story_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 3
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s04_story
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s04_rhetoric:
     name: Chapter 1 scene 4 / rhetoric and reader inference
@@ -2468,9 +2981,10 @@ jobs:
         with:
           name: s04_edit
           path: inputs/edited
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 4 / rhetoric and reader inference
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -2479,13 +2993,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag rhetoric_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 3
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s04_rhetoric
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s04_memory:
     name: Chapter 1 scene 4 / extract memory
@@ -2508,9 +3030,10 @@ jobs:
         with:
           name: s04_edit
           path: inputs/edited
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 4 / extract memory
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -2519,13 +3042,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag memory --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 3
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s04_memory
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s04_repair:
     name: Chapter 1 scene 4 / repair if needed
@@ -2556,9 +3087,10 @@ jobs:
         with:
           name: s04_rhetoric
           path: inputs/rhetoric
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 4 / repair if needed
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -2567,13 +3099,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag repair --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 3
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s04_repair
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s04_verify:
     name: Chapter 1 scene 4 / verify final prose
@@ -2604,9 +3144,10 @@ jobs:
         with:
           name: s04_draft
           path: inputs/draft
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 4 / verify final prose
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -2615,13 +3156,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag verify --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 3
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s04_verify
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s04_verify_rhetoric:
     name: Chapter 1 scene 4 / verify rhetoric revision
@@ -2648,9 +3197,10 @@ jobs:
         with:
           name: s04_rhetoric
           path: inputs/rhetoric
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 4 / verify rhetoric revision
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -2659,13 +3209,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag verify_rhetoric --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 3
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s04_verify_rhetoric
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s04_final_memory:
     name: Chapter 1 scene 4 / refresh memory if prose changed
@@ -2692,9 +3250,10 @@ jobs:
         with:
           name: s04_memory
           path: inputs/initial-memory
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 4 / refresh memory if prose changed
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -2703,13 +3262,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag memory_final --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 3
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s04_final_memory
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s04_memory_review:
     name: Chapter 1 scene 4 / verify memory
@@ -2736,9 +3303,10 @@ jobs:
         with:
           name: s04_final_memory
           path: inputs/memory
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 4 / verify memory
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -2747,13 +3315,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag memory_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 3
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s04_memory_review
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   s04_accept:
     name: Chapter 1 scene 4 / verify chapter and commit
@@ -2794,9 +3370,10 @@ jobs:
         with:
           name: s04_memory_review
           path: inputs/memory-review
-      - name: Run scoped story task
+      - name: Execute Chapter 1 scene 4 / verify chapter and commit
         id: task
         env:
+          PYTHONUNBUFFERED: 1
           STORY_BACKEND: ${{ inputs.backend }}
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
@@ -2805,13 +3382,21 @@ jobs:
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
           python -m storyforge.dag accept --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 3
-      - uses: actions/upload-artifact@v4
+      - name: Save outputs and execution timeline
+        uses: actions/upload-artifact@v4
+        id: artifact
         if: always()
         with:
           name: s04_accept
           path: out/
           retention-days: 7
           overwrite: true
+      - name: Job status and artifact link
+        if: always()
+        env:
+          STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+          TASK_RESULT: ${{ job.status }}
+        run: python -m storyforge.tracking report --out out
 
   results:
     name: Collect outputs and checkpoints
@@ -2837,6 +3422,21 @@ jobs:
           import json, os
           results = json.loads(os.environ['JOB_RESULTS'])
           failed = [k for k, v in results.items() if v['result'] in ['failure', 'cancelled']]
+          from pathlib import Path
+          statuses=[]
+          for path in Path('results').rglob('status.json'):
+              statuses.append(json.loads(path.read_text()))
+          rows=['## Story workflow progress', '', '| Job | Status | Last phase | Seconds |', '|---|---|---|---:|']
+          by_job={s.get('details',{}).get('job'):s for s in statuses}
+          for key,value in results.items():
+              state=by_job.get(key,{})
+              phase=state.get('phase','No task status; inspect setup/input steps' if value['result']=='failure' else value['result'])
+              rows.append('| %s | %s | %s | %s |'%(key,value['result'],phase,state.get('elapsed_seconds','—')))
+          progress=[s.get('story_progress',{}) for s in statuses]
+          accepted=max((p.get('accepted_scenes',0) for p in progress),default=0)
+          rows+=['','Accepted scenes: **%s**'%accepted]
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as summary:
+              summary.write('\n'.join(rows)+'\n')
           print('Failed/cancelled jobs:', failed)
           if failed:
               raise SystemExit(1)

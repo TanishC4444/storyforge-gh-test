@@ -15,6 +15,7 @@ from .brief import controls
 from .editorial import STORY_CHECKS, RHETORIC_CHECKS, editorial_review, rhetoric_signals, apply_signals, merge_reviews
 from .development import development_stage, validate_scene
 from .storage import load, save, export
+from .tracking import tracked_stage, event, heartbeat
 
 REFINE = 'Develop the premise, preserving explicit user choices and marking assumptions. Return only JSON with original_prompt (exact request premise), refined_prompt, central_conflict, reader_experience (strings), and preserved_user_choices, expanded_story_elements, character_tensions, subplot_possibilities, world_constraints, suggested_techniques, retrieval_references, assumptions, open_decisions (arrays). For every supplied creative category, preserve its explicit choices and develop its practical effect: medium/length, themes/tensions, scenes, world constraints, character behavior/arcs, plots/subplots, genre, tone/mood, reference influence, and figurative style. New detail is a proposal, not a user choice. No chapters yet.'
 
@@ -36,6 +37,7 @@ def actor_packet(req, state, card, cid):
             'known_facts': compact(visible(state['memories'], cid)), 'world_rules': req['world_rules']}
 
 
+@tracked_stage
 def stage(task, source, out, index=0, character=None, request_file='silent-bell-full', profile='balanced', backend='fixture'):
     source, out = Path(source), Path(out)
     out.mkdir(parents=True, exist_ok=True)
@@ -44,14 +46,19 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         req['profile'] = profile
         contracts.require(req['chapters'] * req['scenes_per_chapter'] <= 9, 'This workflow supports at most nine scene slots')
         contracts.require(req['auto_approve_plan'], 'This automated DAG requires explicit auto_approve_plan in the request')
+        event('retrieval','Searching literary analyses and selecting role-specific craft guidance',mode=req['retrieval_mode'])
+        with heartbeat('Retrieving classical mechanisms and role-specific craft guidance'):
+            retrieved=retrieve(req)
         state = {'version': 0, 'backend': backend, 'accepted': [],
                  'memories': [dict(f, kind='event', source='user_input') for f in req['initial_facts']],
                  'request_hash': hashlib.sha256(json.dumps(req, sort_keys=True).encode()).hexdigest(),
-                 'retrieval': retrieve(req), 'request': req}
+                 'retrieval': retrieved, 'request': req}
+        event('retrieval_complete','Literary references selected',sources=[s['title'] for s in state['retrieval']['sources']],stale_records=state['retrieval']['stale_embedding_records'])
         save(out / 'snapshot.json', state)
         return state
     state = load(source / 'state' / 'snapshot.json')
     req = state['request']
+    event('state_loaded','Accepted state loaded',version=state['version'],accepted_scenes=len(state['accepted']),planned_scenes=req['chapters']*req['scenes_per_chapter'])
     executor = Executor(req, out, backend)
     if task == 'refine' and (source / 'seed').exists():
         # Old failed attempts may have valid content rejected only for formatting.
@@ -69,6 +76,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
                 recovered = contracts.refinement(parse_json(saved['output']), req)
             except contracts.ContractError:
                 continue
+            event('recovery','Reusing validated refinement; no model generation',source_run=os.getenv('REFINEMENT_SEED_RUN'))
             state['refinement'] = recovered
             state['refinement_recovery'] = {'source_artifact_call': call_path.name, 'source_run': os.getenv('REFINEMENT_SEED_RUN'), 'normalization': 'String-list reader experience joined; labelled objects represented as name/value entries; no story content invented.'}
             save(out / 'refinement.json', recovered)
@@ -133,6 +141,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         review = merge_reviews(load(source / 'diagnosis/review.json'),load(source / 'rhetoric/review.json'))
         changed = not review['pass'] and req['max_repairs'] > 0
         before = hashlib.sha256(prose.encode()).hexdigest()
+        event('repair_decision','Repair required' if changed else 'Prose unchanged; forwarding existing candidate',issues=len(review['issues']))
         if changed:
             prose = executor.call('writer', {'context': scene_packet, 'prose': prose, 'review': review},
                 'Repair the cited violations. Preserve unaffected facts and deliberate voice. Return complete scene prose near target_words, with no commentary.', tokens=budget, skill=(ROOT / 'skills/distinct_writing.md').read_text())
@@ -186,6 +195,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         rhetoric_review=editorial_review(load(source/'rhetoric-review/review.json'),(source/'edited/prose.txt').read_text(),RHETORIC_CHECKS)
         review=editorial_review(review,(source/'edited/prose.txt').read_text(),STORY_CHECKS)
         save(out / 'reviews.json', {'story': review, 'rhetoric':rhetoric_review, 'memory': memory_review})
+        event('acceptance','Checking story, rhetoric and memory gates',story=review['pass'],rhetoric=rhetoric_review['pass'],memory=memory_review['pass'])
         contracts.require(review['pass'] and rhetoric_review['pass'] and memory_review['pass'], 'Review rejected scene or memory; no canon commit. Inspect saved review artifacts.')
         prose = (source / 'edited/prose.txt').read_text()
         memory = contracts.delta(load(source / 'memory/memory.json'), prose, [c['id'] for c in req['characters']])
@@ -201,6 +211,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         result['complete'] = len(result['accepted']) == len(result['plan']['scenes'])
         save(out / 'snapshot.json', result)
         export(out, result, req)
+        event('canon_committed','Scene accepted into canonical story',scene=card['id'],words=len(prose.split()),accepted_scenes=len(result['accepted']),state_version=result['version'])
         output('characters', result['plan']['scenes'][index + 1]['participants'] if not result['complete'] else [])
         return result
     raise ValueError(f'Unknown DAG task: {task}')

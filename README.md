@@ -148,3 +148,9 @@ The library's real GitHub resident-session smoke test passed two isolated constr
 ### Duplicate-check regression
 
 Run 39503852240 failed because the reviewer produced two world-rule assessments and omitted character depth. The previous array schema constrained IDs and count but did not enforce one assessment per distinct ID. Developmental and prose-review decoding now require a checks object with each category as a mandatory named property. The application converts these keyed assessments into stored review records. The actual failed response is preserved as a regression fixture; missing checks remain rejected. This contract change has not yet been tested in another live story run.
+
+## Following a live job
+
+Open a job and expand its **Execute …** step. Timestamped logs identify state loading, retrieval, recovery, each development-review group (1–4), model and attempt, packet size, output/context budgets, validation, repairs, reused reviews and canon commits. During native inference, an elapsed-time heartbeat appears every 20 seconds. It means the call is still active, not that the model has made a particular percentage of progress. Model loading, prompt evaluation and generation are not separately observable until the response returns; completed-call timings then report the available breakdown.
+
+Each job artifact contains `status.json` (latest state and error), `events.jsonl` (timeline), `calls/` (raw outputs/timings) and `packets/` (scoped inputs). GitHub job summaries list phases, validation counts, accepted-scene progress when available, errors and a direct artifact link. Summaries publish as their steps finish; live progress is in the logs. Setup/download failures are visible in their own Actions steps even if the story task never starts.
