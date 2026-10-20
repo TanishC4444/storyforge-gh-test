@@ -40,5 +40,5 @@ def execute(model, system, prompt, tokens, n_ctx, role):
         if process.returncode:
             raise RuntimeError('Worker failed: ' + str(result.get('error', f'exit {process.returncode}')))
         item = result['agent']['results'][-1]
-        return item['output'], {**item, 'workflow_run_id': os.getenv('GITHUB_RUN_ID'),
+        return item['output'], {**item, 'resources': result.get('resources', {}), 'integrity': result.get('integrity', {}), 'workflow_run_id': os.getenv('GITHUB_RUN_ID'),
                                'workflow_job': os.getenv('GITHUB_JOB'), 'model_revision': MODELS[model].get('revision', 'main')}

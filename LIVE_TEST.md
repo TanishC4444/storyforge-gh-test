@@ -1,12 +1,15 @@
-# Full Silent Bell live test
+# Silent Bell live test correction
 
-Launched 20 October 2026 using examples/silent-bell-full.json and the balanced model profile.
+The original coordinator run 39384520129 and its inference child 39384565662 were cancelled because that serial, cross-workflow layout did not meet the requested single-workflow parallelism.
 
-- Coordinator: https://github.com/TanishC4444/storyforge-gh-test/actions/runs/39384520129
-- Initial refinement runner: https://github.com/TanishC4444/storyforge-inference-runner/actions/runs/39384565662
-- Target: three chapters, three scenes per chapter, about 850 words per scene.
-- Initial refinement is a separate model call, before chapter planning.
-- Local preflight: 12 deterministic/adapter tests passed.
-- The live test was still running when this launch record was written. This document does not assert that chapters were generated or quality checks passed. Actions is authoritative for current execution status.
+The replacement workflow declares fresh runners directly as jobs, including parallel character proposals and parallel story-review/memory-extraction branches. It executes the pinned GH-INFERENCE worker inside those jobs. No child inference workflows or dispatch secret are needed.
 
-The coordinator saves scoped input packets, outputs, reviews, and accepted state. Its final artifact is uploaded on success or failure. If interrupted, use the saved artifact's run ID as resume_run_id in the Story coordinator workflow, keeping backend=github.
+Single-scene graph verification: https://github.com/TanishC4444/storyforge-gh-test/actions/runs/39386757448
+
+Observed overlap in that run (UTC):
+
+- Mara: 07:29:18–07:29:24.
+- Oren: 07:29:19–07:29:28.
+- Story review and memory extraction both began at approximately 07:30.
+
+This is a labelled deterministic fixture test, demonstrating the actual Actions runner graph and file transfers, not literary quality. The live three-chapter test is a separate run with backend=live and scene_limit=9. Check Actions for current status and downloadable outputs.
