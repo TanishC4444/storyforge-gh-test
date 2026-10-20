@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 from . import contracts
+from .evidence import payload as evidence_payload
 from .coordinator import compact, packet, visible, planning_packet, PLAN_INSTRUCTION, MEMORY_INSTRUCTION
 from .inference import Executor, ROOT, parse_json
 from .retrieval import retrieve
@@ -140,7 +141,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
                 verdict['issues'].append({'severity': 'blocking', 'category': 'length', 'quote': prose[:80], 'problem': f'{words} words outside target tolerance', 'fix': f'Return a complete scene near {req["words_per_scene"]} words.'})
             save(out / 'review.json', verdict)
         else:
-            result = executor.call('memory', {'prose': prose, 'scene': card, 'characters': [c['id'] for c in req['characters']], 'existing': compact(state['memories'])}, MEMORY_INSTRUCTION, tokens=1600, validator=lambda x: contracts.delta(x, prose, [c['id'] for c in req['characters']]))
+            result = executor.call('memory', {**evidence_payload(prose), 'scene': card, 'characters': [c['id'] for c in req['characters']], 'existing': compact(state['memories'])}, MEMORY_INSTRUCTION, tokens=1600, validator=lambda x: contracts.delta(x, prose, [c['id'] for c in req['characters']]))
             save(out / 'memory.json', result)
         return
     if task == 'memory_review':

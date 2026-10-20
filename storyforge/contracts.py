@@ -1,5 +1,6 @@
 from __future__ import annotations
 import re
+from .evidence import EvidenceError, bind, quote_span
 
 class ContractError(ValueError):
     pass
@@ -61,21 +62,34 @@ def plan(value, req):
 
 def review(value, prose):
     require(isinstance(value, dict) and type(value.get('pass')) is bool and isinstance(value.get('issues'), list), 'Invalid quality review')
+    require(all(isinstance(issue, dict) for issue in value['issues']), 'Review issues must be objects')
+    value = {**value, 'issues': [dict(issue) for issue in value['issues']]}
     for issue in value['issues']:
         require(issue.get('severity') in {'blocking', 'advisory'}, 'Invalid severity')
         for key in ['category', 'quote', 'problem', 'fix']:
             require(isinstance(issue.get(key), str) and bool(issue[key].strip()), f'Review needs {key}')
-        require(issue['quote'] in prose, 'Review quote is not in current prose')
+        try:
+            start, end, method = quote_span(issue['quote'], prose)
+            issue['quote'] = prose[start:end]
+            issue['quote_match'] = method
+        except EvidenceError as exc:
+            raise ContractError('Review quote is not supported by current prose: ' + str(exc)) from exc
     require(not (value['pass'] and any(x['severity'] == 'blocking' for x in value['issues'])), 'Pass contradicts blocking issues')
     return value
 
 
 def delta(value, prose, ids):
     require(isinstance(value, dict) and isinstance(value.get('memories'), list), 'Memory output needs memories array')
-    for m in value['memories']:
+    require(all(isinstance(m, dict) for m in value['memories']), 'Memory entries must be objects')
+    value = {**value, 'memories': [dict(m) for m in value['memories']]}
+    for index, m in enumerate(value['memories']):
         require(m.get('kind') in {'event', 'belief', 'claim', 'resource', 'relationship', 'thread'}, 'Invalid memory kind')
         require(isinstance(m.get('text'), str) and 0 < len(m['text']) <= 600, 'Invalid memory text')
-        require(isinstance(m.get('evidence'), str) and len(m['evidence']) >= 12 and m['evidence'] in prose, 'Memory evidence must quote current prose')
+        try:
+            m = bind(m, prose)
+            value['memories'][index] = m
+        except EvidenceError as exc:
+            raise ContractError(f'Memory {index + 1} evidence is unsupported: {exc}') from exc
         require(isinstance(m.get('known_by'), list) and set(m['known_by']) <= set(ids) | {'public'}, 'Invalid memory knowledge holders')
         if m['kind'] == 'belief':
             require(m.get('holder') in ids and m['holder'] in m['known_by'], 'Belief needs holder')

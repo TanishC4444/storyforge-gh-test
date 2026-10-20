@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 from . import contracts
+from .evidence import payload as evidence_payload
 from .inference import Executor, ROOT
 from .retrieval import retrieve
 from .storage import export, load, lock, save
@@ -11,8 +12,8 @@ from .storage import export, load, lock, save
 PLAN_INSTRUCTION = '''Return only JSON with keys title, threads (array of strings), technique_stack (array of strings), scenes.
 Create exactly the requested chapter and scene counts, in reading order. Scenes have keys id (ch01-sc01, etc.), chapter (integer), pov (character ID), participants (character IDs), location, time, goal, obstacle, intended_change.
 Honor requested length: each chapter is built from its scene word budgets. Follow PLAN mode, but this JSON contract overrides the attached brief's kickoff questions and free-form output rules. Intended changes are plans, not accepted events. Use only supplied character IDs. Build a complete local resolution by the final chapter. No prose chapter yet.'''
-MEMORY_INSTRUCTION = '''Return only JSON {"memories": [{"kind": "event"|"belief"|"claim"|"resource"|"relationship"|"thread", "text": string, "evidence": exact quote of at least 12 characters from CURRENT prose, "known_by": [character IDs or "public"], "holder": character ID for beliefs}]}.
-Extract at most 6 consequential updates. Facts, claims, and beliefs are distinct. A spoken claim is not objective truth. Only record knowledge acquisition supported in this scene; presence alone is not proof. Use public only for a public in-world disclosure, never just because the reader knows. No hypothetical, planned, rejected, or inferred offstage event. Preserve uncertainty. Only current prose is evidence.'''
+MEMORY_INSTRUCTION = '''Return only JSON {"memories": [{"kind": "event"|"belief"|"claim"|"resource"|"relationship"|"thread", "text": string, "evidence_ids": ["p001"], "known_by": [character IDs or "public"], "holder": character ID for beliefs, "claim_source": character ID for claims}]}.
+The ordered evidence_passages contain the complete CURRENT scene. Select 1–3 existing passage IDs per memory; do not copy or reconstruct quotations. The application resolves evidence directly from the source text. Extract at most 6 consequential updates. Distinguish facts, claims, and beliefs. Identify who actually makes a claim; another character quoting or challenging them is not the same speaker. Knowledge acquisition must be supported, not inferred from presence. Use public only for an in-world public disclosure. No plans, hypotheticals, rejected drafts, or inferred offstage facts. Preserve uncertainty.'''
 
 
 def planning_packet(req, refinement, retrieval):
@@ -30,7 +31,7 @@ def compact(memories, count=24, char_budget=4500):
     # Full evidence stays in authoritative state. Working context gets bounded summaries.
     selected, used = [], 0
     for memory in reversed(memories[-count:]):
-        item = {k: v for k, v in memory.items() if k != 'evidence'}
+        item = {k: v for k, v in memory.items() if k not in {'evidence', 'evidence_ids', 'evidence_spans', 'evidence_match', 'evidence_prose_sha256'}}
         size = len(json.dumps(item, ensure_ascii=False))
         if used + size > char_budget:
             continue
@@ -137,7 +138,7 @@ def run(req, folder, backend='fixture', *, stop_after=None, approve_plan=False):
                                           'Repair the cited problems without changing unaffected facts. Return complete scene prose only.', tokens=min(2400, int(req['words_per_scene'] * 2.2) + 200))
             if accepted is None:
                 raise contracts.ContractError(f'{sid} blocked after bounded repairs. Canon unchanged. Inspect work/{sid}. Start a new run for edited upstream inputs.')
-            memory = executor.call('memory', {'prose': accepted, 'scene': card, 'characters': [c['id'] for c in req['characters']],
+            memory = executor.call('memory', {**evidence_payload(accepted), 'scene': card, 'characters': [c['id'] for c in req['characters']],
                                             'existing': compact(state['memories'])}, MEMORY_INSTRUCTION, tokens=1600,
                                    validator=lambda x: contracts.delta(x, accepted, [c['id'] for c in req['characters']]))
             # Second independent check of inference, not just quotation matching.

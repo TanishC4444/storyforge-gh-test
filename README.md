@@ -113,3 +113,7 @@ See PROVENANCE.json for source commits and vendored-library file hashes. The use
 ## Refinement recovery
 
 Equivalent structured presentation is normalized without inventing content: a reader-experience list becomes a joined string, and labelled mappings become name/value entries. Missing required information still fails validation. The optional refinement_seed_run workflow input reuses a prior refine artifact only when its original story request matches and its content passes current validation; this avoids regenerating an already-written refinement after a formatting-only rejection. The raw model output and recovery provenance are preserved.
+
+## Source-bound memory evidence
+
+Memory extraction now selects stable paragraph IDs from an ordered evidence catalog; the application resolves exact source text, offsets, and prose hash. Legacy quotes allow only unique source matches after whitespace/typographic-quote normalization or removal of an enclosing quote wrapper. Paraphrases, unknown IDs, ambiguous normalized matches, and stale-prose evidence remain rejected. A source match does not prove the proposed fact or speaker attribution; the separate memory-quality gate still applies.
