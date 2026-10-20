@@ -8,7 +8,7 @@ A public experimental testbed for developing fiction with literary retrieval, fr
 
 One local coordinator owns state. Every uncached role call dispatches a **fresh GitHub runner job** through the included GH-INFERENCE source snapshot. Each receives only its explicit packet; there is no shared chat history.
 
-1. Retrieve a few literary mechanisms and master-guide sections.
+1. Retrieve a few literary mechanisms and master-guide sections, then run a dedicated initial-prompt refinement stage. Refinement preserves explicit choices and labels proposals before chapter planning.
 2. Story Architect creates a structured plan.
 3. Participating characters each propose one outward action using scoped knowledge.
 4. Director turns the proposals into a bounded scene direction.
@@ -103,6 +103,7 @@ Each run produces:
 runs/project/
   request.json             # frozen input
   retrieval.json           # source IDs, mechanisms, guide excerpts, index status
+  refinement.json          # developed first prompt, assumptions, and preserved choices
   plan.json                # planned developments; not canon
   state.json               # sole atomic authoritative accepted state
   packets/                 # exact scoped role inputs, instructions, and budgets
@@ -144,3 +145,7 @@ Tests cover three-chapter assembly/resume, rejected prose/memory leaving canon u
 See PROVENANCE.json for the GH-INFERENCE source snapshot and file hashes. It includes the user's current local library changes, not just a released PyPI package. The upstream working tree was not modified. RAG source came from ronmin11/hacktxprep at the recorded commit, with explicit integration fixes. The original literary source texts are not bundled as story bodies.
 
 Original orchestration code is MIT licensed. The vendored library retains its MIT license. Corpus analysis and guide provenance are documented rather than assigning new rights to third-party underlying works. Downloaded model weights have their own model terms; this code's license does not license those weights. Before deploying beyond a testbed, confirm the hosting service permits the intended inference workload; GitHub Actions is not assumed to be unrestricted production inference hosting.
+
+## Full live test input
+
+Select examples/silent-bell-full.json (or request_file=silent-bell-full in the workflow) for the comprehensive three-character, three-chapter test. The dedicated refinement result is passed into chapter planning. The attached architect brief remains on disk in full; its task-focused craft rules are sent to the planning worker to reserve context for the structured outline. The library runner is configured for a public 16 GB ubuntu-latest worker; each remote worker also checks actual available resources.

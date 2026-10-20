@@ -41,6 +41,8 @@ def packet(req, state, card):
         'pov_visible_memory': compact(visible(state['memories'], card['pov'])),
         'recent_ending': state['accepted'][-1]['prose'][-1600:] if state['accepted'] and state['accepted'][-1]['pov'] == card['pov'] else '',
         'threads': state['plan']['threads'],
+        'refined_premise': state['refinement']['refined_prompt'],
+        'style_and_controls': {k: req.get(k) for k in ['tone_mood', 'sensory_detail', 'creative_freedom', 'surprise', 'ending_tendency', 'reference_policy']},
         'target_words': req['words_per_scene'],
     }
 
@@ -64,11 +66,17 @@ def run(req, folder, backend='fixture', *, stop_after=None, approve_plan=False):
             state['retrieval'] = retrieve(req)
             save(folder / 'retrieval.json', state['retrieval'])
             save(state_path, state)
+        if 'refinement' not in state:
+            state['refinement'] = executor.call('refiner', {'request': req, 'inspiration': state['retrieval']},
+                'Develop the initial premise into a specific, consequential story proposal. Preserve every explicit user choice and restriction; mark invented details as proposals or assumptions. Do not shorten away important constraints. Return only JSON with original_prompt (the exact request premise), refined_prompt, central_conflict, reader_experience (strings), and preserved_user_choices, expanded_story_elements, character_tensions, subplot_possibilities, world_constraints, suggested_techniques, retrieval_references, assumptions, open_decisions (arrays). References must use supplied source IDs. No chapters yet.',
+                tokens=2400, validator=lambda x: contracts.refinement(x, req))
+            save(folder / 'refinement.json', state['refinement'])
+            save(state_path, state)
         if 'plan' not in state:
-            planner_packet = {'request': req, 'inspiration': state['retrieval']}
+            planner_packet = {'request': req, 'refinement': state['refinement'], 'inspiration': state['retrieval']}
             state['plan'] = executor.call('architect', planner_packet, PLAN_INSTRUCTION, tokens=3800,
                                          validator=lambda x: contracts.plan(x, req),
-                                         skill=(ROOT / 'skills/story_architect.md').read_text())
+                                         skill=(ROOT / 'skills/story_architect.md').read_text().split('TECHNIQUE LIBRARY')[0])
             state['plan_approved'] = bool(req['auto_approve_plan'] or approve_plan)
             save(folder / 'plan.json', state['plan'])
             save(state_path, state)
@@ -105,7 +113,7 @@ def run(req, folder, backend='fixture', *, stop_after=None, approve_plan=False):
                     'Edit only what needs improvement. Preserve events, evidence, private knowledge, POV, and deliberate style. Preserve approximate length. Return complete revised prose alone.',
                     tokens=min(2400, int(req['words_per_scene'] * 2.2) + 200), skill=(ROOT / 'skills/distinct_writing.md').read_text())
                 save(scene_dir / f'distinct-{repair}.txt', polished)
-                critic_packet = {'scene': card, 'request': req, 'accepted_memories': compact(state['memories'], 36),
+                critic_packet = {'scene': card, 'request': {k: req.get(k) for k in ['premise', 'genre', 'reader_experience', 'pov', 'world_rules', 'must_avoid', 'tone_mood', 'sensory_detail', 'ending_tendency', 'initial_facts']}, 'accepted_memories': compact(state['memories'], 36),
                                  'original_draft': draft, 'current_prose': polished}
                 verdict = executor.call('story_quality', critic_packet, 'Review current_prose. Return the required JSON only.', tokens=1400,
                                         validator=lambda x: contracts.review(x, polished), skill=(ROOT / 'skills/story_quality.md').read_text())

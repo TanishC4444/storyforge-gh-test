@@ -12,6 +12,11 @@ on:
         type: choice
         options: [balanced, expressive, small]
         default: balanced
+      request_file:
+        description: Story input example
+        type: choice
+        options: [harbor, silent-bell-full]
+        default: harbor
       resume_run_id:
         description: 'Optional earlier coordinator run ID whose checkpoint artifact should be resumed'
         type: string
@@ -31,6 +36,7 @@ jobs:
       STORY_PROFILE: ${{ inputs.profile }}
       RESUME_RUN_ID: ${{ inputs.resume_run_id }}
       STORY_BACKEND: ${{ inputs.backend }}
+      STORY_REQUEST: ${{ inputs.request_file }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -50,7 +56,7 @@ jobs:
           python - <<'PY'
           import json, os
           from pathlib import Path
-          request = json.loads(Path('examples/harbor.json').read_text())
+          request = json.loads(Path('examples', os.environ['STORY_REQUEST'] + '.json').read_text())
           request['profile'] = os.environ['STORY_PROFILE']
           Path('request-run.json').write_text(json.dumps(request))
           PY

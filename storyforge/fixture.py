@@ -3,6 +3,10 @@ import json
 
 
 def respond(role, packet, req):
+    if role == 'refiner':
+        value = {k: [] for k in ['preserved_user_choices', 'expanded_story_elements', 'character_tensions', 'subplot_possibilities', 'world_constraints', 'suggested_techniques', 'retrieval_references', 'assumptions', 'open_decisions']}
+        value.update(original_prompt=req['premise'], refined_prompt=req['premise'], central_conflict='FIXTURE conflict', reader_experience='FIXTURE only')
+        return json.dumps(value)
     if role == 'architect':
         ids = [c['id'] for c in req['characters']]
         scenes = []

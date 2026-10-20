@@ -122,6 +122,7 @@ class WorkflowTests(unittest.TestCase):
                 return 'A complete test artifact.'
         module = types.ModuleType('gh_ai_runner')
         module.Agent = FakeAgent
+        module.GitHubAIRunner = lambda *a, **kw: object()
         req = example()
         req['profile'] = 'expressive'
         with tempfile.TemporaryDirectory() as d, redirect_stdout(io.StringIO()), patch.dict('sys.modules', {'gh_ai_runner': module}), patch.dict('os.environ', {'GH_AI_TOKEN': 'unit-test-placeholder'}):

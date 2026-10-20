@@ -57,11 +57,12 @@ class Executor:
                         diagnostic = {'finish_reason': 'stop', 'fixture': True}
                     else:
                         sys.path.insert(0, str(ROOT / 'vendor/gh-inference'))
-                        from gh_ai_runner import Agent
+                        from gh_ai_runner import Agent, GitHubAIRunner
                         if not os.getenv('GH_AI_TOKEN'):
                             raise RuntimeError('GH_AI_TOKEN required for live inference')
                         # Every call creates an Agent and dispatches a new job. No implicit history.
-                        agent = Agent(model=model, instructions=system, remember=False, refine_prompt=False,
+                        runner = GitHubAIRunner(os.environ['GH_AI_TOKEN'], repo_name=self.req['runner_repo'], private=False, runner_ram_gb=16, runner_disk_gb=14, metadata_path=None, verbose=False)
+                        agent = Agent(runner=runner, model=model, instructions=system, remember=False, refine_prompt=False,
                                       n_ctx=self.req['n_ctx'], max_tokens=tokens,
                                       temperature=.7 if role in {'writer', 'humanizer'} else .25,
                                       track_time=True, repo_name=self.req['runner_repo'],

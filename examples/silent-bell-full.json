@@ -1,0 +1,148 @@
+{
+  "project_id": "silent-bell-full",
+  "title": "The Silent Bell",
+  "premise": "A harbor apprentice discovers that the city's rescue bell is being silenced before a storm. Her guardian is implicated, but exposing him may leave the harbor without its only trained bell keeper.",
+  "genre": "Grounded coastal fantasy mystery",
+  "reader_experience": "Investigation, growing distrust, practical ingenuity, and costly hope",
+  "pov": "limited third person, Mara, past tense",
+  "chapters": 3,
+  "scenes_per_chapter": 3,
+  "words_per_scene": 850,
+  "min_words_ratio": 0.75,
+  "max_words_ratio": 1.3,
+  "auto_approve_plan": true,
+  "characters": [
+    {
+      "id": "mara",
+      "name": "Mara",
+      "goal": "protect the harbor",
+      "value": "loyalty",
+      "voice": "concrete observations and guarded questions",
+      "fear": "Remaining dependent on a guardian she cannot fully trust",
+      "habitual_strategy": "Inspect first, ask guarded questions second",
+      "limits": "Apprentice authority, limited supplies",
+      "proposed_arc": "Test loyalty through independent judgment"
+    },
+    {
+      "id": "oren",
+      "name": "Oren",
+      "goal": "protect Mara and conceal his debt",
+      "value": "keeping his household safe",
+      "voice": "practical warnings and evasive short answers",
+      "fear": "Exposure of debt costing his household security",
+      "habitual_strategy": "Practical help coupled with partial explanations",
+      "limits": "Cannot operate and repair every station alone",
+      "proposed_arc": "Face the consequences of concealment"
+    },
+    {
+      "id": "ilya",
+      "name": "Ilya",
+      "goal": "Protect her repair yard and workers",
+      "value": "Keeping agreements workers can rely on",
+      "fear": "Losing the yard to council restrictions",
+      "voice": "Direct, transactional; trusts demonstrations",
+      "habitual_strategy": "Offer help with concrete conditions",
+      "limits": "Scarce repair materials",
+      "proposed_arc": "Decide what cooperation is worth risking"
+    }
+  ],
+  "world_rules": [
+    "The rescue bell requires a physical keeper to sound it.",
+    "A storm is expected by the third night.",
+    "No magic can restore a severed rope."
+  ],
+  "initial_facts": [
+    {
+      "text": "Oren trained Mara to inspect the bell mechanism.",
+      "known_by": [
+        "mara",
+        "oren"
+      ]
+    },
+    {
+      "text": "Oren owes a private debt to the harbor collector.",
+      "known_by": [
+        "oren"
+      ]
+    },
+    {
+      "text": "Ilya knows the yard’s available supplies and council restrictions.",
+      "known_by": [
+        "ilya"
+      ]
+    },
+    {
+      "text": "The bell tower, repair yard, council office, and docks are within a working harbor.",
+      "known_by": [
+        "public"
+      ]
+    }
+  ],
+  "must_avoid": [
+    "An unprepared magical rescue",
+    "Instant reconciliation without a consequential choice",
+    "Convenient confessions",
+    "Arbitrary villains",
+    "Exposition-heavy dialogue",
+    "Unsupported solutions"
+  ],
+  "retrieval_query": "conflicting loyalty evidence discovery responsibility debt rescue consequences",
+  "retrieval_mode": "keyword",
+  "profile": "balanced",
+  "max_repairs": 2,
+  "max_stage_retries": 2,
+  "context_chars": 22000,
+  "n_ctx": 8192,
+  "runner_repo": "storyforge-inference-runner",
+  "medium": "prose fiction",
+  "audience": "young adult/adult crossover",
+  "tone_mood": [
+    "intimate",
+    "tense",
+    "restrained",
+    "occasional dry humor"
+  ],
+  "theme_keywords": [
+    "loyalty",
+    "responsibility",
+    "debt",
+    "secrecy",
+    "public duty"
+  ],
+  "technique_keywords": [
+    "conflicting obligations",
+    "evidence trails",
+    "dramatic irony",
+    "setup/payoff",
+    "changing dependence"
+  ],
+  "main_plot": "Discover how and why the bell was disabled, then make a consequential decision before the storm arrives.",
+  "subplots": [
+    "Mara’s dependence on Oren affects what she investigates and risks.",
+    "Ilya’s threatened livelihood affects the materials and cooperation available for rescue."
+  ],
+  "scene_requirements": [
+    "An inspection",
+    "A failed attempt to obtain help",
+    "A confrontation supported by evidence",
+    "A practical rescue sequence"
+  ],
+  "setting": {
+    "locations": [
+      "working harbor",
+      "bell tower",
+      "repair yard",
+      "council office"
+    ],
+    "duration": "three days"
+  },
+  "reference_policy": "Combine mechanisms across sources; invent original circumstances and preserve causal function. Do not copy plots.",
+  "creative_freedom": "May invent minor complications; keep the supplied cast IDs and explicit facts, no new major characters.",
+  "surprise": "moderate; established possibilities must support surprises",
+  "sensory_detail": "moderate; details affect work, danger, or viewpoint attention",
+  "ending_tendency": "Resolve the bell crisis, preserve personal cost, allow incomplete reconciliation.",
+  "output_formats": [
+    "json",
+    "txt"
+  ]
+}

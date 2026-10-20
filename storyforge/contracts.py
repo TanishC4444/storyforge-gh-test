@@ -80,3 +80,13 @@ def delta(value, prose, ids):
         if m['kind'] == 'belief':
             require(m.get('holder') in ids and m['holder'] in m['known_by'], 'Belief needs holder')
     return value
+
+
+def refinement(value, req):
+    require(isinstance(value, dict), 'Refinement must be an object')
+    require(value.get('original_prompt') == req['premise'], 'Refinement must preserve original prompt verbatim')
+    for key in ['refined_prompt', 'central_conflict', 'reader_experience']:
+        require(isinstance(value.get(key), str) and bool(value[key].strip()), f'Refinement needs {key}')
+    for key in ['preserved_user_choices', 'expanded_story_elements', 'character_tensions', 'subplot_possibilities', 'world_constraints', 'suggested_techniques', 'retrieval_references', 'assumptions', 'open_decisions']:
+        require(isinstance(value.get(key), list), f'Refinement needs {key} array')
+    return value
