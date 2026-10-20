@@ -12,8 +12,13 @@ on:
         type: choice
         options: [balanced, expressive, small]
         default: balanced
+      resume_run_id:
+        description: 'Optional earlier coordinator run ID whose checkpoint artifact should be resumed'
+        type: string
+        default: ''
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: story-coordinator
   cancel-in-progress: false
@@ -24,12 +29,22 @@ jobs:
     env:
       GH_AI_TOKEN: ${{ secrets.GH_AI_TOKEN }}
       STORY_PROFILE: ${{ inputs.profile }}
+      RESUME_RUN_ID: ${{ inputs.resume_run_id }}
+      STORY_BACKEND: ${{ inputs.backend }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
       - run: python -m pip install ./vendor/gh-inference -e .
+      - name: Restore a previous checkpoint
+        if: inputs.resume_run_id != ''
+        uses: actions/download-artifact@v4
+        with:
+          name: story-run-${{ inputs.resume_run_id }}
+          path: runs/
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.resume_run_id }}
       - name: Configure example
         run: |
           python - <<'PY'
@@ -40,8 +55,14 @@ jobs:
           Path('request-run.json').write_text(json.dumps(request))
           PY
       - name: Coordinate story
-        run: python -m storyforge.cli --request request-run.json --out runs/harbor --backend '${{ inputs.backend }}'
-      - name: Save checkpoints, prompts, and outputs
+        run: |
+          python - <<'PY'
+          import os, subprocess, sys
+          args = [sys.executable, '-m', 'storyforge.cli', '--out', 'runs/harbor', '--backend', os.environ['STORY_BACKEND']]
+          args += ['--resume'] if os.environ['RESUME_RUN_ID'] else ['--request', 'request-run.json']
+          subprocess.run(args, check=True)
+          PY
+      - name: Save checkpoints, scoped packets, and outputs
         if: always()
         uses: actions/upload-artifact@v4
         with:

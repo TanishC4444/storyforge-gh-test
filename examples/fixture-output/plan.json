@@ -1,0 +1,138 @@
+{
+  "title": "The Silent Bell",
+  "threads": [
+    "bell repair",
+    "trust"
+  ],
+  "technique_stack": [
+    "consequential choice"
+  ],
+  "scenes": [
+    {
+      "id": "ch01-sc01",
+      "chapter": 1,
+      "pov": "mara",
+      "participants": [
+        "mara",
+        "oren"
+      ],
+      "location": "bell tower",
+      "time": "day 1, interval 1",
+      "goal": "inspect the bell mechanism",
+      "obstacle": "access requires cooperation",
+      "intended_change": "a practical decision changes the inspection"
+    },
+    {
+      "id": "ch01-sc02",
+      "chapter": 1,
+      "pov": "mara",
+      "participants": [
+        "mara",
+        "oren"
+      ],
+      "location": "bell tower",
+      "time": "day 1, interval 2",
+      "goal": "inspect the bell mechanism",
+      "obstacle": "access requires cooperation",
+      "intended_change": "a practical decision changes the inspection"
+    },
+    {
+      "id": "ch01-sc03",
+      "chapter": 1,
+      "pov": "mara",
+      "participants": [
+        "mara",
+        "oren"
+      ],
+      "location": "bell tower",
+      "time": "day 1, interval 3",
+      "goal": "inspect the bell mechanism",
+      "obstacle": "access requires cooperation",
+      "intended_change": "a practical decision changes the inspection"
+    },
+    {
+      "id": "ch02-sc01",
+      "chapter": 2,
+      "pov": "mara",
+      "participants": [
+        "mara",
+        "oren"
+      ],
+      "location": "bell tower",
+      "time": "day 2, interval 1",
+      "goal": "inspect the bell mechanism",
+      "obstacle": "access requires cooperation",
+      "intended_change": "a practical decision changes the inspection"
+    },
+    {
+      "id": "ch02-sc02",
+      "chapter": 2,
+      "pov": "mara",
+      "participants": [
+        "mara",
+        "oren"
+      ],
+      "location": "bell tower",
+      "time": "day 2, interval 2",
+      "goal": "inspect the bell mechanism",
+      "obstacle": "access requires cooperation",
+      "intended_change": "a practical decision changes the inspection"
+    },
+    {
+      "id": "ch02-sc03",
+      "chapter": 2,
+      "pov": "mara",
+      "participants": [
+        "mara",
+        "oren"
+      ],
+      "location": "bell tower",
+      "time": "day 2, interval 3",
+      "goal": "inspect the bell mechanism",
+      "obstacle": "access requires cooperation",
+      "intended_change": "a practical decision changes the inspection"
+    },
+    {
+      "id": "ch03-sc01",
+      "chapter": 3,
+      "pov": "mara",
+      "participants": [
+        "mara",
+        "oren"
+      ],
+      "location": "bell tower",
+      "time": "day 3, interval 1",
+      "goal": "inspect the bell mechanism",
+      "obstacle": "access requires cooperation",
+      "intended_change": "a practical decision changes the inspection"
+    },
+    {
+      "id": "ch03-sc02",
+      "chapter": 3,
+      "pov": "mara",
+      "participants": [
+        "mara",
+        "oren"
+      ],
+      "location": "bell tower",
+      "time": "day 3, interval 2",
+      "goal": "inspect the bell mechanism",
+      "obstacle": "access requires cooperation",
+      "intended_change": "a practical decision changes the inspection"
+    },
+    {
+      "id": "ch03-sc03",
+      "chapter": 3,
+      "pov": "mara",
+      "participants": [
+        "mara",
+        "oren"
+      ],
+      "location": "bell tower",
+      "time": "day 3, interval 3",
+      "goal": "inspect the bell mechanism",
+      "obstacle": "access requires cooperation",
+      "intended_change": "a practical decision changes the inspection"
+    }
+  ]
+}

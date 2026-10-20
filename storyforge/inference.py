@@ -45,6 +45,7 @@ class Executor:
             model = PROFILES[self.req['profile']].get(role, PROFILES[self.req['profile']]['default'])
             digest = hashlib.sha256(json.dumps([self.backend, role, model, system, prompt, tokens, self.req['n_ctx'], self.req['runner_repo']]).encode()).hexdigest()
             path = self.folder / 'calls' / f'{role}-{digest[:20]}.json'
+            save(self.folder / 'packets' / f'{role}-{digest[:20]}.json', {'role': role, 'model': model, 'system': system, 'input': packet, 'validation_error': last_error, 'max_tokens': tokens, 'n_ctx': self.req['n_ctx']})
             cached = load(path) if path.exists() else None
             try:
                 if cached is None:

@@ -104,6 +104,37 @@ class WorkflowTests(unittest.TestCase):
             state = run(req, d, approve_plan=True, stop_after=1)
             self.assertEqual(len(state['accepted']), 1)
 
+    def test_live_adapter_uses_fresh_scoped_agents(self):
+        from dataclasses import dataclass
+        import types
+        from storyforge.inference import Executor
+        @dataclass
+        class Result:
+            finish_reason: str = 'stop'
+        made = []
+        class FakeAgent:
+            def __init__(self, **kwargs):
+                self.options = kwargs
+                self.last_result = Result()
+                made.append(self)
+            def run(self, prompt, **kwargs):
+                self.prompt = prompt
+                return 'A complete test artifact.'
+        module = types.ModuleType('gh_ai_runner')
+        module.Agent = FakeAgent
+        req = example()
+        req['profile'] = 'expressive'
+        with tempfile.TemporaryDirectory() as d, redirect_stdout(io.StringIO()), patch.dict('sys.modules', {'gh_ai_runner': module}), patch.dict('os.environ', {'GH_AI_TOKEN': 'unit-test-placeholder'}):
+            executor = Executor(req, d, 'github')
+            executor.call('writer', {'only': 'writer context'}, 'write')
+            executor.call('humanizer', {'only': 'editor context'}, 'edit')
+        self.assertEqual(len(made), 2)
+        self.assertFalse(made[0].options['remember'])
+        self.assertFalse(made[1].options['remember'])
+        self.assertEqual(made[0].options['model'], 'glitter-12b')
+        self.assertEqual(made[1].options['model'], 'gemma-4-12b')
+        self.assertNotIn('writer context', made[1].prompt)
+
     def test_truncation_not_accepted(self):
         from storyforge.inference import Executor
         with tempfile.TemporaryDirectory() as d, redirect_stdout(io.StringIO()):

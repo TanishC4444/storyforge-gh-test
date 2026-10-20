@@ -19,9 +19,17 @@ def visible(memories, character=None):
     return [m for m in memories if 'public' in m['known_by'] or (character is not None and character in m['known_by'])]
 
 
-def compact(memories, count=24):
-    # Full source history remains on disk. This is explicit bounded working context.
-    return memories[-count:]
+def compact(memories, count=24, char_budget=4500):
+    # Full evidence stays in authoritative state. Working context gets bounded summaries.
+    selected, used = [], 0
+    for memory in reversed(memories[-count:]):
+        item = {k: v for k, v in memory.items() if k != 'evidence'}
+        size = len(json.dumps(item, ensure_ascii=False))
+        if used + size > char_budget:
+            continue
+        selected.append(item)
+        used += size
+    return list(reversed(selected))
 
 
 def packet(req, state, card):

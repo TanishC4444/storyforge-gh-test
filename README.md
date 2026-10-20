@@ -21,7 +21,7 @@ One local coordinator owns state. Every uncached role call dispatches a **fresh 
 
 The character round is deliberately bounded. It is not an open-ended group chat. The director can decline a proposal; character proposals do not become canon simply because an agent generated them.
 
-Fresh workers reset inference state; they do not increase model context capacity. Every worker still has its configured context window. Relevant memory is selected explicitly. The prototype retains all accepted prose and memory on disk but currently uses a simple recent-memory selection policy; it can miss important old facts. It does not claim perfect long-form continuity.
+Fresh workers reset inference state; they do not increase model context capacity. Every worker still has its configured context window. Relevant memory is selected explicitly. The prototype retains all accepted prose and memory on disk but currently uses a recent-memory selection policy bounded by both item count and 4,500 characters; it can miss important old facts. It does not claim perfect long-form continuity.
 
 ## Quick start: no credentials or model downloads
 
@@ -67,7 +67,7 @@ These are initial configurations, not proven optimal rankings. Earlier project t
 
 The 12B weights are roughly 7–8 GB and prior tested process peaks were around 9–10 GB. They are unsuitable for assuming an 8 GB worker. GH-INFERENCE performs resource checks; use an adequately provisioned worker and measure at the requested context. The included library disables weight-cache storage above its configured cache size, so repeated fresh 12B jobs can redownload weights. Fresh-runner isolation is significantly slower than its resident pipeline API.
 
-With two character proposals, a normal scene uses eight fresh jobs; three chapter reviews, planning, and a compact final audit bring nine scenes to roughly 77 jobs, before repairs or validation retries. There is no claim this finishes in a few minutes. The coordinator timeout is six hours in the optional Actions workflow; if it times out, download artifacts and resume locally. Larger workloads need a separately measured execution strategy.
+With two character proposals, a normal scene uses eight fresh jobs; three chapter reviews, planning, and a compact final audit bring nine scenes to roughly 77 jobs, before repairs or validation retries. There is no claim this finishes in a few minutes. The coordinator timeout is six hours in the optional Actions workflow; if it times out, resume from its artifact using resume_run_id on the next manual workflow run, or download the artifacts and resume locally. Keep the same backend; the saved request controls the profile on resume. Larger workloads need a separately measured execution strategy.
 
 ## Can embedded files just be put in a folder?
 
@@ -105,6 +105,7 @@ runs/project/
   retrieval.json           # source IDs, mechanisms, guide excerpts, index status
   plan.json                # planned developments; not canon
   state.json               # sole atomic authoritative accepted state
+  packets/                 # exact scoped role inputs, instructions, and budgets
   calls/                   # per-role raw outputs, diagnostics, content-addressed IDs
   work/ch01-sc01/
     draft.txt
@@ -122,11 +123,11 @@ runs/project/
 
 Only one process can write a run folder. state.json is replaced atomically; scene/chapter text files are regenerated from it after interruption. A hard kill can leave .lock; remove it only after confirming the coordinator stopped. If a process dies immediately after committing state, its human-readable checkpoint file may lag, but state.json still owns accepted progress.
 
-Calls contain model output and diagnostics, not the full private prompt. Output can still repeat private story facts. Do not commit run folders or share their artifacts without checking their contents. The CLI never stores tokens. User-authored initial facts, claims, beliefs, and accepted events are distinguished; quotation checks and model memory review reduce unsupported promotion but cannot prove truth.
+Packets contain exact scoped prompts for debugging; calls contain model output and diagnostics. Both can contain private story facts. Do not commit run folders or share their artifacts without checking their contents. The CLI never stores tokens. User-authored initial facts, claims, beliefs, and accepted events are distinguished; quotation checks and model memory review reduce unsupported promotion but cannot prove truth.
 
 ## One workflow
 
-The optional Story coordinator workflow is manual-only. Set its GH_AI_TOKEN repository secret for live execution, choose fixture or github and a model profile. It runs the same local coordinator and uploads output/checkpoints even when a step fails. It does not auto-publish story text to the repository. Artifacts from public repositories can be accessible to others; use only material you intend to share there.
+The optional Story coordinator workflow is manual-only. Set its GH_AI_TOKEN repository secret for live execution, choose fixture or github and a model profile. It runs the same local coordinator and uploads output/checkpoints even when a step fails. Its optional resume_run_id restores an earlier coordinator artifact before continuing; artifacts expire after seven days. It does not auto-publish story text to the repository. Artifacts from public repositories can be accessible to others; use only material you intend to share there.
 
 The separate Tests workflow exercises deterministic local checks on pushes and PRs. It does not dispatch inference or receive the inference secret.
 
@@ -136,7 +137,7 @@ Implemented: structured request/plan/review/memory validation; fresh role calls;
 
 Not implemented: a UI, automatic lore extraction from arbitrary manuscripts, precise dependency-based rewrites, a complete character simulation, adaptive old-memory retrieval, unbounded multi-agent debate, DOCX export, concurrent scene generation, guaranteed originality, or a definitive human-authorship test. The “humanizer” role means editing for distinct writing, exactly as its brief states.
 
-Tests cover three-chapter assembly/resume, rejected prose/memory leaving canon unchanged, private-context filtering, evidence validation, lock exclusion, request/backend isolation, approval gates, disabled retrieval, stale embeddings, and truncated-response repair. They do not establish live model reliability.
+Tests cover three-chapter assembly/resume, rejected prose/memory leaving canon unchanged, private-context filtering, evidence validation, lock exclusion, request/backend isolation, approval gates, disabled retrieval, stale embeddings, and truncated-response repair, and mocked live-adapter freshness/model routing. They do not establish live model reliability.
 
 ## Source provenance and license
 

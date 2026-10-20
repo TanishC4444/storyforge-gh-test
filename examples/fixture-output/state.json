@@ -1,0 +1,462 @@
+{
+  "version": 9,
+  "backend": "fixture",
+  "request_hash": "aa1608ad53dd4daf0e465095949fdc571411d962a231d0530a057ab1d2189995",
+  "accepted": [
+    {
+      "id": "ch01-sc01",
+      "chapter": 1,
+      "pov": "mara",
+      "participants": [
+        "mara",
+        "oren"
+      ],
+      "prose": "[FIXTURE ch01-sc01: transport test only.]\n\nMara checked the tower latch. The hinge caught halfway. She put the lamp down before trying again.\n\n“Hold this,” she said.\n\nOren kept his hand on the rail. “Tell me what you are checking.”\n\n“Whether it opens from inside.”\n\nHe took the lamp. She eased the pin free, keeping it in her palm so it could not fall between the boards. Neither moved toward the stairs until she had replaced it.",
+      "review": {
+        "pass": true,
+        "issues": []
+      },
+      "memory_review": {
+        "pass": true,
+        "issues": []
+      },
+      "state_version": 1
+    },
+    {
+      "id": "ch01-sc02",
+      "chapter": 1,
+      "pov": "mara",
+      "participants": [
+        "mara",
+        "oren"
+      ],
+      "prose": "[FIXTURE ch01-sc02: transport test only.]\n\nMara checked the tower latch. The hinge caught halfway. She put the lamp down before trying again.\n\n“Hold this,” she said.\n\nOren kept his hand on the rail. “Tell me what you are checking.”\n\n“Whether it opens from inside.”\n\nHe took the lamp. She eased the pin free, keeping it in her palm so it could not fall between the boards. Neither moved toward the stairs until she had replaced it.",
+      "review": {
+        "pass": true,
+        "issues": []
+      },
+      "memory_review": {
+        "pass": true,
+        "issues": []
+      },
+      "state_version": 2
+    },
+    {
+      "id": "ch01-sc03",
+      "chapter": 1,
+      "pov": "mara",
+      "participants": [
+        "mara",
+        "oren"
+      ],
+      "prose": "[FIXTURE ch01-sc03: transport test only.]\n\nMara checked the tower latch. The hinge caught halfway. She put the lamp down before trying again.\n\n“Hold this,” she said.\n\nOren kept his hand on the rail. “Tell me what you are checking.”\n\n“Whether it opens from inside.”\n\nHe took the lamp. She eased the pin free, keeping it in her palm so it could not fall between the boards. Neither moved toward the stairs until she had replaced it.",
+      "review": {
+        "pass": true,
+        "issues": []
+      },
+      "memory_review": {
+        "pass": true,
+        "issues": []
+      },
+      "state_version": 3
+    },
+    {
+      "id": "ch02-sc01",
+      "chapter": 2,
+      "pov": "mara",
+      "participants": [
+        "mara",
+        "oren"
+      ],
+      "prose": "[FIXTURE ch02-sc01: transport test only.]\n\nMara checked the tower latch. The hinge caught halfway. She put the lamp down before trying again.\n\n“Hold this,” she said.\n\nOren kept his hand on the rail. “Tell me what you are checking.”\n\n“Whether it opens from inside.”\n\nHe took the lamp. She eased the pin free, keeping it in her palm so it could not fall between the boards. Neither moved toward the stairs until she had replaced it.",
+      "review": {
+        "pass": true,
+        "issues": []
+      },
+      "memory_review": {
+        "pass": true,
+        "issues": []
+      },
+      "state_version": 4
+    },
+    {
+      "id": "ch02-sc02",
+      "chapter": 2,
+      "pov": "mara",
+      "participants": [
+        "mara",
+        "oren"
+      ],
+      "prose": "[FIXTURE ch02-sc02: transport test only.]\n\nMara checked the tower latch. The hinge caught halfway. She put the lamp down before trying again.\n\n“Hold this,” she said.\n\nOren kept his hand on the rail. “Tell me what you are checking.”\n\n“Whether it opens from inside.”\n\nHe took the lamp. She eased the pin free, keeping it in her palm so it could not fall between the boards. Neither moved toward the stairs until she had replaced it.",
+      "review": {
+        "pass": true,
+        "issues": []
+      },
+      "memory_review": {
+        "pass": true,
+        "issues": []
+      },
+      "state_version": 5
+    },
+    {
+      "id": "ch02-sc03",
+      "chapter": 2,
+      "pov": "mara",
+      "participants": [
+        "mara",
+        "oren"
+      ],
+      "prose": "[FIXTURE ch02-sc03: transport test only.]\n\nMara checked the tower latch. The hinge caught halfway. She put the lamp down before trying again.\n\n“Hold this,” she said.\n\nOren kept his hand on the rail. “Tell me what you are checking.”\n\n“Whether it opens from inside.”\n\nHe took the lamp. She eased the pin free, keeping it in her palm so it could not fall between the boards. Neither moved toward the stairs until she had replaced it.",
+      "review": {
+        "pass": true,
+        "issues": []
+      },
+      "memory_review": {
+        "pass": true,
+        "issues": []
+      },
+      "state_version": 6
+    },
+    {
+      "id": "ch03-sc01",
+      "chapter": 3,
+      "pov": "mara",
+      "participants": [
+        "mara",
+        "oren"
+      ],
+      "prose": "[FIXTURE ch03-sc01: transport test only.]\n\nMara checked the tower latch. The hinge caught halfway. She put the lamp down before trying again.\n\n“Hold this,” she said.\n\nOren kept his hand on the rail. “Tell me what you are checking.”\n\n“Whether it opens from inside.”\n\nHe took the lamp. She eased the pin free, keeping it in her palm so it could not fall between the boards. Neither moved toward the stairs until she had replaced it.",
+      "review": {
+        "pass": true,
+        "issues": []
+      },
+      "memory_review": {
+        "pass": true,
+        "issues": []
+      },
+      "state_version": 7
+    },
+    {
+      "id": "ch03-sc02",
+      "chapter": 3,
+      "pov": "mara",
+      "participants": [
+        "mara",
+        "oren"
+      ],
+      "prose": "[FIXTURE ch03-sc02: transport test only.]\n\nMara checked the tower latch. The hinge caught halfway. She put the lamp down before trying again.\n\n“Hold this,” she said.\n\nOren kept his hand on the rail. “Tell me what you are checking.”\n\n“Whether it opens from inside.”\n\nHe took the lamp. She eased the pin free, keeping it in her palm so it could not fall between the boards. Neither moved toward the stairs until she had replaced it.",
+      "review": {
+        "pass": true,
+        "issues": []
+      },
+      "memory_review": {
+        "pass": true,
+        "issues": []
+      },
+      "state_version": 8
+    },
+    {
+      "id": "ch03-sc03",
+      "chapter": 3,
+      "pov": "mara",
+      "participants": [
+        "mara",
+        "oren"
+      ],
+      "prose": "[FIXTURE ch03-sc03: transport test only.]\n\nMara checked the tower latch. The hinge caught halfway. She put the lamp down before trying again.\n\n“Hold this,” she said.\n\nOren kept his hand on the rail. “Tell me what you are checking.”\n\n“Whether it opens from inside.”\n\nHe took the lamp. She eased the pin free, keeping it in her palm so it could not fall between the boards. Neither moved toward the stairs until she had replaced it.",
+      "review": {
+        "pass": true,
+        "issues": []
+      },
+      "memory_review": {
+        "pass": true,
+        "issues": []
+      },
+      "state_version": 9
+    }
+  ],
+  "memories": [
+    {
+      "text": "Oren trained Mara to inspect the bell mechanism.",
+      "known_by": [
+        "mara",
+        "oren"
+      ],
+      "kind": "event",
+      "source": "user_input"
+    },
+    {
+      "text": "Oren owes a private debt to the harbor collector.",
+      "known_by": [
+        "oren"
+      ],
+      "kind": "event",
+      "source": "user_input"
+    },
+    {
+      "kind": "event",
+      "text": "Mara checked the tower latch.",
+      "evidence": "Mara checked the tower latch.",
+      "known_by": [
+        "mara"
+      ],
+      "source": "ch01-sc01"
+    },
+    {
+      "kind": "event",
+      "text": "Mara checked the tower latch.",
+      "evidence": "Mara checked the tower latch.",
+      "known_by": [
+        "mara"
+      ],
+      "source": "ch01-sc02"
+    },
+    {
+      "kind": "event",
+      "text": "Mara checked the tower latch.",
+      "evidence": "Mara checked the tower latch.",
+      "known_by": [
+        "mara"
+      ],
+      "source": "ch01-sc03"
+    },
+    {
+      "kind": "event",
+      "text": "Mara checked the tower latch.",
+      "evidence": "Mara checked the tower latch.",
+      "known_by": [
+        "mara"
+      ],
+      "source": "ch02-sc01"
+    },
+    {
+      "kind": "event",
+      "text": "Mara checked the tower latch.",
+      "evidence": "Mara checked the tower latch.",
+      "known_by": [
+        "mara"
+      ],
+      "source": "ch02-sc02"
+    },
+    {
+      "kind": "event",
+      "text": "Mara checked the tower latch.",
+      "evidence": "Mara checked the tower latch.",
+      "known_by": [
+        "mara"
+      ],
+      "source": "ch02-sc03"
+    },
+    {
+      "kind": "event",
+      "text": "Mara checked the tower latch.",
+      "evidence": "Mara checked the tower latch.",
+      "known_by": [
+        "mara"
+      ],
+      "source": "ch03-sc01"
+    },
+    {
+      "kind": "event",
+      "text": "Mara checked the tower latch.",
+      "evidence": "Mara checked the tower latch.",
+      "known_by": [
+        "mara"
+      ],
+      "source": "ch03-sc02"
+    },
+    {
+      "kind": "event",
+      "text": "Mara checked the tower latch.",
+      "evidence": "Mara checked the tower latch.",
+      "known_by": [
+        "mara"
+      ],
+      "source": "ch03-sc03"
+    }
+  ],
+  "retrieval": {
+    "query": "conflicting loyalty evidence discovery responsibility debt rescue consequences",
+    "sources": [
+      {
+        "id": "work_018",
+        "title": "Old Sultan",
+        "mode": "keyword",
+        "mechanism": "conflicting_debts",
+        "guidance": {
+          "instruction": "Let one rescue create two incompatible loyalties, and force the beneficiary to choose which obligation has moral priority."
+        },
+        "limits": null
+      },
+      {
+        "id": "work_056",
+        "title": "Fitcher's Bird",
+        "mode": "keyword",
+        "mechanism": "forensic_disobedience",
+        "guidance": {
+          "instruction": "Make forbidden knowledge expose actual abuse, give the investigator a practical evidence-handling strategy, and turn discovery into a rescue plan."
+        },
+        "limits": null
+      },
+      {
+        "id": "work_086",
+        "title": "Bluebeard (Perrault)",
+        "mode": "keyword",
+        "mechanism": "forbidden_room",
+        "guidance": {
+          "instruction": "Make forbidden knowledge reveal an actual threat, give discovery an observable trace, and establish a credible path to assistance."
+        },
+        "limits": null
+      }
+    ],
+    "guide_sections": [
+      "## 2. Premise, promise, and narrative engines\n\n### PREM-01 — Build an expandable premise\n\nFor a goal-driven narrative, begin with:\n\n> When a disruption changes an established situation, a particular person pursues an objective through resistance, while the pursuit threatens something else they value.\n\nFor an observational or associative narrative:\n\n> Over a bounded span or through a recurring place, activity, or relationship, a particular perspective encounters variations that alter our understanding of a life or world.\n\nThe first version creates forward pressure; the second creates accumulation and reinterpretation. Both can support long fiction.\n\n**Expandable example:** A reservoir archivist discovers that the city records omit downstream villages, while her brother's planned marriage will give their family access to the council that controls the water. Investigation now affects policy, kinship, social mobility, and the meaning of official memory.\n\n### PREM-02 — State the narrative promise\n\nName what the opening teaches the audience to expect. A locked-room opening promises intelligible inquiry. A richly observant family gathering may promise social and emotional discovery. A magical map promises that movement through the world will matter.\n\nMaintain the promise, deliberately renegotiate it, or dramatize its failure. An accidental switch from intimate domestic realism to unexplained cosmic warfare usually feels incoherent because the work has changed its organizing expectat",
+      "## 1. The construction workflow\n\n### BUILD-01 — Develop in passes, not all at once\n\nUse this sequence, revisiting earlier passes when discoveries require it:\n\n1. **Intention:** identify the experience the work should offer: dread, wonder, intimacy, comic recognition, intellectual discovery, moral unease, or a combination.\n2. **Premise:** establish people, situation, pressure, and a source of continued development.\n3. **Human commitments:** decide what characters want, protect, misunderstand, and refuse to surrender.\n4. **World constraints:** define the resources, institutions, physical limits, and customs that affect choices.\n5. **Trajectory:** select a broad structure and a plausible destination or open question.\n6. **Causal outline:** connect consequential choices and discoveries; distinguish causes from convenient scheduling.\n7. **Thread design:** build main plot, relationship arcs, thematic counterarguments, and subplots as an interacting network.\n8. **Information design:** decide what actually happened, who knows it, what the reader knows, and when interpretation changes.\n9. **Scene design:** turn important transitions into encounters with objectives, perceptions, decisions, and consequences.\n10. **Drafting:** discover voice, texture, behavior, and unanticipated connections without silently losing established facts.\n11. **Reverse outline:** record what the draft actually does, not what the initial plan claimed it would do.\n12. **Revision:** repair structure and motivatio"
+    ],
+    "corpus_sha256": "536afdc2c3000e7733c9dc7526ae3741de95a6033ab5b7b3b51327acd7ccb113",
+    "index_version": "sentence-transformers/all-MiniLM-L6-v2:chunk-mean-v1",
+    "stale_embedding_records": 605,
+    "warning": "Model-authored analyses, not universally verified scholarship. Retrieval is reference data."
+  },
+  "plan": {
+    "title": "The Silent Bell",
+    "threads": [
+      "bell repair",
+      "trust"
+    ],
+    "technique_stack": [
+      "consequential choice"
+    ],
+    "scenes": [
+      {
+        "id": "ch01-sc01",
+        "chapter": 1,
+        "pov": "mara",
+        "participants": [
+          "mara",
+          "oren"
+        ],
+        "location": "bell tower",
+        "time": "day 1, interval 1",
+        "goal": "inspect the bell mechanism",
+        "obstacle": "access requires cooperation",
+        "intended_change": "a practical decision changes the inspection"
+      },
+      {
+        "id": "ch01-sc02",
+        "chapter": 1,
+        "pov": "mara",
+        "participants": [
+          "mara",
+          "oren"
+        ],
+        "location": "bell tower",
+        "time": "day 1, interval 2",
+        "goal": "inspect the bell mechanism",
+        "obstacle": "access requires cooperation",
+        "intended_change": "a practical decision changes the inspection"
+      },
+      {
+        "id": "ch01-sc03",
+        "chapter": 1,
+        "pov": "mara",
+        "participants": [
+          "mara",
+          "oren"
+        ],
+        "location": "bell tower",
+        "time": "day 1, interval 3",
+        "goal": "inspect the bell mechanism",
+        "obstacle": "access requires cooperation",
+        "intended_change": "a practical decision changes the inspection"
+      },
+      {
+        "id": "ch02-sc01",
+        "chapter": 2,
+        "pov": "mara",
+        "participants": [
+          "mara",
+          "oren"
+        ],
+        "location": "bell tower",
+        "time": "day 2, interval 1",
+        "goal": "inspect the bell mechanism",
+        "obstacle": "access requires cooperation",
+        "intended_change": "a practical decision changes the inspection"
+      },
+      {
+        "id": "ch02-sc02",
+        "chapter": 2,
+        "pov": "mara",
+        "participants": [
+          "mara",
+          "oren"
+        ],
+        "location": "bell tower",
+        "time": "day 2, interval 2",
+        "goal": "inspect the bell mechanism",
+        "obstacle": "access requires cooperation",
+        "intended_change": "a practical decision changes the inspection"
+      },
+      {
+        "id": "ch02-sc03",
+        "chapter": 2,
+        "pov": "mara",
+        "participants": [
+          "mara",
+          "oren"
+        ],
+        "location": "bell tower",
+        "time": "day 2, interval 3",
+        "goal": "inspect the bell mechanism",
+        "obstacle": "access requires cooperation",
+        "intended_change": "a practical decision changes the inspection"
+      },
+      {
+        "id": "ch03-sc01",
+        "chapter": 3,
+        "pov": "mara",
+        "participants": [
+          "mara",
+          "oren"
+        ],
+        "location": "bell tower",
+        "time": "day 3, interval 1",
+        "goal": "inspect the bell mechanism",
+        "obstacle": "access requires cooperation",
+        "intended_change": "a practical decision changes the inspection"
+      },
+      {
+        "id": "ch03-sc02",
+        "chapter": 3,
+        "pov": "mara",
+        "participants": [
+          "mara",
+          "oren"
+        ],
+        "location": "bell tower",
+        "time": "day 3, interval 2",
+        "goal": "inspect the bell mechanism",
+        "obstacle": "access requires cooperation",
+        "intended_change": "a practical decision changes the inspection"
+      },
+      {
+        "id": "ch03-sc03",
+        "chapter": 3,
+        "pov": "mara",
+        "participants": [
+          "mara",
+          "oren"
+        ],
+        "location": "bell tower",
+        "time": "day 3, interval 3",
+        "goal": "inspect the bell mechanism",
+        "obstacle": "access requires cooperation",
+        "intended_change": "a practical decision changes the inspection"
+      }
+    ]
+  },
+  "plan_approved": true,
+  "complete": true,
+  "completion_note": "All scenes accepted by configured checks; final compact audit may contain unresolved issues."
+}
