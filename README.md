@@ -122,3 +122,9 @@ Memory extraction now selects stable paragraph IDs from an ordered evidence cata
 ## Creative coverage and editorial audit
 
 See [the pipeline audit](docs/CREATIVE_PIPELINE_AUDIT.md), [deep test input](examples/silent-bell-deep.json), [actual hybrid retrieval output](examples/rag-output-deep.json) and [scoped writer packet](examples/rag-writer-packet.json). Story and rhetoric reviews require complete evidence-linked check coverage; initial design and outline reviews cover the creative categories before drafting. These automated gates remain fallible. The compatibility CLI does not implement the full DAG editorial pipeline.
+
+## Troy opening movement
+
+The manually dispatched **Troy story runners** workflow uses `examples/troy-first-thunder.json`: one chapter, four scenes, about 1,400 words per scene, with discovery and acquisition preceding first battlefield use. The expressive profile uses Glitter for drafting and Gemma for control, editing and review. All roles remain native jobs in one workflow. The original nine-scene workflow is separate.
+
+Explicit `retrieval_weights` now apply mathematical weights to normalized reciprocal semantic/keyword ranks and controlled-mechanism overlap, summed over weighted query facets. The Troy brief uses 0.60 / 0.15 / 0.25. Explicit source references are pinned separately; adaptation strength still controls requested literary influence rather than measuring borrowing. `examples/troy-retrieval.json` records the real retrieval result. The four-scene stress fixture passed with 1,400 synthetic words per scene; it is not a literary-quality or exact-token benchmark.

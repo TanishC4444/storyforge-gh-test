@@ -1,0 +1,37 @@
+{
+  "fixture_only": true,
+  "real_hybrid_retrieval": true,
+  "accepted_fixture_scenes": 4,
+  "chapters": 1,
+  "max_fixture_packet_characters": 46344,
+  "largest_packets": [
+    {
+      "role": "chapter_quality",
+      "characters": 46344
+    },
+    {
+      "role": "humanizer",
+      "characters": 38507
+    },
+    {
+      "role": "humanizer",
+      "characters": 38297
+    },
+    {
+      "role": "humanizer",
+      "characters": 38285
+    },
+    {
+      "role": "humanizer",
+      "characters": 36676
+    }
+  ],
+  "primary_source": "The Iliad (Homer)",
+  "retrieval_weights": {
+    "semantic_similarity": 0.6,
+    "keyword_match": 0.15,
+    "narrative_mechanism_match": 0.25
+  },
+  "stress_prose_words_per_scene": 1400,
+  "warning": "Synthetic 1,400-word scenes test orchestration and character budgets, not live literary quality or exact model token counts."
+}

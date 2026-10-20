@@ -1,0 +1,404 @@
+{
+  "query": "glory and mortal vulnerability heroic honor versus impersonal killing loyalty to comrades versus obedience to a king divine gift with an unequally distributed cost authority versus practical knowledge | Practical survival and effective counsel. Ask, test, bargain and reveal only what wins cooperation. Visible privileges and obligations of kingship. Distribute honors, assert ownership and make public commitments costly to withdraw. Deeds for which a man answers with his own body. Make the concealed insult or cost explicit and demand an answer. Troy and the obligations of its defender. Observe, rally and commit himself where fear threatens cohesion. Responsibility for work and dependents. Demonstrate a physical fact when rank makes an argument easy to dismiss. | extended epic simile supplication and refused counsel | Iliad heroic honor divine gift competing authority mortal vulnerability supplication war",
+  "queries": [
+    {
+      "id": "themes_conflicts",
+      "text": "glory and mortal vulnerability heroic honor versus impersonal killing loyalty to comrades versus obedience to a king divine gift with an unequally distributed cost authority versus practical knowledge",
+      "weight": 1.4
+    },
+    {
+      "id": "character_relationships",
+      "text": "Practical survival and effective counsel. Ask, test, bargain and reveal only what wins cooperation. Visible privileges and obligations of kingship. Distribute honors, assert ownership and make public commitments costly to withdraw. Deeds for which a man answers with his own body. Make the concealed insult or cost explicit and demand an answer. Troy and the obligations of its defender. Observe, rally and commit himself where fear threatens cohesion. Responsibility for work and dependents. Demonstrate a physical fact when rank makes an argument easy to dismiss.",
+      "weight": 1.0
+    },
+    {
+      "id": "craft",
+      "text": "extended epic simile supplication and refused counsel",
+      "weight": 1.0
+    },
+    {
+      "id": "user_query",
+      "text": "Iliad heroic honor divine gift competing authority mortal vulnerability supplication war",
+      "weight": 1.0
+    }
+  ],
+  "sources": [
+    {
+      "id": "work_136",
+      "title": "The Iliad (Homer)",
+      "mode": "hybrid",
+      "canonical_id": "work_136",
+      "ranking_score": 2.736805736636245,
+      "mechanism": "private_choice_public_cost",
+      "analysis": "Achilles' quarrel with Agamemnon removes a crucial fighter; Patroclus' death redirects wounded honor into devastating grief and revenge.",
+      "themes": [
+        "honor",
+        "grief",
+        "war"
+      ],
+      "techniques": [
+        "escalation_and_causal_chains",
+        "tragic_choices_and_irreversibility"
+      ],
+      "guidance": {
+        "instruction": "Connect a protagonist's personal grievance to a collective dependency, then make the cost fall on someone whose loss changes the grievance's meaning."
+      },
+      "limits": [
+        "Expanded into selected independently useful narrative units; not an exhaustive chapter-by-chapter or regional-variant catalogue."
+      ],
+      "retrieval_hits": [
+        {
+          "query": "themes_conflicts",
+          "channel": "keyword",
+          "rank": 2,
+          "bm25": -14.452254787679182
+        },
+        {
+          "query": "user_query",
+          "channel": "keyword",
+          "rank": 1,
+          "bm25": -17.23350098915711
+        },
+        {
+          "query": "themes_conflicts",
+          "channel": "semantic",
+          "rank": 19,
+          "score": 0.012658227848101266,
+          "weighted_contribution": 0.5837288135593219
+        },
+        {
+          "query": "character_relationships",
+          "channel": "semantic",
+          "rank": 12,
+          "score": 0.013888888888888888,
+          "weighted_contribution": 0.47307692307692306
+        },
+        {
+          "query": "craft",
+          "channel": "semantic",
+          "rank": 8,
+          "score": 0.014705882352941176,
+          "weighted_contribution": 0.5125
+        },
+        {
+          "query": "user_query",
+          "channel": "semantic",
+          "rank": 1,
+          "score": 0.01639344262295082,
+          "weighted_contribution": 0.6
+        },
+        {
+          "query": "themes_conflicts",
+          "channel": "controlled_mechanism",
+          "matched_terms": [
+            "cost"
+          ],
+          "overlap": 0.25
+        },
+        {
+          "query": "character_relationships",
+          "channel": "controlled_mechanism",
+          "matched_terms": [
+            "cost",
+            "public"
+          ],
+          "overlap": 0.5
+        }
+      ],
+      "requested_scopes": [
+        {
+          "record_id": "work_136",
+          "scope": "story",
+          "purpose": "Primary spinoff source: preserve the Achaean coalition, recognizable relationships, honor, gifts, kinship, burial, supplication, divine involvement, mortal vulnerability, and Homeric narrative rhetoric. Transfer conflicts and social imagination, not famous scenes with guns substituted.",
+          "do_not_borrow": [
+            "Modern translation wording",
+            "Events incompatible with the explicit divergence",
+            "Claimed precise chronology unsupported by source context"
+          ]
+        }
+      ],
+      "selection": "explicit_reference"
+    },
+    {
+      "id": "work_136_ep002",
+      "title": "The embassy to Achilles",
+      "mode": "hybrid",
+      "canonical_id": "work_136_ep002",
+      "ranking_score": 2.5464224409478726,
+      "mechanism": "failed_compensation",
+      "analysis": "Offers and personal appeals fail to restore Achilles' participation, exposing differences between compensation, trust, and honor.",
+      "themes": [
+        "persuasion",
+        "loyalty",
+        "irreparability"
+      ],
+      "techniques": [
+        "recognition_and_revelation"
+      ],
+      "guidance": {
+        "instruction": "Let several negotiators offer distinct reasons for return, and specify which unmet need makes material compensation insufficient."
+      },
+      "limits": [
+        "Editorial retrieval label; not asserted to be an original chapter heading.",
+        "Parent notes about versions and textual limits also apply."
+      ],
+      "retrieval_hits": [
+        {
+          "query": "themes_conflicts",
+          "channel": "keyword",
+          "rank": 24,
+          "bm25": -8.966374420763055
+        },
+        {
+          "query": "user_query",
+          "channel": "keyword",
+          "rank": 3,
+          "bm25": -11.165538115224715
+        },
+        {
+          "query": "themes_conflicts",
+          "channel": "semantic",
+          "rank": 11,
+          "score": 0.014084507042253521,
+          "weighted_contribution": 0.6752941176470587
+        },
+        {
+          "query": "character_relationships",
+          "channel": "semantic",
+          "rank": 6,
+          "score": 0.015151515151515152,
+          "weighted_contribution": 0.5347826086956521
+        },
+        {
+          "query": "craft",
+          "channel": "semantic",
+          "rank": 12,
+          "score": 0.013888888888888888,
+          "weighted_contribution": 0.47307692307692306
+        },
+        {
+          "query": "user_query",
+          "channel": "semantic",
+          "rank": 2,
+          "score": 0.016129032258064516,
+          "weighted_contribution": 0.5857142857142856
+        }
+      ],
+      "requested_scopes": [],
+      "selection": "ranked_match"
+    },
+    {
+      "id": "work_136_ep001",
+      "title": "The quarrel and Achilles' withdrawal",
+      "mode": "hybrid",
+      "canonical_id": "work_136_ep001",
+      "ranking_score": 2.439713416101687,
+      "mechanism": "private_grievance_public_dependency",
+      "analysis": "Agamemnon's seizure of Briseis makes Achilles withdraw, exposing the army's dependence on a person its leader humiliates.",
+      "themes": [
+        "honor",
+        "authority",
+        "collective_cost"
+      ],
+      "techniques": [
+        "recognition_and_revelation",
+        "escalation_and_causal_chains"
+      ],
+      "guidance": {
+        "instruction": "Give an institution a crucial contributor whose dignity it violates, then make withdrawal reveal a dependency leaders assumed they could ignore."
+      },
+      "limits": [
+        "Editorial retrieval label; not asserted to be an original chapter heading.",
+        "Parent notes about versions and textual limits also apply."
+      ],
+      "retrieval_hits": [
+        {
+          "query": "themes_conflicts",
+          "channel": "keyword",
+          "rank": 11,
+          "bm25": -10.182438779948757
+        },
+        {
+          "query": "character_relationships",
+          "channel": "keyword",
+          "rank": 1,
+          "bm25": -21.659144611089907
+        },
+        {
+          "query": "user_query",
+          "channel": "keyword",
+          "rank": 5,
+          "bm25": -10.508239700850886
+        },
+        {
+          "query": "themes_conflicts",
+          "channel": "semantic",
+          "rank": 39,
+          "score": 0.010101010101010102,
+          "weighted_contribution": 0.43594936708860754
+        },
+        {
+          "query": "character_relationships",
+          "channel": "semantic",
+          "rank": 7,
+          "score": 0.014925373134328358,
+          "weighted_contribution": 0.5234042553191489
+        },
+        {
+          "query": "craft",
+          "channel": "semantic",
+          "rank": 21,
+          "score": 0.012345679012345678,
+          "weighted_contribution": 0.40327868852459015
+        },
+        {
+          "query": "user_query",
+          "channel": "semantic",
+          "rank": 4,
+          "score": 0.015625,
+          "weighted_contribution": 0.5590909090909091
+        },
+        {
+          "query": "character_relationships",
+          "channel": "controlled_mechanism",
+          "matched_terms": [
+            "public"
+          ],
+          "overlap": 0.25
+        }
+      ],
+      "requested_scopes": [],
+      "selection": "ranked_match"
+    }
+  ],
+  "craft_by_role": {
+    "refiner": [
+      {
+        "id": "PREM-03",
+        "chapter": 2,
+        "heading": "PREM-03 — Choose a continuing engine",
+        "content": "### PREM-03 — Choose a continuing engine\n\n| Engine | How it generates further material | Main exhaustion risk |\n|---|---|---|\n| Pursuit | New routes, costs, competitors, and changing destinations | Travel without development |\n| Investigation | Evidence revises a model of past or present events | Clues that merely delay the answer |\n| Relationship | Choices alter trust, obligation, intimacy, or control | Repeated misunderstanding without change |\n| Institutional struggle | Policy, resources, and coalitions alter feasible action | Abstract politics without human effects |\n| Survival | Scarcity forces prioritization and adaptation | Identical emergencies |\n| Apprenticeship | Practice, correction, and responsibility change capacity | Effortless competence or endless training |\n| Social ascent or decline | Access changes incentives and compromises | Status markers without consequences |\n| Return | Arrival reveals altered people, places, and claims | Nostalgia without a present dilemma |\n| Recurring practice | Work, ritual, visits, seasons, or meals accumulate meaning | Undifferentiated r"
+      },
+      {
+        "id": "CHAR-04",
+        "chapter": 5,
+        "heading": "CHAR-04 — Distinguish arc types",
+        "content": "### CHAR-04 — Distinguish arc types\n\n| Arc | What changes or holds | Evidence to dramatize |\n|---|---|---|\n| Growth | A strategy or understanding becomes more adequate | A later choice under comparable pressure |\n| Corruption | The person increasingly sacrifices a value to obtain another | Escalating justifications and costly crossed lines |\n| Disillusionment | A sustaining belief fails, with no guaranteed replacement | New perception and changed conduct |\n| Recovery | Lost capacity, connection, or agency is partly rebuilt | Uneven practice and a revised relationship to limitation |\n| Steadfastness | A commitment survives changed conditions | Its increasing cost and effect on others |\n| Accommodation | A person learns to live with an unresolved condition | New routines, boundaries, and tradeoffs |\n| Revelation | Readers discover complexity that was already present | Recontextualized earlier behavior |\n| Oscillation | Competing strategies recur without a clean synthesis | Changes in frequency, context, and consequence |\n\nA stable protagonist can transform a community. A changing prota"
+      }
+    ],
+    "architect": [
+      {
+        "id": "THREAD-09",
+        "chapter": 8,
+        "heading": "THREAD-09 — Keep a thread matrix",
+        "content": "### THREAD-09 — Keep a thread matrix\n\n| Thread | Question | Owner | Current state | Next change | Main-plot effect | Planned outcome |\n|---|---|---|---|---|---|---|\n| Water records | Who benefits from the omissions? | Archivist | Partial map | Discover revision authority | Changes target of inquiry | Evidence plus contested reform |\n| Engagement | What must the family surrender for access? | Brother | Conditional alliance | Receive public loyalty demand | Threatens access and trust | Boundary chosen at a cost |\n| Maintenance work | Can workers remain safe while resisting? | Pump mechanic | Unpaid hazard | Vote on shutdown | Creates a physical deadline | Negotiated participation |\n\nThe matrix describes interacting change; it is not a demand to give equal space to every thread.\n\n---"
+      },
+      {
+        "id": "SCENE-03",
+        "chapter": 9,
+        "heading": "SCENE-03 — Use beats as changes in action or interpretation",
+        "content": "### SCENE-03 — Use beats as changes in action or interpretation\n\nA beat is a useful drafting unit when a tactic, emotional posture, perception, or relationship changes. Do not make every sentence a new beat.\n\nExample sequence: ask politely → offer payment → discover payment would insult → disclose the real need → receive a conditional offer. The dialogue should enact those changes rather than merely discuss them afterward."
+      }
+    ],
+    "scene_designer": [
+      {
+        "id": "SCENE-01",
+        "chapter": 9,
+        "heading": "SCENE-01 — Decide what this scene changes",
+        "content": "### SCENE-01 — Decide what this scene changes\n\nA scene can change action, knowledge, relationship, emotional orientation, or the reader's interpretation. A contemplative scene may make no external event occur but still transform how a previous event is understood.\n\nState a primary purpose before drafting. If nothing changes, ask whether stillness, ritual, entrapment, or atmosphere is deliberately the point; otherwise summarize, combine, or remove the passage."
+      },
+      {
+        "id": "STATE-02",
+        "chapter": 26,
+        "heading": "STATE-02 — Track the minimum consequential state",
+        "content": "### STATE-02 — Track the minimum consequential state\n\nFor each relevant point in the story, record:\n\n- Location, time, and travel feasibility.\n- Bodily condition, age, fatigue, injuries, and recovery.\n- Skills demonstrated and capabilities actually available.\n- Possessions, money, access, weapons, documents, and consumed resources.\n- Relationship states, promises, debts, boundaries, and obligations.\n- Knowledge, beliefs, suspicions, and evidence available to each actor.\n- Active institutional rules and any exceptions established.\n- Open questions, setup/payoff commitments, and thread status.\n- Visual state if panels or images are generated.\n\nTrack facts because they affect future work, not because every detail deserves equal storage."
+      }
+    ],
+    "writer": [
+      {
+        "id": "SCENE-03",
+        "chapter": 9,
+        "heading": "SCENE-03 — Use beats as changes in action or interpretation",
+        "content": "### SCENE-03 — Use beats as changes in action or interpretation\n\nA beat is a useful drafting unit when a tactic, emotional posture, perception, or relationship changes. Do not make every sentence a new beat.\n\nExample sequence: ask politely → offer payment → discover payment would insult → disclose the real need → receive a conditional offer. The dialogue should enact those changes rather than merely discuss them afterward."
+      },
+      {
+        "id": "FIG-01",
+        "chapter": 20,
+        "heading": "FIG-01 — Comparison, association, and symbolic meaning",
+        "content": "### FIG-01 — Comparison, association, and symbolic meaning\n\n| Device | What it does | Construction and original example | Failure check |\n|---|---|---|---|\n| Metaphor | Understands one thing through another | Select a consequential shared relation: “The permit office was a lock on a public well.” | Does the comparison clarify rather than merely decorate? |\n| Simile | Makes an explicit comparison | “The rumor traveled like water through a cracked wall.” | Is the chosen resemblance specific? |\n| Extended metaphor | Develops a comparison across several details | Continue the lock image through keys, access, and ownership | Do extensions remain coherent? |\n| Conceit | Sustains an unusual or elaborate comparison | Compare a family agreement to a hydraulic system with unequal pressure | Does elaboration generate insight? |\n| Analogy | Uses a mapped comparison to explain or argue | A witness compares archival gaps to missing stitches in a seam | Which parts correspond, and where does the comparison fail? |\n| Personification | Attributes human action or qualities to nonhuman things | “The ar"
+      }
+    ],
+    "humanizer": [
+      {
+        "id": "PROSE-06",
+        "chapter": 19,
+        "heading": "PROSE-06 — Keep sensory detail selective",
+        "content": "### PROSE-06 — Keep sensory detail selective\n\nSight is not the only sense. Texture, pressure, balance, temperature, smell, sound, pain, and bodily orientation can ground a passage. Choose details that alter perception or behavior rather than mechanically inserting all senses.\n\nRecur to a sensory feature when its meaning changes; avoid making every location smell vaguely of rain, metal, or smoke."
+      },
+      {
+        "id": "FIG-01",
+        "chapter": 20,
+        "heading": "FIG-01 — Comparison, association, and symbolic meaning",
+        "content": "### FIG-01 — Comparison, association, and symbolic meaning\n\n| Device | What it does | Construction and original example | Failure check |\n|---|---|---|---|\n| Metaphor | Understands one thing through another | Select a consequential shared relation: “The permit office was a lock on a public well.” | Does the comparison clarify rather than merely decorate? |\n| Simile | Makes an explicit comparison | “The rumor traveled like water through a cracked wall.” | Is the chosen resemblance specific? |\n| Extended metaphor | Develops a comparison across several details | Continue the lock image through keys, access, and ownership | Do extensions remain coherent? |\n| Conceit | Sustains an unusual or elaborate comparison | Compare a family agreement to a hydraulic system with unequal pressure | Does elaboration generate insight? |\n| Analogy | Uses a mapped comparison to explain or argue | A witness compares archival gaps to missing stitches in a seam | Which parts correspond, and where does the comparison fail? |\n| Personification | Attributes human action or qualities to nonhuman things | “The ar"
+      }
+    ],
+    "story_quality": [
+      {
+        "id": "PLOT-02",
+        "chapter": 3,
+        "heading": "PLOT-02 — Give major turns antecedents",
+        "content": "### PLOT-02 — Give major turns antecedents\n\nBefore a turning point, establish some combination of desire, capacity, opportunity, resistance, and cost. The exact outcome need not be predictable, but its possibility should fit the work.\n\nAristotle's *Poetics* links reversals and recognition to the action's plausible or necessary development. This guide uses that as a test of earned consequence, not as a demand that all fiction imitate Greek tragedy. [Aristotle, *Poetics*, sections X–XI](https://www.gutenberg.org/files/1974/1974-h/1974-h.htm)"
+      },
+      {
+        "id": "CHAR-04",
+        "chapter": 5,
+        "heading": "CHAR-04 — Distinguish arc types",
+        "content": "### CHAR-04 — Distinguish arc types\n\n| Arc | What changes or holds | Evidence to dramatize |\n|---|---|---|\n| Growth | A strategy or understanding becomes more adequate | A later choice under comparable pressure |\n| Corruption | The person increasingly sacrifices a value to obtain another | Escalating justifications and costly crossed lines |\n| Disillusionment | A sustaining belief fails, with no guaranteed replacement | New perception and changed conduct |\n| Recovery | Lost capacity, connection, or agency is partly rebuilt | Uneven practice and a revised relationship to limitation |\n| Steadfastness | A commitment survives changed conditions | Its increasing cost and effect on others |\n| Accommodation | A person learns to live with an unresolved condition | New routines, boundaries, and tradeoffs |\n| Revelation | Readers discover complexity that was already present | Recontextualized earlier behavior |\n| Oscillation | Competing strategies recur without a clean synthesis | Changes in frequency, context, and consequence |\n\nA stable protagonist can transform a community. A changing prota"
+      }
+    ],
+    "rhetoric_quality": [
+      {
+        "id": "PROSE-06",
+        "chapter": 19,
+        "heading": "PROSE-06 — Keep sensory detail selective",
+        "content": "### PROSE-06 — Keep sensory detail selective\n\nSight is not the only sense. Texture, pressure, balance, temperature, smell, sound, pain, and bodily orientation can ground a passage. Choose details that alter perception or behavior rather than mechanically inserting all senses.\n\nRecur to a sensory feature when its meaning changes; avoid making every location smell vaguely of rain, metal, or smoke."
+      },
+      {
+        "id": "FIG-01",
+        "chapter": 20,
+        "heading": "FIG-01 — Comparison, association, and symbolic meaning",
+        "content": "### FIG-01 — Comparison, association, and symbolic meaning\n\n| Device | What it does | Construction and original example | Failure check |\n|---|---|---|---|\n| Metaphor | Understands one thing through another | Select a consequential shared relation: “The permit office was a lock on a public well.” | Does the comparison clarify rather than merely decorate? |\n| Simile | Makes an explicit comparison | “The rumor traveled like water through a cracked wall.” | Is the chosen resemblance specific? |\n| Extended metaphor | Develops a comparison across several details | Continue the lock image through keys, access, and ownership | Do extensions remain coherent? |\n| Conceit | Sustains an unusual or elaborate comparison | Compare a family agreement to a hydraulic system with unequal pressure | Does elaboration generate insight? |\n| Analogy | Uses a mapped comparison to explain or argue | A witness compares archival gaps to missing stitches in a seam | Which parts correspond, and where does the comparison fail? |\n| Personification | Attributes human action or qualities to nonhuman things | “The ar"
+      }
+    ]
+  },
+  "guide_sections": [
+    "### PREM-03 — Choose a continuing engine\n\n| Engine | How it generates further material | Main exhaustion risk |\n|---|---|---|\n| Pursuit | New routes, costs, competitors, and changing destinations | Travel without development |\n| Investigation | Evidence revises a model of past or present events | Clues that merely delay the answer |\n| Relationship | Choices alter trust, obligation, intimacy, or control | Repeated misunderstanding without change |\n| Institutional struggle | Policy, resources, and coalitions alter feasible action | Abstract politics without human effects |\n| Survival | Scarcity forces prioritization and adaptation | Identical emergencies |\n| Apprenticeship | Practice, correction, and responsibility change capacity | Effortless competence or endless training |\n| Social ascent or decline | Access changes incentives and compromises | Status markers without consequences |\n| Return | Arrival reveals altered people, places, and claims | Nostalgia without a present dilemma |\n| Recurring practice | Work, ritual, visits, seasons, or meals accumulate meaning | Undifferentiated r",
+    "### CHAR-04 — Distinguish arc types\n\n| Arc | What changes or holds | Evidence to dramatize |\n|---|---|---|\n| Growth | A strategy or understanding becomes more adequate | A later choice under comparable pressure |\n| Corruption | The person increasingly sacrifices a value to obtain another | Escalating justifications and costly crossed lines |\n| Disillusionment | A sustaining belief fails, with no guaranteed replacement | New perception and changed conduct |\n| Recovery | Lost capacity, connection, or agency is partly rebuilt | Uneven practice and a revised relationship to limitation |\n| Steadfastness | A commitment survives changed conditions | Its increasing cost and effect on others |\n| Accommodation | A person learns to live with an unresolved condition | New routines, boundaries, and tradeoffs |\n| Revelation | Readers discover complexity that was already present | Recontextualized earlier behavior |\n| Oscillation | Competing strategies recur without a clean synthesis | Changes in frequency, context, and consequence |\n\nA stable protagonist can transform a community. A changing prota"
+  ],
+  "corpus_sha256": "536afdc2c3000e7733c9dc7526ae3741de95a6033ab5b7b3b51327acd7ccb113",
+  "index_version": "sentence-transformers/all-MiniLM-L6-v2@1110a243fdf4706b3f48f1d95db1a4f5529b4d41:chunk-mean-v1",
+  "stale_embedding_records": 0,
+  "mode": "hybrid",
+  "adaptation_policy": {
+    "strength": 0.9,
+    "mode": "structural_echo",
+    "relationship": "alternate-continuity spinoff",
+    "max_active_sources_per_scene": 1,
+    "preserve_user_choices": true,
+    "primary_source_id": "work_136",
+    "preserve": [
+      "Recognizable principal relationships and ancient social values",
+      "Hector and Achilles alive in this installment",
+      "War not resolved"
+    ],
+    "divergence": "Greeks earn access to firearms from a hidden workshop of Hephaestus during the tenth campaigning season.",
+    "interpretation": "Strong source influence and pinned source selection; strength is guidance, not a measured borrowed percentage."
+  },
+  "retrieval_weights": {
+    "semantic_similarity": 0.6,
+    "keyword_match": 0.15,
+    "narrative_mechanism_match": 0.25
+  },
+  "scoring_policy": "Weighted normalized reciprocal ranks (41/(40+rank)) plus mechanism-label overlap, summed over weighted query facets; explicit references pinned separately.",
+  "warning": "Model-authored analyses with source limits. Retrieval selects reference material; it does not establish historical influence, originality, or successful application."
+}

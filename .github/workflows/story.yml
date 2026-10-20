@@ -216,7 +216,7 @@ jobs:
           overwrite: true
 
   plan:
-    name: Plan three chapters
+    name: Plan requested chapters
     needs: [refine_gate]
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -893,7 +893,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
-          backend: fixture
+          backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
           name: s01_design
@@ -1475,7 +1475,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
-          backend: fixture
+          backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
           name: s02_design
@@ -2639,7 +2639,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
-          backend: fixture
+          backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
           name: s04_design
@@ -3221,7 +3221,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
-          backend: fixture
+          backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
           name: s05_design
@@ -4385,7 +4385,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
-          backend: fixture
+          backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
           name: s07_design
@@ -4967,7 +4967,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
-          backend: fixture
+          backend: ${{ inputs.backend }}
       - uses: actions/download-artifact@v4
         with:
           name: s08_design

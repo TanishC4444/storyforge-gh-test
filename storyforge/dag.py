@@ -42,7 +42,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
     if task == 'prepare':
         req = contracts.request(load(ROOT / 'examples' / f'{request_file}.json'))
         req['profile'] = profile
-        contracts.require(req['chapters'] == 3 and req['scenes_per_chapter'] == 3, 'This test DAG has exactly three chapters of three scenes')
+        contracts.require(req['chapters'] * req['scenes_per_chapter'] <= 9, 'This workflow supports at most nine scene slots')
         contracts.require(req['auto_approve_plan'], 'This automated DAG requires explicit auto_approve_plan in the request')
         state = {'version': 0, 'backend': backend, 'accepted': [],
                  'memories': [dict(f, kind='event', source='user_input') for f in req['initial_facts']],
@@ -94,7 +94,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         return result
     if task=='scene_design':
         old=state['plan']['scenes'][index]
-        designed=executor.call('scene_designer',{'request_controls':controls(req),'world':req['world_design'],'plot':req['plot_design'],'characters':req['characters'],'proposed_scene':old,'accepted_memory':compact(state['memories'],36),'previous_scene':{'id':state['accepted'][-1]['id'],'prose_excerpt':state['accepted'][-1]['prose'][-4500:]} if state['accepted'] else None,'inspiration':application_packet(req,state['retrieval'],'scene_designer',old['id'])},
+        designed=executor.call('scene_designer',{'request_controls':controls(req),'world':req['world_design'],'plot':req['plot_design'],'characters':req['characters'],'proposed_scene':old,'accepted_memory':compact(state['memories'],36),'previous_scene':{'id':state['accepted'][-1]['id'],'prose_excerpt':state['accepted'][-1]['prose'][-4500:]} if state['accepted'] else None,'user_scene_design':[s for s in req['scene_designs'] if s['id']==old['id']],'inspiration':application_packet(req,state['retrieval'],'scene_designer',old['id'])},
             'Reconcile the proposed scene with what ACTUALLY happened. Do not rediscover an established fact. Preserve IDs, chapter, valid participant IDs, world rules, and user choices. Return one JSON scene card with id, chapter, pov, participants, location, time, goal, obstacle, intended_change, choice, consequence, new_development, and reference_uses (array of {record_id,application}). Explain development through a new tactic, cost, commitment, leverage, or interpretation, not stronger adjectives. No new events become canon here.',
             tokens=1600,validator=lambda x:validate_scene(x,req,index))
         allowed={r['id'] for r in application_packet(req,state['retrieval'],'scene_designer',old['id'])['references']}
@@ -105,7 +105,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         return state
     card = state['plan']['scenes'][index]
     scene_packet = context(req, state, card)
-    budget = min(2400, int(req['words_per_scene'] * 2.2) + 200)
+    budget = min(3600, int(req['words_per_scene'] * 2.2) + 200)
     quality_skill = (ROOT / 'skills/story_quality.md').read_text()
     if task == 'character':
         result = executor.call('character', actor_packet(req, state, card, character), 'Propose one observable action or spoken line pursuing your goal in this situation. Use only known facts. Do not disclose private reasoning or secrets as commentary.', tokens=220)

@@ -57,6 +57,12 @@ def validate(req, require):
             require(bool(re.fullmatch(pattern,ref['target'])),'Invalid reference target format')
             require(1<=int(ref['target'][2:4])<=req['chapters'],'Reference chapter outside requested length')
             if ref['scope']=='scene':require(1<=int(ref['target'][-2:])<=req['scenes_per_chapter'],'Reference scene outside requested length')
+    if 'retrieval_weights' in req:
+        weights=req['retrieval_weights']
+        require(isinstance(weights,dict) and set(weights)=={'semantic_similarity','keyword_match','narrative_mechanism_match'},'Invalid retrieval weight keys')
+        require(all(type(v) in (int,float) and 0<=v<=1 for v in weights.values()),'Retrieval weights must be 0–1')
+        require(abs(sum(weights.values())-1)<1e-6,'Retrieval weights must sum to one')
+        require(req['retrieval_mode']=='hybrid' or weights['semantic_similarity']==0,'Semantic weighting requires hybrid retrieval')
     adaptation=req['adaptation']
     require(type(adaptation.get('strength')) in (int,float) and 0<=adaptation['strength']<=1,'Adaptation strength must be 0–1')
     require(adaptation.get('mode') in {'mechanisms','structural_echo','comparative'},'Invalid adaptation mode')

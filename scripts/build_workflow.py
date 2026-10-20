@@ -39,8 +39,11 @@ jobs:
 '''
 
 
-def build():
-    blocks = [HEADER]
+def build(total=9, per_chapter=3, troy=False):
+    header=HEADER
+    if troy:
+        header=header.replace('name: Story runners','name: Troy story runners').replace('options: [silent-bell-deep, silent-bell-full, harbor]','options: [troy-first-thunder]').replace('default: silent-bell-deep','default: troy-first-thunder').replace("options: ['9', '3', '1']","options: ['4']").replace("default: '9'","default: '4'").replace('Nine scenes is the full three-chapter test','Four scenes is the full opening movement')
+    blocks = [header]
     jobs = []
     def job(key, title, task, needs=(), downloads=(), index=None, matrix=None, state_output=False):
         jobs.append(key)
@@ -54,7 +57,7 @@ def build():
             lines += ['    strategy:', '      fail-fast: false', '      max-parallel: 3', '      matrix:', f'        character: ${{{{ fromJSON(needs.{matrix}.outputs.characters) }}}}']
         if state_output:
             lines += ['    outputs:', '      characters: ${{ steps.task.outputs.characters }}']
-        setup_backend = "fixture" if task == "prepare" or (task == "accept" and (index + 1) % 3 != 0) else ("${{ inputs.refinement_seed_run != '' && 'fixture' || inputs.backend }}" if task == "refine" else "${{ inputs.backend }}")
+        setup_backend = "fixture" if task == "prepare" else ("${{ inputs.refinement_seed_run != '' && 'fixture' || inputs.backend }}" if task == "refine" else "${{ inputs.backend }}")
         lines += ['    steps:', '      - uses: actions/checkout@v4', '      - uses: ./.github/actions/setup-worker', '        with:', '          backend: ' + setup_backend]
         if task == 'prepare':
             lines += ['      - name: Install local RAG encoder when requested', '        env:', '          STORY_REQUEST: ${{ inputs.request_file }}', '        run: |', "          python - <<'PY'", '          import json, os, subprocess, sys', '          from pathlib import Path', "          request=json.loads(Path('examples',os.environ['STORY_REQUEST']+'.json').read_text())", "          if request.get('retrieval_mode')=='hybrid':", "              subprocess.run([sys.executable,'-m','pip','install','-e','.[rag]'],check=True)", '          PY']
@@ -79,14 +82,14 @@ def build():
     job('refine_review','Development editor / critique initial story','refine_review',['refine'],[('refine','state',False)])
     job('refine_revision','Revise initial story against development review','refine_revision',['refine_review'],[('refine_review','state',False),('refine_review','design-review',False)])
     job('refine_gate','Approve developed story before outlining','refine_gate',['refine_revision'],[('refine_revision','state',False)])
-    job('plan', 'Plan three chapters', 'plan', ['refine_gate'], [('refine_gate', 'state', False)], state_output=True)
+    job('plan', 'Plan requested chapters', 'plan', ['refine_gate'], [('refine_gate', 'state', False)], state_output=True)
     job('plan_review','Development editor / critique scene progression','plan_review',['plan'],[('plan','state',False)])
     job('plan_revision','Revise chapter structure and causal choices','plan_revision',['plan_review'],[('plan_review','state',False),('plan_review','design-review',False)])
     job('plan_gate','Approve causal outline before drafting','plan_gate',['plan_revision'],[('plan_revision','state',False)],state_output=True)
     previous = 'plan_gate'
-    for i in range(9):
+    for i in range(total):
         p = f's{i+1:02}'
-        label = f'Chapter {i//3+1} scene {i%3+1}'
+        label = f'Chapter {i//per_chapter+1} scene {i%per_chapter+1}'
         job(p+'_design',label+' / reconcile design with accepted state','scene_design',[previous],[(previous,'state',False)],i,state_output=True)
         scene_state=p+'_design'
         state = [(scene_state, 'state', False)]
@@ -104,7 +107,7 @@ def build():
         job(p+'_verify_rhetoric',label+' / verify rhetoric revision','verify_rhetoric',[scene_state,p+'_repair',p+'_rhetoric'],repaired+[(p+'_rhetoric','rhetoric',False)],i)
         job(p+'_final_memory', label+' / refresh memory if prose changed', 'memory_final', [scene_state,p+'_repair',p+'_memory'], repaired+[(p+'_memory','initial-memory',False)], i)
         job(p+'_memory_review', label+' / verify memory', 'memory_review', [scene_state,p+'_repair',p+'_final_memory'], repaired+[(p+'_final_memory','memory',False)], i)
-        job(p+'_accept', label+(' / verify chapter and commit' if (i+1)%3==0 else ' / commit accepted state'), 'accept', [scene_state,p+'_repair',p+'_verify',p+'_verify_rhetoric',p+'_final_memory',p+'_memory_review'], repaired+[(p+'_verify','story-review',False),(p+'_verify_rhetoric','rhetoric-review',False),(p+'_final_memory','memory',False),(p+'_memory_review','memory-review',False)], i, state_output=True)
+        job(p+'_accept', label+(' / verify chapter and commit' if (i+1)%per_chapter==0 else ' / commit accepted state'), 'accept', [scene_state,p+'_repair',p+'_verify',p+'_verify_rhetoric',p+'_final_memory',p+'_memory_review'], repaired+[(p+'_verify','story-review',False),(p+'_verify_rhetoric','rhetoric-review',False),(p+'_final_memory','memory',False),(p+'_memory_review','memory-review',False)], i, state_output=True)
         previous = p+'_accept'
     blocks.append('''  results:
     name: Collect outputs and checkpoints
@@ -138,3 +141,4 @@ def build():
 
 if __name__ == '__main__':
     (ROOT / '.github/workflows/story.yml').write_text(build())
+    (ROOT / '.github/workflows/troy.yml').write_text(build(total=4,per_chapter=4,troy=True))
