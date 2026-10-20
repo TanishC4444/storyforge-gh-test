@@ -36,8 +36,10 @@ jobs:
   prepare:
     name: Prepare request and literary retrieval
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -76,8 +78,10 @@ jobs:
     name: Refine initial story prompt
     needs: [prepare]
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -116,8 +120,10 @@ jobs:
     name: Development editor / critique initial story
     needs: [refine]
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -149,8 +155,10 @@ jobs:
     name: Revise initial story against development review
     needs: [refine_review]
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -186,8 +194,10 @@ jobs:
     name: Approve developed story before outlining
     needs: [refine_revision]
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -219,10 +229,12 @@ jobs:
     name: Plan requested chapters
     needs: [refine_gate]
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     outputs:
       characters: ${{ steps.task.outputs.characters }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -254,8 +266,10 @@ jobs:
     name: Development editor / critique scene progression
     needs: [plan]
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -287,8 +301,10 @@ jobs:
     name: Revise chapter structure and causal choices
     needs: [plan_review]
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -324,10 +340,12 @@ jobs:
     name: Approve causal outline before drafting
     needs: [plan_revision]
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     outputs:
       characters: ${{ steps.task.outputs.characters }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -360,10 +378,12 @@ jobs:
     needs: [plan_gate]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     outputs:
       characters: ${{ steps.task.outputs.characters }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -396,13 +416,15 @@ jobs:
     needs: [s01_design]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       max-parallel: 3
       matrix:
         character: ${{ fromJSON(needs.s01_design.outputs.characters) }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -436,8 +458,10 @@ jobs:
     needs: [s01_design, s01_characters]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -474,8 +498,10 @@ jobs:
     needs: [s01_design, s01_direction]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -512,8 +538,10 @@ jobs:
     needs: [s01_design, s01_draft]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -550,8 +578,10 @@ jobs:
     needs: [s01_design, s01_draft, s01_edit]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -592,8 +622,10 @@ jobs:
     needs: [s01_design, s01_edit]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -630,8 +662,10 @@ jobs:
     needs: [s01_design, s01_edit]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -668,8 +702,10 @@ jobs:
     needs: [s01_design, s01_edit, s01_story, s01_rhetoric]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -714,8 +750,10 @@ jobs:
     needs: [s01_design, s01_repair, s01_story, s01_draft]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -760,8 +798,10 @@ jobs:
     needs: [s01_design, s01_repair, s01_rhetoric]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -802,8 +842,10 @@ jobs:
     needs: [s01_design, s01_repair, s01_memory]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -844,8 +886,10 @@ jobs:
     needs: [s01_design, s01_repair, s01_final_memory]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -886,10 +930,12 @@ jobs:
     needs: [s01_design, s01_repair, s01_verify, s01_verify_rhetoric, s01_final_memory, s01_memory_review]
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     outputs:
       characters: ${{ steps.task.outputs.characters }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -942,10 +988,12 @@ jobs:
     needs: [s01_accept]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     outputs:
       characters: ${{ steps.task.outputs.characters }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -978,13 +1026,15 @@ jobs:
     needs: [s02_design]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       max-parallel: 3
       matrix:
         character: ${{ fromJSON(needs.s02_design.outputs.characters) }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1018,8 +1068,10 @@ jobs:
     needs: [s02_design, s02_characters]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1056,8 +1108,10 @@ jobs:
     needs: [s02_design, s02_direction]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1094,8 +1148,10 @@ jobs:
     needs: [s02_design, s02_draft]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1132,8 +1188,10 @@ jobs:
     needs: [s02_design, s02_draft, s02_edit]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1174,8 +1232,10 @@ jobs:
     needs: [s02_design, s02_edit]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1212,8 +1272,10 @@ jobs:
     needs: [s02_design, s02_edit]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1250,8 +1312,10 @@ jobs:
     needs: [s02_design, s02_edit, s02_story, s02_rhetoric]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1296,8 +1360,10 @@ jobs:
     needs: [s02_design, s02_repair, s02_story, s02_draft]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1342,8 +1408,10 @@ jobs:
     needs: [s02_design, s02_repair, s02_rhetoric]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1384,8 +1452,10 @@ jobs:
     needs: [s02_design, s02_repair, s02_memory]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1426,8 +1496,10 @@ jobs:
     needs: [s02_design, s02_repair, s02_final_memory]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1468,10 +1540,12 @@ jobs:
     needs: [s02_design, s02_repair, s02_verify, s02_verify_rhetoric, s02_final_memory, s02_memory_review]
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     outputs:
       characters: ${{ steps.task.outputs.characters }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1524,10 +1598,12 @@ jobs:
     needs: [s02_accept]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     outputs:
       characters: ${{ steps.task.outputs.characters }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1560,13 +1636,15 @@ jobs:
     needs: [s03_design]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       max-parallel: 3
       matrix:
         character: ${{ fromJSON(needs.s03_design.outputs.characters) }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1600,8 +1678,10 @@ jobs:
     needs: [s03_design, s03_characters]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1638,8 +1718,10 @@ jobs:
     needs: [s03_design, s03_direction]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1676,8 +1758,10 @@ jobs:
     needs: [s03_design, s03_draft]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1714,8 +1798,10 @@ jobs:
     needs: [s03_design, s03_draft, s03_edit]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1756,8 +1842,10 @@ jobs:
     needs: [s03_design, s03_edit]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1794,8 +1882,10 @@ jobs:
     needs: [s03_design, s03_edit]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1832,8 +1922,10 @@ jobs:
     needs: [s03_design, s03_edit, s03_story, s03_rhetoric]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1878,8 +1970,10 @@ jobs:
     needs: [s03_design, s03_repair, s03_story, s03_draft]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1924,8 +2018,10 @@ jobs:
     needs: [s03_design, s03_repair, s03_rhetoric]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -1966,8 +2062,10 @@ jobs:
     needs: [s03_design, s03_repair, s03_memory]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2008,8 +2106,10 @@ jobs:
     needs: [s03_design, s03_repair, s03_final_memory]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2050,10 +2150,12 @@ jobs:
     needs: [s03_design, s03_repair, s03_verify, s03_verify_rhetoric, s03_final_memory, s03_memory_review]
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     outputs:
       characters: ${{ steps.task.outputs.characters }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2106,10 +2208,12 @@ jobs:
     needs: [s03_accept]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     outputs:
       characters: ${{ steps.task.outputs.characters }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2142,13 +2246,15 @@ jobs:
     needs: [s04_design]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       max-parallel: 3
       matrix:
         character: ${{ fromJSON(needs.s04_design.outputs.characters) }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2182,8 +2288,10 @@ jobs:
     needs: [s04_design, s04_characters]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2220,8 +2328,10 @@ jobs:
     needs: [s04_design, s04_direction]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2258,8 +2368,10 @@ jobs:
     needs: [s04_design, s04_draft]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2296,8 +2408,10 @@ jobs:
     needs: [s04_design, s04_draft, s04_edit]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2338,8 +2452,10 @@ jobs:
     needs: [s04_design, s04_edit]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2376,8 +2492,10 @@ jobs:
     needs: [s04_design, s04_edit]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2414,8 +2532,10 @@ jobs:
     needs: [s04_design, s04_edit, s04_story, s04_rhetoric]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2460,8 +2580,10 @@ jobs:
     needs: [s04_design, s04_repair, s04_story, s04_draft]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2506,8 +2628,10 @@ jobs:
     needs: [s04_design, s04_repair, s04_rhetoric]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2548,8 +2672,10 @@ jobs:
     needs: [s04_design, s04_repair, s04_memory]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2590,8 +2716,10 @@ jobs:
     needs: [s04_design, s04_repair, s04_final_memory]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2632,10 +2760,12 @@ jobs:
     needs: [s04_design, s04_repair, s04_verify, s04_verify_rhetoric, s04_final_memory, s04_memory_review]
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     outputs:
       characters: ${{ steps.task.outputs.characters }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2688,10 +2818,12 @@ jobs:
     needs: [s04_accept]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     outputs:
       characters: ${{ steps.task.outputs.characters }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2724,13 +2856,15 @@ jobs:
     needs: [s05_design]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       max-parallel: 3
       matrix:
         character: ${{ fromJSON(needs.s05_design.outputs.characters) }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2764,8 +2898,10 @@ jobs:
     needs: [s05_design, s05_characters]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2802,8 +2938,10 @@ jobs:
     needs: [s05_design, s05_direction]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2840,8 +2978,10 @@ jobs:
     needs: [s05_design, s05_draft]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2878,8 +3018,10 @@ jobs:
     needs: [s05_design, s05_draft, s05_edit]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2920,8 +3062,10 @@ jobs:
     needs: [s05_design, s05_edit]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2958,8 +3102,10 @@ jobs:
     needs: [s05_design, s05_edit]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -2996,8 +3142,10 @@ jobs:
     needs: [s05_design, s05_edit, s05_story, s05_rhetoric]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3042,8 +3190,10 @@ jobs:
     needs: [s05_design, s05_repair, s05_story, s05_draft]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3088,8 +3238,10 @@ jobs:
     needs: [s05_design, s05_repair, s05_rhetoric]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3130,8 +3282,10 @@ jobs:
     needs: [s05_design, s05_repair, s05_memory]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3172,8 +3326,10 @@ jobs:
     needs: [s05_design, s05_repair, s05_final_memory]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3214,10 +3370,12 @@ jobs:
     needs: [s05_design, s05_repair, s05_verify, s05_verify_rhetoric, s05_final_memory, s05_memory_review]
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     outputs:
       characters: ${{ steps.task.outputs.characters }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3270,10 +3428,12 @@ jobs:
     needs: [s05_accept]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     outputs:
       characters: ${{ steps.task.outputs.characters }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3306,13 +3466,15 @@ jobs:
     needs: [s06_design]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       max-parallel: 3
       matrix:
         character: ${{ fromJSON(needs.s06_design.outputs.characters) }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3346,8 +3508,10 @@ jobs:
     needs: [s06_design, s06_characters]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3384,8 +3548,10 @@ jobs:
     needs: [s06_design, s06_direction]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3422,8 +3588,10 @@ jobs:
     needs: [s06_design, s06_draft]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3460,8 +3628,10 @@ jobs:
     needs: [s06_design, s06_draft, s06_edit]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3502,8 +3672,10 @@ jobs:
     needs: [s06_design, s06_edit]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3540,8 +3712,10 @@ jobs:
     needs: [s06_design, s06_edit]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3578,8 +3752,10 @@ jobs:
     needs: [s06_design, s06_edit, s06_story, s06_rhetoric]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3624,8 +3800,10 @@ jobs:
     needs: [s06_design, s06_repair, s06_story, s06_draft]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3670,8 +3848,10 @@ jobs:
     needs: [s06_design, s06_repair, s06_rhetoric]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3712,8 +3892,10 @@ jobs:
     needs: [s06_design, s06_repair, s06_memory]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3754,8 +3936,10 @@ jobs:
     needs: [s06_design, s06_repair, s06_final_memory]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3796,10 +3980,12 @@ jobs:
     needs: [s06_design, s06_repair, s06_verify, s06_verify_rhetoric, s06_final_memory, s06_memory_review]
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     outputs:
       characters: ${{ steps.task.outputs.characters }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3852,10 +4038,12 @@ jobs:
     needs: [s06_accept]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     outputs:
       characters: ${{ steps.task.outputs.characters }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3888,13 +4076,15 @@ jobs:
     needs: [s07_design]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       max-parallel: 3
       matrix:
         character: ${{ fromJSON(needs.s07_design.outputs.characters) }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3928,8 +4118,10 @@ jobs:
     needs: [s07_design, s07_characters]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -3966,8 +4158,10 @@ jobs:
     needs: [s07_design, s07_direction]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4004,8 +4198,10 @@ jobs:
     needs: [s07_design, s07_draft]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4042,8 +4238,10 @@ jobs:
     needs: [s07_design, s07_draft, s07_edit]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4084,8 +4282,10 @@ jobs:
     needs: [s07_design, s07_edit]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4122,8 +4322,10 @@ jobs:
     needs: [s07_design, s07_edit]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4160,8 +4362,10 @@ jobs:
     needs: [s07_design, s07_edit, s07_story, s07_rhetoric]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4206,8 +4410,10 @@ jobs:
     needs: [s07_design, s07_repair, s07_story, s07_draft]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4252,8 +4458,10 @@ jobs:
     needs: [s07_design, s07_repair, s07_rhetoric]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4294,8 +4502,10 @@ jobs:
     needs: [s07_design, s07_repair, s07_memory]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4336,8 +4546,10 @@ jobs:
     needs: [s07_design, s07_repair, s07_final_memory]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4378,10 +4590,12 @@ jobs:
     needs: [s07_design, s07_repair, s07_verify, s07_verify_rhetoric, s07_final_memory, s07_memory_review]
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     outputs:
       characters: ${{ steps.task.outputs.characters }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4434,10 +4648,12 @@ jobs:
     needs: [s07_accept]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     outputs:
       characters: ${{ steps.task.outputs.characters }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4470,13 +4686,15 @@ jobs:
     needs: [s08_design]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       max-parallel: 3
       matrix:
         character: ${{ fromJSON(needs.s08_design.outputs.characters) }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4510,8 +4728,10 @@ jobs:
     needs: [s08_design, s08_characters]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4548,8 +4768,10 @@ jobs:
     needs: [s08_design, s08_direction]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4586,8 +4808,10 @@ jobs:
     needs: [s08_design, s08_draft]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4624,8 +4848,10 @@ jobs:
     needs: [s08_design, s08_draft, s08_edit]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4666,8 +4892,10 @@ jobs:
     needs: [s08_design, s08_edit]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4704,8 +4932,10 @@ jobs:
     needs: [s08_design, s08_edit]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4742,8 +4972,10 @@ jobs:
     needs: [s08_design, s08_edit, s08_story, s08_rhetoric]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4788,8 +5020,10 @@ jobs:
     needs: [s08_design, s08_repair, s08_story, s08_draft]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4834,8 +5068,10 @@ jobs:
     needs: [s08_design, s08_repair, s08_rhetoric]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4876,8 +5112,10 @@ jobs:
     needs: [s08_design, s08_repair, s08_memory]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4918,8 +5156,10 @@ jobs:
     needs: [s08_design, s08_repair, s08_final_memory]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -4960,10 +5200,12 @@ jobs:
     needs: [s08_design, s08_repair, s08_verify, s08_verify_rhetoric, s08_final_memory, s08_memory_review]
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     outputs:
       characters: ${{ steps.task.outputs.characters }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -5016,10 +5258,12 @@ jobs:
     needs: [s08_accept]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     outputs:
       characters: ${{ steps.task.outputs.characters }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -5052,13 +5296,15 @@ jobs:
     needs: [s09_design]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       max-parallel: 3
       matrix:
         character: ${{ fromJSON(needs.s09_design.outputs.characters) }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -5092,8 +5338,10 @@ jobs:
     needs: [s09_design, s09_characters]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -5130,8 +5378,10 @@ jobs:
     needs: [s09_design, s09_direction]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -5168,8 +5418,10 @@ jobs:
     needs: [s09_design, s09_draft]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -5206,8 +5458,10 @@ jobs:
     needs: [s09_design, s09_draft, s09_edit]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -5248,8 +5502,10 @@ jobs:
     needs: [s09_design, s09_edit]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -5286,8 +5542,10 @@ jobs:
     needs: [s09_design, s09_edit]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -5324,8 +5582,10 @@ jobs:
     needs: [s09_design, s09_edit, s09_story, s09_rhetoric]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -5370,8 +5630,10 @@ jobs:
     needs: [s09_design, s09_repair, s09_story, s09_draft]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -5416,8 +5678,10 @@ jobs:
     needs: [s09_design, s09_repair, s09_rhetoric]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -5458,8 +5722,10 @@ jobs:
     needs: [s09_design, s09_repair, s09_memory]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -5500,8 +5766,10 @@ jobs:
     needs: [s09_design, s09_repair, s09_final_memory]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -5542,10 +5810,12 @@ jobs:
     needs: [s09_design, s09_repair, s09_verify, s09_verify_rhetoric, s09_final_memory, s09_memory_review]
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360
     outputs:
       characters: ${{ steps.task.outputs.characters }}
     steps:
+      - name: Start shared job time budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
@@ -5595,6 +5865,7 @@ jobs:
 
   results:
     name: Collect outputs and checkpoints
+    timeout-minutes: 360
     if: always()
     needs: [prepare, refine, refine_review, refine_revision, refine_gate, plan, plan_review, plan_revision, plan_gate, s01_design, s01_characters, s01_direction, s01_draft, s01_edit, s01_story, s01_rhetoric, s01_memory, s01_repair, s01_verify, s01_verify_rhetoric, s01_final_memory, s01_memory_review, s01_accept, s02_design, s02_characters, s02_direction, s02_draft, s02_edit, s02_story, s02_rhetoric, s02_memory, s02_repair, s02_verify, s02_verify_rhetoric, s02_final_memory, s02_memory_review, s02_accept, s03_design, s03_characters, s03_direction, s03_draft, s03_edit, s03_story, s03_rhetoric, s03_memory, s03_repair, s03_verify, s03_verify_rhetoric, s03_final_memory, s03_memory_review, s03_accept, s04_design, s04_characters, s04_direction, s04_draft, s04_edit, s04_story, s04_rhetoric, s04_memory, s04_repair, s04_verify, s04_verify_rhetoric, s04_final_memory, s04_memory_review, s04_accept, s05_design, s05_characters, s05_direction, s05_draft, s05_edit, s05_story, s05_rhetoric, s05_memory, s05_repair, s05_verify, s05_verify_rhetoric, s05_final_memory, s05_memory_review, s05_accept, s06_design, s06_characters, s06_direction, s06_draft, s06_edit, s06_story, s06_rhetoric, s06_memory, s06_repair, s06_verify, s06_verify_rhetoric, s06_final_memory, s06_memory_review, s06_accept, s07_design, s07_characters, s07_direction, s07_draft, s07_edit, s07_story, s07_rhetoric, s07_memory, s07_repair, s07_verify, s07_verify_rhetoric, s07_final_memory, s07_memory_review, s07_accept, s08_design, s08_characters, s08_direction, s08_draft, s08_edit, s08_story, s08_rhetoric, s08_memory, s08_repair, s08_verify, s08_verify_rhetoric, s08_final_memory, s08_memory_review, s08_accept, s09_design, s09_characters, s09_direction, s09_draft, s09_edit, s09_story, s09_rhetoric, s09_memory, s09_repair, s09_verify, s09_verify_rhetoric, s09_final_memory, s09_memory_review, s09_accept]
     runs-on: ubuntu-latest

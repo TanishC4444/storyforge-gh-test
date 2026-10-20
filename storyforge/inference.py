@@ -8,6 +8,7 @@ import sys
 import time
 from .contracts import ContractError
 from .storage import load, save
+from .runtime import JOB_TIMEOUT_MINUTES, JOB_TIMEOUT_SECONDS, DOWNLOAD_TIMEOUT_SECONDS
 
 ROOT = Path(__file__).resolve().parents[1]
 PROFILES = {
@@ -61,17 +62,18 @@ class Executor:
                     else:
                         sys.path.insert(0, str(ROOT / 'vendor/gh-inference'))
                         from gh_ai_runner import Agent, GitHubAIRunner
+                        from gh_ai_runner.limits import Limits
                         if not os.getenv('GH_AI_TOKEN'):
                             raise RuntimeError('GH_AI_TOKEN required for live inference')
                         # Every call creates an Agent and dispatches a new job. No implicit history.
-                        runner = GitHubAIRunner(os.environ['GH_AI_TOKEN'], repo_name=self.req['runner_repo'], private=False, runner_ram_gb=16, runner_disk_gb=14, metadata_path=None, verbose=False)
+                        runner = GitHubAIRunner(os.environ['GH_AI_TOKEN'], repo_name=self.req['runner_repo'], private=False, runner_ram_gb=16, runner_disk_gb=14, metadata_path=None, verbose=False, completion_timeout=JOB_TIMEOUT_SECONDS, limits=Limits(job_timeout_minutes=JOB_TIMEOUT_MINUTES, provider_timeout_seconds=JOB_TIMEOUT_SECONDS, download_timeout_seconds=DOWNLOAD_TIMEOUT_SECONDS))
                         agent = Agent(runner=runner, model=model, instructions=system, remember=False, refine_prompt=False,
                                       n_ctx=self.req['n_ctx'], max_tokens=tokens,
                                       temperature=.7 if role in {'writer', 'humanizer'} else .25,
                                       track_time=True, repo_name=self.req['runner_repo'],
                                       model_options={'chat_template_options': {'enable_thinking': False}} if model.startswith('gemma-4') else {})
                         try:
-                            output = agent.run(prompt, timeout=1800)
+                            output = agent.run(prompt, timeout=JOB_TIMEOUT_SECONDS)
                         except Exception:
                             job = getattr(agent, 'last_job', None)
                             save(self.folder / 'last-job.json', {'role': role, 'job': str(getattr(job, 'run_id', 'unknown')), 'note': 'Inspect runner Actions before retrying; timed-out remote jobs may still be running.'})

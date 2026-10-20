@@ -13,10 +13,24 @@ def document(state,kind):
     return {'request':state['request'],'candidate':state['refinement'] if kind=='refine' else state['plan']}
 
 
+def source_paths(document):
+    """Supply real navigable paths, never guessed aliases for normalized fields."""
+    paths=[]
+    def visit(value,path,depth):
+        paths.append(path)
+        if depth>=2:return
+        if isinstance(value,dict):
+            for key,item in value.items():visit(item,path+'.'+key,depth+1)
+        elif isinstance(value,list):
+            for index,item in enumerate(value[:6]):visit(item,path+'.'+str(index),depth+1)
+    visit(document['candidate'],'candidate',0)
+    return paths
+
+
 def assess(executor,state,kind):
     data=document(state,kind)
-    return executor.call('development_editor',{'review_document':data,'required_checks':DESIGN_CHECKS},
-                         'Assess every required category using paths into review_document; return the required design-review JSON.',
+    return executor.call('development_editor',{'review_document':data,'required_checks':DESIGN_CHECKS,'valid_candidate_paths':source_paths(data)},
+                         'Assess every required category against the actual candidate, compared with the user request. Select paths from valid_candidate_paths. Normalized lists use numeric indexes, not invented named keys. User-request fields are requirements, not evidence that the candidate satisfies them. Return the required design-review JSON. Set pass=true if all checks pass and issues are advisory only; pass=false requires a failed check or blocking issue.',
                          tokens=2700,validator=lambda x:design_review(x,data),skill=(ROOT/'skills/design_review.md').read_text())
 
 

@@ -158,14 +158,22 @@ class WorkflowTests(unittest.TestCase):
                 return 'A complete test artifact.'
         module = types.ModuleType('gh_ai_runner')
         module.Agent = FakeAgent
-        module.GitHubAIRunner = lambda *a, **kw: object()
+        runner_options = []
+        def fake_runner(*args, **kwargs):
+            runner_options.append(kwargs)
+            return object()
+        module.GitHubAIRunner = fake_runner
+        policy_module = types.ModuleType('gh_ai_runner.limits')
+        policy_module.Limits = lambda **kwargs: types.SimpleNamespace(**kwargs)
         req = example()
         req['profile'] = 'expressive'
-        with tempfile.TemporaryDirectory() as d, redirect_stdout(io.StringIO()), patch.dict('sys.modules', {'gh_ai_runner': module}), patch.dict('os.environ', {'GH_AI_TOKEN': 'unit-test-placeholder'}):
+        with tempfile.TemporaryDirectory() as d, redirect_stdout(io.StringIO()), patch.dict('sys.modules', {'gh_ai_runner': module, 'gh_ai_runner.limits': policy_module}), patch.dict('os.environ', {'GH_AI_TOKEN': 'unit-test-placeholder'}):
             executor = Executor(req, d, 'github')
             executor.call('writer', {'only': 'writer context'}, 'write')
             executor.call('humanizer', {'only': 'editor context'}, 'edit')
         self.assertEqual(len(made), 2)
+        self.assertEqual(runner_options[0]['limits'].job_timeout_minutes, 360)
+        self.assertEqual(runner_options[0]['completion_timeout'], 21600)
         self.assertFalse(made[0].options['remember'])
         self.assertFalse(made[1].options['remember'])
         self.assertEqual(made[0].options['model'], 'glitter-12b')

@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 from .inference import ROOT
+from .runtime import JOB_TIMEOUT_MINUTES, JOB_TIMEOUT_SECONDS, DOWNLOAD_TIMEOUT_SECONDS, worker_timeout_seconds
 
 
 def execute(model, system, prompt, tokens, n_ctx, role):
@@ -18,10 +19,10 @@ def execute(model, system, prompt, tokens, n_ctx, role):
     from gh_ai_runner.limits import Limits
     from gh_ai_runner.validation import _validate
     from gh_ai_runner.models import MODELS
-    limits = Limits()
+    limits = Limits(job_timeout_minutes=JOB_TIMEOUT_MINUTES, provider_timeout_seconds=JOB_TIMEOUT_SECONDS, download_timeout_seconds=DOWNLOAD_TIMEOUT_SECONDS)
     _validate(model, tokens, .7, n_ctx, runner_ram_gb=16, runner_disk_gb=14, cache=False, limits=limits)
     config = {'model': model, 'n_ctx': n_ctx, 'max_tokens': tokens,
-              'temperature': .7 if role in {'writer', 'humanizer'} else .25,
+              'job_timeout_minutes': JOB_TIMEOUT_MINUTES, 'temperature': .7 if role in {'writer', 'humanizer'} else .25,
               'cache_weights': False, 'limits': limits.to_dict(),
               'agent': {'remember': False, 'history': [], 'tasks': [], 'refine_prompt': False, 'track_time': True},
               'model_options': {'chat_template_options': {'enable_thinking': False}} if model.startswith('gemma-4') else {}}
@@ -34,7 +35,7 @@ def execute(model, system, prompt, tokens, n_ctx, role):
         env = {**os.environ, 'JOB_ID': role, 'ATTEMPT': '1', 'BACKEND': 'local',
                'LOCAL_MODEL': model, 'CACHE': 'false', 'SYSTEM': system, 'PROMPT': prompt,
                'CONFIG_JSON': json.dumps(config)}
-        process = subprocess.run([sys.executable, str(path / 'worker.py')], cwd=path, env=env, timeout=2100)
+        process = subprocess.run([sys.executable, str(path / 'worker.py')], cwd=path, env=env, timeout=worker_timeout_seconds())
         result_path = path / 'result.json'
         result = json.loads(result_path.read_text()) if result_path.exists() else {}
         if process.returncode:
