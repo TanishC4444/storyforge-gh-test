@@ -42,8 +42,8 @@ jobs:
 '''
 
 
-def build(total=9, per_chapter=3, troy=False, continuation=False, full_api=False):
-    if full_api:
+def build(total=9, per_chapter=3, troy=False, continuation=False, full_api=False, resident=True):
+    if full_api and resident:
         if not troy or continuation:raise ValueError('Full API workflow requires fresh Troy process')
         return build_resident()
     header=HEADER
@@ -248,3 +248,6 @@ if __name__ == '__main__':
     (ROOT / '.github/workflows/troy-continue.yml').write_text(build(total=4,per_chapter=4,troy=True,continuation=True))
 
     (ROOT / '.github/workflows/troy-full-api.yml').write_text(build(total=4,per_chapter=4,troy=True,full_api=True))
+    multi=build(total=4,per_chapter=4,troy=True,full_api=True,resident=False)
+    multi=multi.replace('Troy full prompt-to-story / hosted APIs','Troy full multi-runner / hosted APIs').replace('troy-full-api','troy-multi-api')
+    (ROOT / '.github/workflows/troy-multi-api.yml').write_text(multi)

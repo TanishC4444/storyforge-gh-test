@@ -1,6 +1,6 @@
 """Quota-aware Google hosted inference. Secrets never enter packets or diagnostics."""
 from __future__ import annotations
-import fcntl,json,math,os,time,random,urllib.request,urllib.error
+import fcntl,json,math,os,time,random,uuid,urllib.request,urllib.error
 from pathlib import Path
 from .storage import save
 
@@ -51,9 +51,33 @@ class GoogleHosted:
                 if current['calls']>=max_calls:raise HostedError(kind+' run call budget exhausted')
                 now=time.time();current['recent']=[r for r in current['recent'] if now-r[0]<61]
                 if len(current['recent'])<rpm and sum(r[1] for r in current['recent'])+tokens<=tpm:
-                    current['recent'].append([now,tokens]);current['calls']+=1;save(path,state);return
+                    current['recent'].append([now,tokens]);current['calls']+=1
+                    current.setdefault('reservations',[]).append({'id':uuid.uuid4().hex,'time':now,'tokens':tokens})
+                    save(path,state);return
                 wait=max(.2,61-(now-current['recent'][0][0]))
             time.sleep(min(wait,1))
+    def inherit(self,paths):
+        """Union upstream reservation IDs; shared ancestry is counted once.
+
+        Distributed requests keep hosted work on a single dependency chain, so
+        independent CPU branches cannot race to reserve provider capacity.
+        """
+        ledger={};health={}
+        for path in paths:
+            value=json.loads(path.read_text())
+            for kind in MODELS:
+                for item in value.get(kind,{}).get('reservations',[]):
+                    ledger.setdefault(kind,{})[item['id']]=item
+            prior_health=path.parent/'health.json'
+            if prior_health.exists():
+                for kind,item in json.loads(prior_health.read_text()).items():
+                    if item['until']>health.get(kind,{}).get('until',0):health[kind]=item
+        if ledger:
+            save(self.folder/'quota.json',{kind:{'calls':len(items),'reservations':list(items.values()),
+                'recent':[[item['time'],item['tokens']] for item in items.values() if time.time()-item['time']<61]}
+                for kind,items in ledger.items()})
+        if health:save(self.folder/'health.json',health)
+
     def can_rescue(self):
         path=self.folder/'quota.json'
         with (self.folder/'quota.lock').open('a') as lock:

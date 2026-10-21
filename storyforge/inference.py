@@ -49,6 +49,8 @@ class Executor:
         if backend=='worker' and req.get('api_roles'):
             from .hosted import GoogleHosted
             self.hosted=GoogleHosted(os.getenv('STORY_QUOTA_DIR',str(self.folder/'provider-budget')))
+            if req.get('performance',{}).get('inherit_provider_budget') and not os.getenv('STORY_QUOTA_DIR'):
+                self.hosted.inherit((self.folder.parent/'inputs').rglob('provider-budget/quota.json'))
 
     def call(self, role, packet, instruction, *, tokens=1200, validator=None, skill='', response_schema=None, output_format='json'):
         from .output_schema import editorial_schema, refinement_schema, plan_schema, scene_schema, memory_review_schema
@@ -107,7 +109,7 @@ class Executor:
                         if self.hosted and kind:
                             from .resilience import warning
                             routes=[kind]
-                            if self.req.get('performance',{}).get('hosted_failover') or (role=='humanizer' and kind=='gemma'):
+                            if self.req.get('performance',{}).get('hosted_failover') or (role=='humanizer' and kind=='gemma' and 'hosted_failover' not in self.req.get('performance',{})):
                                 routes += ['gemma' if kind=='flash' else 'flash']
                             for route in routes:
                                 if route=='flash' and kind!='flash' and not self.hosted.can_rescue():continue

@@ -91,3 +91,30 @@ class FullFlowTests(unittest.TestCase):
             self.assertEqual(len(dev_calls),1)
             # Neither the fixture marker nor synthetic approval is presented as a live benchmark.
             self.assertIn('FIXTURE',(root/'run/FINAL_STORY.txt').read_text())
+
+class DistributedBudgetTests(unittest.TestCase):
+    def test_shared_ancestry_is_not_double_counted(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);ancestor=GoogleHosted(root/'ancestor','placeholder')
+            ancestor.reserve('gemma',100)
+            first=GoogleHosted(root/'first','placeholder');first.inherit([root/'ancestor/quota.json'])
+            first.reserve('gemma',100)
+            second=GoogleHosted(root/'second','placeholder');second.inherit([root/'ancestor/quota.json'])
+            joined=GoogleHosted(root/'joined','placeholder')
+            joined.inherit([root/'first/quota.json',root/'second/quota.json'])
+            state=load(root/'joined/quota.json')['gemma']
+            self.assertEqual(state['calls'],2)
+            self.assertEqual(len(state['recent']),2)
+            self.assertEqual(sum(item[1] for item in state['recent']),200)
+    def test_massive_graph_keeps_separate_parallel_jobs(self):
+        workflow=(ROOT/'.github/workflows/troy-multi-api.yml').read_text()
+        self.assertIn('options: [troy-multi-api]',workflow)
+        for scene in range(1,5):
+            for suffix in ['characters','draft','edit','story','rhetoric','memory','repair','verify','verify_rhetoric','final_memory','memory_review','accept']:
+                self.assertIn('\n  s%02d_%s:'%(scene,suffix),workflow)
+        self.assertIn('matrix:',workflow)
+        self.assertNotIn('python -m storyforge.full_flow',workflow)
+        req=load(ROOT/'examples/troy-multi-api.json')
+        self.assertTrue(req['performance']['inherit_provider_budget'])
+        for role in ['rhetoric_quality','memory','memory_quality','character']:
+            self.assertNotIn(role,req['api_roles'])
