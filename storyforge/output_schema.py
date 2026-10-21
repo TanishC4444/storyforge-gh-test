@@ -34,3 +34,20 @@ def refinement_schema():
     properties.update({key: {'type': 'array', 'items': {'type': 'string'}} for key in arrays})
     return {'type': 'object', 'properties': properties,
             'required': list(properties), 'additionalProperties': False}
+
+
+def plan_schema(req):
+    """Constrain the complete outline, including fields required after scenes."""
+    ids=[c['id'] for c in req['characters']]
+    total=req['chapters']*req['scenes_per_chapter']
+    scene_ids=[f'ch{i // req["scenes_per_chapter"] + 1:02}-sc{i % req["scenes_per_chapter"] + 1:02}' for i in range(total)]
+    properties={key:{'type':'string','minLength':1} for key in ['goal','obstacle','intended_change','location','time']}
+    properties.update({'id':{'type':'string','enum':scene_ids},
+                       'chapter':{'type':'integer','minimum':1,'maximum':req['chapters']},
+                       'pov':{'type':'string','enum':ids},
+                       'participants':{'type':'array','items':{'type':'string','enum':ids},'minItems':1,'maxItems':len(ids)}})
+    scene={'type':'object','properties':properties,'required':list(properties),'additionalProperties':False}
+    return {'type':'object','properties':{
+        'scenes':{'type':'array','items':scene,'minItems':total,'maxItems':total},
+        'threads':{'type':'array','items':{'type':'string'},'maxItems':12}},
+        'required':['scenes','threads'],'additionalProperties':False}

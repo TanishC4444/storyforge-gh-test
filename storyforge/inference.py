@@ -51,14 +51,16 @@ class Executor:
             self.hosted=GoogleHosted(os.getenv('STORY_QUOTA_DIR',str(self.folder/'provider-budget')))
 
     def call(self, role, packet, instruction, *, tokens=1200, validator=None, skill='', response_schema=None, output_format='json'):
-        from .output_schema import editorial_schema, refinement_schema
-        response_schema=response_schema or (refinement_schema() if role=='refiner' else editorial_schema(packet))
+        from .output_schema import editorial_schema, refinement_schema, plan_schema
+        response_schema=response_schema or (refinement_schema() if role=='refiner' else plan_schema(self.req) if role=='architect' else editorial_schema(packet))
         editorial_repair=bool(response_schema and 'checks' in response_schema.get('properties',{}))
         if self.req.get('performance',{}).get('single_editorial_pass') and role.endswith('quality'):
             instruction+=' Keep each check reason to one specific sentence, and issues to concrete actionable faults. No introduction or repeated analysis.'
             skill='Assess every required check using exact source passages. Respect deliberate style, private knowledge, physical causality, character depth, subtext and user choices. A failed check must have a matching actionable issue. Propose an exact replacement only when it preserves facts.'
             if role in {'story_quality','rhetoric_quality'}:
                 packet={k:v for k,v in packet.items() if k != 'craft'}
+        if role=='architect':
+            instruction+=' Return only the scene cards and thread strings in the schema. Keep each scene field to one or two concrete sentences. Do not repeat the supplied brief, reference lists, stylistic devices or technique libraries.'
         last_error = ''
         repair_output = None
         for attempt in range(self.req['max_stage_retries'] + 1):

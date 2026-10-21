@@ -1,0 +1,117 @@
+{
+  "title": "The Fire Beneath the Bronze",
+  "threads": [
+    {
+      "id": "smith-freedom",
+      "owner": "thestor",
+      "current_state": "Seek passage and withheld wages before discovery",
+      "next_change": "Kings prevent departure once his knowledge becomes necessary",
+      "main_plot_effect": "Will skill secure household freedom or bind him more tightly to the army?",
+      "planned_outcome": "Without it the social cost is only a debate among powerful men"
+    },
+    {
+      "id": "honor-command",
+      "owner": "achilles",
+      "current_state": "An existing dispute with Agamemnon shapes response before the trial",
+      "next_change": "Deployment conditions force Achilles to risk his own body",
+      "main_plot_effect": "Who earns honor and who faces danger in a victory enabled by unfamiliar craft?",
+      "planned_outcome": "Without it acquisition faces implausibly little internal resistance"
+    },
+    {
+      "id": "water-records",
+      "owner": "archivist",
+      "current_state": "Partial map",
+      "next_change": "Discover revision authority",
+      "main_plot_effect": "Changes target of inquiry",
+      "planned_outcome": "Evidence plus contested reform"
+    },
+    {
+      "id": "engagement",
+      "owner": "brother",
+      "current_state": "Conditional alliance",
+      "next_change": "Receive public loyalty demand",
+      "main_plot_effect": "Threatens access and trust",
+      "planned_outcome": "Boundary chosen at a cost"
+    },
+    {
+      "id": "maintenance-work",
+      "owner": "pump-mechanic",
+      "current_state": "Unpaid hazard",
+      "next_change": "Vote on shutdown",
+      "main_plot_effect": "Creates a physical deadline",
+      "planned_outcome": "Negotiated participation"
+    }
+  ],
+  "technique_stack": [
+    "extended epic simile",
+    "recurring epithet",
+    "supplication and refused counsel",
+    "supplication and refused counsel",
+    "supplication and refused counsel",
+    "supplication and refused counsel",
+    "supplication and refused counsel",
+    "supplication and refused counsel"
+  ],
+  "scenes": [
+    {
+      "id": "ch01-sc01",
+      "chapter": 1,
+      "pov": "thestor",
+      "participants": [
+        "thestor",
+        "odysseus"
+      ],
+      "location": "Achaean shore and smiths' shelters after a storm",
+      "time": "after a storm",
+      "goal": "Earn curiosity through material evidence and conflicting needs",
+      "obstacle": "No usable firearm, trial, battle use or complete understanding",
+      "intended_change": "Thestor reveals enough to secure an expedition though it delays departure. Odysseus commits time and men"
+    },
+    {
+      "id": "ch01-sc02",
+      "chapter": 1,
+      "pov": "odysseus",
+      "participants": [
+        "odysseus",
+        "thestor"
+      ],
+      "location": "Concealed coastal sanctuary reached by a difficult journey",
+      "time": "a difficult journey",
+      "goal": "Earn access through a costly bargain and physical acquisition",
+      "obstacle": "Spend substantial scene space acquiring and transporting the cache. Keeper must want something. No infinite supply",
+      "intended_change": "Odysseus binds himself, conceals part of the price and brings back six weapons plus a fixed finite charge supply"
+    },
+    {
+      "id": "ch01-sc03",
+      "chapter": 1,
+      "pov": "achilles",
+      "participants": [
+        "agamemnon",
+        "odysseus",
+        "achilles",
+        "thestor"
+      ],
+      "location": "Secluded trial ground, then the Achaean council",
+      "time": "public rank meets unreliable physical evidence",
+      "goal": "Make possession a conflict over use, authority and who faces danger",
+      "obstacle": "No unanimous conversion by a speech. Establish every limitation used in the climax. Maintain third-person epic language during practical work",
+      "intended_change": "Authorize limited deployment with explicit conditions and personal exposure. A Trojan movement makes delay costly"
+    },
+    {
+      "id": "ch01-sc04",
+      "chapter": 1,
+      "pov": "achilles",
+      "participants": [
+        "achilles",
+        "hector",
+        "thestor",
+        "odysseus"
+      ],
+      "location": "Contested approach between Greek defenses and Trojan fighting line",
+      "time": "operators prepare under exposure; Trojans respond to unfamiliar effects",
+      "goal": "Local climax: constrained first deployment, costly choice, consequential aftermath",
+      "obstacle": "Hector and Achilles survive. No massacre or fall of Troy. Mark any Trojan focal shift. End on a concrete obligation or action, not a moral explanation",
+      "intended_change": "Achilles enters danger to protect operators he opposed. Thestor chooses between equipment and a dependent. Greeks secure the position; a specific irreversible loss follows an established limitation and human decision"
+    }
+  ]
+}

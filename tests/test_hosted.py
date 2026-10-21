@@ -202,3 +202,39 @@ class RefinementFailureRegressionTests(unittest.TestCase):
                 config=request.call_args.args[1]['generationConfig']
                 self.assertEqual(config['responseMimeType'],'application/json')
                 self.assertEqual(config.get('responseJsonSchema'),refinement_schema() if kind=='flash' else None)
+
+class OutlineFailureRegressionTests(unittest.TestCase):
+    def test_actual_failed_outline_is_rejected_without_thread_invention(self):
+        from storyforge.contracts import plan, ContractError
+        req=example()
+        bad=json.loads((Path(__file__).parent/'fixtures/outline-39622560642.json').read_text())
+        req['chapters']=1;req['scenes_per_chapter']=4
+        req['characters']=[{'id':cid} for cid in ['agamemnon','odysseus','achilles','hector','thestor']]
+        with self.assertRaisesRegex(ContractError,'thread strings'):
+            plan(bad,req)
+
+    def test_outage_truncation_and_valid_retry_preserve_outline_contract(self):
+        from storyforge.contracts import plan
+        from storyforge.output_schema import plan_schema
+        from storyforge.fixture import respond
+        req=example();req['profile']='fast';req['api_roles']={'architect':'flash'};req['max_stage_retries']=1
+        valid=respond('architect',{},req)
+        with tempfile.TemporaryDirectory() as d,patch('storyforge.hosted.GoogleHosted.complete',side_effect=HostedError('Google HTTP 503')) as hosted,patch('storyforge.local_worker.execute',side_effect=[('{"scenes":[',{'finish_reason':'length'}),(valid,{'finish_reason':'stop'})]) as cpu:
+            result=Executor(req,d,'worker').call('architect',{'request':req},'Plan the story',validator=lambda x:plan(x,req))
+            self.assertEqual(result,json.loads(valid))
+            self.assertEqual(hosted.call_args.kwargs['response_schema'],plan_schema(req))
+            for call in cpu.call_args_list:
+                self.assertEqual(call.kwargs['response_schema'],plan_schema(req))
+                self.assertIn('Do not repeat the supplied brief',call.args[1])
+            self.assertIn('possible truncated artifact',cpu.call_args.args[2])
+
+    def test_outline_arrays_are_finite_and_required(self):
+        from storyforge.output_schema import plan_schema
+        req=example();schema=plan_schema(req)
+        self.assertEqual(schema['required'],['scenes','threads'])
+        self.assertFalse(schema['additionalProperties'])
+        scenes=schema['properties']['scenes']
+        self.assertEqual(scenes['minItems'],req['chapters']*req['scenes_per_chapter'])
+        self.assertEqual(scenes['maxItems'],scenes['minItems'])
+        self.assertFalse(scenes['items']['additionalProperties'])
+        self.assertEqual(schema['properties']['threads']['items']['type'],'string')

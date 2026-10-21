@@ -44,6 +44,8 @@ jobs:
       - uses: ./.github/actions/setup-worker
         with:
           backend: fixture
+      - name: Check inference contracts before benchmark
+        run: python -m unittest discover -s tests -q
       - name: Install local RAG encoder when requested
         env:
           STORY_REQUEST: ${{ inputs.request_file }}

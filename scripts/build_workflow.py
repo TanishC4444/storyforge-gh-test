@@ -72,6 +72,8 @@ def build(total=9, per_chapter=3, troy=False, continuation=False, full_api=False
         setup_backend = "fixture" if task == "prepare" else ("${{ inputs.refinement_seed_run != '' && 'fixture' || inputs.backend }}" if task == "refine" else "${{ inputs.backend }}")
         if continuation and task in {'resume','scene_design','director','edit_plan','edit_merge'}: setup_backend='fixture'
         lines += ['    steps:', '      - name: Start shared job time budget', '        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + '+str(WORKER_TIMEOUT_SECONDS)+' ))" >> "$GITHUB_ENV"', '      - uses: actions/checkout@v4', '      - uses: ./.github/actions/setup-worker', '        with:', '          backend: ' + setup_backend]
+        if full_api and task=='prepare':
+            lines += ['      - name: Check inference contracts before benchmark', '        run: python -m unittest discover -s tests -q']
         if task == 'prepare':
             lines += ['      - name: Install local RAG encoder when requested', '        env:', '          STORY_REQUEST: ${{ inputs.request_file }}', '        run: |', "          python - <<'PY'", '          import json, os, subprocess, sys', '          from pathlib import Path', "          request=json.loads(Path('examples',os.environ['STORY_REQUEST']+'.json').read_text())", "          if request.get('retrieval_mode')=='hybrid' and not request.get('execution_policy',{}).get('resume_seed'):", "              subprocess.run([sys.executable,'-m','pip','install','-e','.[rag]'],check=True)", '          PY']
         if task == 'refine':
