@@ -36,7 +36,7 @@ def actor_packet(req, state, card, cid):
     contracts.require(cid in card['participants'], 'Character not in this scene')
     return {'character': next(c for c in req['characters'] if c['id'] == cid),
             'situation': {'location': card['location'], 'time': card['time']},
-            'known_facts': compact(visible(state['memories'], cid)), 'world_rules': req['world_rules']}
+            'known_facts': compact(visible(state['memories'],cid,{s['id']:s['participants'] for s in state['accepted']})), 'knowledge_policy':'Use only supported known facts; author world rules and future scene outcomes are not character knowledge.'}
 
 
 def safe_review(value,prose,required,req):

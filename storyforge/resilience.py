@@ -36,14 +36,21 @@ def salvage_memory(raw,prose,ids):
     return {'memories':valid,'quarantined':rejected}
 
 
-def memory_extract(executor,req,out,prose,packet,instruction):
+def memory_extract(executor,req,out,prose,packet,instruction,allow_public=True):
     ids=[c['id'] for c in req['characters']]
     from .output_schema import memory_schema
     def validate(raw):
         result=salvage_memory(raw,prose,ids) if enabled(req) else contracts.delta(raw,prose,ids)
+        if not allow_public:
+            retained=[]
+            for item in result['memories']:
+                if 'public' in item['known_by']:
+                    result.setdefault('quarantined',[]).append({'error':'Public scope is not allowed; explicit witnesses required','raw':item})
+                else:retained.append(item)
+            result['memories']=retained
         return result
     try:
-        result=executor.call('memory',packet,instruction,tokens=1000,validator=validate,response_schema=memory_schema(packet,ids))
+        result=executor.call('memory',packet,instruction,tokens=1000,validator=validate,response_schema=memory_schema(packet,ids,allow_public=allow_public))
         if result.get('quarantined'):warning(out,'memory_quarantine','Unsupported memory entries quarantined; source prose retained.')
         return result
     except Exception as exc:

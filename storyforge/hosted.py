@@ -22,7 +22,7 @@ class GoogleHosted:
             raise HostedError('Google HTTP '+str(exc.code)) from None
         except (TimeoutError,OSError):raise HostedError('Google connection failed or timed out') from None
     def reserve(self,kind,tokens):
-        limits={'gemma':(24,14000,80),'flash':(4,220000,6)}
+        limits={'gemma':(24,14000,120),'flash':(4,220000,6)}
         rpm,tpm,max_calls=limits[kind]
         if tokens>tpm:raise HostedError('Input exceeds conservative hosted per-minute allowance')
         path=self.folder/'quota.json'

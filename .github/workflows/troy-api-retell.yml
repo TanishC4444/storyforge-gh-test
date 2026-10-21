@@ -13,11 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
+      - name: Start shared six-hour job budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-worker
         with:
           backend: live
       - name: Load literary retrieval from completed run
+        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           name: s04_accept

@@ -24,8 +24,12 @@ def planning_packet(req, refinement, retrieval):
             'inspiration': application_packet(req, retrieval, 'architect')}
 
 
-def visible(memories, character=None):
-    return [m for m in memories if 'public' in m['known_by'] or (character is not None and character in m['known_by'])]
+def visible(memories, character=None, scene_audiences=None):
+    def public_for(memory):
+        if 'public' not in memory['known_by']:return False
+        if scene_audiences is None or memory.get('source')=='user_input':return True
+        return character in scene_audiences.get(memory.get('source'),[])
+    return [m for m in memories if public_for(m) or (character is not None and character in m['known_by'])]
 
 
 def compact(memories, count=24, char_budget=4500):
@@ -47,7 +51,7 @@ def packet(req, state, card):
         'brief': {k: req.get(k) for k in ['premise', 'genre', 'reader_experience', 'pov', 'world_rules', 'must_avoid']},
         'characters': [{k: c.get(k) for k in ['id', 'name', 'voice', 'voice_design']} for c in req['characters'] if c['id'] in card['participants']],
         'pov_profile': next(c for c in req['characters'] if c['id'] == card['pov']),
-        'pov_visible_memory': compact(visible(state['memories'], card['pov'])),
+        'pov_visible_memory': compact(visible(state['memories'],card['pov'],{s['id']:s['participants'] for s in state['accepted']})),
         'recent_ending': state['accepted'][-1]['prose'][-1600:] if state['accepted'] and state['accepted'][-1]['pov'] == card['pov'] else '',
         'author_continuity':{'instruction':'Prior prose is an author record, NOT automatic knowledge for any character. Preserve each character’s supported knowledge boundaries.','recent_scenes':[{'id':s['id'],'pov':s['pov'],'excerpt':s['prose'][-2500:]} for s in state['accepted'][-2:]]},
         'threads': state['plan']['threads'],

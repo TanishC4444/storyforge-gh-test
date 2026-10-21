@@ -1,5 +1,7 @@
 # Storyforge GH Test
 
+Latest completed experiment: [FINAL_STORY.txt](outputs/troy-third-person/FINAL_STORY.txt) — four scenes, third-person narration, no dialogue, with a final editorial pass. [Workflow and writing audit](docs/RETELLING_AUDIT.md).
+
 A public, file-based storytelling testbed using literary retrieval, fresh model runners, distinct-writing editing, and reviewed story memory. No Gemini and no UI.
 
 ## Current workflow: one run, multiple runners, real parallel branches

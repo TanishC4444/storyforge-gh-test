@@ -1,0 +1,366 @@
+{
+  "schema_version": 1,
+  "authority": "Published editorial text, superseding pre-editorial run snapshots",
+  "text": "FINAL_STORY.txt",
+  "body_sha256": "8eaa97e6e00120653208def97a5ccbcc9bf0c9e56b1965761ba140071e912955",
+  "scenes": [
+    {
+      "id": "ch01-sc01",
+      "prose_sha256": "cecef925a47dfd6d61d4e3e4a77f790573a232e3a7cb323381465218d7ec1103",
+      "facts": {
+        "location": "Achaean shore, south of the Myrmidon shelters",
+        "time": "Autumn morning, tenth campaigning season",
+        "change": "Thestor secures barley and conditional passage for Meles by agreeing to accompany Odysseus to Lekton. The homeward ship departs without them.",
+        "weapons_held": 0,
+        "charges_held": 0
+      },
+      "passage_index": [
+        {
+          "id": "p001",
+          "start": 0,
+          "end": 433
+        },
+        {
+          "id": "p002",
+          "start": 435,
+          "end": 1072
+        },
+        {
+          "id": "p003",
+          "start": 1074,
+          "end": 1728
+        },
+        {
+          "id": "p004",
+          "start": 1730,
+          "end": 2422
+        },
+        {
+          "id": "p005",
+          "start": 2424,
+          "end": 2729
+        },
+        {
+          "id": "p006",
+          "start": 2731,
+          "end": 3116
+        },
+        {
+          "id": "p007",
+          "start": 3118,
+          "end": 3617
+        },
+        {
+          "id": "p008",
+          "start": 3619,
+          "end": 4100
+        },
+        {
+          "id": "p009",
+          "start": 4102,
+          "end": 5175
+        },
+        {
+          "id": "p010",
+          "start": 5177,
+          "end": 5523
+        },
+        {
+          "id": "p011",
+          "start": 5525,
+          "end": 5936
+        },
+        {
+          "id": "p012",
+          "start": 5938,
+          "end": 6503
+        }
+      ]
+    },
+    {
+      "id": "ch01-sc02",
+      "prose_sha256": "1623cd00f2ef39d3e23b4dd954848a81cd026f10255111b243c5ddf65bbb725a",
+      "facts": {
+        "location": "Cape Lekton sanctuary and return skiff",
+        "time": "Journey after the shore discovery, ending with the return tide",
+        "change": "Distinct unnamed keeper holds Odysseus’s seal pending restitution of the sacred basin from Agamemnon’s camp.",
+        "weapons_held": 6,
+        "charges_held": 24,
+        "shrine_starting_charges": 25,
+        "demonstration_expended": 1
+      },
+      "passage_index": [
+        {
+          "id": "p001",
+          "start": 0,
+          "end": 534
+        },
+        {
+          "id": "p002",
+          "start": 536,
+          "end": 950
+        },
+        {
+          "id": "p003",
+          "start": 952,
+          "end": 1261
+        },
+        {
+          "id": "p004",
+          "start": 1263,
+          "end": 1446
+        },
+        {
+          "id": "p005",
+          "start": 1448,
+          "end": 1807
+        },
+        {
+          "id": "p006",
+          "start": 1809,
+          "end": 2072
+        },
+        {
+          "id": "p007",
+          "start": 2074,
+          "end": 2397
+        },
+        {
+          "id": "p008",
+          "start": 2399,
+          "end": 2721
+        },
+        {
+          "id": "p009",
+          "start": 2723,
+          "end": 3159
+        },
+        {
+          "id": "p010",
+          "start": 3161,
+          "end": 3255
+        },
+        {
+          "id": "p011",
+          "start": 3257,
+          "end": 3455
+        },
+        {
+          "id": "p012",
+          "start": 3457,
+          "end": 3855
+        },
+        {
+          "id": "p013",
+          "start": 3857,
+          "end": 4217
+        },
+        {
+          "id": "p014",
+          "start": 4219,
+          "end": 4397
+        }
+      ]
+    },
+    {
+      "id": "ch01-sc03",
+      "prose_sha256": "88048b4b29d7304ecc55b24936e60f61a6d54c8e5b81dc2b77243c2cadc30d38",
+      "facts": {
+        "location": "Agamemnon’s flagship trial ground",
+        "time": "Midday before Trojan advance",
+        "change": "Thestor’s right hand and wrist are burned. Achilles assigns shield-men to protect handlers; Meles’s passage is formally recorded.",
+        "weapons_held": 6,
+        "charges_held": 23,
+        "suspect_charges_included": 1,
+        "trial_expended": 1
+      },
+      "passage_index": [
+        {
+          "id": "p001",
+          "start": 0,
+          "end": 333
+        },
+        {
+          "id": "p002",
+          "start": 335,
+          "end": 705
+        },
+        {
+          "id": "p003",
+          "start": 707,
+          "end": 982
+        },
+        {
+          "id": "p004",
+          "start": 984,
+          "end": 1388
+        },
+        {
+          "id": "p005",
+          "start": 1390,
+          "end": 1706
+        },
+        {
+          "id": "p006",
+          "start": 1708,
+          "end": 2084
+        },
+        {
+          "id": "p007",
+          "start": 2086,
+          "end": 2455
+        },
+        {
+          "id": "p008",
+          "start": 2457,
+          "end": 2782
+        },
+        {
+          "id": "p009",
+          "start": 2784,
+          "end": 3066
+        },
+        {
+          "id": "p010",
+          "start": 3068,
+          "end": 3483
+        },
+        {
+          "id": "p011",
+          "start": 3485,
+          "end": 3597
+        },
+        {
+          "id": "p012",
+          "start": 3599,
+          "end": 3878
+        }
+      ]
+    },
+    {
+      "id": "ch01-sc04",
+      "prose_sha256": "1e4307bd1baf7d8dc81c9a0af1ee2967bb127f6e470dd7c1b8484d49132ea7e7",
+      "facts": {
+        "location": "Contested ditch, then Greek camp",
+        "time": "Squall, battle and aftermath",
+        "change": "Greeks hold the approach. Hector and Achilles survive. Meles’s left leg is crushed and his foot cannot be saved. One weapon has a broken collar and remains under the frame in the ditch.",
+        "usable_weapons_held": 5,
+        "charges_held": 19,
+        "battle_shots": 3,
+        "failed_charge_expended": 1
+      },
+      "passage_index": [
+        {
+          "id": "p001",
+          "start": 0,
+          "end": 360
+        },
+        {
+          "id": "p002",
+          "start": 362,
+          "end": 651
+        },
+        {
+          "id": "p003",
+          "start": 653,
+          "end": 1057
+        },
+        {
+          "id": "p004",
+          "start": 1059,
+          "end": 1385
+        },
+        {
+          "id": "p005",
+          "start": 1387,
+          "end": 1683
+        },
+        {
+          "id": "p006",
+          "start": 1685,
+          "end": 1719
+        },
+        {
+          "id": "p007",
+          "start": 1721,
+          "end": 2018
+        },
+        {
+          "id": "p008",
+          "start": 2020,
+          "end": 2072
+        },
+        {
+          "id": "p009",
+          "start": 2074,
+          "end": 2491
+        },
+        {
+          "id": "p010",
+          "start": 2493,
+          "end": 2624
+        },
+        {
+          "id": "p011",
+          "start": 2626,
+          "end": 2990
+        },
+        {
+          "id": "p012",
+          "start": 2992,
+          "end": 3240
+        },
+        {
+          "id": "p013",
+          "start": 3242,
+          "end": 3649
+        },
+        {
+          "id": "p014",
+          "start": 3651,
+          "end": 4100
+        },
+        {
+          "id": "p015",
+          "start": 4102,
+          "end": 4382
+        },
+        {
+          "id": "p016",
+          "start": 4384,
+          "end": 4682
+        },
+        {
+          "id": "p017",
+          "start": 4684,
+          "end": 4944
+        },
+        {
+          "id": "p018",
+          "start": 4946,
+          "end": 5334
+        },
+        {
+          "id": "p019",
+          "start": 5336,
+          "end": 5556
+        },
+        {
+          "id": "p020",
+          "start": 5558,
+          "end": 5899
+        }
+      ]
+    }
+  ],
+  "knowledge_boundaries": {
+    "hector": "Observed noise, smoke, impacts and exposed Greek handlers; no private Greek inventory or bargain knowledge.",
+    "odysseus": "Knows the sacred basin obligation and where his seal is held. At the end he takes hold of the basin handle in Agamemnon’s camp; restitution has not yet occurred."
+  },
+  "unresolved": [
+    "Troy remains untaken; the war continues.",
+    "Sacred basin must return to the shrine before the moon returns to its present shape; keeper still holds the seal.",
+    "Six weapons were lent, but only five remain usable; the damaged sixth awaits recovery.",
+    "Meles survives with a permanent bodily loss; homeward passage remains a promise, not a completed journey."
+  ]
+}

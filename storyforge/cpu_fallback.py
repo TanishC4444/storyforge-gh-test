@@ -11,6 +11,6 @@ def execute(model,system,prompt,tokens,n_ctx,role,response_schema=None):
     from gh_ai_runner.limits import Limits
     from .runtime import JOB_TIMEOUT_MINUTES,JOB_TIMEOUT_SECONDS,DOWNLOAD_TIMEOUT_SECONDS
     runner=GitHubAIRunner(os.environ['GH_AI_TOKEN'],repo_name='storyforge-inference-runner',private=False,runner_ram_gb=16,metadata_path=None,verbose=False,completion_timeout=JOB_TIMEOUT_SECONDS,limits=Limits(job_timeout_minutes=JOB_TIMEOUT_MINUTES,provider_timeout_seconds=JOB_TIMEOUT_SECONDS,download_timeout_seconds=DOWNLOAD_TIMEOUT_SECONDS))
-    agent=Agent(runner=runner,model=model,instructions=system,remember=False,refine_prompt=False,n_ctx=n_ctx,max_tokens=tokens,temperature=.7 if role in {'writer','humanizer'} else .25)
+    agent=Agent(runner=runner,model=model,instructions=system,remember=False,refine_prompt=False,n_ctx=n_ctx,max_tokens=tokens,temperature=.7 if role in {'writer','humanizer'} else .25,generation_options={'response_format':{'type':'json_object','schema':response_schema}} if response_schema is not None else {})
     result=agent.run(prompt,timeout=JOB_TIMEOUT_SECONDS)
     return result,{**asdict(agent.last_result),'fallback':'existing_github_cpu_runner'}

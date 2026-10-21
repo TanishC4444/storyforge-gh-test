@@ -102,3 +102,60 @@ class CharacterKnowledgeTests(unittest.TestCase):
         value=actor_input({'id':'smith','goal':'Go home'},state,card,'Work beside ships')
         text=json.dumps(value)
         self.assertIn('Own fact',text);self.assertNotIn('Other secret',text);self.assertNotIn('future weapons',text)
+
+class MemoryScopeTests(unittest.TestCase):
+    def test_explicit_witness_schema_does_not_offer_public(self):
+        from storyforge.output_schema import memory_schema,continuity_schema
+        from storyforge.evidence import payload
+        schema=memory_schema(payload('The smith inspected the mark.'),['smith','king'],allow_public=False)
+        self.assertEqual(schema['properties']['memories']['items']['properties']['known_by']['items']['enum'],['smith','king'])
+        ledger=continuity_schema(2)
+        self.assertEqual(ledger['properties']['approved_memory_indices']['maxItems'],2)
+        self.assertEqual(ledger['properties']['approved_memory_indices']['items']['enum'],[0,1])
+    def test_known_identity_corruption_is_blocked(self):
+        self.assertTrue(any('identity' in x for x in defects('Thestor, the blind hearth-priest, sat in the grotto.')))
+
+class CPUFallbackSchemaTests(unittest.TestCase):
+    def test_remote_cpu_keeps_structured_decoding(self):
+        import os,sys,types
+        from dataclasses import dataclass
+        from unittest.mock import MagicMock
+        from storyforge.cpu_fallback import execute
+        @dataclass
+        class Result:finish_reason:str='stop'
+        module=types.ModuleType('gh_ai_runner');module.__path__=[]
+        module.Agent=MagicMock();module.GitHubAIRunner=MagicMock()
+        module.Agent.return_value.run.return_value='{"approved_memory_indices":[]}'
+        module.Agent.return_value.last_result=Result()
+        limits=types.ModuleType('gh_ai_runner.limits');limits.Limits=MagicMock()
+        schema={'type':'object','properties':{'approved_memory_indices':{'type':'array','maxItems':0}}}
+        with patch.dict(sys.modules,{'gh_ai_runner':module,'gh_ai_runner.limits':limits}),patch.dict(os.environ,{'GH_AI_TOKEN':'test-placeholder'}),patch('storyforge.cpu_fallback.importlib.util.find_spec',return_value=None):
+            execute('qwen3b','system','prompt',700,16384,'memory_quality',schema)
+        kwargs=module.Agent.call_args.kwargs
+        self.assertEqual(kwargs['n_ctx'],16384)
+        self.assertEqual(kwargs['generation_options']['response_format']['schema'],schema)
+
+class ContinuityRecoveryTests(unittest.TestCase):
+    def test_unknown_indices_never_grant_knowledge(self):
+        from storyforge.continuity import validate
+        value=validate({'approved_memory_indices':[0,'1',1,9,-1],'charges_remaining':'23','charges_used_this_scene':2},2)
+        self.assertEqual(value['approved_memory_indices'],[0,1]);self.assertEqual(value['quarantined_approval_indices'],[9,-1]);self.assertEqual(value['charges_remaining'],23)
+    def test_bad_usage_count_is_withheld_not_silently_rewritten(self):
+        from storyforge.continuity import reconcile
+        value=reconcile({'charges_remaining':23,'charges_used_this_scene':2},{'charges_remaining':24},2)
+        self.assertIsNone(value['charges_used_this_scene']);self.assertEqual(value['net_charge_count_reduction'],1);self.assertEqual(value['quarantined_reported_usage'],2)
+
+class PublicAudienceTests(unittest.TestCase):
+    def test_greek_council_is_not_worldwide_public_knowledge(self):
+        from storyforge.coordinator import visible
+        facts=[{'text':'The council knows the inventory','known_by':['public'],'source':'council'},{'text':'The war is ongoing','known_by':['public'],'source':'user_input'}]
+        scope={'council':['odysseus','achilles']}
+        self.assertEqual([x['text'] for x in visible(facts,'hector',scope)],['The war is ongoing'])
+        self.assertEqual(len(visible(facts,'achilles',scope)),2)
+
+class WholeStorySeparatorTests(unittest.TestCase):
+    def test_scene_dividers_are_not_duplicated_prose(self):
+        text='\n\n* * *\n\n'.join(['Unique opening '+str(i)+'. '+('Different words '+str(i)+' ') * 80 for i in range(4)])
+        self.assertFalse(any('Duplicate paragraph' in x for x in defects(text)))
+    def test_actual_duplicate_paragraph_still_fails(self):
+        self.assertTrue(any('Duplicate paragraph' in x for x in defects('Same paragraph.\n\n* * *\n\nSame paragraph.')))

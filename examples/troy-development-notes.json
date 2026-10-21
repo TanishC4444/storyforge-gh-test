@@ -18,5 +18,14 @@
       "beats": "Begin at the contested approach, with the cache already acquired and the council complete. Four charges are consumed in this scene: three shots and one failed damp charge, leaving nineteen. The first shot misses its intended primary target. A later casualty gets a brief concrete human particular, not an invented moral epitaph. Smoke hides the operators' vulnerability; the damp failure breaks one tube or its support and traps Meles. Thestor's previously burned hand impedes rescue. Achilles gives up a real opportunity to pursue Hector so he can shield and extract the operators; the earlier protection bargain is now costly action. Thestor must abandon the damaged weapon to free the boy. Hector responds to observed smoke, pauses and disorder, disperses his men and withdraws in order; he cannot know ammunition counts or internal operation. Greeks hold the limited position. Meles has an irreversible injury with no instant cure. Five usable tubes and nineteen charges remain; the missing sixth tube and Odysseus's seal/basin obligation carry consequences into the larger story. End on a specific act of custody, care or owed restitution, without explaining the theme or announcing victory's significance.",
       "change": "Local ground held; Hector and Achilles survive. Five usable weapons, nineteen charges, a wounded apprentice, a lost damaged tube, and the still-unfulfilled sacred restitution remain."
     }
-  ]
+  ],
+  "cast_registry": {
+    "thestor": "Mortal Achaean smith and uncle/master of Meles; NOT a priest, seer, god, blind man or the sanctuary keeper. Travels with Odysseus.",
+    "meles": "Thestor’s nephew and apprentice. Remains in the Ithacan camp during scene 2; NOT the keeper’s relative or guardian.",
+    "odysseus": "Achaean king of Ithaca, bargaining expedition leader.",
+    "agamemnon": "Achaean coalition commander and king of Mycenae.",
+    "achilles": "Achaean warrior and Myrmidon leader, not a Trojan.",
+    "hector": "Trojan prince and commander; has no private Greek inventory or bargain knowledge.",
+    "sanctuary_keeper": "A distinct unnamed human priest of Hephaestus, guarding the shrine; NOT Thestor or a disguised member of the Greek party."
+  }
 }

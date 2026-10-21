@@ -7,11 +7,13 @@ def defects(prose,previous=''):
     issues=[];seen={}
     for p in passages(prose):
         normalized=' '.join(p['text'].lower().split())
+        if normalized=='* * *':continue
         if normalized in seen:issues.append('Duplicate paragraph '+p['id']+' repeats '+seen[normalized])
         seen[normalized]=p['id']
     for pattern,label in [(r'[“”"]','Quoted speech or quotation violates no-dialogue brief'),(r'(?m)^\s*#{1,6}\s','Markdown heading in prose'),(r'\}\s*\}\s*,|\{"(?:prose|text|replacements)"','Serialization leaked into prose'),(r'(?i)\b(?:sing,? muse|dear reader|opening a larger epic|the local climax|the scene demonstrates)\b','Narratorial instruction or structural summary'),(r'\b(?:I|we|our|you|your)\b','First/second person violates third-person-only brief')]:
         if re.search(pattern,prose):issues.append(label)
     if re.search(r'(?i)\b(the|a|an|of|to|his|her)\s+\1\b',prose):issues.append('Accidentally repeated function word')
+    if re.search(r'(?i)\bThestor,? (?:the |a )?(?:blind|sightless|hearth-priest)',prose):issues.append('Cast identity corruption: Thestor is the mortal smith, not the blind priest')
     sentences=re.split(r'(?<=[.!?])\s+',prose);seen_sentences=set()
     for sentence in sentences:
         normalized=' '.join(sentence.lower().split())

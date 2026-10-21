@@ -1,0 +1,53 @@
+{
+  "final_text": "FINAL_STORY.txt",
+  "words": 3676,
+  "scenes": 4,
+  "whole_story_audit_pass": true,
+  "editorial_candidate": true,
+  "final_body_sha256": "8eaa97e6e00120653208def97a5ccbcc9bf0c9e56b1965761ba140071e912955",
+  "request_hash": "b545fe557bf18a15223f88e94e44a6325690063539b8f2116e3b41c449add39c",
+  "provider_budget": {
+    "flash": {
+      "calls": 6,
+      "recent": [
+        [
+          1792573551.608762,
+          7506
+        ],
+        [
+          1792573576.501513,
+          7506
+        ]
+      ]
+    },
+    "gemma": {
+      "calls": 82,
+      "recent": [
+        [
+          1792574736.6360152,
+          5198
+        ],
+        [
+          1792574766.6978738,
+          5198
+        ]
+      ]
+    },
+    "_rescue_calls": 1
+  },
+  "authoritative_text": "FINAL_STORY.txt",
+  "publication_status": "final_editorial_version",
+  "editorial_pass": "Codex structural and prose revision after Gemma/Flash generation",
+  "final_review": {
+    "pass": true,
+    "issues": [],
+    "scene_progression": "The narrative follows a precise four-act structure: the discovery of the bronze sleeve at the camp, the perilous journey to Cape Lekton to acquire the weapons through a high-stakes bargain, the trial of the iron tubes before Agamemnon and Achilles, and the tactical deployment during a Trojan skirmish resulting in a permanent cost to Meles.",
+    "depth_assessment": "The text maintains high material density, treating the inventory (tubes and charges) as physical constraints that dictate the plot. The cost of the weapons is established twice: first through Odysseus's personal seal and later through Meles's injury and Thestor's burn. The interaction between the burn, the rain, and the subsequent failure of the fourth charge is causally linked and avoids generic emotional labeling. The distinction between the cast is absolute, and the omniscient perspective remains disciplined, never granting Hector internal Greek knowledge."
+  },
+  "canonical_state": "final-state.json",
+  "additional_connectivity_probes": {
+    "flash": 1,
+    "gemma": 1
+  },
+  "budget_note": "Generation reservations include failures and retries. Small connectivity probes are listed separately. Flash role budget remains six; Gemma development budget is 120."
+}

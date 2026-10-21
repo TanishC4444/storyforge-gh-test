@@ -136,3 +136,29 @@ Avoid replacing that sentence with another metaphor for importance.
 Do not diagnose another character's inner calculation from a single look. For limited viewpoint, stay inside the focal character's perceptions, memories and imperfect inferences. An explicitly omniscient epic narrator may supply history or inner attention in separate paragraphs without granting that knowledge to other characters. A
 reader can see a ruler's tactic from whom he dismisses, what he withholds and which
 obligation he invokes. Do not turn that evidence into an omniscient explanation.
+
+## Endings and accountable implications
+
+Read the last two paragraphs against the rest of the scene. Remove any sentence
+whose only contribution is to announce that a bargain has a price, a secret will
+bring a reckoning, a loss threatens authority, or a choice changes the future when
+the physical exchange already makes that legible. End on custody, labor, exposure,
+care, a departure or another consequential act. Keep a new fact about a future
+obligation; cut a second explanation of its significance.
+
+Avoid abstract claims such as diminished legal standing or a piece of sovereignty
+unless the story establishes a concrete practice through which another person can
+exploit that loss. Prefer the withheld token, the absent witness, the unredeemed
+pledge or the person now entitled to demand something. Do not replace one vague
+political metaphor with another. Necessary explanation and textured stillness are
+allowed; the test is whether deletion loses a particular fact, perception or
+pressure, rather than merely an announced interpretation.
+
+## Causal handoffs
+
+An established defect must remain consequential, not merely be mentioned twice.
+If a suspect object is deliberately set aside and later used, show the particular
+decision, pressure or handling error that returns it to use. Do not silently move
+it back into the usable stock. Keep total, usable, spent and abandoned resources
+distinct. A previous injury must constrain a later action when the climax relies
+on it. Do not invent a fresh defect at the last moment to manufacture a cost.
