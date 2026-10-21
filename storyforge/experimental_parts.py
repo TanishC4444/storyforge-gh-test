@@ -100,7 +100,7 @@ def stitch(parts):
 def writer(executor,req,packet,direction):
     count=req.get('execution_policy',{}).get('writer_beats',1)
     require(type(count) is int and 1<=count<=4,'writer_beats must be 1–4')
-    if count==1:return executor.call('writer',{**packet,'direction':direction},'Write the complete scene, respecting the brief, canon and distinct-writing guidance.',tokens=3000,skill=(ROOT/'skills/distinct_writing.md').read_text())
+    if count==1:return executor.call('writer',{**packet,'direction':direction},'Write a developed complete scene at target_words. Obey nonnegotiable_form first. Use the scene and chapter contracts, completed events, private knowledge, and distinct-writing guidance. Dramatize the decisive choice and its material consequences; do not summarize, recap, add headings, dialogue, invocation, or a moral.',tokens=4200,skill=(ROOT/'skills/distinct_writing.md').read_text())
     schema={'type':'object','properties':{'beats':{'type':'array','minItems':count,'maxItems':count,'items':{'type':'object','properties':{k:{'type':'string'} for k in ['action','entry_state','exit_state']},'required':['action','entry_state','exit_state'],'additionalProperties':False}}},'required':['beats'],'additionalProperties':False}
     def validate_plan(value):
         require(isinstance(value,dict) and isinstance(value.get('beats'),list) and len(value['beats'])==count,'Wrong beat count')

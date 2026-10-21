@@ -6,18 +6,18 @@
   "max_stage_retries": 1,
   "runner_repo": "storyforge-inference-runner",
   "length_policy": {
-    "scene_words": "guidance",
+    "scene_words": "strict",
     "chapter_words": "target",
-    "allow_compression": true,
-    "policy": "850 words is a planning estimate. Expand through action, negotiation, and consequences; never pad a repeated discovery to reach a minimum."
+    "allow_compression": false,
+    "policy": "Target 1200 words per scene, 4800 per chapter, approximately 14400 overall. Develop lived action, choices and resistance. Never reach length by repeating information or padding imagery."
   },
   "project_id": "troy-parallel-experiment",
   "title": "The Fire Beneath the Bronze",
   "brief_version": 2,
   "medium": "short_story",
-  "chapters": 1,
+  "chapters": 3,
   "scenes_per_chapter": 4,
-  "words_per_scene": 850,
+  "words_per_scene": 1200,
   "context_chars": 48000,
   "n_ctx": 16384,
   "profile": "fast",
@@ -29,7 +29,7 @@
   "tone_mood": "Grave and martial, with tenderness in concrete duties; wonder before divine craft and unease beneath victory. No modern sarcasm or action-film triumphalism.",
   "sensory_detail": "Concrete material detail perceived through ancient experience: bronze, sea, wool, ash, labor, bodies and weather.",
   "ending_tendency": "Resolve acquisition and first deployment, not the Trojan War. End on a concrete changed obligation, not a moral summary.",
-  "premise": "After nine years before Troy, in the tenth campaigning season, the Achaeans remain unable to take the city. Hector and Achilles live. Following a storm, a smith and Odysseus investigate a damaged divine object, undertake an expedition, bargain for a small finite cache of firearms made by Hephaestus, and bring it back. Rival leaders debate its use; a crisis forces the first constrained deployment. Tell exactly four developed scenes: discovery without possession; expedition and costly acquisition; trial and contested counsel; first battle use and local climax. This is the opening movement of a larger alternate Trojan epic, not the fall of Troy. The weapons must be earned through buildup. Use elevated English shaped by Homeric epic and an ancient social imagination throughout. RETELL FROM SCRATCH: purely third person, no dialogue, no invocation. Four developed scenes, not a summary. Material causality and costly decisions carry character depth.",
+  "premise": "After nine years before Troy, with Hector and Achilles alive, a mortal smith and Odysseus discover a damaged object of divine craft. Write a large, developed three-chapter opening movement, twelve scenes of approximately 1200 words each. Chapter 1 earns the discovery, difficult journey and costly acquisition of exactly six finite weapons from a hidden workshop of Hephaestus. Chapter 2 develops transport, physical trial and the coalition struggle over custody, honor and dangerous labor. Chapter 3 follows limited deployment through a contested position, an established failure, personal exposure and a costly local Greek victory. Troy does not fall. The price of divine assistance becomes a concrete new obligation. Pure third-person past-tense narration, no dialogue or quoted speech, no invocation. Homeric social imagination and material causality, not a modern military adventure. Dramatize decisions and consequences rather than expanding a synopsis.",
   "keywords": [
     {
       "term": "heroic honor versus impersonal killing",
@@ -321,7 +321,7 @@
       "Travel, carrying and weather consume time. Weapons have visible material limits."
     ],
     "deadlines": [
-      "A Trojan movement becomes known in scene 3, creating a narrow opportunity in scene 4.",
+      "A Trojan movement becomes known in chapter 2, creating a narrow opportunity in chapter 3.",
       "The divine obligation receives its first concrete demand after deployment, not retroactively before its terms exist."
     ],
     "divine_framework": [
@@ -377,66 +377,190 @@
     {
       "id": "ch01-sc01",
       "title": "What the Sea Returned",
-      "location": "Achaean shore and smiths’ shelters after a storm",
-      "setting": "Ordinary work, damaged ships and a household trying to leave.",
-      "dramatic_function": "Earn curiosity through material evidence and conflicting needs.",
+      "pov": "thestor",
       "participants": [
         "thestor",
         "odysseus"
       ],
-      "pov": "thestor",
-      "development": "Thestor repairs fittings while seeking passage. A damaged unfamiliar object resists explanation; maker’s marks and Odysseus’s knowledge point to a neglected coastal sanctuary.",
-      "choice_and_consequence": "Thestor reveals enough to secure an expedition though it delays departure. Odysseus commits time and men.",
-      "restrictions": "No usable firearm, trial, battle use or complete understanding. Expedition needs a reason stronger than curiosity."
+      "location": "Achaean shore",
+      "setting": "Achaean shore",
+      "dramatic_function": "A household seeks passage through storm damage. An unfamiliar object complicates ordinary work.",
+      "development": "A household seeks passage through storm damage. An unfamiliar object complicates ordinary work.",
+      "choice_and_consequence": "Choose to investigate rather than finish the work that would earn passage.",
+      "restrictions": "No completed decipherment or usable weapon."
     },
     {
       "id": "ch01-sc02",
-      "title": "The Price at the Forge",
-      "location": "Concealed coastal sanctuary reached by a difficult journey",
-      "setting": "Travel, resistance and a keeper guarding a divine purpose.",
-      "dramatic_function": "Earn access through a costly bargain and physical acquisition.",
+      "title": "The Mark and the Debt",
+      "pov": "odysseus",
       "participants": [
         "odysseus",
         "thestor"
       ],
-      "pov": "odysseus",
-      "development": "The keeper demonstrates one weapon only after the travelers establish their claim, then refuses possession without a binding restoration and acknowledgment obligation.",
-      "choice_and_consequence": "Odysseus binds himself, conceals part of the price and brings back six weapons plus a fixed finite charge supply.",
-      "restrictions": "Spend substantial scene space acquiring and transporting the cache. Keeper must want something. No infinite supply."
+      "location": "Shore shelters",
+      "setting": "Shore shelters",
+      "dramatic_function": "Test competing explanations and identify a credible reason to seek the sanctuary.",
+      "development": "Test competing explanations and identify a credible reason to seek the sanctuary.",
+      "choice_and_consequence": "Commit scarce transport and men despite a visible cost to existing duties.",
+      "restrictions": "No acquisition or complete operational knowledge."
     },
     {
       "id": "ch01-sc03",
-      "title": "The Counsel Beside the Ships",
-      "location": "Secluded trial ground, then the Achaean council",
-      "setting": "Public rank meets unreliable physical evidence.",
-      "dramatic_function": "Make possession a conflict over use, authority and who faces danger.",
+      "title": "The Difficult Coast",
+      "pov": "thestor",
       "participants": [
+        "thestor",
+        "odysseus"
+      ],
+      "location": "Storm-damaged coast",
+      "setting": "Storm-damaged coast",
+      "dramatic_function": "Dramatize difficult travel and an obstacle requiring a costly practical choice.",
+      "development": "Dramatize difficult travel and an obstacle requiring a costly practical choice.",
+      "choice_and_consequence": "Use the smith’s skill to earn an approach while narrowing his chance to leave.",
+      "restrictions": "Do not skip the journey or solve resistance by divine delivery."
+    },
+    {
+      "id": "ch01-sc04",
+      "title": "The Price at the Forge",
+      "pov": "odysseus",
+      "participants": [
+        "odysseus",
+        "thestor"
+      ],
+      "location": "Concealed sanctuary",
+      "setting": "Concealed sanctuary",
+      "dramatic_function": "A keeper resists access for a reason; demonstrate one weapon only within a negotiated claim.",
+      "development": "A keeper resists access for a reason; demonstrate one weapon only within a negotiated claim.",
+      "choice_and_consequence": "Accept a concrete restoration obligation and transfer six weapons with an exact finite charge count.",
+      "restrictions": "No battle; no new cost retroactively imposed later."
+    },
+    {
+      "id": "ch02-sc01",
+      "title": "The Burden Home",
+      "pov": "thestor",
+      "participants": [
+        "thestor",
+        "odysseus"
+      ],
+      "location": "Return coast",
+      "setting": "Return coast",
+      "dramatic_function": "Transport and protect the acquired cache under established material limits.",
+      "development": "Transport and protect the acquired cache under established material limits.",
+      "choice_and_consequence": "Protect a dependent at a cost that leaves a trace in equipment, time or obligation.",
+      "restrictions": "No rediscovery or second acquisition."
+    },
+    {
+      "id": "ch02-sc02",
+      "title": "The Trial in the Sand",
+      "pov": "achilles",
+      "participants": [
+        "achilles",
+        "odysseus",
+        "thestor"
+      ],
+      "location": "Secluded trial ground",
+      "setting": "Secluded trial ground",
+      "dramatic_function": "Demonstrate power, preparation, poor aim and weather sensitivity through consequential action.",
+      "development": "Demonstrate power, preparation, poor aim and weather sensitivity through consequential action.",
+      "choice_and_consequence": "Spend a counted charge and expose the operators’ vulnerability.",
+      "restrictions": "Establish limits later used in the climax; no perfect weapon."
+    },
+    {
+      "id": "ch02-sc03",
+      "title": "The Lords and the Smith",
+      "pov": "achilles",
+      "participants": [
+        "achilles",
         "agamemnon",
+        "odysseus",
+        "thestor"
+      ],
+      "location": "Achaean council",
+      "setting": "Achaean council",
+      "dramatic_function": "Opposed interests pursue control of custody and skilled labor through concrete commitments.",
+      "development": "Opposed interests pursue control of custody and skilled labor through concrete commitments.",
+      "choice_and_consequence": "A limited authorization distributes honor and danger unequally.",
+      "restrictions": "Narrate negotiation indirectly; no speeches or unanimous conversion."
+    },
+    {
+      "id": "ch02-sc04",
+      "title": "The Narrow Hour",
+      "pov": "odysseus",
+      "participants": [
         "odysseus",
         "achilles",
         "thestor"
       ],
-      "pov": "achilles",
-      "development": "A trial shows power and established failures; competing physical claims pursue different aims. Thestor learns that indispensable knowledge blocks departure.",
-      "choice_and_consequence": "Authorize limited deployment with explicit conditions and personal exposure. A Trojan movement makes delay costly.",
-      "restrictions": "No unanimous conversion by a speech. Establish every limitation used in the climax. Maintain third-person epic language during practical work."
+      "location": "Greek defensive works",
+      "setting": "Greek defensive works",
+      "dramatic_function": "Learn a credible Trojan movement and prepare operators under a deadline.",
+      "development": "Learn a credible Trojan movement and prepare operators under a deadline.",
+      "choice_and_consequence": "Choose a limited objective and deployment conditions that foreclose an easier alternative.",
+      "restrictions": "No instant intelligence or knowledge of enemy private plans."
     },
     {
-      "id": "ch01-sc04",
+      "id": "ch03-sc01",
+      "title": "The Exposed Approach",
+      "pov": "thestor",
+      "participants": [
+        "thestor",
+        "achilles",
+        "odysseus"
+      ],
+      "location": "Contested approach",
+      "setting": "Contested approach",
+      "dramatic_function": "Move the operators and finite supplies into position under visible danger.",
+      "development": "Move the operators and finite supplies into position under visible danger.",
+      "choice_and_consequence": "Make an irreversible commitment that creates a real need for protection.",
+      "restrictions": "Respect travel and inventory; no decisive victory yet."
+    },
+    {
+      "id": "ch03-sc02",
       "title": "The First Thunder",
-      "location": "Contested approach between Greek defenses and Trojan fighting line",
-      "setting": "Operators prepare under exposure; Trojans respond to unfamiliar effects.",
-      "dramatic_function": "Local climax: constrained first deployment, costly choice, consequential aftermath.",
+      "pov": "achilles",
       "participants": [
         "achilles",
         "hector",
-        "thestor",
-        "odysseus"
+        "thestor"
       ],
+      "location": "Contested fighting line",
+      "setting": "Contested fighting line",
+      "dramatic_function": "Partial first use disrupts Trojans; Hector observes and adapts without knowing the mechanism.",
+      "development": "Partial first use disrupts Trojans; Hector observes and adapts without knowing the mechanism.",
+      "choice_and_consequence": "An established failure exposes operators and makes Achilles’ disputed protection obligation immediate.",
+      "restrictions": "Hector and Achilles survive; weapons do not guarantee victory."
+    },
+    {
+      "id": "ch03-sc03",
+      "title": "The Price in the Open",
       "pov": "achilles",
-      "development": "First use succeeds only partly. Noise and wounds disrupt Trojans; an established failure exposes the Greek operators. Hector observes and orders withdrawal rather than surrendering to rout.",
-      "choice_and_consequence": "Achilles enters danger to protect operators he opposed. Thestor chooses between equipment and a dependent. Greeks secure the position; a specific irreversible loss follows an established limitation and human decision.",
-      "restrictions": "Hector and Achilles survive. No massacre or fall of Troy. Mark any Trojan focal shift. End on a concrete obligation or action, not a moral explanation."
+      "participants": [
+        "achilles",
+        "hector",
+        "thestor"
+      ],
+      "location": "Contested position",
+      "setting": "Contested position",
+      "dramatic_function": "Develop the rescue or exposed advance through resistance and an available costly alternative.",
+      "development": "Develop the rescue or exposed advance through resistance and an available costly alternative.",
+      "choice_and_consequence": "Secure the position at an irreversible loss caused by established limits and a human choice.",
+      "restrictions": "No massacre, fall of Troy, or unexplained new weakness."
+    },
+    {
+      "id": "ch03-sc04",
+      "title": "What Victory Requires",
+      "pov": "thestor",
+      "participants": [
+        "thestor",
+        "odysseus",
+        "achilles"
+      ],
+      "location": "Captured position and Greek shore",
+      "setting": "Captured position and Greek shore",
+      "dramatic_function": "Care for the aftermath and account for custody, wounds and remaining charges.",
+      "development": "Care for the aftermath and account for custody, wounds and remaining charges.",
+      "choice_and_consequence": "Enact a specific first demand of the divine restoration debt while the household remains bound.",
+      "restrictions": "End on concrete work or obligation, not a moral summary."
     }
   ],
   "must_avoid": [
@@ -472,19 +596,23 @@
     "authorized": "User requested full prompt-to-story API speed benchmark",
     "workflow": "Full separate-runner DAG with parallel character matrices, independent story/rhetoric/memory branches, repairs and all verification stages",
     "no_prior_run_restart": true,
-    "experiment": "Batched APIs only: Gemma reviews bounded groups of checks; Flash records source-bound fact batches and audits the final chapter. Planning, writing and character contexts retain CPU runners."
+    "experiment": "Large twelve-scene story in chapter chunks; CPU creative work; APIs only bounded character proposals and small fact checks."
   },
   "execution_policy": {
-    "continue_with_warnings": true,
+    "continue_with_warnings": false,
     "experimental": true,
     "gate_repair_threshold": "blocking",
-    "writer_beats": 2,
+    "writer_beats": 1,
     "concurrency": {
       "api": 2,
       "reviews": 3,
       "repair": 3,
       "writer": 2
-    }
+    },
+    "compile_supplied_brief": true,
+    "chapter_revision": true,
+    "chapter_outline_chunks": true,
+    "cpu_quality": true
   },
   "performance": {
     "compact_packets": true,
@@ -494,7 +622,7 @@
     "canon_index": true,
     "inherit_provider_budget": true,
     "application_plan_binding": true,
-    "development_batch_size": 4,
+    "development_batch_size": 6,
     "api_batch_probes": false
   },
   "api_roles": {
@@ -502,5 +630,30 @@
     "story_quality": "gemma",
     "memory": "flash",
     "chapter_quality": "flash"
-  }
+  },
+  "chapter_contract": {
+    "arc": "A household attempt to leave the war becomes a divine debt and a new dependence on indispensable labor. The first victory must worsen that dependence.",
+    "causal_spine": [
+      "Discovery earns a risky journey, not a weapon.",
+      "A difficult approach and a resisted bargain earn possession. Fix six weapons and the exact charge count here.",
+      "A physical trial establishes both power and failure before rival lords impose conditions.",
+      "The established failure forces Achilles to expose himself; success costs someone something already valued."
+    ],
+    "continuity": "Each scene begins after the previous irreversible choice. Track possession, usable charges, weather, travel, injury and who witnessed what. Do not restage a bargain or discovery.",
+    "ending": "A concrete demand on labor, protection or restitution closes the opening movement. Troy remains unconquered; Hector and Achilles live."
+  },
+  "quality_contract": [
+    "Third person, past tense, no dialogue or quoted speech, no invocation, no scene headings.",
+    "Every decisive event unfolds through attempted action, resistance, a credible alternative and an irreversible choice. Avoid plot-summary transitions at the moments that matter.",
+    "Thestor pursues household departure through competent work; his usefulness gives powerful men reason to prevent it. Odysseus solves a present problem by accepting a future vulnerability. Achilles must embody the danger he argues about.",
+    "Use close material perception and ancient social obligations. Do not label every emotion, explain an image twice, or repeat stock eyes, hands, weight and measured voices.",
+    "An epic simile must illuminate the current physical predicament and return cleanly to action. Elevated language is neither faux-archaic filler nor a translation imitation.",
+    "No repeated paragraphs, recycled bargaining, retroactive costs, unearned knowledge, instantaneous transport or offstage solutions.",
+    "Chapter revision must preserve the sequence and strengthen setup/payoff across scene boundaries; memory is extracted only after revisions."
+  ],
+  "chapter_arcs": [
+    "The household seeks departure; discovery traps its skilled labor in a difficult journey. End with a binding bargain and physical transfer of a finite cache, not a battle.",
+    "Bring the cache home under real constraints. Test it, expose limits, struggle over custody and authority, then commit to a limited deployment under a credible deadline.",
+    "Move the operators into danger. Let partial success expose a limitation already tested. Achilles must choose personal exposure; Hector observes and adapts. Secure a local position at irreversible cost, then enact the first concrete demand of the divine bargain."
+  ]
 }

@@ -37,8 +37,8 @@ def assess(executor,state,kind):
         size=state['request']['performance'].get('development_batch_size',len(DESIGN_CHECKS))
         contracts.require(type(size) is int and 1<=size<=len(DESIGN_CHECKS),'Invalid development batch size')
         groups=[list(DESIGN_CHECKS[i:i+size]) for i in range(0,len(DESIGN_CHECKS),size)]
-    results=[]
-    for group_index,group in enumerate(groups,1):
+    def assess_group(item):
+        group_index,group=item
         event('review_group','Development review group %s/%s: %s'%(group_index,len(groups),', '.join(group)),group=group_index,total_groups=len(groups))
         wanted=set(group)
         for key in group:wanted.update(ALIASES.get(key,[]))
@@ -51,7 +51,12 @@ def assess(executor,state,kind):
             'Compare candidate evidence with requirements. Return JSON pass, checks (an object keyed by EVERY required check name; each value has verdict pass/fail, evidence_id, reason), issues (severity, category, evidence_id, problem, fix). Select evidence IDs; NEVER invent paths. Check what is actually developed, not just promised. Missing development fails with an actionable matching issue. Advisory issues alone do not require failure.',
             tokens=2400 if len(group)>4 else 1100,validator=lambda x,c=selected,g=group:resolve_review(x,data,c,g),response_schema=review_schema(selected,group))
         event('review_group_complete','Review group %s/%s finished'%(group_index,len(groups)),passed=result['pass'],issues=len(result['issues']))
-        results.append(result)
+        return result
+    if state['request'].get('execution_policy',{}).get('experimental'):
+        from .worker_policy import parallel
+        results=parallel(state['request'],'reviews',list(enumerate(groups,1)),assess_group)
+    else:results=[assess_group(item) for item in enumerate(groups,1)]
+    for result in results:
         if result.get('unverified'):return result
     return design_review({'pass':all(r['pass'] for r in results),'checks':[c for r in results for c in r['checks']],'issues':[i for r in results for i in r['issues']]},data)
 

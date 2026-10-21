@@ -11,6 +11,7 @@ from .resilience import memory_extract
 from .canon import append,recording_context
 from .experimental_parts import review,repair,writer,changes,needs_repair
 from .patching import digest
+from .craft import author_packet
 
 UNHANDLED=object()
 
@@ -43,6 +44,37 @@ def review_memory(executor,req,prose,memories):
 def run_bundle(task,source,out,state,index,profile,backend,request_file):
     from .dag import stage,output
     kind=task.split('_')[0];previous=Path(source)/'state'
+    if kind=='plan' and state['request'].get('execution_policy',{}).get('chapter_outline_chunks'):
+        from .contracts import plan as validate_plan
+        combined={'title':state['request']['title'],'threads':[],'technique_stack':[],'scenes':[]}
+        chunk_reports=[]
+        for chapter in range(1,state['request']['chapters']+1):
+            local=copy.deepcopy(state);req=local['request'];req['chapters']=1
+            req['execution_policy']['chapter_outline_chunks']=False
+            req['scene_designs']=[copy.deepcopy(c) for c in state['request']['scene_designs'] if c['id'].startswith(f'ch{chapter:02}-')]
+            for card in req['scene_designs']:card['id']='ch01-'+card['id'].split('-',1)[1]
+            req['premise']=state['request']['premise']+f' Plan ONLY chapter {chapter}: '+state['request']['chapter_arcs'][chapter-1]
+            # Preserve the immutable original refinement while limiting this planner's scene allocation.
+            local['refinement']={**local['refinement'],'original_prompt':req['premise'],'refined_prompt':req['premise']}
+            local['accepted']=[]
+            chunk=Path(out)/'_chapters'/str(chapter);save(chunk/'inputs/state/snapshot.json',local)
+            result=run_bundle('plan_bundle',chunk/'inputs',chunk/'out',local,0,profile,backend,request_file)
+            for card in result['plan']['scenes']:
+                card['chapter']=chapter;card['id']=f'ch{chapter:02}-'+card['id'].split('-',1)[1]
+                combined['scenes'].append(card)
+            for key in ['threads','technique_stack']:
+                combined[key]=list(dict.fromkeys(combined[key]+result['plan'].get(key,[])))
+            chunk_reports.append(result.get('development_gates',{}).get('plan'))
+        state['plan']=validate_plan(combined,state['request']);state['plan_approved']=True
+        state['chapter_development_reviews']=chunk_reports
+        save(Path(out)/'plan.json',state['plan']);save(Path(out)/'snapshot.json',state)
+        output('characters',state['plan']['scenes'][0]['participants']);return state
+    if kind=='refine' and state['request'].get('execution_policy',{}).get('compile_supplied_brief'):
+        from .craft import compile_brief
+        state['refinement']=compile_brief(state['request'])
+        state['refinement_method']='compiled_user_brief_no_model_expansion'
+        save(Path(out)/'refinement.json',state['refinement']);save(Path(out)/'snapshot.json',state)
+        return state
     for suffix in ['', '_review','_revision','_gate']:
         name=kind+suffix;work=Path(out)/'_steps'/name;inputs=work/'inputs'
         shutil.copytree(previous,inputs/'state',dirs_exist_ok=True)
@@ -94,13 +126,28 @@ def dispatch(task,source,out,state,index,profile,backend,request_file):
             path=choose(source,preferred,fallback,'review.json');save(source/target/'review.json',load(path))
         path=source/'memory-review/review.json'
         if not path.exists():save(path,load(source/'memory/memory-review.json'))
+        if req.get('execution_policy',{}).get('chapter_revision'):
+            from .craft import validate_prose
+            validate_prose((source/'edited/prose.txt').read_text(),req,check_length=backend!='fixture')
+            validate_prose('\n\n'.join([s['prose'] for s in state['accepted']]+[(source/'edited/prose.txt').read_text()]),req)
         if index>0:contracts.require(state.get('design_memory_hash')==memory_hash(state),'Accepted scene used a stale memory design; settle must rerun design')
         return UNHANDLED
+    if task=='edit' and req.get('execution_policy',{}).get('chapter_revision'):
+        from .craft import REVISION,validate_prose
+        executor=Executor(req,out,backend);card=state['plan']['scenes'][index]
+        draft=(source/'draft/draft.txt').read_text()
+        data={**context(req,state,card),**author_packet(req,state,card)}
+        structural=executor.call('structural_editor',{**data,'prose':draft},REVISION+' First repair dramatic structure and chapter handoffs. Do not merely substitute adjectives.',tokens=4200)
+        save(out/'structural-draft.txt',structural)
+        revised=executor.call('humanizer',{**data,'prose':structural},REVISION+' Now perform the final line edit: specific perception, rhythm, coherent imagery, and no explanatory duplication.',tokens=4200)
+        validate_prose(revised,req);save(out/'prose.txt',revised)
+        save(out/'edit-report.json',{'passes':['chapter_structure','scene_line_edit'],'prior_scenes':len(state['accepted'])})
+        return None
     if task not in {'writer','story_review','rhetoric_review','verify','verify_rhetoric','repair','memory','memory_final','memory_review'}:return UNHANDLED
     executor=Executor(req,out,backend)
     card=state['plan']['scenes'][index] if 'plan' in state else None
     if task=='writer':
-        save(out/'draft.txt',writer(executor,req,context(req,state,card),(source/'direction/direction.txt').read_text()));return None
+        save(out/'draft.txt',writer(executor,req,{**context(req,state,card),**author_packet(req,state,card)},(source/'direction/direction.txt').read_text()));return None
     if task in {'story_review','rhetoric_review','verify','verify_rhetoric'}:
         prose=(source/'edited/prose.txt').read_text();kind='rhetoric' if task in {'rhetoric_review','verify_rhetoric'} else 'story'
         checks=RHETORIC_CHECKS if kind=='rhetoric' else STORY_CHECKS

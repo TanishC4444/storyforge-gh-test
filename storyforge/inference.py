@@ -94,6 +94,8 @@ class Executor:
             if len(system) + len(prompt) > self.req['context_chars']:
                 raise ContractError(f'{role} context exceeds character budget; reduce inputs or restart with a larger tested budget. No silent truncation.')
             model = PROFILES[self.req['profile']].get(role, PROFILES[self.req['profile']]['default'])
+            if self.req.get('execution_policy',{}).get('cpu_quality') and role in {'writer','humanizer','structural_editor','architect','scene_designer','director','global_repair','repair','chapter_quality','memory','story_quality','rhetoric_quality','development_editor'}:
+                model='qwen7b'
             if last_error and role in {'writer','architect'} and self.req['profile']=='fast':model='qwen3b'
             n_ctx=min(self.req['n_ctx'],8192) if model=='qwen3b' and not (validator and self.req.get('performance',{}).get('compact_packets')) and role not in {'writer','architect','chapter_quality','humanizer','refiner'} else self.req['n_ctx']
             digest = hashlib.sha256(json.dumps([self.backend, role, model, system, prompt, tokens, n_ctx, self.req['runner_repo'], response_schema,self.req.get('api_roles',{}),output_format]).encode()).hexdigest()

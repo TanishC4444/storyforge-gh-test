@@ -229,3 +229,29 @@ gate_repair_threshold, writer_beats, and per-kind concurrency. Fixture tests cov
 both repair gates, patch ownership, beat stitching, source fallbacks, a complete
 two-scene sequence, delta-only verification and forced hash-mismatch design reruns.
 Live speed and quality improvements remain unmeasured until the experiment runs.
+
+## Large story revision (2026-10-21)
+
+The experimental request now targets three chapters of four 1,200-word scenes
+(about 14,400 words). The rich supplied brief is compiled directly into the
+refinement contract, with no generative refinement/development loop. Outline
+creation, critique, revision and gate run separately for each four-scene chapter;
+scene IDs are rebound to their true chapter after local validation. There is no
+claim that independent chapter reviews establish whole-story literary quality.
+
+Creative work and substantial judgments use existing CPU workers: outline,
+development, direction, whole-scene drafting, structural chapter-aware revision,
+line editing, repair, story/rhetoric audits, memory extraction and chapter audit.
+Only bounded character proposals and fact-verification calls use the hosted API.
+The new CPU quality option uses the existing qwen7b model for substantial stages.
+Removing API dependency does not imply faster creative generation on CPU.
+
+Current-chapter prose, scene contracts and canonical prior facts guide revisions.
+Earlier chapters remain in checkpoints and source-bound canon; they are not all
+repeated in every model input. Each scene gets two whole-scene revision passes
+before any review or memory extraction. There is no late chapter rewrite that
+would invalidate recorded facts. Deterministic guards reject quoted speech,
+invocations, headings, identical substantial paragraphs and, in live runs,
+undersized/oversized scenes. Failed review gates stop canon acceptance instead of
+silently declaring a provisional draft final. These checks cannot prove literary
+excellence; live prose and quality still require inspection.

@@ -59,7 +59,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         if req.get('execution_policy',{}).get('experimental'):
             from .worker_policy import validate
             validate(req)
-        contracts.require(req['chapters'] * req['scenes_per_chapter'] <= 9, 'This workflow supports at most nine scene slots')
+        contracts.require(req['chapters'] * req['scenes_per_chapter'] <= (12 if req.get('execution_policy',{}).get('experimental') else 9), 'Requested scenes exceed workflow capacity')
         contracts.require(req['auto_approve_plan'], 'This automated DAG requires explicit auto_approve_plan in the request')
         if backend=='worker' and req.get('performance',{}).get('api_batch_probes'):
             from .hosted import GoogleHosted

@@ -266,7 +266,7 @@ jobs:
 
 def build_experimental():
     import re
-    header=HEADER.replace('Nine scenes is the full three-chapter test','Four scenes is the full opening movement').replace('name: Story runners','name: Troy parallel repair and beat experiment').replace('options: [silent-bell-deep, silent-bell-full, harbor]','options: [troy-parallel-experiment]').replace('default: silent-bell-deep','default: troy-parallel-experiment').replace('default: balanced','default: fast').replace("options: ['9', '3', '1']","options: ['4']").replace("default: '9'","default: '4'").replace('group: story-runners','group: story-parallel-experiment')
+    header=HEADER.replace('Nine scenes is the full three-chapter test','Twelve scenes across three chapters').replace('name: Story runners','name: Troy large story / chapter revisions').replace('options: [silent-bell-deep, silent-bell-full, harbor]','options: [troy-parallel-experiment]').replace('default: silent-bell-deep','default: troy-parallel-experiment').replace('default: balanced','default: fast').replace("options: ['9', '3', '1']","options: ['12']").replace("default: '9'","default: '12'").replace('group: story-runners','group: story-parallel-experiment')
     blocks=[header];keys=[]
     def job(key,title,task,needs=(),downloads=(),index=None,condition=None,matrix=None):
         keys.append(key);lines=[f'  {key}:',f'    name: {title}']
@@ -295,16 +295,16 @@ def build_experimental():
         blocks.append('\n'.join(lines)+'\n')
     ok="always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')"
     job('prepare','Prepare fresh brief and retrieval','prepare')
-    job('refine_bundle','Refine, develop, revise and gate','refine_bundle',['prepare'],[('prepare','state')])
-    job('plan_bundle','Outline, develop, revise and gate','plan_bundle',['refine_bundle'],[('refine_bundle','state')])
-    for i in range(4):
+    job('refine_bundle','Compile supplied author brief without expansion','refine_bundle',['prepare'],[('prepare','state')])
+    job('plan_bundle','Develop and verify each chapter outline','plan_bundle',['refine_bundle'],[('refine_bundle','state')])
+    for i in range(12):
         p=f's{i+1:02}';previous=f's{i:02}';state=p+'_design' if i==0 else previous+'_settle'
         if i==0:job(state,'Scene 1 design','scene_design',['plan_bundle'],[('plan_bundle','state')],i)
         common=[(state,'state')]
         job(p+'_characters',p+' isolated character runners','character',[state],common,i,matrix=state)
         job(p+'_direction',p+' direction','director',[state,p+'_characters'],common+[(p+'_characters-*','characters')],i)
-        job(p+'_draft',p+' beat-parallel writer','writer',[state,p+'_direction'],common+[(p+'_direction','direction')],i)
-        job(p+'_edit',p+' whole-scene distinct writing','edit',[state,p+'_draft'],common+[(p+'_draft','draft')],i)
+        job(p+'_draft',p+' whole-scene writer','writer',[state,p+'_direction'],common+[(p+'_direction','direction')],i)
+        job(p+'_edit',p+' chapter-aware structural revision and line edit','edit',[state,p+'_draft'],common+[(p+'_draft','draft')],i)
         edit=common+[(p+'_edit','edited')]
         job(p+'_story',p+' concurrent story dimensions','story_review',[state,p+'_edit'],edit,i)
         job(p+'_rhetoric',p+' concurrent rhetoric dimensions','rhetoric_review',[state,p+'_edit'],edit,i)
@@ -323,7 +323,7 @@ def build_experimental():
         for suffix,path in [('repair','repair'),('verify','verified'),('verify_rhetoric','verified-rhetoric'),('final_memory','final-memory'),('memory_review','memory-review')]:extras.append((p+'_'+suffix,path,f"needs.{p}_{suffix}.result == 'success'"))
         required=' && '.join(f"needs.{key}.result == 'success'" for key in [state,p+'_edit',p+'_story',p+'_rhetoric',p+'_memory'])
         job(p+'_accept',p+' accept with conditional fallbacks','accept',needs,extras,i,ok+' && '+required)
-        if i<3:
+        if i<11:
             following=f's{i+2:02}'
             job(following+'_design',following+' speculative next-scene design','anticipate_design',[state,p+'_edit',p+'_memory'],edit+[(p+'_memory','memory')],i+1)
             job(p+'_settle',p+' settle canon and reconcile next design','settle',[p+'_accept',following+'_design'],[(p+'_accept','state'),(following+'_design','anticipated')],i+1)
@@ -335,9 +335,9 @@ def build_experimental():
         with:
           name: READABLE-STORY-${{ github.run_id }}
           path: |
-            results/s04_accept/FINAL_STORY.txt
-            results/s04_accept/PROVISIONAL_STORY.txt
-            results/s04_accept/READ_ME.txt
+            results/s12_accept/FINAL_STORY.txt
+            results/s12_accept/PROVISIONAL_STORY.txt
+            results/s12_accept/READ_ME.txt
           if-no-files-found: warn
       - name: Summarize run''')
     blocks.append('  results:\n'+tail)

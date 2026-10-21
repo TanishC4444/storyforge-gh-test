@@ -6,15 +6,15 @@ import threading
 
 # Provider tiers are existing configured models; no unverified model identifiers.
 STAGES={
- 'refiner':('flash',2400,90),'architect':('flash',3000,120),
- 'development_editor':('gemma',1200,90),'scene_designer':('gemma',1200,90),
- 'character':('gemma',220,45),'director':('gemma',500,60),
- 'writer':('gemma',3000,150),'writer_beat':('gemma',1100,120),
- 'seam':('gemma',700,90),'humanizer':('gemma',3000,150),
- 'repair':('gemma',1300,120),'global_repair':('gemma',3200,150),
- 'story_quality':('gemma',1600,90),'rhetoric_quality':('flash',1400,90),
- 'memory':('flash',1400,90),'memory_quality':('flash',1000,90),
- 'chapter_quality':('flash',1800,120)}
+ 'refiner':(None,2400,90),'architect':(None,3000,120),
+ 'development_editor':(None,1200,90),'scene_designer':(None,1200,90),
+ 'character':('gemma',220,45),'director':(None,500,60),
+ 'writer':(None,4200,180),'writer_beat':(None,1100,120),
+ 'seam':(None,700,90),'humanizer':(None,4200,180),'structural_editor':(None,4200,180),
+ 'repair':(None,1300,120),'global_repair':(None,3200,150),
+ 'story_quality':(None,1600,90),'rhetoric_quality':(None,1400,90),
+ 'memory':(None,1400,90),'memory_quality':('gemma',1000,90),
+ 'chapter_quality':(None,1800,120)}
 PROFILE_TABLES={'fast':STAGES,'small':{role:(tier,min(cap,1800),min(timeout,90)) for role,(tier,cap,timeout) in STAGES.items()}}
 _LOCK=threading.Lock();_SEMAPHORES={};CPU_LOCK=threading.RLock()
 

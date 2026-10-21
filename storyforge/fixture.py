@@ -43,6 +43,7 @@ def respond(role, packet, req):
         return packet['character'].get('name', packet['character']['id']) + ' checks the nearest fastening.'
     if role == 'director':
         return 'Inspect the latch; ask for access; cooperate on a practical check.'
+    if role == 'structural_editor':return packet['prose']
     if role == 'humanizer':
         if 'paragraphs' in packet:return json.dumps({'replacements':{p['id']:p['original'] for p in packet['paragraphs']}})
         return packet['prose']
