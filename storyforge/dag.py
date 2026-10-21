@@ -68,10 +68,30 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         event('retrieval_complete','Literary references selected',sources=[s['title'] for s in state['retrieval']['sources']],stale_records=state['retrieval']['stale_embedding_records'])
         save(out / 'snapshot.json', state)
         return state
+    if task == 'resume':
+        from .resilience import creative_request
+        state=load(source/'checkpoint/snapshot.json')
+        req=contracts.request(load(ROOT/'examples'/f'{request_file}.json'))
+        contracts.require(creative_request(req)==creative_request(state['request']),'Continuation brief differs from checkpoint')
+        contracts.require(len(state['accepted'])==2,'Continuation requires exactly two committed scenes')
+        contracts.plan(state['plan'],req)
+        state['request']['performance']={**state['request'].get('performance',{}),'single_editorial_pass':True,'combine_direction':True,'targeted_edits':True}
+        state['request']['profile']=profile;state['backend']=backend
+        state['request_hash']=hashlib.sha256(json.dumps(state['request'],sort_keys=True).encode()).hexdigest()
+        if (source/'saved-design/snapshot.json').exists() and (source/'saved-draft/draft.txt').exists():
+            saved=load(source/'saved-design/snapshot.json')
+            contracts.require(saved['accepted']==state['accepted'],'Saved draft has a different canon checkpoint')
+            contracts.require(creative_request(saved['request'])==creative_request(req),'Saved draft brief differs')
+            state['plan']['scenes'][2]=saved['plan']['scenes'][2]
+            state['continuation_drafts']={'2':(source/'saved-draft/draft.txt').read_text()}
+        state['continuation']={'source_run':os.getenv('CONTINUATION_RUN'),'start_scene':3}
+        save(out/'snapshot.json',state);output('characters',state['plan']['scenes'][2]['participants']);return state
     state = load(source / 'state' / 'snapshot.json')
     req = state['request']
     event('state_loaded','Accepted state loaded',version=state['version'],accepted_scenes=len(state['accepted']),planned_scenes=req['chapters']*req['scenes_per_chapter'])
     executor = Executor(req, out, backend)
+    if req.get('performance',{}).get('single_editorial_pass'):
+        executor.req={**req,'max_stage_retries':0}
     if task=='refine' and state.get('recovery',{}).get('reuse_planning'):
         save(out/'refinement.json',state['refinement']);save(out/'snapshot.json',state);return state
     if task == 'refine' and (source / 'seed').exists():
@@ -118,6 +138,8 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         return result
     if task=='scene_design':
         old=state['plan']['scenes'][index]
+        if req.get('performance',{}).get('single_editorial_pass'):
+            save(out/'scene-design.json',old);save(out/'snapshot.json',state);output('characters',old['participants']);event('design','Using approved scene card; writer reconciles with latest accepted canon');return state
         if index==0 and state.get('recovery'):
             save(out/'scene-design.json',old);save(out/'snapshot.json',state);output('characters',old['participants']);return state
         designed=executor.call('scene_designer',{'request_controls':controls(req),'world':req['world_design'],'plot':req['plot_design'],'characters':req['characters'],'proposed_scene':old,'accepted_memory':compact(state['memories'],36),'previous_scene':{'id':state['accepted'][-1]['id'],'prose_excerpt':state['accepted'][-1]['prose'][-4500:]} if state['accepted'] else None,'user_scene_design':[s for s in req['scene_designs'] if s['id']==old['id']],'inspiration':application_packet(req,state['retrieval'],'scene_designer',old['id'])},
@@ -133,6 +155,8 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
     scene_packet = context(req, state, card)
     budget = min(3600, int(req['words_per_scene'] * 2.2) + 200)
     quality_skill = (ROOT / 'skills/story_quality.md').read_text()
+    if task=='character' and str(index) in state.get('continuation_drafts',{}):
+        save(out/'proposal.json',{'character':character,'observable_proposal':'Existing draft retained; no new proposal.','state_version':state['version']});return
     if task == 'character' and index==0 and state.get('recovery'):
         save(out/'proposal.json',{'character':character,'observable_proposal':'Recovered scene already exists; no new actions proposed.','state_version':state['version']});return
     if task == 'character':
@@ -148,12 +172,45 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         result = executor.call('director', {'scene_context': scene_packet, 'proposals': proposals}, 'Propose 3–5 concise beats. Respect POV, knowledge, rules, and intended change. Proposals are optional and are not canon.', tokens=500)
         save(out / 'direction.txt', result)
         return
+    if task=='writer' and str(index) in state.get('continuation_drafts',{}):
+        save(out/'draft.txt',state['continuation_drafts'][str(index)]);event('recovery','Reusing already generated scene draft');return
     if task=='writer' and index==0 and state.get('recovery'):
         save(out/'draft.txt',state['recovery']['prose']);event('recovery','Recovered existing scene 1 prose; no drafting call');return
     if task == 'writer':
         scene_packet['direction'] = (source / 'direction/direction.txt').read_text()
         result = executor.call('writer', scene_packet, 'Write complete scene prose at target_words. No summary, heading, commentary, or canon delta. Respect POV, knowledge, rules, and voices. Give choices consequences.', tokens=budget,skill=(ROOT/'skills/distinct_writing.md').read_text())
         save(out / 'draft.txt', result)
+        return
+    if task == 'edit_plan':
+        from .fast_edit import batches
+        prose=(source/'draft/draft.txt').read_text()
+        plan=batches(prose)
+        contracts.require(bool(plan),'Cannot edit empty draft')
+        save(out/'batches.json',plan);save(out/'draft.txt',prose)
+        output('characters',[b['id'] for b in plan]);return
+    if task == 'edit_batch':
+        from .fast_edit import validate, schema
+        batch=next(b for b in load(source/'edit-plan/batches.json') if b['id']==character)
+        try:
+            result=({'replacements':{}} if backend=='fixture' else executor.call('humanizer',{'owned_paragraphs':batch['owned'],'passages':batch['passages'],
+                'scene':card,'style':req['style'],'world_rules':req['world_rules'],
+                'pov_character':next(c for c in req['characters'] if c['id']==card['pov'])},
+                'In one pass edit prose, rhetoric and distinct writing. Return JSON replacements only for owned paragraphs needing changes; empty replacements if none. Neighbors are read-only. Preserve events, knowledge, chronology, deliberate epic register and approximate length. Do not invent facts or explain obvious actions.',
+                tokens=1800,validator=lambda x:validate(x,batch),response_schema=schema(batch),skill=(ROOT/'skills/distinct_writing.md').read_text()))
+        except Exception as exc:
+            if not enabled(req):raise
+            warning(out,'passage_editor_unavailable',exc);result={'replacements':{},'unverified':True}
+        save(out/'batch.json',{**result,'id':batch['id'],'source_sha256':batch['source_sha256']});return
+    if task == 'edit_merge':
+        from .fast_edit import merge
+        prose=(source/'edit-plan/draft.txt').read_text()
+        results=[load(p) for p in (source/'batches').rglob('batch.json')]
+        revised=merge(prose,load(source/'edit-plan/batches.json'),results)
+        save(out/'prose.txt',revised)
+        save(out/'repair.json',{'changed':False,'reviewed_sha256':hashlib.sha256(revised.encode()).hexdigest(),'candidate_sha256':hashlib.sha256(revised.encode()).hexdigest()})
+        save(out/'edit-report.json',{'batches':results,'source_sha256':hashlib.sha256(prose.encode()).hexdigest(),'final_sha256':hashlib.sha256(revised.encode()).hexdigest()})
+        for result in results:
+            if result.get('unverified'):warning(out,'passage_edit_skipped','Batch '+result['id']+' retained original prose; full-scene review still required.')
         return
     if task == 'edit':
         draft = (source / 'draft/draft.txt').read_text()
@@ -239,7 +296,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         prose = (source / 'edited/prose.txt').read_text()
         memory = contracts.delta(load(source / 'memory/memory.json'), prose, [c['id'] for c in req['characters']])
         final_patch=None
-        if unresolved and enabled(req) and req.get('performance',{}).get('targeted_edits'):
+        if unresolved and enabled(req) and req.get('performance',{}).get('targeted_edits') and not req.get('performance',{}).get('single_editorial_pass'):
             try:
                 revised,final_patch=patch_repair(executor,req,prose,[review,rhetoric_review])
                 if revised!=prose:

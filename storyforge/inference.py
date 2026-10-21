@@ -49,6 +49,11 @@ class Executor:
     def call(self, role, packet, instruction, *, tokens=1200, validator=None, skill='', response_schema=None):
         from .output_schema import editorial_schema
         response_schema=response_schema or editorial_schema(packet)
+        if self.req.get('performance',{}).get('single_editorial_pass') and role.endswith('quality'):
+            instruction+=' Keep each check reason to one specific sentence, and issues to concrete actionable faults. No introduction or repeated analysis.'
+            skill='Assess every required check using exact source passages. Respect deliberate style, private knowledge, physical causality, character depth, subtext and user choices. A failed check must have a matching actionable issue. Propose an exact replacement only when it preserves facts.'
+            if role in {'story_quality','rhetoric_quality'}:
+                packet={k:v for k,v in packet.items() if k != 'craft'}
         last_error = ''
         repair_output = None
         for attempt in range(self.req['max_stage_retries'] + 1):
