@@ -3472,9 +3472,21 @@ jobs:
     needs: [prepare, refine, refine_review, refine_revision, refine_gate, plan, plan_review, plan_revision, plan_gate, s01_design, s01_characters, s01_direction, s01_draft, s01_edit, s01_story, s01_rhetoric, s01_memory, s01_repair, s01_verify, s01_verify_rhetoric, s01_final_memory, s01_memory_review, s01_accept, s02_design, s02_characters, s02_direction, s02_draft, s02_edit, s02_story, s02_rhetoric, s02_memory, s02_repair, s02_verify, s02_verify_rhetoric, s02_final_memory, s02_memory_review, s02_accept, s03_design, s03_characters, s03_direction, s03_draft, s03_edit, s03_story, s03_rhetoric, s03_memory, s03_repair, s03_verify, s03_verify_rhetoric, s03_final_memory, s03_memory_review, s03_accept, s04_design, s04_characters, s04_direction, s04_draft, s04_edit, s04_story, s04_rhetoric, s04_memory, s04_repair, s04_verify, s04_verify_rhetoric, s04_final_memory, s04_memory_review, s04_accept]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           path: results/
+      - name: Save observed API and CPU usage, including failed attempts
+        if: always()
+        run: python -m storyforge.usage --source results --out results/usage-summary
+      - name: Retain usage reports for 90 days
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: usage-${{ github.run_id }}
+          path: results/usage-summary/
+          retention-days: 90
+          if-no-files-found: warn
       - uses: actions/upload-artifact@v4
         with:
           name: story-run-${{ github.run_id }}

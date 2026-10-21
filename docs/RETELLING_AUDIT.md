@@ -125,3 +125,38 @@ a final-story label. phase-timings.json, benchmark.json, provider-health.json an
 provider-budget/requests.jsonl distinguish stage time, output generation, provider
 failure and quota pacing. The new orchestration has full fixture coverage; actual
 speed, provider availability and literary quality must be measured on its live run.
+
+## Usage recording and run 39646990809
+
+The restored multi-runner run failed in planning. A prior Gemma HTTP 500 opened
+its inherited circuit; the planner's first CPU response used misordered scene IDs
+and numbered chapters as 2, 3, 4, 1. The second hosted attempt also returned HTTP
+500; its CPU fallback put the IDs in order but numbered the four scenes as chapters
+1, 2, 3, 4, rather than keeping all in chapter 1. Schema-level numeric ranges did
+not prevent that transport output. Scene IDs and chapter numbers are now
+application-owned metadata derived from requested reading order. Scene content is
+never reordered or approved by that assignment; development review remains required.
+
+Earlier in the same run, the batched development review needed 8,733 tokens but the
+CPU fallback was limited to 8,192 despite the configured 16,384-token context.
+Compact structured calls now retain the configured context. The review was marked
+unverified; the draft-continuation policy allowed planning to proceed provisionally.
+
+Usage is now recorded for every returned CPU attempt and each hosted generation
+attempt, including retries and truncated provider output. Google usage is saved
+before finish-reason rejection. HTTP failures without usage metadata retain null
+counts, never invented zero usage. Count-token estimates and quota reservations do
+not enter observed token totals. Prompt text and credentials are excluded.
+
+Every story workflow saves JSON, CSV and readable usage reports as a separate
+usage-RUN_ID artifact retained for 90 days, including failed runs. Reports group
+provider, model and role, with request counts, observed input/output/thinking/total
+tokens, unknown usage counts and elapsed attempt time. These are observed usage
+records, not invoices or account quota balances.
+
+The recovered historical report under reports/run-usage/39646990809 contains three
+CPU outputs totaling 17,849 input and 2,012 output tokens (19,861 total), plus six
+hosted generation attempts whose token metadata was not preserved by the old
+instrumentation. One hosted response hit MAX_TOKENS before CPU fallback; that
+successful HTTP response was not a successful accepted generation. Its token usage
+cannot now be reconstructed. The report explicitly marks all six as unknown.

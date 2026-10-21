@@ -151,9 +151,21 @@ def build(total=9, per_chapter=3, troy=False, continuation=False, full_api=False
     needs: [''' + ', '.join(jobs) + ''']
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           path: results/
+      - name: Save observed API and CPU usage, including failed attempts
+        if: always()
+        run: python -m storyforge.usage --source results --out results/usage-summary
+      - name: Retain usage reports for 90 days
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: usage-${{ github.run_id }}
+          path: results/usage-summary/
+          retention-days: 90
+          if-no-files-found: warn
       - uses: actions/upload-artifact@v4
         with:
           name: story-run-${{ github.run_id }}
@@ -225,6 +237,17 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           PYTHONUNBUFFERED: '1'
         run: python -m storyforge.full_flow --out runs/troy-full-api
+      - name: Save observed API and CPU usage
+        if: always()
+        run: python -m storyforge.usage --source runs/troy-full-api --out runs/usage-summary
+      - name: Retain usage reports for 90 days
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: usage-${{ github.run_id }}
+          path: runs/usage-summary/
+          retention-days: 90
+          if-no-files-found: warn
       - name: Final reviewed story
         if: success()
         uses: actions/upload-artifact@v4

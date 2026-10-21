@@ -482,7 +482,8 @@
     "hosted_failover": false,
     "batch_development": true,
     "canon_index": true,
-    "inherit_provider_budget": true
+    "inherit_provider_budget": true,
+    "application_plan_binding": true
   },
   "api_roles": {
     "refiner": "gemma",

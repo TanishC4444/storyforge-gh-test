@@ -1,0 +1,6 @@
+provider,model,role,requests,unknown_usage_requests,observed_input_tokens,observed_output_tokens,observed_total_tokens,observed_thinking_tokens,seconds
+cpu,qwen3b,architect,2,0,12397,1239,13636,0,660.51630796
+cpu,qwen3b,refiner,1,0,5452,773,6225,0,227.992660082
+google,gemma-4-31b-it,plan,2,2,0,0,0,0,45.4
+google,gemma-4-31b-it,refine_review,2,2,0,0,0,0,12.126000000000001
+google,gemma-4-31b-it,refine,2,2,0,0,0,0,149.95299999999997

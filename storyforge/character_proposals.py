@@ -21,7 +21,7 @@ def propose(executor,req,state,card,setting,cast):
         save(executor.folder/'packets'/f'actor-{digest}.json',{'role':'character','input':data,'system':INSTRUCTION,'model':MODELS[kind]})
         try:
             print('Character '+character['id']+': independent API context',flush=True)
-            text,diag=executor.hosted.complete(kind,INSTRUCTION,json.dumps(data,ensure_ascii=False),220)
+            text,diag=executor.hosted.complete(kind,INSTRUCTION,json.dumps(data,ensure_ascii=False),220,role='character')
             save(path,{'role':'character','model':diag['model'],'output':text,'diagnostic':diag})
             return character['id'],text,None
         except Exception as exc:return character['id'],None,str(exc)

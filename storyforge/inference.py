@@ -68,6 +68,8 @@ class Executor:
             if role in {'story_quality','rhetoric_quality'}:
                 packet={k:v for k,v in packet.items() if k != 'craft'}
         if role=='architect':
+            if self.req.get('performance',{}).get('application_plan_binding'):
+                instruction+=' The application assigns scene IDs and chapter numbers by requested reading order. Omit those metadata fields. Preserve the requested scene sequence in the scenes array.'
             instruction+=' Return only the scene cards and thread strings in the schema. Keep each scene field to one or two concrete sentences. Do not repeat the supplied brief, reference lists, stylistic devices or technique libraries.'
         last_error = ''
         repair_output = None
@@ -88,7 +90,7 @@ class Executor:
                 raise ContractError(f'{role} context exceeds character budget; reduce inputs or restart with a larger tested budget. No silent truncation.')
             model = PROFILES[self.req['profile']].get(role, PROFILES[self.req['profile']]['default'])
             if last_error and role in {'writer','architect'} and self.req['profile']=='fast':model='qwen3b'
-            n_ctx=min(self.req['n_ctx'],8192) if model=='qwen3b' and role not in {'writer','architect','chapter_quality','humanizer','refiner'} else self.req['n_ctx']
+            n_ctx=min(self.req['n_ctx'],8192) if model=='qwen3b' and not (validator and self.req.get('performance',{}).get('compact_packets')) and role not in {'writer','architect','chapter_quality','humanizer','refiner'} else self.req['n_ctx']
             digest = hashlib.sha256(json.dumps([self.backend, role, model, system, prompt, tokens, n_ctx, self.req['runner_repo'], response_schema,self.req.get('api_roles',{}),output_format]).encode()).hexdigest()
             path = self.folder / 'calls' / f'{role}-{digest[:20]}.json'
             save(self.folder / 'packets' / f'{role}-{digest[:20]}.json', {'role': role, 'model': model, 'system': system, 'input': packet, 'validation_error': last_error, 'max_tokens': tokens, 'n_ctx': n_ctx,'response_schema':response_schema,'format_repair_only':bool(last_error and editorial_repair)})
@@ -115,7 +117,7 @@ class Executor:
                                 if route=='flash' and kind!='flash' and not self.hosted.can_rescue():continue
                                 try:
                                     with heartbeat('Hosted '+route+' / '+role+'; shared quota pacing applies'):
-                                        hosted_result=self.hosted.complete(route,system,prompt,tokens,structured=bool(validator) and output_format=='json',response_schema=response_schema)
+                                        hosted_result=self.hosted.complete(route,system,prompt,tokens,structured=bool(validator) and output_format=='json',response_schema=response_schema,role=role)
                                     break
                                 except Exception as exc:
                                     warning(self.folder,'api_fallback',str(exc))
@@ -150,6 +152,9 @@ class Executor:
                     cached = {'role': role, 'model': diagnostic.get('model',model), 'output': output, 'diagnostic': diagnostic,
                               'seconds': round(time.monotonic() - started, 3), 'digest': digest}
                     save(path, cached)
+                    if self.backend!='fixture' and diagnostic.get('provider')!='google':
+                        from .usage import record
+                        record(self.folder,'cpu',cached['model'],role,diagnostic.get('usage'),call_id=digest,attempt=attempt+1,seconds=(diagnostic.get('timings') or {}).get('total_seconds',cached['seconds']),end_to_end_seconds=cached['seconds'],status='returned',finish_reason=diagnostic.get('finish_reason'))
                 event('model_returned','Model response received; validating before acceptance',role=role,seconds=cached.get('seconds'),usage=cached['diagnostic'].get('usage'),timings=cached['diagnostic'].get('timings'),weights_reused=cached['diagnostic'].get('model_reused'),finish_reason=cached['diagnostic'].get('finish_reason'))
                 if cached['diagnostic'].get('finish_reason') not in {'stop', 'eos'}:
                     raise ContractError('Generation did not stop naturally; possible truncated artifact')
@@ -159,6 +164,8 @@ class Executor:
                         raise ContractError('Formatting repair changed editorial judgments; rejected.')
                 parsed = parse_json(cached['output']) if validator and output_format=='json' else cached['output']
                 if validator:
+                    if role=='architect' and self.req.get('performance',{}).get('application_plan_binding') and isinstance(parsed,dict) and isinstance(parsed.get('scenes'),list):
+                        parsed={**parsed,'scenes':[{**scene,'id':f'ch{i // self.req["scenes_per_chapter"] + 1:02}-sc{i % self.req["scenes_per_chapter"] + 1:02}','chapter':i // self.req['scenes_per_chapter'] + 1} if isinstance(scene,dict) else scene for i,scene in enumerate(parsed['scenes'])]}
                     if role=='refiner' and self.req.get('performance',{}).get('application_prompt_binding') and isinstance(parsed,dict):
                         parsed={**parsed,'original_prompt':self.req['premise']}
                     if isinstance(parsed,dict) and isinstance(parsed.get('checks'),dict):

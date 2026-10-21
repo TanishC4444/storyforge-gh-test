@@ -27,7 +27,7 @@ def run(folder,request_file='troy-full-api',profile='fast',backend='worker'):
         for kind in ['gemma','flash']:
             before=time.monotonic()
             try:
-                _,diag=hosted.complete(kind,'Return only OK.','Connection and output compatibility check.',128)
+                _,diag=hosted.complete(kind,'Return only OK.','Connection and output compatibility check.',128,role='health_probe')
                 health[kind]={'available':True,'diagnostic':diag}
             except Exception as exc:health[kind]={'available':False,'error':str(exc)}
             health[kind]['seconds']=round(time.monotonic()-before,3)

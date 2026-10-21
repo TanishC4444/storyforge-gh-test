@@ -47,9 +47,11 @@ def plan_schema(req):
     scene_ids=[f'ch{i // req["scenes_per_chapter"] + 1:02}-sc{i % req["scenes_per_chapter"] + 1:02}' for i in range(total)]
     properties={key:{'type':'string','minLength':1} for key in ['goal','obstacle','intended_change','location','time']}
     properties.update({'id':{'type':'string','enum':scene_ids},
-                       'chapter':{'type':'integer','minimum':1,'maximum':req['chapters']},
+                       'chapter':{'type':'integer','enum':list(range(1,req['chapters']+1))},
                        'pov':{'type':'string','enum':ids},
                        'participants':{'type':'array','items':{'type':'string','enum':ids},'minItems':1,'maxItems':len(ids)}})
+    if req.get('performance',{}).get('application_plan_binding'):
+        properties.pop('id');properties.pop('chapter')
     scene={'type':'object','properties':properties,'required':list(properties),'additionalProperties':False}
     return {'type':'object','properties':{
         'scenes':{'type':'array','items':scene,'minItems':total,'maxItems':total},
@@ -59,6 +61,8 @@ def plan_schema(req):
 
 def scene_schema(req,packet):
     scene=plan_schema(req)['properties']['scenes']['items']
+    card=packet.get('proposed_scene',{})
+    scene['properties'].update({'id':{'type':'string','enum':[card['id']]} if 'id' in card else {'type':'string'},'chapter':{'type':'integer','enum':[card['chapter']]} if 'chapter' in card else {'type':'integer'}})
     scene['properties'].update({key:{'type':'string','minLength':1} for key in ['choice','consequence','new_development']})
     refs=packet.get('inspiration',{}).get('references',[])
     item={'type':'object','properties':{'record_id':{'type':'string','enum':[r['id'] for r in refs]} if refs else {'type':'string'},'application':{'type':'string'}},'required':['record_id','application'],'additionalProperties':False}

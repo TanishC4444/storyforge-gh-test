@@ -96,7 +96,7 @@ class GoogleHosted:
                 save(path,health)
             return health.get(kind,{}).get('until',0)>time.time()
 
-    def complete(self,kind,system,prompt,tokens,structured=False,response_schema=None):
+    def complete(self,kind,system,prompt,tokens,structured=False,response_schema=None,role=None):
         if not self.key:raise HostedError('Google API key unavailable')
         if kind in self.disabled or self.circuit(kind):raise HostedError(kind+' circuit open after prior provider failure')
         model=MODELS[kind]
@@ -116,9 +116,15 @@ class GoogleHosted:
             if response_schema is not None:config['responseJsonSchema']=response_schema
         started=time.monotonic()
         for attempt in range(2):
+            from .usage import record
+            request_started=time.monotonic()
             try:
-                result=self.request(model+':generateContent',{**body,'generationConfig':config},timeout=150 if kind=='gemma' else 240);break
+                result=self.request(model+':generateContent',{**body,'generationConfig':config},timeout=150 if kind=='gemma' else 240)
+                candidate=result.get('candidates',[{}])
+                record(self.folder,'google',model,role,result.get('usageMetadata'),attempt=attempt+1,seconds=round(time.monotonic()-request_started,3),status='returned',finish_reason=candidate[0].get('finishReason') if candidate else None,reserved_input_tokens=estimate)
+                break
             except HostedError as exc:
+                record(self.folder,'google',model,role,attempt=attempt+1,seconds=round(time.monotonic()-request_started,3),status=str(exc),reserved_input_tokens=estimate)
                 if attempt==0 and any(code in str(exc) for code in ['500','502','503','504']):
                     time.sleep(4+random.random());self.reserve(kind,estimate+tokens);continue
                 if any(code in str(exc) for code in ['400','401','403','404','429']):self.disabled.add(kind)

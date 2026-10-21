@@ -481,7 +481,8 @@
     "application_prompt_binding": true,
     "hosted_failover": true,
     "batch_development": true,
-    "canon_index": true
+    "canon_index": true,
+    "application_plan_binding": true
   },
   "api_roles": {
     "refiner": "gemma",
