@@ -51,8 +51,9 @@ class Executor:
             self.hosted=GoogleHosted(os.getenv('STORY_QUOTA_DIR',str(self.folder/'provider-budget')))
 
     def call(self, role, packet, instruction, *, tokens=1200, validator=None, skill='', response_schema=None, output_format='json'):
-        from .output_schema import editorial_schema
-        response_schema=response_schema or editorial_schema(packet)
+        from .output_schema import editorial_schema, refinement_schema
+        response_schema=response_schema or (refinement_schema() if role=='refiner' else editorial_schema(packet))
+        editorial_repair=bool(response_schema and 'checks' in response_schema.get('properties',{}))
         if self.req.get('performance',{}).get('single_editorial_pass') and role.endswith('quality'):
             instruction+=' Keep each check reason to one specific sentence, and issues to concrete actionable faults. No introduction or repeated analysis.'
             skill='Assess every required check using exact source passages. Respect deliberate style, private knowledge, physical causality, character depth, subtext and user choices. A failed check must have a matching actionable issue. Propose an exact replacement only when it preserves facts.'
@@ -66,11 +67,13 @@ class Executor:
                       + skill + '\n' + instruction)
             prompt = json.dumps(packet, ensure_ascii=False, sort_keys=True,separators=(',',':'))
             if last_error:
-                if response_schema is not None and repair_output is not None:
+                if editorial_repair and repair_output is not None:
                     system='Repair JSON structure only. Preserve judgments and reasons. Do not make new literary judgments. Return the corrected JSON matching the supplied schema. If semantic reevaluation is required, stop rather than inventing evidence.'
                     prompt=json.dumps({'invalid_output':repair_output,'validation_error':last_error,'allowed_evidence_ids':[x.get('id') for x in packet.get('candidate_evidence',packet.get('evidence_passages',[]))]},ensure_ascii=False,separators=(',',':'))
                 else:
-                    prompt += '\nPrevious output failed validation: ' + last_error + '\nReturn a complete corrected artifact.'
+                    prompt += '\nPrevious output failed validation: ' + last_error + '\nReturn a complete corrected artifact grounded in the original request. Supply every required field; do not substitute retrieval guidance for the premise.'
+            if response_schema is not None:
+                system+='\nRequired output JSON Schema: '+json.dumps(response_schema,separators=(',',':'))
             if len(system) + len(prompt) > self.req['context_chars']:
                 raise ContractError(f'{role} context exceeds character budget; reduce inputs or restart with a larger tested budget. No silent truncation.')
             model = PROFILES[self.req['profile']].get(role, PROFILES[self.req['profile']]['default'])
@@ -78,9 +81,9 @@ class Executor:
             n_ctx=min(self.req['n_ctx'],8192) if model=='qwen3b' and role not in {'writer','architect','chapter_quality','humanizer','refiner'} else self.req['n_ctx']
             digest = hashlib.sha256(json.dumps([self.backend, role, model, system, prompt, tokens, n_ctx, self.req['runner_repo'], response_schema,self.req.get('api_roles',{}),output_format]).encode()).hexdigest()
             path = self.folder / 'calls' / f'{role}-{digest[:20]}.json'
-            save(self.folder / 'packets' / f'{role}-{digest[:20]}.json', {'role': role, 'model': model, 'system': system, 'input': packet, 'validation_error': last_error, 'max_tokens': tokens, 'n_ctx': n_ctx,'response_schema':response_schema,'format_repair_only':bool(last_error and response_schema)})
+            save(self.folder / 'packets' / f'{role}-{digest[:20]}.json', {'role': role, 'model': model, 'system': system, 'input': packet, 'validation_error': last_error, 'max_tokens': tokens, 'n_ctx': n_ctx,'response_schema':response_schema,'format_repair_only':bool(last_error and editorial_repair)})
             cached = load(path) if path.exists() else None
-            event('model_start','Starting %s attempt %s/%s'%(role,attempt+1,self.req['max_stage_retries']+1),model=model,role=role,input_characters=len(prompt),system_characters=len(system),context_tokens=n_ctx,output_budget=tokens,checks=packet.get('required_checks',[]),cached=bool(cached),format_repair=bool(last_error and response_schema),call_id=digest[:20])
+            event('model_start','Starting %s attempt %s/%s'%(role,attempt+1,self.req['max_stage_retries']+1),model=model,role=role,input_characters=len(prompt),system_characters=len(system),context_tokens=n_ctx,output_budget=tokens,checks=packet.get('required_checks',[]),cached=bool(cached),format_repair=bool(last_error and editorial_repair),call_id=digest[:20])
             try:
                 if cached is None:
                     started = time.monotonic()
@@ -96,14 +99,14 @@ class Executor:
                         if self.hosted and kind and not last_error:
                             try:
                                 with heartbeat('Hosted '+kind+' / '+role+'; shared quota pacing applies'):
-                                    hosted_result=self.hosted.complete(kind,system,prompt,tokens,structured=bool(validator) and output_format=='json')
+                                    hosted_result=self.hosted.complete(kind,system,prompt,tokens,structured=bool(validator) and output_format=='json',response_schema=response_schema)
                             except Exception as exc:
                                 from .resilience import warning
                                 warning(self.folder,'api_fallback',str(exc))
                                 event('fallback','Hosted provider unavailable; using existing CPU worker',role=role,local_model=model)
                                 if role=='humanizer' and kind=='gemma' and self.hosted.can_rescue() and not any(code in str(exc) for code in ['401','403']):
                                     try:
-                                        hosted_result=self.hosted.complete('flash',system,prompt,tokens,structured=bool(validator) and output_format=='json')
+                                        hosted_result=self.hosted.complete('flash',system,prompt,tokens,structured=bool(validator) and output_format=='json',response_schema=response_schema)
                                     except Exception as rescue_error:warning(self.folder,'flash_rescue_unavailable',str(rescue_error))
                         if hosted_result is not None:
                             output,diagnostic=hosted_result
@@ -137,7 +140,7 @@ class Executor:
                 event('model_returned','Model response received; validating before acceptance',role=role,seconds=cached.get('seconds'),usage=cached['diagnostic'].get('usage'),timings=cached['diagnostic'].get('timings'),weights_reused=cached['diagnostic'].get('model_reused'),finish_reason=cached['diagnostic'].get('finish_reason'))
                 if cached['diagnostic'].get('finish_reason') not in {'stop', 'eos'}:
                     raise ContractError('Generation did not stop naturally; possible truncated artifact')
-                if last_error and response_schema is not None and repair_output is not None:
+                if last_error and editorial_repair and repair_output is not None:
                     before=judgment_signature(repair_output)
                     if before is not None and before!=judgment_signature(cached['output']):
                         raise ContractError('Formatting repair changed editorial judgments; rejected.')

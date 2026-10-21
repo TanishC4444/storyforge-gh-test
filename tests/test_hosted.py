@@ -20,12 +20,12 @@ class HostedTests(unittest.TestCase):
             with self.assertRaisesRegex(HostedError,'per-minute'):GoogleHosted(d).reserve('gemma',15000)
     def test_provider_failure_uses_existing_worker(self):
         req=example();req['api_roles']={'writer':'gemma'}
-        with tempfile.TemporaryDirectory() as d,patch('storyforge.hosted.GoogleHosted.complete',side_effect=HostedError('Google HTTP 429')),patch('storyforge.cpu_fallback.execute',return_value=('Fallback prose',{'finish_reason':'stop'})) as local:
+        with tempfile.TemporaryDirectory() as d,patch('storyforge.hosted.GoogleHosted.complete',side_effect=HostedError('Google HTTP 429')),patch('storyforge.local_worker.execute',return_value=('Fallback prose',{'finish_reason':'stop'})) as local:
             self.assertEqual(Executor(req,d,'worker').call('writer',{'scene':'test'},'write'),'Fallback prose')
             local.assert_called_once()
     def test_hosted_success_does_not_start_cpu_model(self):
         req=example();req['api_roles']={'writer':'gemma'}
-        with tempfile.TemporaryDirectory() as d,patch('storyforge.hosted.GoogleHosted.complete',return_value=('Hosted prose',{'finish_reason':'stop','model':'gemma-4-31b-it'})),patch('storyforge.cpu_fallback.execute',side_effect=AssertionError('CPU must stay idle')):
+        with tempfile.TemporaryDirectory() as d,patch('storyforge.hosted.GoogleHosted.complete',return_value=('Hosted prose',{'finish_reason':'stop','model':'gemma-4-31b-it'})),patch('storyforge.local_worker.execute',side_effect=AssertionError('CPU must stay idle')):
             self.assertEqual(Executor(req,d,'worker').call('writer',{},'write'),'Hosted prose')
             call=json.loads(next(Path(d,'calls').glob('*.json')).read_text());self.assertEqual(call['model'],'gemma-4-31b-it')
     def test_structural_defects_are_blocking(self):
@@ -159,3 +159,46 @@ class WholeStorySeparatorTests(unittest.TestCase):
         self.assertFalse(any('Duplicate paragraph' in x for x in defects(text)))
     def test_actual_duplicate_paragraph_still_fails(self):
         self.assertTrue(any('Duplicate paragraph' in x for x in defects('Same paragraph.\n\n* * *\n\nSame paragraph.')))
+
+
+class RefinementFailureRegressionTests(unittest.TestCase):
+    def test_actual_failed_run_outputs_remain_rejected(self):
+        from storyforge.contracts import refinement, ContractError
+        req=example()
+        for path in (Path(__file__).parent/'fixtures/retell-refiner-39618729263').glob('*.json'):
+            value=json.loads(path.read_text())
+            # Retell binds the immutable user prompt itself, as in the failed run.
+            value['original_prompt']=req['premise']
+            with self.subTest(path=path.name),self.assertRaises(ContractError):
+                refinement(value,req)
+
+    def test_provider_outage_then_missing_fields_gets_complete_retry(self):
+        from storyforge.contracts import refinement
+        from storyforge.output_schema import refinement_schema
+        req=example();req['api_roles']={'refiner':'flash'};req['max_stage_retries']=1
+        complete={key: [] if spec['type']=='array' else 'Developed detail'
+                  for key,spec in refinement_schema()['properties'].items()}
+        complete['original_prompt']=req['premise']
+        bad={'original_prompt':req['premise'],'refined_prompt':'Draft',
+             'central_conflict':'Conflict','reader_experience':'Tension'}
+        with tempfile.TemporaryDirectory() as d,patch('storyforge.hosted.GoogleHosted.complete',side_effect=HostedError('Google HTTP 503')),patch('storyforge.local_worker.execute',side_effect=[(json.dumps(bad),{'finish_reason':'stop'}),(json.dumps(complete),{'finish_reason':'stop'})]) as cpu:
+            result=Executor(req,d,'worker').call('refiner',{'request':req},'Develop premise',validator=lambda x:refinement(x,req))
+            self.assertEqual(result,complete)
+            self.assertEqual(cpu.call_count,2)
+            for call in cpu.call_args_list:
+                self.assertEqual(call.kwargs['response_schema'],refinement_schema())
+                self.assertIn('character_tensions',call.args[1])
+            self.assertIn('original request',cpu.call_args.args[2])
+            self.assertNotIn('Repair JSON structure only',cpu.call_args.args[1])
+
+    def test_flash_receives_schema_and_gemma_uses_prompt_contract(self):
+        from storyforge.output_schema import refinement_schema
+        result={'candidates':[{'finishReason':'STOP','content':{'parts':[{'text':'{}'}]}}]}
+        for kind in ['flash','gemma']:
+            with self.subTest(kind=kind),tempfile.TemporaryDirectory() as d:
+                h=GoogleHosted(d,'placeholder')
+                with patch.object(h,'request',side_effect=[{'totalTokens':100},result]) as request:
+                    h.complete(kind,'system','prompt',100,structured=True,response_schema=refinement_schema())
+                config=request.call_args.args[1]['generationConfig']
+                self.assertEqual(config['responseMimeType'],'application/json')
+                self.assertEqual(config.get('responseJsonSchema'),refinement_schema() if kind=='flash' else None)

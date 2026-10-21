@@ -1,0 +1,92 @@
+{
+  "original_prompt": "Use only what serves the scene. Cite source IDs in planning/review metadata, never device labels in story prose. Preserve user choices and explicit spinoff continuity. Do not transplant plots unless requested or force every reference into every scene.",
+  "refined_prompt": "Use only what serves the scene. Cite source IDs in planning/review metadata, never device labels in story prose. Preserve user choices and explicit spinoff continuity. Do not transplant plots unless requested or force every reference into every scene. Preserve user choices and explicit spinoff continuity. Do not transplant plots unless requested or force every reference into every scene.",
+  "central_conflict": "The Greeks must earn and use the unfamiliar weapons made by Hephaestus, risking both personal and collective honor and the lives of their companions.",
+  "reader_experience": "Wonder, anticipation, competing loyalties, martial terror and a costly local victory that opens a larger epic.",
+  "preserved_user_choices": [
+    "Recognizable principal relationships and ancient social values",
+    "Hector and Achilles alive in this installment",
+    "War not resolved"
+  ],
+  "expanded_story_elements": {
+    "character_tensions": [
+      {
+        "character": "Agamemnon",
+        "tension": "Authority versus practical knowledge"
+      },
+      {
+        "character": "Achilles",
+        "tension": "Heroic honor versus impersonal killing"
+      },
+      {
+        "character": "Hector",
+        "tension": "Loyalty to comrades versus obedience to a king"
+      },
+      {
+        "character": "Thestor",
+        "tension": "Useful knowledge can purchase safety versus a dangerous limitation"
+      }
+    ],
+    "subplot_possibilities": [
+      {
+        "id": "smith-freedom",
+        "independent_action": "Seek passage and withheld wages before discovery",
+        "intersection": "Kings prevent departure once his knowledge becomes necessary",
+        "owner": "thestor",
+        "question": "Will skill secure household freedom or bind him more tightly to the army?"
+      },
+      {
+        "id": "honor-command",
+        "independent_action": "An existing dispute with Agamemnon shapes response before the trial",
+        "intersection": "Deployment conditions force Achilles to risk his own body",
+        "owner": "achilles",
+        "question": "Who earns honor and who faces danger in a victory enabled by unfamiliar craft?"
+      }
+    ]
+  },
+  "world_constraints": [
+    "The divine gift of weapons is tied to a particular grievance and bargain, explaining access but not arbitrary delivery.",
+    "The cache is exactly six cumbersome single-shot weapons with a finite supply of prepared charges.",
+    "Deliberate preparation, smoke, noise, imperfect aim and wet-weather failures limit use.",
+    "The weapons have visible material limits and cannot guarantee a hit or victory.",
+    "The Greeks interpret unfamiliar craft through their ancient experience.",
+    "Agamemnon claims the cache but depends on skilled men and coalition consent.",
+    "Hector and Achilles survive; larger political and divine conflicts remain open."
+  ],
+  "suggested_techniques": [
+    "Use elevated English shaped by Homeric epic and an ancient social imagination throughout.",
+    "Retell from scratch: purely third person, no dialogue, no invocation.",
+    "Pin Iliad analysis work_136 as primary. Supplement only when it serves an actual gap.",
+    "Use material acts, reciprocal obligation, shame and rank; no stock modern cinematic gestures.",
+    "Roughly one extended comparison per scene when earned, no mandatory quota."
+  ],
+  "retrieval_references": [
+    {
+      "do_not_borrow": [
+        "Modern translation wording",
+        "Events incompatible with the explicit divergence",
+        "Claimed precise chronology unsupported by source context"
+      ],
+      "purpose": "Primary spinoff source: preserve the Achaean coalition, recognizable relationships, honor, gifts, kinship, burial, supplication, divine involvement, mortal vulnerability, and Homeric narrative rhetoric. Transfer conflicts and social imagination, not famous scenes with guns substituted."
+    }
+  ],
+  "assumptions": [
+    "The Greeks earn access to firearms from a hidden workshop of Hephaestus during the tenth campaigning season.",
+    "Hector and Achilles live in this installment.",
+    "War is not resolved."
+  ],
+  "open_decisions": [
+    [
+      "How the Greeks earn access to the weapons"
+    ],
+    [
+      "How the weapons are used and who bears the cost"
+    ],
+    [
+      "The specific conditions and consequences of the first deployment"
+    ],
+    [
+      "The impact of the first use on the characters and the broader narrative"
+    ]
+  ]
+}

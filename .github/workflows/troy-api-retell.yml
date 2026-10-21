@@ -19,6 +19,8 @@ jobs:
       - uses: ./.github/actions/setup-worker
         with:
           backend: live
+      - name: Verify contracts and provider fallback before generation
+        run: python -m unittest discover -s tests -q
       - name: Load literary retrieval from completed run
         continue-on-error: true
         uses: actions/download-artifact@v4

@@ -45,7 +45,7 @@ class GoogleHosted:
             if value.get('_rescue_calls',0)>=2 or value.get('flash',{}).get('calls',0)>=5:return False
             value['_rescue_calls']=value.get('_rescue_calls',0)+1;save(path,value);return True
 
-    def complete(self,kind,system,prompt,tokens,structured=False):
+    def complete(self,kind,system,prompt,tokens,structured=False,response_schema=None):
         if kind in self.disabled:raise HostedError(kind+' circuit open after prior provider failure')
         model=MODELS[kind]
         contents=[{'role':'user','parts':[{'text':prompt}]}]
@@ -57,7 +57,10 @@ class GoogleHosted:
         print('Hosted '+model+': reserving '+str(estimate)+' input tokens',flush=True)
         self.reserve(kind,estimate)
         config={'maxOutputTokens':tokens,'thinkingConfig':{'thinkingLevel':'minimal' if kind=='gemma' else 'low'}}
-        if structured:config['responseMimeType']='application/json'
+        if structured:
+            config['responseMimeType']='application/json'
+            if response_schema is not None and kind=='flash':
+                config['responseJsonSchema']=response_schema
         started=time.monotonic()
         for attempt in range(2):
             try:

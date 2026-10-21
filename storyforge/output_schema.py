@@ -22,3 +22,15 @@ def continuity_schema(memory_count):
     if memory_count:indices['items']['enum']=list(range(memory_count))
     properties['approved_memory_indices']=indices
     return {'type':'object','properties':properties,'required':list(properties),'additionalProperties':False}
+
+
+def refinement_schema():
+    """Match contracts.refinement; never fill missing creative content ourselves."""
+    strings = ['original_prompt', 'refined_prompt', 'central_conflict', 'reader_experience']
+    arrays = ['preserved_user_choices', 'expanded_story_elements', 'character_tensions',
+              'subplot_possibilities', 'world_constraints', 'suggested_techniques',
+              'retrieval_references', 'assumptions', 'open_decisions']
+    properties = {key: {'type': 'string', 'minLength': 1} for key in strings}
+    properties.update({key: {'type': 'array', 'items': {'type': 'string'}} for key in arrays})
+    return {'type': 'object', 'properties': properties,
+            'required': list(properties), 'additionalProperties': False}
