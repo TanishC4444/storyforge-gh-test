@@ -471,7 +471,8 @@
   "execution_intent": {
     "authorized": "User requested full prompt-to-story API speed benchmark",
     "workflow": "Full separate-runner DAG with parallel character matrices, independent story/rhetoric/memory branches, repairs and all verification stages",
-    "no_prior_run_restart": true
+    "no_prior_run_restart": true,
+    "experiment": "Batched APIs only: Gemma reviews bounded groups of checks; Flash records source-bound fact batches and audits the final chapter. Planning, writing and character contexts retain CPU runners."
   },
   "execution_policy": {
     "continue_with_warnings": true
@@ -483,17 +484,14 @@
     "batch_development": true,
     "canon_index": true,
     "inherit_provider_budget": true,
-    "application_plan_binding": true
+    "application_plan_binding": true,
+    "development_batch_size": 4,
+    "api_batch_probes": true
   },
   "api_roles": {
-    "refiner": "gemma",
-    "architect": "gemma",
-    "writer": "gemma",
-    "humanizer": "gemma",
-    "story_quality": "gemma",
-    "chapter_quality": "flash",
     "development_editor": "gemma",
-    "scene_designer": "gemma",
-    "director": "gemma"
+    "story_quality": "gemma",
+    "memory": "flash",
+    "chapter_quality": "flash"
   }
 }

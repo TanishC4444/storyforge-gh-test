@@ -34,7 +34,9 @@ def assess(executor,state,kind):
     requirements=compact_requirements(state['request'])
     groups=[['medium_length','themes_tensions','genre','tone_mood'],['scene_design','information_order','causal_alternatives'],['world_rules','character_depth'],['plot_subplots','references_adaptation','figurative_language']]
     if state['request'].get('performance',{}).get('batch_development'):
-        groups=[list(DESIGN_CHECKS)]
+        size=state['request']['performance'].get('development_batch_size',len(DESIGN_CHECKS))
+        contracts.require(type(size) is int and 1<=size<=len(DESIGN_CHECKS),'Invalid development batch size')
+        groups=[list(DESIGN_CHECKS[i:i+size]) for i in range(0,len(DESIGN_CHECKS),size)]
     results=[]
     for group_index,group in enumerate(groups,1):
         event('review_group','Development review group %s/%s: %s'%(group_index,len(groups),', '.join(group)),group=group_index,total_groups=len(groups))

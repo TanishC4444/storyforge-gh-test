@@ -58,6 +58,17 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         req['profile'] = profile
         contracts.require(req['chapters'] * req['scenes_per_chapter'] <= 9, 'This workflow supports at most nine scene slots')
         contracts.require(req['auto_approve_plan'], 'This automated DAG requires explicit auto_approve_plan in the request')
+        if backend=='worker' and req.get('performance',{}).get('api_batch_probes'):
+            from .hosted import GoogleHosted
+            probe=GoogleHosted(out/'provider-budget');health={}
+            for kind in ['gemma','flash']:
+                try:
+                    text,diag=probe.complete(kind,'Return only JSON. Copy all four supplied items without changing them.','{"items":["a","b","c","d"]}',128,structured=True,role='batch_probe')
+                    contracts.require(parse_json(text)=={'items':['a','b','c','d']},'Batch probe changed item identities')
+                    health[kind]={'batch_probe':'passed','model':diag['model']}
+                except Exception as exc:health[kind]={'batch_probe':'failed','error':str(exc)}
+            save(out/'batch-provider-health.json',health)
+            event('provider_probe','Batched API compatibility probes completed',results=health)
         seed=load_seed(req,ROOT)
         if seed is not None:
             seed['backend']=backend

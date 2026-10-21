@@ -116,5 +116,40 @@ class DistributedBudgetTests(unittest.TestCase):
         self.assertNotIn('python -m storyforge.full_flow',workflow)
         req=load(ROOT/'examples/troy-multi-api.json')
         self.assertTrue(req['performance']['inherit_provider_budget'])
-        for role in ['rhetoric_quality','memory','memory_quality','character']:
+        for role in ['rhetoric_quality','memory_quality','character']:
             self.assertNotIn(role,req['api_roles'])
+
+class BatchedApiAssignmentsTests(unittest.TestCase):
+    def test_full_multi_runner_routes_only_batched_work_to_apis(self):
+        req=load(ROOT/'examples/troy-multi-api.json')
+        self.assertEqual(req['api_roles'],{'development_editor':'gemma','story_quality':'gemma','memory':'flash','chapter_quality':'flash'})
+        self.assertEqual(req['performance']['development_batch_size'],4)
+        self.assertTrue(req['performance']['api_batch_probes'])
+        self.assertIn('Hector and Achilles live',req['premise'])
+        self.assertIn('Hephaestus',req['premise'])
+    def test_flash_keeps_last_generation_slot_for_final_chapter(self):
+        with tempfile.TemporaryDirectory() as d:
+            h=GoogleHosted(d,'placeholder')
+            Path(d,'quota.json').write_text(json.dumps({'flash':{'calls':5,'recent':[]}}))
+            with patch.object(h,'request',return_value={'totalTokens':100}):
+                with self.assertRaisesRegex(HostedError,'budget exhausted'):
+                    h.complete('flash','s','p',100,role='memory')
+            result={'candidates':[{'finishReason':'STOP','content':{'parts':[{'text':'{}'}]}}]}
+            with patch.object(h,'request',side_effect=[{'totalTokens':100},result]):
+                h.complete('flash','s','p',100,role='chapter_quality')
+            self.assertEqual(load(Path(d,'quota.json'))['flash']['calls'],6)
+    def test_development_batches_are_bounded_without_dropping_checks(self):
+        from storyforge.development import assess
+        from storyforge.fixture import respond
+        from storyforge.editorial import DESIGN_CHECKS
+        req=example();req['performance']={'batch_development':True,'development_batch_size':4}
+        state={'request':req,'refinement':json.loads(respond('refiner',{},req))}
+        class Fake:
+            def __init__(self):self.groups=[]
+            def call(self,role,packet,instruction,**kwargs):
+                self.groups.append(packet['required_checks'])
+                return kwargs['validator'](json.loads(respond(role,packet,req)))
+        fake=Fake();result=assess(fake,state,'refine')
+        self.assertTrue(result['pass'])
+        self.assertEqual([len(group) for group in fake.groups],[4,4,4])
+        self.assertEqual([key for group in fake.groups for key in group],DESIGN_CHECKS)

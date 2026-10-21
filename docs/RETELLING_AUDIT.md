@@ -160,3 +160,23 @@ hosted generation attempts whose token metadata was not preserved by the old
 instrumentation. One hosted response hit MAX_TOKENS before CPU fallback; that
 successful HTTP response was not a successful accepted generation. Its token usage
 cannot now be reconstructed. The report explicitly marks all six as unknown.
+
+## Bounded API batch experiment
+
+The next multi-runner experiment preserves the same Troy discovery/acquisition/
+trial/first-use brief and the full separate-runner graph. Gemma handles development
+review groups of four checks and story-quality check batches. Flash handles
+source-bound memory-update batches and the final chapter audit. Refiner, planner,
+writer, humanizer, character and director roles retain their CPU workers. This
+isolates hosted services from scene-length generation and metadata assignment;
+it does not guarantee that provider 5xx errors disappear. Small four-item batch
+probes save compatibility results before the run proceeds. Flash's final generation
+slot is reserved for chapter review; ordinary batches fall back when that allowance
+is exhausted. Live timings and probe outcomes must establish whether reliability
+or speed improves.
+
+The user's request to save usage referred to the ChatGPT/Codex account used for
+this conversation. Sanitized account-wide limit snapshots are now kept locally in
+reports/chat-usage/, excluded from Git. Account IDs and credentials are omitted.
+Account-wide changes cannot be attributed solely to this chat. The separate
+story-model token reports remain available as workflow diagnostics.

@@ -11,7 +11,7 @@ class HostedError(RuntimeError):pass
 class GoogleHosted:
     def __init__(self,folder,key=None):
         self.folder=Path(folder);self.folder.mkdir(parents=True,exist_ok=True)
-        self.key=key or os.getenv('GEMINI_API_KEY','');self.disabled=set()
+        self.key=key or os.getenv('GEMINI_API_KEY','');self.disabled=set();self.reserve_flash_final=False
     def telemetry(self,path,seconds,outcome):
         value={'model':path.split(':')[0],'operation':path.split(':')[-1],'seconds':round(seconds,3),'outcome':outcome}
         with (self.folder/'telemetry.lock').open('a') as lock:
@@ -41,6 +41,7 @@ class GoogleHosted:
     def reserve(self,kind,tokens):
         limits={'gemma':(24,14000,120),'flash':(4,220000,6)}
         rpm,tpm,max_calls=limits[kind]
+        if kind=='flash' and self.reserve_flash_final:max_calls=5
         if tokens>tpm:raise HostedError('Input exceeds conservative hosted per-minute allowance')
         path=self.folder/'quota.json'
         while True:
@@ -98,6 +99,7 @@ class GoogleHosted:
 
     def complete(self,kind,system,prompt,tokens,structured=False,response_schema=None,role=None):
         if not self.key:raise HostedError('Google API key unavailable')
+        self.reserve_flash_final=(kind=='flash' and role!='chapter_quality')
         if kind in self.disabled or self.circuit(kind):raise HostedError(kind+' circuit open after prior provider failure')
         model=MODELS[kind]
         contents=[{'role':'user','parts':[{'text':prompt}]}]
