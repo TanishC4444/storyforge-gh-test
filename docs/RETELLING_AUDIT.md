@@ -175,8 +175,8 @@ slot is reserved for chapter review; ordinary batches fall back when that allowa
 is exhausted. Live timings and probe outcomes must establish whether reliability
 or speed improves.
 
-The user's request to save usage referred to the ChatGPT/Codex account used for
-this conversation. Sanitized account-wide limit snapshots are now kept locally in
-reports/chat-usage/, excluded from Git. Account IDs and credentials are omitted.
-Account-wide changes cannot be attributed solely to this chat. The separate
-story-model token reports remain available as workflow diagnostics.
+The user wants to conserve the ChatGPT/Codex account quota used in this
+conversation. Keep responses and investigation concise and avoid redundant polling
+or checks. A local account-wide snapshot was saved under reports/chat-usage/ and
+excluded from Git; do not infer per-chat use or continue routine sampling without
+an explicit request. Separate story-model token reports remain workflow diagnostics.

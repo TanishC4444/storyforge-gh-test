@@ -3,10 +3,9 @@
 Keep the full, separate-runner Actions graph when the user asks for the full or
 massive workflow. Do not substitute the single-coordinator experiment.
 
-The user wants ChatGPT/Codex account usage recorded while discussing this project.
-When the account-usage tool is available, sample the account-wide limits near the
-start and end of a work turn and append sanitized timestamped snapshots to
-reports/chat-usage/account-usage.jsonl. Keep that directory local and excluded from
-Git. Record window length, used percentage and reset time; omit account IDs and
-credentials. Never attribute account-wide changes solely to this chat or invent
-per-chat token counts. These records differ from story-model API usage reports.
+The user wants to conserve ChatGPT/Codex account usage while we work. Keep
+responses concise, avoid repeated discovery or unchanged polling, batch independent
+reads, and run meaningful checks once per change. Do not introduce recurring
+account-usage polling or per-turn snapshots unless explicitly requested. The
+existing local account snapshot is account-wide and cannot be attributed to this
+chat. Keep account IDs and credentials out of repository files.
