@@ -51,8 +51,14 @@ class Executor:
             self.hosted=GoogleHosted(os.getenv('STORY_QUOTA_DIR',str(self.folder/'provider-budget')))
 
     def call(self, role, packet, instruction, *, tokens=1200, validator=None, skill='', response_schema=None, output_format='json'):
-        from .output_schema import editorial_schema, refinement_schema, plan_schema
-        response_schema=response_schema or (refinement_schema() if role=='refiner' else plan_schema(self.req) if role=='architect' else editorial_schema(packet))
+        from .output_schema import editorial_schema, refinement_schema, plan_schema, scene_schema, memory_review_schema
+        if self.req.get('performance',{}).get('compact_packets'):
+            from .working_context import concise_packet
+            packet=concise_packet(packet,self.req)
+        response_schema=response_schema or (refinement_schema() if role=='refiner' else plan_schema(self.req) if role=='architect' else scene_schema(self.req,packet) if role=='scene_designer' else memory_review_schema() if role=='memory_quality' and 'current_prose' in packet else editorial_schema(packet))
+        if role=='refiner' and self.req.get('performance',{}).get('application_prompt_binding'):
+            response_schema=dict(response_schema,properties={k:v for k,v in response_schema['properties'].items() if k!='original_prompt'},required=[k for k in response_schema['required'] if k!='original_prompt'])
+            instruction+=' The application binds original_prompt to the immutable request premise. Do not reproduce original_prompt in the response. Keep array entries concise and distinct.'
         editorial_repair=bool(response_schema and 'checks' in response_schema.get('properties',{}))
         if self.req.get('performance',{}).get('single_editorial_pass') and role.endswith('quality'):
             instruction+=' Keep each check reason to one specific sentence, and issues to concrete actionable faults. No introduction or repeated analysis.'
@@ -89,7 +95,7 @@ class Executor:
             try:
                 if cached is None:
                     started = time.monotonic()
-                    preferred=self.req.get('api_roles',{}).get(role) if self.hosted and not last_error else None
+                    preferred=self.req.get('api_roles',{}).get(role) if self.hosted else None
                     print(f'{role}: '+(('Google '+preferred+'; CPU fallback '+model) if preferred else model)+f' / fresh context ({self.backend})',flush=True)
                     if self.backend == 'fixture':
                         from .fixture import respond
@@ -98,18 +104,21 @@ class Executor:
                     elif self.backend == 'worker':
                         kind=self.req.get('api_roles',{}).get(role)
                         hosted_result=None
-                        if self.hosted and kind and not last_error:
-                            try:
-                                with heartbeat('Hosted '+kind+' / '+role+'; shared quota pacing applies'):
-                                    hosted_result=self.hosted.complete(kind,system,prompt,tokens,structured=bool(validator) and output_format=='json',response_schema=response_schema)
-                            except Exception as exc:
-                                from .resilience import warning
-                                warning(self.folder,'api_fallback',str(exc))
-                                event('fallback','Hosted provider unavailable; using existing CPU worker',role=role,local_model=model)
-                                if role=='humanizer' and kind=='gemma' and self.hosted.can_rescue() and not any(code in str(exc) for code in ['401','403']):
-                                    try:
-                                        hosted_result=self.hosted.complete('flash',system,prompt,tokens,structured=bool(validator) and output_format=='json',response_schema=response_schema)
-                                    except Exception as rescue_error:warning(self.folder,'flash_rescue_unavailable',str(rescue_error))
+                        if self.hosted and kind:
+                            from .resilience import warning
+                            routes=[kind]
+                            if self.req.get('performance',{}).get('hosted_failover') or (role=='humanizer' and kind=='gemma'):
+                                routes += ['gemma' if kind=='flash' else 'flash']
+                            for route in routes:
+                                if route=='flash' and kind!='flash' and not self.hosted.can_rescue():continue
+                                try:
+                                    with heartbeat('Hosted '+route+' / '+role+'; shared quota pacing applies'):
+                                        hosted_result=self.hosted.complete(route,system,prompt,tokens,structured=bool(validator) and output_format=='json',response_schema=response_schema)
+                                    break
+                                except Exception as exc:
+                                    warning(self.folder,'api_fallback',str(exc))
+                                    event('fallback','Hosted route unavailable',role=role,provider=route,error=str(exc))
+                                    if any(code in str(exc) for code in ['401','403']):break
                         if hosted_result is not None:
                             output,diagnostic=hosted_result
                         else:
@@ -148,6 +157,8 @@ class Executor:
                         raise ContractError('Formatting repair changed editorial judgments; rejected.')
                 parsed = parse_json(cached['output']) if validator and output_format=='json' else cached['output']
                 if validator:
+                    if role=='refiner' and self.req.get('performance',{}).get('application_prompt_binding') and isinstance(parsed,dict):
+                        parsed={**parsed,'original_prompt':self.req['premise']}
                     if isinstance(parsed,dict) and isinstance(parsed.get('checks'),dict):
                         parsed['checks']=[dict(check,id=key) for key,check in parsed['checks'].items()]
                     parsed = validator(parsed)

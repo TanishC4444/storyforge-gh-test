@@ -1,164 +1,39 @@
 # Distinct writing
 
-Treat these as editing signals, not authorship tests. Follow the brief, genre,
-character, and deliberate stylistic choices over this checklist.
+The user brief, genre and deliberate style govern. Return prose alone. These are
+editing tests, not an authorship detector; never add errors or arbitrary slang.
 
-- **Specificity over decoration.** Choose details the viewpoint character would
-  notice and that affect action. Cut interchangeable atmosphere, inflated claims,
-  abstract emotional summaries, and metaphors that explain nothing.
-- **Voice over polish.** Give each speaker a goal, vocabulary, rhythm, and way of
-  avoiding discomfort. Let characters evade, misunderstand, or answer indirectly
-  when motivated. Do not make everyone equally eloquent, witty, or self-aware.
-- **Subtext over explanation.** Let choices, omissions, and consequences carry
-  emotion. Remove narration that explains an already legible gesture or line.
-  In scripts, favor playable actions over invisible psychological commentary.
-- **Development over loops.** Each exchange should change knowledge, leverage,
-  risk, or intention. Cut restated premises, interchangeable banter, repeated
-  gestures, and endings that merely summarize the scene's lesson.
-- **Purposeful rhythm.** Match sentence length to thought and pressure. Watch
-  repeated openings, balanced clauses, rhetorical triplets, and automatic
-  “not X, but Y” pivots. Keep them when they earn their place.
-- **Earn the language.** Inspect clusters of stock phrases such as “palpable
-  tension,” “a testament to,” “tapestry,” or “something shifted.” Replace the
-  vague claim with its actual observation; do not merely swap synonyms.
-- **Earn the outcome.** Preserve physical causality, viewpoint, private knowledge,
-  and character continuity. Avoid convenient confessions, instant reconciliation,
-  and solutions unsupported by earlier details. Do not force darkness or ambiguity.
-- **Motivate gestures.** Watch interchangeable sighs, clenched jaws, caught
-  breaths, smirks, softened gazes, and hovering hands. A gesture should reveal
-  this person's tactic or change the interaction. Do not attach one to every
-  line or replace a repeated gesture with a thesaurus equivalent.
-- **Keep images coherent.** Avoid stacked similes, mixed sensory descriptions,
-  and personified scenery that repeatedly announces the mood. Develop an image
-  when it matters; do not decorate every object. Figurative language should fit
-  the speaker's experience and the work's register.
-- **Let dialogue pursue something.** Watch perfect question-answer exchanges,
-  exposition both speakers already know, relentless quips, and everyone sounding
-  like a therapist. Give lines a purpose: persuade, conceal, distract, test, refuse.
-  A character's explanation may be partial, mistaken, or self-serving.
-- **Resist automatic significance.** Cut sentences announcing that a minor event
-  changed everything, revealed a profound truth, or marked a new beginning unless
-  the story earns that claim. End on a consequential action, image, or decision
-  when appropriate; not every scene needs an epiphany or quotable last line.
-- **In nonfiction, make claims accountable.** Replace empty praise, vague
-  “experts say” attributions, canned introductions, and repeated summaries with
-  the actual claim and support. Do not invent facts or citations to add specificity.
-  Use headings and lists because they help the reader, not as automatic packaging.
+1. Develop an attempted tactic, credible resistance, an available alternative and
+   a particular cost. Each scene changes action, resources, knowledge, obligation,
+   relationship or interpretation. Do not repeat discovery, acquisition or a bargain
+   already completed. Quiet work may matter through perception, care or dependence.
+2. Make details belong to this observer and situation. Favor physical arrangements,
+   labor, custody, bodily constraints and unequal obligations over interchangeable
+   atmosphere or announced emotion. A useful pause need not advance plot.
+3. Let actions and consequences carry legible meaning. Cut the second explanation
+   of a gesture, image or sacrifice. Preserve interiority that adds uncertainty,
+   a competing interpretation, new association or decision. Do not replace every
+   emotional label with eyes, hands, breath or a tightened jaw.
+4. Preserve established chronology, character identities, injuries and knowledge.
+   A narrator's knowledge is not a character's. Mark any authorized focal shift.
+   Separate total, usable, spent and abandoned resources. If a rejected object
+   returns to use, establish the decision or handling that caused it.
+5. Honor the requested register. Epic language needs ancient values, social pressure
+   and precise comparisons, not epithets alone. Keep images coherent and purposeful.
+   Vary sentence pace with pressure; preserve earned repetition while cutting
+   duplicate beats, stock pivots, ornamental triplets and repeated openings.
+6. Speech, when permitted, pursues a tactic rather than reciting shared information.
+   For a third-person/no-dialogue brief: no quoted or disguised speeches, invocation
+   or direct address. Briefly narrate offers, refusals and orders, then show their
+   effects. No-dialogue does not require pantomime and meaningful looks.
+7. A reversal must follow established choices or limits. Develop decisive action
+   instead of summarizing it. A climax pays off a prior constraint and costly act;
+   the aftermath changes custody, care, labor or obligation. End on that concrete
+   act when appropriate, without announcing its significance or the story's moral.
 
-## Small revision examples
-
-- Redundant explanation: “She hid his boarding pass. She couldn't bear to lose
-  him.” Consider stopping after the action if context already makes it legible.
-- Generic feeling: “An unspoken tension hung between them.” Replace it with
-  evidence specific to the scene, such as “He set her cup on the far counter.”
-  Use that detail only if it fits the established relationship and setting.
-
-## Final pass
-
-Before returning, make one silent revision pass: find the most interchangeable
-passage, the most redundant explanation, and the weakest character-specific choice;
-repair only what needs it. Check the requested format and length afterward.
-Return the artifact alone unless critique is requested. Do not add typos, arbitrary
-fragments, gratuitous slang, or invented personal experience to imitate humanity.
-No blanket bans on em dashes, ordinary words, lyricism, or intentional repetition.
-
-## Revision authority
-
-Use the supplied creative controls, role-specific craft packet, and scene function.
-Do not stop at punctuation or tiny word cuts when redundant explanation, generic
-atmosphere, interchangeable voices, or incoherent imagery survives. You may cut or
-rebuild sentences and paragraphs while preserving events, knowledge, actions, and
-deliberate style. Shorten a padded passage when scene length is guidance. If the
-structural problem cannot be fixed within that authority, leave it for the
-structural review and repair stage; do not camouflage it with prettier language.
-No minimum percentage of changes is required.
-
-## Structural distinctness and narrative necessity
-
-Before polishing a scene, identify what changes: a character's available action,
-material resources, exposure, relationship, obligation, or belief. A sentence may
-serve action, perception, temporal/spatial orientation, pressure, characterization,
-or an earned image. Remove commentary that merely announces the importance of
-what the scene already shows. Meaning is not a requirement for constant plot;
-a pause or ordinary task may expose a value or make later loss specific.
-
-Check the entire progression before editing local paragraphs. Do not reacquire an
-object already possessed, renegotiate a completed bargain, stage the same council
-twice, or import an earlier scene's dialogue as a new event. Preserve genuinely
-consequential unresolved conflicts rather than repeating their wording.
-
-Never copy a neighboring paragraph into its replacement. Cut accidental duplicated
-sentences, paragraphs, and near-identical beats. Intentional epic repetition must
-change its situation or consequence. A recurring epithet alone does not make a
-scene Homeric. Remove raw JSON, prompt phrases, scene-function summaries, Markdown
-headings, and statements that a local climax has occurred; dramatize the action.
-
-Deep revision may rebuild a whole causal sequence where sentence-level repairs
-cannot make a choice earned. Preserve established facts and constraints, but
-change the order of disclosure, the tactic, resistance, physical action, and
-consequences. Record structural proposals separately until the revised prose is
-reviewed. Never equate a high edit percentage with literary improvement.
-
-For a third-person/no-dialogue brief: no quoted speech, no first-person narrator,
-no direct address to Muse or reader, no unquoted speeches disguised as narration.
-Use third-person focalized perception and narrated decisions. Render negotiations
-through concrete offers, withheld objects, arrangements, witnessed commitments,
-and their consequences. Do not convert every speech into 'he explained that'.
-Maintain ancient social values and material experience without ornamental archaism.
-
-A final scene must pay off a previously established physical limitation and a
-character's costly decision on the page. Return to specific custody, bodily cost,
-or obligation afterward; do not end by explaining the moral or promising an epic.
-
-## No-dialogue narration is not pantomime
-
-Characters may bargain or give orders; narrate the resulting offer, refusal, or
-condition briefly without reproducing a speech. Do not replace every spoken line
-with pointing, meaningful looks and an explanation of what the gesture meant.
-
-Weak: “He pointed at the boy and then at the sea. The gesture was a plea for
-passage, a demand for the wages that would buy freedom.”
-Stronger approach: establish the concrete arrangement directly (the ship cannot
-carry the boy until a named debt is discharged), then show the action it causes.
-Do not copy this example's facts into the story.
-
-Weak: “His invitation felt like a shackle. He had sought escape but built a bridge
-into the heart of the conflict.”
-Stronger approach: end on the material restriction or costly act that makes escape
-harder. A berth assigned to somebody else, unfinished paid work, or tools left in
-another's custody can carry that meaning when the established facts support it.
-Do not explain the implication again afterward.
-
-Weak: “He understood that the object was not a curiosity, but a key.”
-Stronger approach: show the new use of the object and the risk taken to secure it.
-Avoid replacing that sentence with another metaphor for importance.
-
-Do not diagnose another character's inner calculation from a single look. For limited viewpoint, stay inside the focal character's perceptions, memories and imperfect inferences. An explicitly omniscient epic narrator may supply history or inner attention in separate paragraphs without granting that knowledge to other characters. A
-reader can see a ruler's tactic from whom he dismisses, what he withholds and which
-obligation he invokes. Do not turn that evidence into an omniscient explanation.
-
-## Endings and accountable implications
-
-Read the last two paragraphs against the rest of the scene. Remove any sentence
-whose only contribution is to announce that a bargain has a price, a secret will
-bring a reckoning, a loss threatens authority, or a choice changes the future when
-the physical exchange already makes that legible. End on custody, labor, exposure,
-care, a departure or another consequential act. Keep a new fact about a future
-obligation; cut a second explanation of its significance.
-
-Avoid abstract claims such as diminished legal standing or a piece of sovereignty
-unless the story establishes a concrete practice through which another person can
-exploit that loss. Prefer the withheld token, the absent witness, the unredeemed
-pledge or the person now entitled to demand something. Do not replace one vague
-political metaphor with another. Necessary explanation and textured stillness are
-allowed; the test is whether deletion loses a particular fact, perception or
-pressure, rather than merely an announced interpretation.
-
-## Causal handoffs
-
-An established defect must remain consequential, not merely be mentioned twice.
-If a suspect object is deliberately set aside and later used, show the particular
-decision, pressure or handling error that returns it to use. Do not silently move
-it back into the usable stock. Keep total, usable, spent and abandoned resources
-distinct. A previous injury must constrain a later action when the climax relies
-on it. Do not invent a fresh defect at the last moment to manufacture a cost.
+Revision authority: rebuild sentences and paragraphs where needed; propose causal
+changes only within supplied facts and constraints. Preserve unaffected material
+and substantive length. No required edit percentage. Never copy adjacent passages
+into a replacement. Do not leak JSON, headings, prompt labels or technique names.
+Before returning, repair the weakest causal handoff, most interchangeable detail,
+and most redundant explanation; then verify viewpoint, requested form and length.

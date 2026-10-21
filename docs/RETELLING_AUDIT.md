@@ -67,3 +67,61 @@ The development run executed from the local coordinator, using hosted APIs and t
 The first raw whole-story review passed prose that still needed editorial work; model approval was not treated as sufficient proof. A separate final mechanical check also exposed that scene dividers were being counted as repeated prose. Dividers are now exempt while real duplicate paragraphs still fail, with regression coverage. Invalid memory approval indices are quarantined, and inconsistent reported usage is withheld rather than silently converted into a firing event.
 
 The final publication review used Gemma after the six-call Flash role budget had been consumed. A compact candidate-only review avoids sending obsolete pre-editorial ledgers back as narrative authority. The run reserved 82 Gemma generation attempts and six Flash attempts, including failures and retries; one small connectivity generation probe for each model was outside that orchestration counter. These are development-run figures, not an estimate of every future story’s cost or a guarantee of latency.
+
+## Full-flow efficiency and failure audit (21 October 2026)
+
+The latest pre-optimization run, 39629417302, failed in refinement, not writing.
+Flash returned HTTP 503 after its bounded transport retry. The CPU fallback's
+first response took 521 seconds and failed the exact original-prompt echo check;
+the second took 830 seconds and exhausted 3,600 output tokens. Schema compliance
+alone cannot enforce equality with immutable user text or guarantee natural completion.
+The application now binds that original prompt itself and retains the raw response.
+
+In completed run 39552359292, the scene-4 writer job took 925 seconds, and scene-3
+and scene-4 story-quality jobs took 653 and 627 seconds. These are job wall times,
+including setup, rather than pure API latencies. The fast profile assigns both roles
+to the larger Qwen 2.5 7B CPU model. Large, repeated context and substantial output
+make them slower than short control calls. The failed API runs did not reach those
+stages, so they provide no end-to-end API speedup measurement.
+
+The full API workflow now uses one resident coordinator. It still performs fresh
+hybrid retrieval, refinement, development review/revision/gate, outline and its
+review/revision/gate, scene reconciliation, isolated actor proposals, direction,
+writing, humanizing, review, repair, changed-text verification, memory verification,
+canon commit and final chapter review. It does not use the retelling experiment's
+fixed development overlay or prior accepted scenes. Development checks share one
+call; story and rhetoric share one source read with all sixteen checks; accepted
+text is recorded once after editing. Unchanged prose reuses its hash-bound review.
+
+Gemma is the primary hosted route; scarce Flash calls are reserved for at most two
+rescue routing attempts and the final chapter audit. Both routes retain the CPU
+fallback. Provider errors do not become approvals. Gemini uses native JSON schema
+configuration; Gemma receives the explicit schema in its prompt without assuming
+Gemini JSON-MIME compatibility. Model health, bounded retry/circuit state and quota
+counters are shared across stages. Conservative token pacing includes reserved
+output. HTTP telemetry keeps model, operation, duration and allowlisted status only;
+provider messages, credentials and prompts are excluded from that telemetry.
+
+The four main authoring/planning/review skills fell from 28,741 to 7,115 bytes
+(75% smaller). Source limits and requested reference mechanisms remain in scoped
+packets; full retrieved material and original requests remain in checkpoints.
+Reduced prompt size does not establish higher literary quality; that requires
+inspection of the resulting prose and reviews.
+
+Canon has an append-only source-bound history and a current-state projection.
+Changes cite prior fact IDs with the same fact key and kind; arbitrary or future
+supersessions are rejected. Actor visibility is applied before current-state
+projection, so a character who never learned a change retains their older knowledge.
+Older resources, relationships and unresolved threads are prioritized over routine
+recent events; omitted working-context IDs are explicit. Full evidence and all
+historical versions remain in canon.json and snapshots. Planned reference uses and
+source-bound model assessments remain in reference-usage.json. The current index is
+not an independent semantic oracle: model-generated updates still require the
+separate memory verifier and unsupported updates remain quarantined.
+
+FINAL_STORY.txt is emitted only for a completed reviewed result. An unresolved
+result is named PROVISIONAL_STORY.txt, with its review report, rather than receiving
+a final-story label. phase-timings.json, benchmark.json, provider-health.json and
+provider-budget/requests.jsonl distinguish stage time, output generation, provider
+failure and quota pacing. The new orchestration has full fixture coverage; actual
+speed, provider availability and literary quality must be measured on its live run.

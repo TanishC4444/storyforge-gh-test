@@ -10,7 +10,7 @@ from .retrieval import retrieve, application_packet
 from .brief import scene_controls
 from .storage import export, load, lock, save
 
-PLAN_INSTRUCTION = '''Return only JSON with keys title, threads (array of strings), technique_stack (array of strings), scenes.
+PLAN_INSTRUCTION = '''Return only JSON with keys threads (array of strings), scenes.
 Create exactly the requested chapter and scene counts, in reading order. Scenes have keys id (ch01-sc01, etc.), chapter (integer), pov (character ID), participants (character IDs), location, time, goal, obstacle, intended_change.
 Honor requested length: each chapter is built from its scene word budgets. Follow PLAN mode, but this JSON contract overrides the attached brief's kickoff questions and free-form output rules. Intended changes are plans, not accepted events. Use only supplied character IDs. Build the requested local resolution by the final chapter while preserving explicitly requested unresolved larger-story threads. Each scene must introduce a distinct consequential action, changed option, commitment, cost, or interpretation. Do not spend multiple scenes proving what is already established. Include the choice and consequence in intended_change. Treat scene word counts as guidance unless the user requires strict counts. Apply scoped references as mechanisms, not transplanted plots. No prose chapter yet.'''
 MEMORY_INSTRUCTION = '''Return only JSON {"memories": [{"kind": "event"|"belief"|"claim"|"resource"|"relationship"|"thread", "text": string, "evidence_ids": ["p001"], "known_by": [character IDs or "public"], "holder": character ID for beliefs, "claim_source": character ID for claims}]}.
@@ -46,7 +46,7 @@ def compact(memories, count=24, char_budget=4500):
 
 
 def packet(req, state, card):
-    return {
+    result={
         'scene': card,
         'brief': {k: req.get(k) for k in ['premise', 'genre', 'reader_experience', 'pov', 'world_rules', 'must_avoid']},
         'characters': [{k: c.get(k) for k in ['id', 'name', 'voice', 'voice_design']} for c in req['characters'] if c['id'] in card['participants']],
@@ -60,6 +60,11 @@ def packet(req, state, card):
         'style_and_controls': {k: req.get(k) for k in ['tone_mood', 'sensory_detail', 'creative_freedom', 'surprise', 'ending_tendency', 'reference_policy']},
         'target_words': req['words_per_scene'],
     }
+    if req.get('performance',{}).get('canon_index'):
+        from .canon import working
+        result['author_continuity']['current_state']=working(state,query=json.dumps(card))
+        result['pov_visible_memory']=working(state,card['pov'],query=json.dumps(card))['facts']
+    return result
 
 
 def run(req, folder, backend='fixture', *, stop_after=None, approve_plan=False):
@@ -82,7 +87,7 @@ def run(req, folder, backend='fixture', *, stop_after=None, approve_plan=False):
             save(folder / 'retrieval.json', state['retrieval'])
             save(state_path, state)
         if 'refinement' not in state:
-            state['refinement'] = executor.call('refiner', {'request': req, 'inspiration': state['retrieval']},
+            state['refinement'] = executor.call('refiner', {'request': req, 'inspiration': application_packet(req,state['retrieval'],'refiner')},
                 'Develop the initial premise into a specific, consequential story proposal. Preserve every explicit user choice and restriction; mark invented details as proposals or assumptions. Do not shorten away important constraints. Return only JSON with original_prompt (the exact request premise), refined_prompt, central_conflict, reader_experience (strings), and preserved_user_choices, expanded_story_elements, character_tensions, subplot_possibilities, world_constraints, suggested_techniques, retrieval_references, assumptions, open_decisions (arrays). References must use supplied source IDs. No chapters yet.',
                 tokens=2400, validator=lambda x: contracts.refinement(x, req))
             save(folder / 'refinement.json', state['refinement'])

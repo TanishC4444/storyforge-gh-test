@@ -33,6 +33,8 @@ def assess(executor,state,kind):
     data=document(state,kind);cards=evidence_cards(data)
     requirements=compact_requirements(state['request'])
     groups=[['medium_length','themes_tensions','genre','tone_mood'],['scene_design','information_order','causal_alternatives'],['world_rules','character_depth'],['plot_subplots','references_adaptation','figurative_language']]
+    if state['request'].get('performance',{}).get('batch_development'):
+        groups=[list(DESIGN_CHECKS)]
     results=[]
     for group_index,group in enumerate(groups,1):
         event('review_group','Development review group %s/%s: %s'%(group_index,len(groups),', '.join(group)),group=group_index,total_groups=len(groups))
@@ -45,7 +47,7 @@ def assess(executor,state,kind):
         if 'information_order' in group:reqs['information_order']=requirements['scene_design']
         result=executor.call('development_editor',{'requirements':reqs,'candidate_evidence':selected,'required_checks':group},
             'Compare candidate evidence with requirements. Return JSON pass, checks (an object keyed by EVERY required check name; each value has verdict pass/fail, evidence_id, reason), issues (severity, category, evidence_id, problem, fix). Select evidence IDs; NEVER invent paths. Check what is actually developed, not just promised. Missing development fails with an actionable matching issue. Advisory issues alone do not require failure.',
-            tokens=1100,validator=lambda x,c=selected,g=group:resolve_review(x,data,c,g),response_schema=review_schema(selected,group))
+            tokens=2400 if len(group)>4 else 1100,validator=lambda x,c=selected,g=group:resolve_review(x,data,c,g),response_schema=review_schema(selected,group))
         event('review_group_complete','Review group %s/%s finished'%(group_index,len(groups)),passed=result['pass'],issues=len(result['issues']))
         results.append(result)
         if result.get('unverified'):return result

@@ -476,10 +476,16 @@
   "execution_policy": {
     "continue_with_warnings": true
   },
-  "performance": {},
+  "performance": {
+    "compact_packets": true,
+    "application_prompt_binding": true,
+    "hosted_failover": true,
+    "batch_development": true,
+    "canon_index": true
+  },
   "api_roles": {
-    "refiner": "flash",
-    "architect": "flash",
+    "refiner": "gemma",
+    "architect": "gemma",
     "character": "gemma",
     "writer": "gemma",
     "humanizer": "gemma",

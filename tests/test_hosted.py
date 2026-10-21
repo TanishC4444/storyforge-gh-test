@@ -200,7 +200,7 @@ class RefinementFailureRegressionTests(unittest.TestCase):
                 with patch.object(h,'request',side_effect=[{'totalTokens':100},result]) as request:
                     h.complete(kind,'system','prompt',100,structured=True,response_schema=refinement_schema())
                 config=request.call_args.args[1]['generationConfig']
-                self.assertEqual(config['responseMimeType'],'application/json')
+                self.assertEqual(config.get('responseMimeType'),'application/json' if kind=='flash' else None)
                 self.assertEqual(config.get('responseJsonSchema'),refinement_schema() if kind=='flash' else None)
 
 class OutlineFailureRegressionTests(unittest.TestCase):

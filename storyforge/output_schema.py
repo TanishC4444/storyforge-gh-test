@@ -9,10 +9,14 @@ def editorial_schema(packet):
     return {'type':'object','properties':{'pass':{'type':'boolean'},'checks':{'type':'object','properties':{key:check for key in required},'required':list(required),'additionalProperties':False},'issues':{'type':'array','items':issue}},'required':['pass','checks','issues'],'additionalProperties':False}
 
 
-def memory_schema(packet,character_ids,allow_public=True):
+def memory_schema(packet,character_ids,allow_public=True,prior_memories=None):
     ids=[p['id'] for p in packet['evidence_passages']]
     item={'type':'object','properties':{'kind':{'type':'string','enum':['event','belief','claim','resource','relationship','thread']},'text':{'type':'string'},'evidence_ids':{'type':'array','items':{'type':'string','enum':ids},'minItems':1,'maxItems':3},'known_by':{'type':'array','items':{'type':'string','enum':character_ids+(['public'] if allow_public else [])}},'holder':{'type':'string','enum':character_ids},'claim_source':{'type':'string','enum':character_ids}},'required':['kind','text','evidence_ids','known_by'],'additionalProperties':False}
-    return {'type':'object','properties':{'memories':{'type':'array','items':item,'maxItems':6}},'required':['memories'],'additionalProperties':False}
+    if prior_memories is not None:
+        item['properties']['fact_key']={'type':'string'}
+        item['required']+=['fact_key','supersedes']
+        item['properties']['supersedes']={'type':'array','items':{'type':'string','enum':[m['id'] for m in prior_memories]} if prior_memories else {'type':'string'},'maxItems':3 if prior_memories else 0}
+    return {'type':'object','properties':{'memories':{'type':'array','items':item,'maxItems':12 if prior_memories is not None else 6}},'required':['memories'],'additionalProperties':False}
 
 
 def continuity_schema(memory_count):
@@ -31,7 +35,7 @@ def refinement_schema():
               'subplot_possibilities', 'world_constraints', 'suggested_techniques',
               'retrieval_references', 'assumptions', 'open_decisions']
     properties = {key: {'type': 'string', 'minLength': 1} for key in strings}
-    properties.update({key: {'type': 'array', 'items': {'type': 'string'}} for key in arrays})
+    properties.update({key: {'type': 'array', 'items': {'type': 'string'},'maxItems':12} for key in arrays})
     return {'type': 'object', 'properties': properties,
             'required': list(properties), 'additionalProperties': False}
 
@@ -51,3 +55,19 @@ def plan_schema(req):
         'scenes':{'type':'array','items':scene,'minItems':total,'maxItems':total},
         'threads':{'type':'array','items':{'type':'string'},'maxItems':12}},
         'required':['scenes','threads'],'additionalProperties':False}
+
+
+def scene_schema(req,packet):
+    scene=plan_schema(req)['properties']['scenes']['items']
+    scene['properties'].update({key:{'type':'string','minLength':1} for key in ['choice','consequence','new_development']})
+    refs=packet.get('inspiration',{}).get('references',[])
+    item={'type':'object','properties':{'record_id':{'type':'string','enum':[r['id'] for r in refs]} if refs else {'type':'string'},'application':{'type':'string'}},'required':['record_id','application'],'additionalProperties':False}
+    scene['properties']['reference_uses']={'type':'array','items':item,'maxItems':len(refs)}
+    scene['required']=list(scene['properties'])
+    return scene
+
+
+def memory_review_schema():
+    issue={'type':'object','properties':{k:{'type':'string'} for k in ['category','quote','problem','fix']},'required':['severity','category','quote','problem','fix'],'additionalProperties':False}
+    issue['properties']['severity']={'type':'string','enum':['blocking','advisory']}
+    return {'type':'object','properties':{'pass':{'type':'boolean'},'issues':{'type':'array','items':issue}},'required':['pass','issues'],'additionalProperties':False}

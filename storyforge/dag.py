@@ -18,6 +18,7 @@ from .storage import load, save, export
 from .tracking import tracked_stage, event, heartbeat
 from .resilience import enabled, warning, unavailable, memory_extract, load_seed
 from .patching import repair as patch_repair
+from .canon import cards as canon_cards, recording_context
 
 REFINE = 'Develop the premise, preserving explicit user choices and marking assumptions. Return only JSON with original_prompt (exact request premise), refined_prompt, central_conflict, reader_experience (strings), and preserved_user_choices, expanded_story_elements, character_tensions, subplot_possibilities, world_constraints, suggested_techniques, retrieval_references, assumptions, open_decisions (arrays). For every supplied creative category, preserve its explicit choices and develop its practical effect: medium/length, themes/tensions, scenes, world constraints, character behavior/arcs, plots/subplots, genre, tone/mood, reference influence, and figurative style. New detail is a proposal, not a user choice. No chapters yet.'
 
@@ -34,9 +35,13 @@ def context(req, state, card):
 
 def actor_packet(req, state, card, cid):
     contracts.require(cid in card['participants'], 'Character not in this scene')
+    facts=compact(visible(state['memories'],cid,{s['id']:s['participants'] for s in state['accepted']}))
+    if req.get('performance',{}).get('canon_index'):
+        from .canon import working
+        facts=working(state,cid,query=json.dumps(card))['facts']
     return {'character': next(c for c in req['characters'] if c['id'] == cid),
             'situation': {'location': card['location'], 'time': card['time']},
-            'known_facts': compact(visible(state['memories'],cid,{s['id']:s['participants'] for s in state['accepted']})), 'knowledge_policy':'Use only supported known facts; author world rules and future scene outcomes are not character knowledge.'}
+            'known_facts': facts, 'knowledge_policy':'Use only supported known facts; author world rules and future scene outcomes are not character knowledge.'}
 
 
 def safe_review(value,prose,required,req):
@@ -274,12 +279,12 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
                 verdict['issues'].append({'severity': 'blocking', 'category': 'length', 'quote': prose[:80], 'problem': f'{words} words outside target tolerance', 'fix': f'Return a complete scene near {req["words_per_scene"]} words.'})
             save(out / 'review.json', verdict)
         else:
-            result = memory_extract(executor,req,out,prose,{**evidence_payload(prose),'scene':card,'characters':[c['id'] for c in req['characters']],'existing':compact(state['memories'])},MEMORY_INSTRUCTION)
+            result = memory_extract(executor,req,out,prose,{**evidence_payload(prose),'scene':card,'characters':[c['id'] for c in req['characters']],'existing':compact(state['memories']),**(recording_context(state,card) if req.get('performance',{}).get('canon_index') else {})},MEMORY_INSTRUCTION)
             save(out / 'memory.json', result)
         return
     if task == 'memory_review':
         prose = (source / 'edited/prose.txt').read_text()
-        verdict = executor.call('memory_quality', {'current_prose': prose, 'proposed_memory': load(source / 'memory/memory.json'), 'prior_memory': compact(state['memories'], 36)}, 'Check proposed_memory for unsupported inference, contradiction, false knowledge acquisition, or belief/claim presented as fact. Return required review JSON with quotations from current_prose.', tokens=1200, validator=lambda x: contracts.review(x, prose), skill=(ROOT/'skills/memory_quality.md').read_text())
+        verdict = executor.call('memory_quality', {'current_prose': prose, 'proposed_memory': load(source / 'memory/memory.json'), 'prior_memory': (recording_context(state,card) if req.get('performance',{}).get('canon_index') else compact(state['memories'],36))}, 'Check proposed_memory for unsupported inference, contradiction, false knowledge acquisition, or belief/claim presented as fact. Return required review JSON with quotations from current_prose.', tokens=1200, validator=lambda x: contracts.review(x, prose), skill=(ROOT/'skills/memory_quality.md').read_text())
         save(out / 'review.json', verdict)
         return
     if task == 'accept':
@@ -303,7 +308,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
                     reviewed_hash=hashlib.sha256(prose.encode()).hexdigest();prose=revised
                     for verdict in [review,rhetoric_review]:verdict['reviewed_prose_sha256']=reviewed_hash;verdict['post_review_patch']=True
                     save(out/'final-prose.txt',prose)
-                    memory=memory_extract(executor,req,out,prose,{**evidence_payload(prose),'scene':card,'characters':[c['id'] for c in req['characters']],'existing':compact(state['memories'])},MEMORY_INSTRUCTION)
+                    memory=memory_extract(executor,req,out,prose,{**evidence_payload(prose),'scene':card,'characters':[c['id'] for c in req['characters']],'existing':compact(state['memories']),**(recording_context(state,card) if req.get('performance',{}).get('canon_index') else {})},MEMORY_INSTRUCTION)
                     memory_review=executor.call('memory_quality',{'current_prose':prose,'proposed_memory':memory,'prior_memory':compact(state['memories'])},'Check supported facts and knowledge holders; return pass and issues with exact source quotations.',tokens=900,validator=lambda x:contracts.review(x,prose),skill=(ROOT/'skills/memory_quality.md').read_text())
                     warning(out,'final_targeted_edit','Final cited issues patched; literary re-verification remains pending and the draft is provisional.')
             except Exception as exc:warning(out,'final_patch_unavailable',exc)
@@ -324,7 +329,11 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         result = copy.deepcopy(state)
         result['version'] += 1
         result['accepted'].append({'id': card['id'], 'chapter': card['chapter'], 'pov': card['pov'], 'participants': card['participants'], 'prose': prose, 'review': review, 'rhetoric_review':rhetoric_review, 'memory_review': memory_review, 'reference_uses':card.get('reference_uses',[]), 'state_version': result['version'],'quality_status':'needs_review' if unresolved else 'reviewed','memory_extraction':memory_status})
-        result['memories'].extend(dict(m, source=card['id']) for m in memory['memories'])
+        if req.get('performance',{}).get('canon_index'):
+            from .canon import append
+            append(result,memory['memories'],card['id'])
+            save(out/'canon.json',result['canon'])
+        else:result['memories'].extend(dict(m, source=card['id']) for m in memory['memories'])
         result['complete'] = len(result['accepted']) == len(result['plan']['scenes'])
         result['completion_status']='complete_with_warnings' if result['complete'] and any(s.get('quality_status')=='needs_review' for s in result['accepted']) else ('complete' if result['complete'] else 'in_progress')
         save(out / 'snapshot.json', result)
