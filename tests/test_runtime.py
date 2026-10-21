@@ -37,3 +37,33 @@ class RuntimeTests(unittest.TestCase):
         self.assertIn('candidate.expanded_story_elements.0',paths)
         self.assertNotIn('candidate.expanded_story_elements.medium_length',paths)
         for path in paths:_path(document,path)
+
+class FullApiWorkflowTests(unittest.TestCase):
+    def test_full_api_graph_keeps_every_stage_and_secret(self):
+        import importlib.util
+        root=Path(__file__).resolve().parents[1]
+        spec=importlib.util.spec_from_file_location('full_api_builder',root/'scripts/build_workflow.py')
+        builder=importlib.util.module_from_spec(spec);spec.loader.exec_module(builder)
+        workflow=builder.build(total=4,per_chapter=4,troy=True,full_api=True)
+        self.assertEqual(workflow,(root/'.github/workflows/troy-full-api.yml').read_text())
+        self.assertIn('options: [troy-full-api]',workflow)
+        for stage in ['prepare','refine','refine_review','refine_revision','refine_gate','plan','plan_review','plan_revision','plan_gate']:
+            self.assertIn('\n  '+stage+':',workflow)
+        for scene in range(1,5):
+            for stage in ['design','characters','direction','draft','edit','story','rhetoric','repair','verify','verify_rhetoric','final_memory','memory_review','accept']:
+                self.assertIn('\n  s%02d_%s:'%(scene,stage),workflow)
+        self.assertEqual(workflow.count('GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}'),workflow.count('python -m storyforge.dag '))
+        self.assertNotIn('Restore first two committed scenes',workflow)
+
+    def test_benchmark_brief_is_unchanged_and_has_no_shortcuts(self):
+        import json
+        from storyforge.contracts import request
+        root=Path(__file__).resolve().parents[1]
+        req=request(json.loads((root/'examples/troy-full-api.json').read_text()))
+        original=json.loads((root/'examples/troy-narrative-api.json').read_text())
+        for key in ['premise','characters','scene_designs','world_rules','pov','style','words_per_scene']:
+            self.assertEqual(req[key],original[key])
+        self.assertFalse(req['performance'])
+        self.assertNotIn('resume_seed',req['execution_policy'])
+        for role in ['development_editor','scene_designer','director','refiner','architect','writer','humanizer','character','story_quality','rhetoric_quality','memory','memory_quality','chapter_quality']:
+            self.assertIn(req['api_roles'][role],['gemma','flash'])

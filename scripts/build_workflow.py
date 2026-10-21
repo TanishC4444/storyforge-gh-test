@@ -42,11 +42,16 @@ jobs:
 '''
 
 
-def build(total=9, per_chapter=3, troy=False, continuation=False):
+def build(total=9, per_chapter=3, troy=False, continuation=False, full_api=False):
     header=HEADER
     if troy:
         header=header.replace('default: balanced','default: fast')
         header=header.replace('name: Story runners','name: Troy story runners').replace('options: [silent-bell-deep, silent-bell-full, harbor]','options: [troy-first-thunder]').replace('default: silent-bell-deep','default: troy-first-thunder').replace("options: ['9', '3', '1']","options: ['4']").replace("default: '9'","default: '4'").replace('Nine scenes is the full three-chapter test','Four scenes is the full opening movement')
+    if full_api:
+        if not troy or continuation:
+            raise ValueError('Full API workflow requires fresh Troy DAG')
+        header=header.replace('name: Troy story runners','name: Troy full prompt-to-story / hosted APIs')
+        header=header.replace('options: [troy-first-thunder]','options: [troy-full-api]').replace('default: troy-first-thunder','default: troy-full-api')
     if continuation:
         header=header.replace('name: Troy story runners','name: Troy continuation / parallel passage editors')
         header=header.replace('      refinement_seed_run:', "      checkpoint_run:\n        type: string\n        default: '39536276390'\n        description: Source run containing the committed s02_accept artifact\n      refinement_seed_run:")
@@ -75,6 +80,7 @@ def build(total=9, per_chapter=3, troy=False, continuation=False):
             lines += ['      - uses: actions/download-artifact@v4', '        with:', f'          {"pattern" if pattern else "name"}: {artifact}', f'          path: inputs/{path}']
             if task=='resume':lines += ['          run-id: ${{ inputs.checkpoint_run }}', '          github-token: ${{ github.token }}']
         lines += [f'      - name: Execute {title}', '        id: task', '        env:', '          PYTHONUNBUFFERED: 1', '          STORY_BACKEND: ${{ inputs.backend }}', '          STORY_PROFILE: ${{ inputs.profile }}', '          STORY_REQUEST: ${{ inputs.request_file }}', '          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}']
+        if full_api:lines += ['          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}']
         if continuation:lines += ['          CONTINUATION_RUN: ${{ inputs.checkpoint_run }}']
         if matrix:
             lines += ['          STORY_CHARACTER: ${{ matrix.character }}']
@@ -187,3 +193,5 @@ if __name__ == '__main__':
     (ROOT / '.github/workflows/troy.yml').write_text(build(total=4,per_chapter=4,troy=True))
 
     (ROOT / '.github/workflows/troy-continue.yml').write_text(build(total=4,per_chapter=4,troy=True,continuation=True))
+
+    (ROOT / '.github/workflows/troy-full-api.yml').write_text(build(total=4,per_chapter=4,troy=True,full_api=True))
