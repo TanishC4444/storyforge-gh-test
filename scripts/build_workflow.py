@@ -271,7 +271,10 @@ def build_experimental():
     def job(key,title,task,needs=(),downloads=(),index=None,condition=None,matrix=None):
         keys.append(key);lines=[f'  {key}:',f'    name: {title}']
         if needs:lines.append('    needs: ['+', '.join(needs)+']')
-        if condition:lines.append('    if: ${{ '+condition+' }}')
+        if condition:
+            lines.append('    if: ${{ '+(condition if 'always()' in condition else 'always() && !cancelled() && ('+condition+')')+' }}')
+        elif needs:
+            lines.append("    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}")
         lines+=['    runs-on: ubuntu-latest','    timeout-minutes: 360','    outputs:']
         for output in ['characters','needs_repair','changed','facts_changed']:lines.append(f'      {output}: ${{{{ steps.task.outputs.{output} }}}}')
         if matrix:lines+=['    strategy:','      fail-fast: false','      max-parallel: 3','      matrix:',f'        character: ${{{{ fromJSON(needs.{matrix}.outputs.characters) }}}}']
@@ -318,13 +321,25 @@ def build_experimental():
         needs=[state,p+'_edit',p+'_story',p+'_rhetoric',p+'_memory',p+'_repair',p+'_verify',p+'_verify_rhetoric',p+'_final_memory',p+'_memory_review']
         extras=common+[(p+'_edit','edited'),(p+'_story','initial-story'),(p+'_rhetoric','initial-rhetoric'),(p+'_memory','memory')]
         for suffix,path in [('repair','repair'),('verify','verified'),('verify_rhetoric','verified-rhetoric'),('final_memory','final-memory'),('memory_review','memory-review')]:extras.append((p+'_'+suffix,path,f"needs.{p}_{suffix}.result == 'success'"))
-        job(p+'_accept',p+' accept with conditional fallbacks','accept',needs,extras,i,ok)
+        required=' && '.join(f"needs.{key}.result == 'success'" for key in [state,p+'_edit',p+'_story',p+'_rhetoric',p+'_memory'])
+        job(p+'_accept',p+' accept with conditional fallbacks','accept',needs,extras,i,ok+' && '+required)
         if i<3:
             following=f's{i+2:02}'
             job(following+'_design',following+' speculative next-scene design','anticipate_design',[state,p+'_edit',p+'_memory'],edit+[(p+'_memory','memory')],i+1)
             job(p+'_settle',p+' settle canon and reconcile next design','settle',[p+'_accept',following+'_design'],[(p+'_accept','state'),(following+'_design','anticipated')],i+1)
     tail=build(total=4,per_chapter=4,troy=True,full_api=True,resident=False).split('  results:\n',1)[1]
     tail=re.sub(r'    needs: \[[^\n]+\]', '    needs: ['+', '.join(keys)+']',tail,count=1)
+    tail=tail.replace('      - name: Summarize run', '''      - name: Publish clearly labelled story download
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: READABLE-STORY-${{ github.run_id }}
+          path: |
+            results/s04_accept/FINAL_STORY.txt
+            results/s04_accept/PROVISIONAL_STORY.txt
+            results/s04_accept/READ_ME.txt
+          if-no-files-found: warn
+      - name: Summarize run''')
     blocks.append('  results:\n'+tail)
     return '\n'.join(blocks)
 

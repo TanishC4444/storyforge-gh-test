@@ -76,6 +76,7 @@ jobs:
   refine_bundle:
     name: Refine, develop, revise and gate
     needs: [prepare]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -117,6 +118,7 @@ jobs:
   plan_bundle:
     name: Outline, develop, revise and gate
     needs: [refine_bundle]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -158,6 +160,7 @@ jobs:
   s01_design:
     name: Scene 1 design
     needs: [plan_bundle]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -199,6 +202,7 @@ jobs:
   s01_characters:
     name: s01 isolated character runners
     needs: [s01_design]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -246,6 +250,7 @@ jobs:
   s01_direction:
     name: s01 direction
     needs: [s01_design, s01_characters]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -291,6 +296,7 @@ jobs:
   s01_draft:
     name: s01 beat-parallel writer
     needs: [s01_design, s01_direction]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -336,6 +342,7 @@ jobs:
   s01_edit:
     name: s01 whole-scene distinct writing
     needs: [s01_design, s01_draft]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -381,6 +388,7 @@ jobs:
   s01_story:
     name: s01 concurrent story dimensions
     needs: [s01_design, s01_edit]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -426,6 +434,7 @@ jobs:
   s01_rhetoric:
     name: s01 concurrent rhetoric dimensions
     needs: [s01_design, s01_edit]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -471,6 +480,7 @@ jobs:
   s01_memory:
     name: s01 initial memory and independent verification
     needs: [s01_design, s01_edit]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -516,7 +526,7 @@ jobs:
   s01_repair:
     name: s01 paragraph patch batches
     needs: [s01_design, s01_edit, s01_story, s01_rhetoric]
-    if: ${{ needs.s01_story.outputs.needs_repair == 'true' || needs.s01_rhetoric.outputs.needs_repair == 'true' }}
+    if: ${{ always() && !cancelled() && (needs.s01_story.outputs.needs_repair == 'true' || needs.s01_rhetoric.outputs.needs_repair == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -570,7 +580,7 @@ jobs:
   s01_verify:
     name: s01 changed-paragraph story verification
     needs: [s01_design, s01_repair, s01_story]
-    if: ${{ needs.s01_repair.outputs.changed == 'true' }}
+    if: ${{ always() && !cancelled() && (needs.s01_repair.outputs.changed == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -620,7 +630,7 @@ jobs:
   s01_verify_rhetoric:
     name: s01 changed-paragraph rhetoric verification
     needs: [s01_design, s01_repair, s01_rhetoric]
-    if: ${{ needs.s01_repair.outputs.changed == 'true' }}
+    if: ${{ always() && !cancelled() && (needs.s01_repair.outputs.changed == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -670,7 +680,7 @@ jobs:
   s01_final_memory:
     name: s01 diff-based memory refresh
     needs: [s01_design, s01_repair, s01_memory]
-    if: ${{ needs.s01_repair.outputs.facts_changed == 'true' }}
+    if: ${{ always() && !cancelled() && (needs.s01_repair.outputs.facts_changed == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -720,7 +730,7 @@ jobs:
   s01_memory_review:
     name: s01 changed-fact verification
     needs: [s01_design, s01_repair, s01_final_memory]
-    if: ${{ needs.s01_final_memory.outputs.facts_changed == 'true' }}
+    if: ${{ always() && !cancelled() && (needs.s01_final_memory.outputs.facts_changed == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -770,7 +780,7 @@ jobs:
   s01_accept:
     name: s01 accept with conditional fallbacks
     needs: [s01_design, s01_edit, s01_story, s01_rhetoric, s01_memory, s01_repair, s01_verify, s01_verify_rhetoric, s01_final_memory, s01_memory_review]
-    if: ${{ always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
+    if: ${{ always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && needs.s01_design.result == 'success' && needs.s01_edit.result == 'success' && needs.s01_story.result == 'success' && needs.s01_rhetoric.result == 'success' && needs.s01_memory.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -853,6 +863,7 @@ jobs:
   s02_design:
     name: s02 speculative next-scene design
     needs: [s01_design, s01_edit, s01_memory]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -902,6 +913,7 @@ jobs:
   s01_settle:
     name: s01 settle canon and reconcile next design
     needs: [s01_accept, s02_design]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -947,6 +959,7 @@ jobs:
   s02_characters:
     name: s02 isolated character runners
     needs: [s01_settle]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -994,6 +1007,7 @@ jobs:
   s02_direction:
     name: s02 direction
     needs: [s01_settle, s02_characters]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -1039,6 +1053,7 @@ jobs:
   s02_draft:
     name: s02 beat-parallel writer
     needs: [s01_settle, s02_direction]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -1084,6 +1099,7 @@ jobs:
   s02_edit:
     name: s02 whole-scene distinct writing
     needs: [s01_settle, s02_draft]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -1129,6 +1145,7 @@ jobs:
   s02_story:
     name: s02 concurrent story dimensions
     needs: [s01_settle, s02_edit]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -1174,6 +1191,7 @@ jobs:
   s02_rhetoric:
     name: s02 concurrent rhetoric dimensions
     needs: [s01_settle, s02_edit]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -1219,6 +1237,7 @@ jobs:
   s02_memory:
     name: s02 initial memory and independent verification
     needs: [s01_settle, s02_edit]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -1264,7 +1283,7 @@ jobs:
   s02_repair:
     name: s02 paragraph patch batches
     needs: [s01_settle, s02_edit, s02_story, s02_rhetoric]
-    if: ${{ needs.s02_story.outputs.needs_repair == 'true' || needs.s02_rhetoric.outputs.needs_repair == 'true' }}
+    if: ${{ always() && !cancelled() && (needs.s02_story.outputs.needs_repair == 'true' || needs.s02_rhetoric.outputs.needs_repair == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -1318,7 +1337,7 @@ jobs:
   s02_verify:
     name: s02 changed-paragraph story verification
     needs: [s01_settle, s02_repair, s02_story]
-    if: ${{ needs.s02_repair.outputs.changed == 'true' }}
+    if: ${{ always() && !cancelled() && (needs.s02_repair.outputs.changed == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -1368,7 +1387,7 @@ jobs:
   s02_verify_rhetoric:
     name: s02 changed-paragraph rhetoric verification
     needs: [s01_settle, s02_repair, s02_rhetoric]
-    if: ${{ needs.s02_repair.outputs.changed == 'true' }}
+    if: ${{ always() && !cancelled() && (needs.s02_repair.outputs.changed == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -1418,7 +1437,7 @@ jobs:
   s02_final_memory:
     name: s02 diff-based memory refresh
     needs: [s01_settle, s02_repair, s02_memory]
-    if: ${{ needs.s02_repair.outputs.facts_changed == 'true' }}
+    if: ${{ always() && !cancelled() && (needs.s02_repair.outputs.facts_changed == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -1468,7 +1487,7 @@ jobs:
   s02_memory_review:
     name: s02 changed-fact verification
     needs: [s01_settle, s02_repair, s02_final_memory]
-    if: ${{ needs.s02_final_memory.outputs.facts_changed == 'true' }}
+    if: ${{ always() && !cancelled() && (needs.s02_final_memory.outputs.facts_changed == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -1518,7 +1537,7 @@ jobs:
   s02_accept:
     name: s02 accept with conditional fallbacks
     needs: [s01_settle, s02_edit, s02_story, s02_rhetoric, s02_memory, s02_repair, s02_verify, s02_verify_rhetoric, s02_final_memory, s02_memory_review]
-    if: ${{ always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
+    if: ${{ always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && needs.s01_settle.result == 'success' && needs.s02_edit.result == 'success' && needs.s02_story.result == 'success' && needs.s02_rhetoric.result == 'success' && needs.s02_memory.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -1601,6 +1620,7 @@ jobs:
   s03_design:
     name: s03 speculative next-scene design
     needs: [s01_settle, s02_edit, s02_memory]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -1650,6 +1670,7 @@ jobs:
   s02_settle:
     name: s02 settle canon and reconcile next design
     needs: [s02_accept, s03_design]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -1695,6 +1716,7 @@ jobs:
   s03_characters:
     name: s03 isolated character runners
     needs: [s02_settle]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -1742,6 +1764,7 @@ jobs:
   s03_direction:
     name: s03 direction
     needs: [s02_settle, s03_characters]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -1787,6 +1810,7 @@ jobs:
   s03_draft:
     name: s03 beat-parallel writer
     needs: [s02_settle, s03_direction]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -1832,6 +1856,7 @@ jobs:
   s03_edit:
     name: s03 whole-scene distinct writing
     needs: [s02_settle, s03_draft]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -1877,6 +1902,7 @@ jobs:
   s03_story:
     name: s03 concurrent story dimensions
     needs: [s02_settle, s03_edit]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -1922,6 +1948,7 @@ jobs:
   s03_rhetoric:
     name: s03 concurrent rhetoric dimensions
     needs: [s02_settle, s03_edit]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -1967,6 +1994,7 @@ jobs:
   s03_memory:
     name: s03 initial memory and independent verification
     needs: [s02_settle, s03_edit]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -2012,7 +2040,7 @@ jobs:
   s03_repair:
     name: s03 paragraph patch batches
     needs: [s02_settle, s03_edit, s03_story, s03_rhetoric]
-    if: ${{ needs.s03_story.outputs.needs_repair == 'true' || needs.s03_rhetoric.outputs.needs_repair == 'true' }}
+    if: ${{ always() && !cancelled() && (needs.s03_story.outputs.needs_repair == 'true' || needs.s03_rhetoric.outputs.needs_repair == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -2066,7 +2094,7 @@ jobs:
   s03_verify:
     name: s03 changed-paragraph story verification
     needs: [s02_settle, s03_repair, s03_story]
-    if: ${{ needs.s03_repair.outputs.changed == 'true' }}
+    if: ${{ always() && !cancelled() && (needs.s03_repair.outputs.changed == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -2116,7 +2144,7 @@ jobs:
   s03_verify_rhetoric:
     name: s03 changed-paragraph rhetoric verification
     needs: [s02_settle, s03_repair, s03_rhetoric]
-    if: ${{ needs.s03_repair.outputs.changed == 'true' }}
+    if: ${{ always() && !cancelled() && (needs.s03_repair.outputs.changed == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -2166,7 +2194,7 @@ jobs:
   s03_final_memory:
     name: s03 diff-based memory refresh
     needs: [s02_settle, s03_repair, s03_memory]
-    if: ${{ needs.s03_repair.outputs.facts_changed == 'true' }}
+    if: ${{ always() && !cancelled() && (needs.s03_repair.outputs.facts_changed == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -2216,7 +2244,7 @@ jobs:
   s03_memory_review:
     name: s03 changed-fact verification
     needs: [s02_settle, s03_repair, s03_final_memory]
-    if: ${{ needs.s03_final_memory.outputs.facts_changed == 'true' }}
+    if: ${{ always() && !cancelled() && (needs.s03_final_memory.outputs.facts_changed == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -2266,7 +2294,7 @@ jobs:
   s03_accept:
     name: s03 accept with conditional fallbacks
     needs: [s02_settle, s03_edit, s03_story, s03_rhetoric, s03_memory, s03_repair, s03_verify, s03_verify_rhetoric, s03_final_memory, s03_memory_review]
-    if: ${{ always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
+    if: ${{ always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && needs.s02_settle.result == 'success' && needs.s03_edit.result == 'success' && needs.s03_story.result == 'success' && needs.s03_rhetoric.result == 'success' && needs.s03_memory.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -2349,6 +2377,7 @@ jobs:
   s04_design:
     name: s04 speculative next-scene design
     needs: [s02_settle, s03_edit, s03_memory]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -2398,6 +2427,7 @@ jobs:
   s03_settle:
     name: s03 settle canon and reconcile next design
     needs: [s03_accept, s04_design]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -2443,6 +2473,7 @@ jobs:
   s04_characters:
     name: s04 isolated character runners
     needs: [s03_settle]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -2490,6 +2521,7 @@ jobs:
   s04_direction:
     name: s04 direction
     needs: [s03_settle, s04_characters]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -2535,6 +2567,7 @@ jobs:
   s04_draft:
     name: s04 beat-parallel writer
     needs: [s03_settle, s04_direction]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -2580,6 +2613,7 @@ jobs:
   s04_edit:
     name: s04 whole-scene distinct writing
     needs: [s03_settle, s04_draft]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -2625,6 +2659,7 @@ jobs:
   s04_story:
     name: s04 concurrent story dimensions
     needs: [s03_settle, s04_edit]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -2670,6 +2705,7 @@ jobs:
   s04_rhetoric:
     name: s04 concurrent rhetoric dimensions
     needs: [s03_settle, s04_edit]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -2715,6 +2751,7 @@ jobs:
   s04_memory:
     name: s04 initial memory and independent verification
     needs: [s03_settle, s04_edit]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -2760,7 +2797,7 @@ jobs:
   s04_repair:
     name: s04 paragraph patch batches
     needs: [s03_settle, s04_edit, s04_story, s04_rhetoric]
-    if: ${{ needs.s04_story.outputs.needs_repair == 'true' || needs.s04_rhetoric.outputs.needs_repair == 'true' }}
+    if: ${{ always() && !cancelled() && (needs.s04_story.outputs.needs_repair == 'true' || needs.s04_rhetoric.outputs.needs_repair == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -2814,7 +2851,7 @@ jobs:
   s04_verify:
     name: s04 changed-paragraph story verification
     needs: [s03_settle, s04_repair, s04_story]
-    if: ${{ needs.s04_repair.outputs.changed == 'true' }}
+    if: ${{ always() && !cancelled() && (needs.s04_repair.outputs.changed == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -2864,7 +2901,7 @@ jobs:
   s04_verify_rhetoric:
     name: s04 changed-paragraph rhetoric verification
     needs: [s03_settle, s04_repair, s04_rhetoric]
-    if: ${{ needs.s04_repair.outputs.changed == 'true' }}
+    if: ${{ always() && !cancelled() && (needs.s04_repair.outputs.changed == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -2914,7 +2951,7 @@ jobs:
   s04_final_memory:
     name: s04 diff-based memory refresh
     needs: [s03_settle, s04_repair, s04_memory]
-    if: ${{ needs.s04_repair.outputs.facts_changed == 'true' }}
+    if: ${{ always() && !cancelled() && (needs.s04_repair.outputs.facts_changed == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -2964,7 +3001,7 @@ jobs:
   s04_memory_review:
     name: s04 changed-fact verification
     needs: [s03_settle, s04_repair, s04_final_memory]
-    if: ${{ needs.s04_final_memory.outputs.facts_changed == 'true' }}
+    if: ${{ always() && !cancelled() && (needs.s04_final_memory.outputs.facts_changed == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -3014,7 +3051,7 @@ jobs:
   s04_accept:
     name: s04 accept with conditional fallbacks
     needs: [s03_settle, s04_edit, s04_story, s04_rhetoric, s04_memory, s04_repair, s04_verify, s04_verify_rhetoric, s04_final_memory, s04_memory_review]
-    if: ${{ always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
+    if: ${{ always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && needs.s03_settle.result == 'success' && needs.s04_edit.result == 'success' && needs.s04_story.result == 'success' && needs.s04_rhetoric.result == 'success' && needs.s04_memory.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -3122,6 +3159,16 @@ jobs:
           path: results/
           retention-days: 7
           overwrite: true
+      - name: Publish clearly labelled story download
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: READABLE-STORY-${{ github.run_id }}
+          path: |
+            results/s04_accept/FINAL_STORY.txt
+            results/s04_accept/PROVISIONAL_STORY.txt
+            results/s04_accept/READ_ME.txt
+          if-no-files-found: warn
       - name: Summarize run
         env:
           JOB_RESULTS: ${{ toJSON(needs) }}

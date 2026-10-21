@@ -58,5 +58,11 @@ def export(folder, state, req):
     if len(chapters) == req['chapters']:
         save(folder / 'story.txt', req.get('title', req['project_id']) + '\n\n' + '\n\n'.join(chapters))
     save(folder / 'reference-usage.json', [{'scene_id':s['id'],'planned_uses':s.get('reference_uses',[]),'model_assessment':next((c for c in s.get('review',{}).get('checks',[]) if c['id']=='reference_application'),None)} for s in state['accepted']])
+    complete = len(state['accepted']) == req['chapters'] * req['scenes_per_chapter']
+    provisional = any(s.get('quality_status') == 'needs_review' for s in state['accepted'])
+    label = 'PARTIAL_DRAFT' if not complete else ('PROVISIONAL_STORY' if provisional else 'FINAL_STORY')
+    text = req.get('title', req['project_id']) + '\n\n' + prefix + '\n\n* * *\n\n'.join(s['prose'] for s in state['accepted'])
+    save(folder / (label + '.txt'), text)
+    save(folder / 'READ_ME.txt', f'{len(state["accepted"])} of {req["chapters"] * req["scenes_per_chapter"]} scenes. Read {label}.txt.\nComplete: {complete}. Quality warnings: {provisional}.\n')
     for scene in state['accepted']:
         save(folder / 'scenes' / f'{scene["id"]}.txt', prefix + scene['prose'])
