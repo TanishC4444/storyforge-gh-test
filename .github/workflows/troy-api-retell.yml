@@ -1,0 +1,44 @@
+name: Troy API retelling / third person
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: troy-api-retell
+  cancel-in-progress: false
+jobs:
+  retell:
+    name: Hosted roles with shared quota pacing and CPU fallback
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: live
+      - name: Load literary retrieval from completed run
+        uses: actions/download-artifact@v4
+        with:
+          name: s04_accept
+          run-id: 39552359292
+          github-token: ${{ github.token }}
+          path: inputs
+      - name: Refine, outline, draft, compare revisions and verify final story
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          PYTHONUNBUFFERED: '1'
+        run: python -m storyforge.retell --out runs/troy-third-person-api --source inputs/snapshot.json
+      - name: Download this artifact for the final story
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: FINAL_STORY
+          path: runs/troy-third-person-api/FINAL_STORY.txt
+          if-no-files-found: error
+      - name: Preserve comparisons, reviews and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: retelling-diagnostics
+          path: runs/troy-third-person-api/

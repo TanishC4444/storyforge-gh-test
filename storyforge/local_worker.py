@@ -1,6 +1,7 @@
 """Resident inference within the job already allocated by GitHub Actions."""
 from __future__ import annotations
 import atexit
+import importlib.util
 import os
 import signal
 from .runtime import JOB_TIMEOUT_MINUTES, JOB_TIMEOUT_SECONDS, DOWNLOAD_TIMEOUT_SECONDS, worker_timeout_seconds
@@ -17,6 +18,9 @@ atexit.register(close_sessions)
 
 
 def execute(model, system, prompt, tokens, n_ctx, role, response_schema=None):
+    if importlib.util.find_spec('llama_cpp') is None:
+        from .cpu_fallback import execute as remote
+        return remote(model,system,prompt,tokens,n_ctx,role,response_schema)
     from gh_inference import ResidentSession, Limits
     key=(model,n_ctx)
     if key not in _SESSIONS:

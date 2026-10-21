@@ -45,8 +45,12 @@ def judgment_signature(text):
 class Executor:
     def __init__(self, req, folder, backend):
         self.req, self.folder, self.backend = req, Path(folder), backend
+        self.hosted=None
+        if backend=='worker' and req.get('api_roles'):
+            from .hosted import GoogleHosted
+            self.hosted=GoogleHosted(os.getenv('STORY_QUOTA_DIR',str(self.folder/'provider-budget')))
 
-    def call(self, role, packet, instruction, *, tokens=1200, validator=None, skill='', response_schema=None):
+    def call(self, role, packet, instruction, *, tokens=1200, validator=None, skill='', response_schema=None, output_format='json'):
         from .output_schema import editorial_schema
         response_schema=response_schema or editorial_schema(packet)
         if self.req.get('performance',{}).get('single_editorial_pass') and role.endswith('quality'):
@@ -72,7 +76,7 @@ class Executor:
             model = PROFILES[self.req['profile']].get(role, PROFILES[self.req['profile']]['default'])
             if last_error and role in {'writer','architect'} and self.req['profile']=='fast':model='qwen3b'
             n_ctx=min(self.req['n_ctx'],8192) if model=='qwen3b' and role not in {'writer','architect','chapter_quality'} else self.req['n_ctx']
-            digest = hashlib.sha256(json.dumps([self.backend, role, model, system, prompt, tokens, n_ctx, self.req['runner_repo'], response_schema]).encode()).hexdigest()
+            digest = hashlib.sha256(json.dumps([self.backend, role, model, system, prompt, tokens, n_ctx, self.req['runner_repo'], response_schema,self.req.get('api_roles',{}),output_format]).encode()).hexdigest()
             path = self.folder / 'calls' / f'{role}-{digest[:20]}.json'
             save(self.folder / 'packets' / f'{role}-{digest[:20]}.json', {'role': role, 'model': model, 'system': system, 'input': packet, 'validation_error': last_error, 'max_tokens': tokens, 'n_ctx': n_ctx,'response_schema':response_schema,'format_repair_only':bool(last_error and response_schema)})
             cached = load(path) if path.exists() else None
@@ -80,15 +84,29 @@ class Executor:
             try:
                 if cached is None:
                     started = time.monotonic()
-                    print(f'{role}: {model} / fresh context ({self.backend})', flush=True)
+                    preferred=self.req.get('api_roles',{}).get(role) if self.hosted and not last_error else None
+                    print(f'{role}: '+(('Google '+preferred+'; CPU fallback '+model) if preferred else model)+f' / fresh context ({self.backend})',flush=True)
                     if self.backend == 'fixture':
                         from .fixture import respond
                         output = respond(role, packet, self.req)
                         diagnostic = {'finish_reason': 'stop', 'fixture': True}
                     elif self.backend == 'worker':
-                        from .local_worker import execute
-                        with heartbeat('Waiting for %s response; model preparation, prompt evaluation or generation is in progress'%role):
-                            output, diagnostic = execute(model, system, prompt, tokens, n_ctx, role, response_schema=response_schema)
+                        kind=self.req.get('api_roles',{}).get(role)
+                        hosted_result=None
+                        if self.hosted and kind and not last_error:
+                            try:
+                                with heartbeat('Hosted '+kind+' / '+role+'; shared quota pacing applies'):
+                                    hosted_result=self.hosted.complete(kind,system,prompt,tokens,structured=bool(validator) and output_format=='json')
+                            except Exception as exc:
+                                from .resilience import warning
+                                warning(self.folder,'api_fallback',str(exc))
+                                event('fallback','Hosted provider unavailable; using existing CPU worker',role=role,local_model=model)
+                        if hosted_result is not None:
+                            output,diagnostic=hosted_result
+                        else:
+                            from .local_worker import execute
+                            with heartbeat('Existing CPU fallback / '+role):
+                                output, diagnostic = execute(model, system, prompt, tokens, n_ctx, role, response_schema=response_schema)
                     else:
                         sys.path.insert(0, str(ROOT / 'vendor/gh-inference'))
                         from gh_ai_runner import Agent, GitHubAIRunner
@@ -109,7 +127,7 @@ class Executor:
                             save(self.folder / 'last-job.json', {'role': role, 'job': str(getattr(job, 'run_id', 'unknown')), 'note': 'Inspect runner Actions before retrying; timed-out remote jobs may still be running.'})
                             raise
                         diagnostic = asdict(agent.last_result)
-                    cached = {'role': role, 'model': model, 'output': output, 'diagnostic': diagnostic,
+                    cached = {'role': role, 'model': diagnostic.get('model',model), 'output': output, 'diagnostic': diagnostic,
                               'seconds': round(time.monotonic() - started, 3), 'digest': digest}
                     save(path, cached)
                 event('model_returned','Model response received; validating before acceptance',role=role,seconds=cached.get('seconds'),usage=cached['diagnostic'].get('usage'),timings=cached['diagnostic'].get('timings'),weights_reused=cached['diagnostic'].get('model_reused'),finish_reason=cached['diagnostic'].get('finish_reason'))
@@ -119,7 +137,7 @@ class Executor:
                     before=judgment_signature(repair_output)
                     if before is not None and before!=judgment_signature(cached['output']):
                         raise ContractError('Formatting repair changed editorial judgments; rejected.')
-                parsed = parse_json(cached['output']) if validator else cached['output']
+                parsed = parse_json(cached['output']) if validator and output_format=='json' else cached['output']
                 if validator:
                     if isinstance(parsed,dict) and isinstance(parsed.get('checks'),dict):
                         parsed['checks']=[dict(check,id=key) for key,check in parsed['checks'].items()]

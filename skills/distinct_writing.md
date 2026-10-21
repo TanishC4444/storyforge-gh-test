@@ -72,3 +72,40 @@ deliberate style. Shorten a padded passage when scene length is guidance. If the
 structural problem cannot be fixed within that authority, leave it for the
 structural review and repair stage; do not camouflage it with prettier language.
 No minimum percentage of changes is required.
+
+## Structural distinctness and narrative necessity
+
+Before polishing a scene, identify what changes: a character's available action,
+material resources, exposure, relationship, obligation, or belief. A sentence may
+serve action, perception, temporal/spatial orientation, pressure, characterization,
+or an earned image. Remove commentary that merely announces the importance of
+what the scene already shows. Meaning is not a requirement for constant plot;
+a pause or ordinary task may expose a value or make later loss specific.
+
+Check the entire progression before editing local paragraphs. Do not reacquire an
+object already possessed, renegotiate a completed bargain, stage the same council
+twice, or import an earlier scene's dialogue as a new event. Preserve genuinely
+consequential unresolved conflicts rather than repeating their wording.
+
+Never copy a neighboring paragraph into its replacement. Cut accidental duplicated
+sentences, paragraphs, and near-identical beats. Intentional epic repetition must
+change its situation or consequence. A recurring epithet alone does not make a
+scene Homeric. Remove raw JSON, prompt phrases, scene-function summaries, Markdown
+headings, and statements that a local climax has occurred; dramatize the action.
+
+Deep revision may rebuild a whole causal sequence where sentence-level repairs
+cannot make a choice earned. Preserve established facts and constraints, but
+change the order of disclosure, the tactic, resistance, physical action, and
+consequences. Record structural proposals separately until the revised prose is
+reviewed. Never equate a high edit percentage with literary improvement.
+
+For a third-person/no-dialogue brief: no quoted speech, no first-person narrator,
+no direct address to Muse or reader, no unquoted speeches disguised as narration.
+Use third-person focalized perception and narrated decisions. Render negotiations
+through concrete offers, withheld objects, arrangements, witnessed commitments,
+and their consequences. Do not convert every speech into 'he explained that'.
+Maintain ancient social values and material experience without ornamental archaism.
+
+A final scene must pay off a previously established physical limitation and a
+character's costly decision on the page. Return to specific custody, bodily cost,
+or obligation afterward; do not end by explaining the moral or promising an epic.

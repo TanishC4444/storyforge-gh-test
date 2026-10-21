@@ -1,0 +1,495 @@
+{
+  "min_words_ratio": 0.75,
+  "max_words_ratio": 1.3,
+  "auto_approve_plan": true,
+  "max_repairs": 1,
+  "max_stage_retries": 1,
+  "runner_repo": "storyforge-inference-runner",
+  "length_policy": {
+    "scene_words": "guidance",
+    "chapter_words": "target",
+    "allow_compression": true,
+    "policy": "850 words is a planning estimate. Expand through action, negotiation, and consequences; never pad a repeated discovery to reach a minimum."
+  },
+  "project_id": "troy-narrative-api",
+  "title": "The Fire Beneath the Bronze",
+  "brief_version": 2,
+  "medium": "short_story",
+  "chapters": 1,
+  "scenes_per_chapter": 4,
+  "words_per_scene": 850,
+  "context_chars": 48000,
+  "n_ctx": 16384,
+  "profile": "fast",
+  "retrieval_mode": "hybrid",
+  "retrieval_query": "Iliad heroic honor divine gift competing authority mortal vulnerability supplication war",
+  "genre": "Mythic war epic; tragic alternate Trojan continuity",
+  "reader_experience": "Wonder, anticipation, competing loyalties, martial terror and a costly local victory that opens a larger epic.",
+  "pov": "Strict third-person past tense, focalized through one designated character per scene. No dialogue, quoted speech, first-person narrator, invocation, or direct address. Narrated commitments and action carry negotiation. No character acquires narrator-only knowledge.",
+  "tone_mood": "Grave and martial, with tenderness in concrete duties; wonder before divine craft and unease beneath victory. No modern sarcasm or action-film triumphalism.",
+  "sensory_detail": "Concrete material detail perceived through ancient experience: bronze, sea, wool, ash, labor, bodies and weather.",
+  "ending_tendency": "Resolve acquisition and first deployment, not the Trojan War. End on a concrete changed obligation, not a moral summary.",
+  "premise": "After nine years before Troy, in the tenth campaigning season, the Achaeans remain unable to take the city. Hector and Achilles live. Following a storm, a smith and Odysseus investigate a damaged divine object, undertake an expedition, bargain for a small finite cache of firearms made by Hephaestus, and bring it back. Rival leaders debate its use; a crisis forces the first constrained deployment. Tell exactly four developed scenes: discovery without possession; expedition and costly acquisition; trial and contested counsel; first battle use and local climax. This is the opening movement of a larger alternate Trojan epic, not the fall of Troy. The weapons must be earned through buildup. Use elevated English shaped by Homeric epic and an ancient social imagination throughout. RETELL FROM SCRATCH: purely third person, no dialogue, no invocation. Four developed scenes, not a summary. Material causality and costly decisions carry character depth.",
+  "keywords": [
+    {
+      "term": "heroic honor versus impersonal killing",
+      "kind": "tension",
+      "priority": 3
+    },
+    {
+      "term": "divine gift with an unequally distributed cost",
+      "kind": "conflict",
+      "priority": 3
+    },
+    {
+      "term": "authority versus practical knowledge",
+      "kind": "conflict",
+      "priority": 3
+    },
+    {
+      "term": "glory and mortal vulnerability",
+      "kind": "theme",
+      "priority": 3
+    },
+    {
+      "term": "loyalty to comrades versus obedience to a king",
+      "kind": "tension",
+      "priority": 2
+    },
+    {
+      "term": "extended epic simile",
+      "kind": "technique",
+      "priority": 2
+    },
+    {
+      "term": "supplication and refused counsel",
+      "kind": "technique",
+      "priority": 2
+    }
+  ],
+  "retrieval_weights": {
+    "semantic_similarity": 0.6,
+    "keyword_match": 0.15,
+    "narrative_mechanism_match": 0.25
+  },
+  "reference_policy": "Pin Iliad analysis work_136 as primary. Supplement only when it serves an actual gap. This is alternate continuity, not an episode narrated by Homer. Analyses alone are not authority for exact historical facts; preserve source limitations. No modern translation passages.",
+  "references": [
+    {
+      "record_id": "work_136",
+      "scope": "story",
+      "purpose": "Primary spinoff source: preserve the Achaean coalition, recognizable relationships, honor, gifts, kinship, burial, supplication, divine involvement, mortal vulnerability, and Homeric narrative rhetoric. Transfer conflicts and social imagination, not famous scenes with guns substituted.",
+      "do_not_borrow": [
+        "Modern translation wording",
+        "Events incompatible with the explicit divergence",
+        "Claimed precise chronology unsupported by source context"
+      ]
+    }
+  ],
+  "adaptation": {
+    "strength": 0.9,
+    "mode": "structural_echo",
+    "relationship": "alternate-continuity spinoff",
+    "max_active_sources_per_scene": 1,
+    "preserve_user_choices": true,
+    "primary_source_id": "work_136",
+    "preserve": [
+      "Recognizable principal relationships and ancient social values",
+      "Hector and Achilles alive in this installment",
+      "War not resolved"
+    ],
+    "divergence": "Greeks earn access to firearms from a hidden workshop of Hephaestus during the tenth campaigning season.",
+    "interpretation": "Strong source influence and pinned source selection; strength is guidance, not a measured borrowed percentage."
+  },
+  "style": {
+    "narrator": "Strict third-person past tense, focalized through one designated character per scene. No dialogue, quoted speech, first-person narrator, invocation, or direct address. Narrated commitments and action carry negotiation. No character acquires narrator-only knowledge.",
+    "register": "Concrete, grave, musical ancient epic in intelligible English. Use material acts, reciprocal obligation, shame and rank; no stock modern cinematic gestures.",
+    "wording": [
+      "Recurring epithets at meaningful moments; avoid attaching one to every name.",
+      "Period-fitting names: unfamiliar iron object, then iron tubes or fire-bearing tubes; keep naming consistent. No modern military vocabulary.",
+      "Ancient measures and experiences; no modern technical or psychological vocabulary.",
+      "Contemporary English grammar shaped by ancient epic; no indiscriminate thee/thou or faux-biblical filler.",
+      "Gods and human motives intertwine, while choices retain consequences.",
+      "No quotation or close reproduction of a modern translation."
+    ],
+    "figurative_language": {
+      "density": "moderate",
+      "devices": [
+        "extended epic simile",
+        "recurring epithet"
+      ],
+      "image_domains": [
+        "shepherding",
+        "harvest",
+        "storms",
+        "wild animals",
+        "weaving",
+        "shipbuilding",
+        "smithwork"
+      ],
+      "guidance": "Roughly one extended comparison per scene when earned, no mandatory quota. Let its image develop before returning to action. No modern image domains or continuous ornament."
+    },
+    "interiority": "Selective focalized thought tied to a practical choice, remembered obligation or fear of a specific loss; no abstract emotional labels.",
+    "dialogue": "Forbidden: no direct or quoted speech. Do not turn speeches into repetitive reported explanations.",
+    "explanation": "Cut explanations that merely restate legible action. Preserve purposeful epic repetition, ceremonial speech, lyricism and similes."
+  },
+  "characters": [
+    {
+      "id": "odysseus",
+      "name": "Odysseus",
+      "goal": "Obtain an advantage that can end the siege and return his men home.",
+      "value": "Practical survival and effective counsel.",
+      "fear": "Returning with neither victory nor the men entrusted to him.",
+      "habitual_strategy": "Ask, test, bargain and reveal only what wins cooperation.",
+      "limits": "He cannot anticipate divine intentions or command every king.",
+      "voice": "Measured persuasion through concrete examples and carefully limited promises.",
+      "arc": {
+        "starting_belief": "A useful advantage can be mastered through foresight.",
+        "old_strategy": "Ask, test, bargain and reveal only what wins cooperation.",
+        "pressure_test": "The bargain binds him to an obligation he cannot safely disclose.",
+        "costly_choice": "Authorize first use despite a limitation he understands.",
+        "possible_change": "Gaining possession is different from controlling consequences."
+      },
+      "contradiction": {
+        "tension": "He sees the costs hidden in heroic boasting while concealing the costs of his own bargains."
+      },
+      "emotional_behavior": {
+        "under_pressure": "Becomes exact about names, objects and promises."
+      },
+      "voice_design": {
+        "register": "Measured persuasion through concrete examples and carefully limited promises.",
+        "examples": [
+          "Let the thing be tried before the kings divide its honor.",
+          "I pledged what was mine to pledge; ask me now what remains."
+        ]
+      },
+      "source_status": "Principal character adapted from Trojan epic"
+    },
+    {
+      "id": "agamemnon",
+      "name": "Agamemnon",
+      "goal": "Turn the discovery into victory under his authority.",
+      "value": "Visible privileges and obligations of kingship.",
+      "fear": "The army discovering it can succeed without him.",
+      "habitual_strategy": "Distribute honors, assert ownership and make public commitments costly to withdraw.",
+      "limits": "Depends on skilled men and allies he cannot simply replace.",
+      "voice": "Public declarative speech concerned with rank and what each man owes.",
+      "arc": {
+        "starting_belief": "Possession and command are the same.",
+        "old_strategy": "Distribute honors, assert ownership and make public commitments costly to withdraw.",
+        "pressure_test": "The weapons depend on skill and consent below his rank.",
+        "costly_choice": "Accept a public condition limiting his authority.",
+        "possible_change": "Win apparent control while creating a new dependency."
+      },
+      "contradiction": {
+        "tension": "Must protect a coalition whose strongest members he treats as rivals."
+      },
+      "emotional_behavior": {
+        "under_pressure": "Turns a practical challenge into a question of rank."
+      },
+      "voice_design": {
+        "register": "Public declarative speech concerned with rank and what each man owes.",
+        "examples": [
+          "Who keeps the ships together when each lord claims his own road home?",
+          "Let the smith speak of iron; the burden of command is mine."
+        ]
+      },
+      "source_status": "Principal character adapted from Trojan epic"
+    },
+    {
+      "id": "achilles",
+      "name": "Achilles",
+      "goal": "Preserve meaningful honor and protect his companions.",
+      "value": "Deeds for which a man answers with his own body.",
+      "fear": "Fame assigned by a king while its cost falls on others.",
+      "habitual_strategy": "Make the concealed insult or cost explicit and demand an answer.",
+      "limits": "Cannot protect every companion; cannot oppose aid without exposing others.",
+      "voice": "Direct forceful speeches, extended comparisons when bargaining fails.",
+      "arc": {
+        "starting_belief": "The weapon diminishes the worth of the warrior.",
+        "old_strategy": "Make the concealed insult or cost explicit and demand an answer.",
+        "pressure_test": "Refusal of its aid exposes men he loves.",
+        "costly_choice": "Enter immediate danger to protect operators of a weapon he opposed.",
+        "possible_change": "His objection survives but can no longer remain abstract."
+      },
+      "contradiction": {
+        "tension": "Condemns distance from danger despite exceptional advantages of his own."
+      },
+      "emotional_behavior": {
+        "under_pressure": "Anger sharpens speech; affection appears through protection, gifts and attention."
+      },
+      "voice_design": {
+        "register": "Direct forceful speeches, extended comparisons when bargaining fails.",
+        "examples": [
+          "Will the man who names the prize stand where its price is paid?",
+          "Bring him behind my shield; contend for honor when he breathes."
+        ]
+      },
+      "source_status": "Principal character adapted from Trojan epic"
+    },
+    {
+      "id": "hector",
+      "name": "Hector",
+      "goal": "Prevent a local Greek advantage from becoming a breach.",
+      "value": "Troy and the obligations of its defender.",
+      "fear": "Failing those who cannot leave the city.",
+      "habitual_strategy": "Observe, rally and commit himself where fear threatens cohesion.",
+      "limits": "Does not know the weapons before witnessing their effects.",
+      "voice": "Commands and appeals rooted in family, city and shared duty.",
+      "arc": {
+        "starting_belief": "Enemy strength can be judged through familiar signs.",
+        "old_strategy": "Observe, rally and commit himself where fear threatens cohesion.",
+        "pressure_test": "A visible fighter falls without a recognizable spear or arrow.",
+        "costly_choice": "Yield a position to preserve men despite public shame.",
+        "possible_change": "Begin adapting without knowing what the Greeks possess."
+      },
+      "contradiction": {
+        "tension": "Need to appear steadfast makes necessary withdrawal difficult."
+      },
+      "emotional_behavior": {
+        "under_pressure": "Answers uncertainty with concrete tasks before private doubt."
+      },
+      "voice_design": {
+        "register": "Commands and appeals rooted in family, city and shared duty.",
+        "examples": [
+          "Keep the wounded between the shields; the road is not yet lost.",
+          "You have seen a man fall. You have not seen the city taken."
+        ]
+      },
+      "source_status": "Principal character adapted from Trojan epic"
+    },
+    {
+      "id": "thestor",
+      "name": "Thestor",
+      "goal": "Secure passage for his surviving apprentice and wages owed to their household.",
+      "value": "Responsibility for work and dependents.",
+      "fear": "A king demanding certainty from craft he has barely understood.",
+      "habitual_strategy": "Demonstrate a physical fact when rank makes an argument easy to dismiss.",
+      "limits": "Mortal smith, no instant mastery or ability to reproduce divine craft.",
+      "voice": "Concrete and restrained before kings, less guarded with his apprentice.",
+      "arc": {
+        "starting_belief": "Useful knowledge can purchase safety.",
+        "old_strategy": "Demonstrate a physical fact when rank makes an argument easy to dismiss.",
+        "pressure_test": "Discovery makes him necessary and prevents departure.",
+        "costly_choice": "Reveal a dangerous limitation before deployment, risking punishment.",
+        "possible_change": "Gain a voice in council at the cost of being bound to the weapon."
+      },
+      "contradiction": {
+        "tension": "Resents concealment by leaders but initially hides what makes him indispensable."
+      },
+      "emotional_behavior": {
+        "under_pressure": "Checks tools or another person’s equipment when frightened."
+      },
+      "voice_design": {
+        "register": "Concrete and restrained before kings, less guarded with his apprentice.",
+        "examples": [
+          "My lord, the iron has endured one trial. I have promised no second.",
+          "The passage was paid for. Tell me whose word can take it back."
+        ]
+      },
+      "source_status": "Invented minor character"
+    }
+  ],
+  "world_rules": [
+    "Hephaestus made the weapons for a divine purpose. A particular grievance and bargain explain access; no arbitrary delivery from the sky.",
+    "Scene 1 provides only an anomalous damaged object and grounds for an expedition: NO usable gun, possession, demonstration or battlefield firing.",
+    "Scene 2 must earn the cache through an on-page journey, resistance, bargain and physical transport. The keeper has a motive beyond exposition.",
+    "Cache: exactly six cumbersome single-shot weapons, with a finite supply of prepared charges explicitly fixed at acquisition. No resupply or reproduction within this arc.",
+    "Deliberate preparation, smoke, noise, imperfect aim and wet-weather failures limit use. Possession does not guarantee a hit or victory.",
+    "Describe operation only enough to understand action and failure. Omit construction recipes and technical instructions.",
+    "No modern industry, tactical jargon, technical units or modern worldview. Men interpret unfamiliar craft through their ancient experience.",
+    "Divine aid never grants perfect knowledge, unlimited supplies or immunity. A god cannot retroactively cancel an established cost.",
+    "Odysseus accepts an obligation to restore a neglected sacred trust and acknowledge the maker. Specify a future concrete vulnerability; no gratuitous sacrifice of an innocent.",
+    "Agamemnon claims the cache but depends on skilled men and coalition consent. Achilles cannot be silenced by invoking the common cause.",
+    "Trojans observe, infer and adapt plausibly; no instant knowledge of operation or inventory.",
+    "Track each weapon, custodian, condition, remaining charges, travel, wounds, witnessed facts and private bargains.",
+    "End in a costly local Greek success, NOT Troy’s fall. Hector and Achilles survive; larger political and divine conflicts remain open."
+  ],
+  "world_design": {
+    "technology": [
+      "Cache: exactly six cumbersome single-shot weapons, with a finite supply of prepared charges explicitly fixed at acquisition. No resupply or reproduction within this arc.",
+      "Deliberate preparation, smoke, noise, imperfect aim and wet-weather failures limit use. Possession does not guarantee a hit or victory.",
+      "Describe operation only enough to understand action and failure. Omit construction recipes and technical instructions.",
+      "No modern industry, tactical jargon, technical units or modern worldview. Men interpret unfamiliar craft through their ancient experience."
+    ],
+    "institutions": [
+      "Achaean coalition of rival kings; command does not erase obligations or consent.",
+      "Gifts, honor, kinship, burial, supplication and divine favor organize decisions.",
+      "A low-status smith has indispensable skill but little freedom."
+    ],
+    "physical_systems": [
+      "Greek shore and ships, storm-damaged coast, concealed coastal forge, trial ground and contested approach to Troy.",
+      "Travel, carrying and weather consume time. Weapons have visible material limits."
+    ],
+    "deadlines": [
+      "A Trojan movement becomes known in scene 3, creating a narrow opportunity in scene 4.",
+      "The divine obligation receives its first concrete demand after deployment, not retroactively before its terms exist."
+    ],
+    "divine_framework": [
+      "Hephaestus made the weapons for a divine purpose. A particular grievance and bargain explain access; no arbitrary delivery from the sky.",
+      "Divine aid never grants perfect knowledge, unlimited supplies or immunity. A god cannot retroactively cancel an established cost.",
+      "Odysseus accepts an obligation to restore a neglected sacred trust and acknowledge the maker. Specify a future concrete vulnerability; no gratuitous sacrifice of an innocent."
+    ],
+    "source_continuity": "Tenth campaigning season before principal Iliad deaths; this new sequence is explicit alternate continuity, not a claimed canonical event."
+  },
+  "plot_design": {
+    "central_question": "What becomes of heroic honor when a man of little standing can strike down a champion beyond spear reach?",
+    "arc_question": "Will the Greeks obtain and use the weapons, and who bears the cost?",
+    "causal_dependencies": [
+      "Storm object motivates credible inquiry and expedition.",
+      "Journey and binding bargain earn finite possession.",
+      "Trial establishes capabilities and ALL limitations later used in the climax.",
+      "Coalition struggle imposes deployment conditions; Trojan movement forces a choice.",
+      "Partial success and an established failure require personal exposure; local victory creates political and divine obligations."
+    ],
+    "subplots": [
+      {
+        "id": "smith-freedom",
+        "owner": "thestor",
+        "question": "Will skill secure household freedom or bind him more tightly to the army?",
+        "independent_action": "Seek passage and withheld wages before discovery.",
+        "intersection": "Kings prevent departure once his knowledge becomes necessary.",
+        "removal_cost": "Without it the social cost is only a debate among powerful men."
+      },
+      {
+        "id": "honor-command",
+        "owner": "achilles",
+        "question": "Who earns honor and who faces danger in a victory enabled by unfamiliar craft?",
+        "independent_action": "An existing dispute with Agamemnon shapes response before the trial.",
+        "intersection": "Deployment conditions force Achilles to risk his own body.",
+        "removal_cost": "Without it acquisition faces implausibly little internal resistance."
+      }
+    ],
+    "alternatives_and_costs": [
+      "Abandon expedition: siege and household losses continue.",
+      "Acquire and refuse use: preserve one moral position while exposing comrades to a known danger.",
+      "Demonstrate without battle use: reveals possession without securing the threatened position.",
+      "Keep alternatives plausible; choices and specific pressure close them, not invented automatic consequences."
+    ],
+    "local_resolution": "Cache acquired; first deployment secures a contested position at irreversible human cost.",
+    "unresolved": [
+      "Hector seeks the weapons’ limits.",
+      "Agamemnon claims greater control.",
+      "Odysseus receives a concrete demand from the bargain.",
+      "Thestor’s household remains bound to the army."
+    ]
+  },
+  "scene_designs": [
+    {
+      "id": "ch01-sc01",
+      "title": "What the Sea Returned",
+      "location": "Achaean shore and smiths’ shelters after a storm",
+      "setting": "Ordinary work, damaged ships and a household trying to leave.",
+      "dramatic_function": "Earn curiosity through material evidence and conflicting needs.",
+      "participants": [
+        "thestor",
+        "odysseus"
+      ],
+      "pov": "thestor",
+      "development": "Thestor repairs fittings while seeking passage. A damaged unfamiliar object resists explanation; maker’s marks and Odysseus’s knowledge point to a neglected coastal sanctuary.",
+      "choice_and_consequence": "Thestor reveals enough to secure an expedition though it delays departure. Odysseus commits time and men.",
+      "restrictions": "No usable firearm, trial, battle use or complete understanding. Expedition needs a reason stronger than curiosity."
+    },
+    {
+      "id": "ch01-sc02",
+      "title": "The Price at the Forge",
+      "location": "Concealed coastal sanctuary reached by a difficult journey",
+      "setting": "Travel, resistance and a keeper guarding a divine purpose.",
+      "dramatic_function": "Earn access through a costly bargain and physical acquisition.",
+      "participants": [
+        "odysseus",
+        "thestor"
+      ],
+      "pov": "odysseus",
+      "development": "The keeper demonstrates one weapon only after the travelers establish their claim, then refuses possession without a binding restoration and acknowledgment obligation.",
+      "choice_and_consequence": "Odysseus binds himself, conceals part of the price and brings back six weapons plus a fixed finite charge supply.",
+      "restrictions": "Spend substantial scene space acquiring and transporting the cache. Keeper must want something. No infinite supply."
+    },
+    {
+      "id": "ch01-sc03",
+      "title": "The Counsel Beside the Ships",
+      "location": "Secluded trial ground, then the Achaean council",
+      "setting": "Public rank meets unreliable physical evidence.",
+      "dramatic_function": "Make possession a conflict over use, authority and who faces danger.",
+      "participants": [
+        "agamemnon",
+        "odysseus",
+        "achilles",
+        "thestor"
+      ],
+      "pov": "achilles",
+      "development": "A trial shows power and established failures; competing physical claims pursue different aims. Thestor learns that indispensable knowledge blocks departure.",
+      "choice_and_consequence": "Authorize limited deployment with explicit conditions and personal exposure. A Trojan movement makes delay costly.",
+      "restrictions": "No unanimous conversion by a speech. Establish every limitation used in the climax. Maintain third-person epic language during practical work."
+    },
+    {
+      "id": "ch01-sc04",
+      "title": "The First Thunder",
+      "location": "Contested approach between Greek defenses and Trojan fighting line",
+      "setting": "Operators prepare under exposure; Trojans respond to unfamiliar effects.",
+      "dramatic_function": "Local climax: constrained first deployment, costly choice, consequential aftermath.",
+      "participants": [
+        "achilles",
+        "hector",
+        "thestor",
+        "odysseus"
+      ],
+      "pov": "achilles",
+      "development": "First use succeeds only partly. Noise and wounds disrupt Trojans; an established failure exposes the Greek operators. Hector observes and orders withdrawal rather than surrendering to rout.",
+      "choice_and_consequence": "Achilles enters danger to protect operators he opposed. Thestor chooses between equipment and a dependent. Greeks secure the position; a specific irreversible loss follows an established limitation and human decision.",
+      "restrictions": "Hector and Achilles survive. No massacre or fall of Troy. Mark any Trojan focal shift. End on a concrete obligation or action, not a moral explanation."
+    }
+  ],
+  "must_avoid": [
+    "Modern diction or modern psychological frameworks.",
+    "Modern translation quotation or close imitation of a particular translation.",
+    "Handwaved acquisition, immediate complete understanding, unlimited ammunition.",
+    "Repeated discovery scenes, decorative speeches without competing aims.",
+    "Explaining already legible gestures or declaring that war changed forever.",
+    "Removing ceremonial speech, earned similes or purposeful epic repetition merely to modernize prose.",
+    "Resolving the whole Trojan War or killing Hector or Achilles."
+  ],
+  "initial_facts": [
+    {
+      "text": "After nine years, the Achaean coalition remains outside Troy; Hector and Achilles live. No Greek possesses or understands the unfamiliar weapons at the opening.",
+      "known_by": [
+        "public"
+      ]
+    },
+    {
+      "text": "Thestor seeks wages and passage for his surviving apprentice. He is a mortal smith, not master of divine craft.",
+      "known_by": [
+        "thestor"
+      ]
+    },
+    {
+      "text": "Agamemnon commands a coalition of rival lords; Achilles and he have strained relations over honor.",
+      "known_by": [
+        "public"
+      ]
+    }
+  ],
+  "execution_intent": {
+    "authorized": "User explicitly requested launch",
+    "workflow": "Dedicated four-scene, one-chapter live run",
+    "no_prior_run_restart": true
+  },
+  "execution_policy": {
+    "continue_with_warnings": true
+  },
+  "performance": {
+    "targeted_edits": true,
+    "combine_direction": true
+  },
+  "api_roles": {
+    "refiner": "flash",
+    "architect": "flash",
+    "character": "gemma",
+    "writer": "gemma",
+    "humanizer": "gemma",
+    "story_quality": "gemma",
+    "rhetoric_quality": "gemma",
+    "memory": "gemma",
+    "memory_quality": "gemma",
+    "chapter_quality": "flash"
+  }
+}
