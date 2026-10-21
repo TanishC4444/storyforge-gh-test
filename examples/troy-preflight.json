@@ -1,29 +1,29 @@
 {
   "fixture_only": true,
-  "real_hybrid_retrieval": true,
+  "real_hybrid_retrieval": false,
   "accepted_fixture_scenes": 4,
   "chapters": 1,
-  "max_fixture_packet_characters": 46344,
+  "max_fixture_packet_characters": 45783,
   "largest_packets": [
     {
       "role": "chapter_quality",
-      "characters": 46344
-    },
-    {
-      "role": "architect",
-      "characters": 34177
+      "characters": 45783
     },
     {
       "role": "story_quality",
-      "characters": 33661
+      "characters": 37298
     },
     {
       "role": "story_quality",
-      "characters": 33661
+      "characters": 37272
     },
     {
       "role": "story_quality",
-      "characters": 33661
+      "characters": 34413
+    },
+    {
+      "role": "writer",
+      "characters": 28507
     }
   ],
   "primary_source": "The Iliad (Homer)",
@@ -33,5 +33,6 @@
     "narrative_mechanism_match": 0.25
   },
   "stress_prose_words_per_scene": 1400,
-  "warning": "Synthetic 1,400-word scenes test orchestration and character budgets, not literary quality or exact model token counts."
+  "warning": "Synthetic stress prose tests orchestration and context-character budgets, not exact token counts or literary quality.",
+  "retrieval": "Reused the saved real hybrid retrieval and validated creative brief from the recovery seed."
 }

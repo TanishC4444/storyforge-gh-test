@@ -38,6 +38,7 @@ def respond(role, packet, req):
     if role == 'director':
         return 'Inspect the latch; ask for access; cooperate on a practical check.'
     if role == 'humanizer':
+        if 'paragraphs' in packet:return json.dumps({'replacements':{p['id']:p['original'] for p in packet['paragraphs']}})
         return packet['prose']
     if role == 'writer':
         card = packet.get('scene', packet.get('context', {}).get('scene', {}))

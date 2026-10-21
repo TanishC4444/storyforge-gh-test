@@ -34,7 +34,7 @@ def request(value):
         require(type(value[name]) in (int, float) and .1 <= value[name] <= 3, f'Invalid {name}')
     require(value['min_words_ratio'] <= value['max_words_ratio'], 'Invalid length range')
     value.setdefault('profile', 'balanced')
-    require(value['profile'] in {'balanced', 'expressive', 'small'}, 'Unknown profile')
+    require(value['profile'] in {'balanced', 'expressive', 'small','fast'}, 'Unknown profile')
     value.setdefault('retrieval_mode', 'keyword')
     require(value['retrieval_mode'] in {'keyword', 'hybrid'}, 'Unknown retrieval mode')
     value.setdefault('auto_approve_plan', False)

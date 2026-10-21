@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PROFILES = {
     'balanced': {'default': 'gemma-4-12b', 'writer': 'gemma-4-12b', 'humanizer': 'gemma-4-12b'},
     'expressive': {'default': 'gemma-4-12b', 'writer': 'glitter-12b', 'humanizer': 'gemma-4-12b', 'development_editor':'qwen3b', 'character':'qwen3b', 'memory':'qwen3b', 'memory_quality':'qwen3b', 'director':'qwen3b', 'scene_designer':'qwen3b'},
+    'fast': {'default':'qwen3b','writer':'qwen7b','humanizer':'qwen3b','story_quality':'qwen7b','rhetoric_quality':'qwen3b','chapter_quality':'qwen3b'},
     'small': {'default': 'qwen3b', 'writer': 'qwen3b', 'humanizer': 'qwen3b'},
 }
 
@@ -64,7 +65,8 @@ class Executor:
             if len(system) + len(prompt) > self.req['context_chars']:
                 raise ContractError(f'{role} context exceeds character budget; reduce inputs or restart with a larger tested budget. No silent truncation.')
             model = PROFILES[self.req['profile']].get(role, PROFILES[self.req['profile']]['default'])
-            n_ctx=min(self.req['n_ctx'],8192) if model=='qwen3b' else self.req['n_ctx']
+            if last_error and role in {'writer','architect'} and self.req['profile']=='fast':model='qwen3b'
+            n_ctx=min(self.req['n_ctx'],8192) if model=='qwen3b' and role not in {'writer','architect','chapter_quality'} else self.req['n_ctx']
             digest = hashlib.sha256(json.dumps([self.backend, role, model, system, prompt, tokens, n_ctx, self.req['runner_repo'], response_schema]).encode()).hexdigest()
             path = self.folder / 'calls' / f'{role}-{digest[:20]}.json'
             save(self.folder / 'packets' / f'{role}-{digest[:20]}.json', {'role': role, 'model': model, 'system': system, 'input': packet, 'validation_error': last_error, 'max_tokens': tokens, 'n_ctx': n_ctx,'response_schema':response_schema,'format_repair_only':bool(last_error and response_schema)})
@@ -121,8 +123,21 @@ class Executor:
                     raise ContractError('Empty output')
                 event('validated','Response passed format and source validation',role=role,passed=parsed.get('pass') if isinstance(parsed,dict) else None,issues=len(parsed.get('issues',[])) if isinstance(parsed,dict) else 0,words=len(parsed.split()) if isinstance(parsed,str) else None)
                 return parsed
-            except ContractError as exc:
+            except Exception as exc:
                 event('validation_failed','Response rejected: '+str(exc),role=role,next_action='Bounded retry' if attempt<self.req['max_stage_retries'] else 'Stop; no canon update')
                 last_error = str(exc)
                 repair_output = cached.get('output') if cached else None
+        from .resilience import enabled, warning, unavailable
+        if enabled(self.req) and role=='character':
+            warning(self.folder,'character_proposal_unavailable',last_error)
+            return 'No proposal available. Do not infer a new action from this missing proposal.'
+        if enabled(self.req) and role=='scene_designer':
+            warning(self.folder,'scene_design_fallback',last_error)
+            candidate=dict(packet['proposed_scene'])
+            for key in ['choice','consequence','new_development']:candidate.setdefault(key,candidate.get('intended_change','Continue the user-specified scene.'))
+            candidate.setdefault('reference_uses',[])
+            return validator(candidate) if validator else candidate
+        if enabled(self.req) and role in {'story_quality','rhetoric_quality','chapter_quality','memory_quality','development_editor'}:
+            warning(self.folder,'review_unavailable',last_error)
+            return unavailable(last_error)
         raise ContractError(f'{role} failed after bounded retries: {last_error}')

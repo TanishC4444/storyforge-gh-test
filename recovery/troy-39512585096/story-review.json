@@ -1,0 +1,219 @@
+{
+  "pass": false,
+  "checks": [
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p015",
+        "p018",
+        "p020"
+      ],
+      "reason": "The scene successfully transitions from a state of 'mysterious debris' to 'identified divine artifact,' establishing a specific expedition goal (the sanctuary) and a formal bargain.",
+      "id": "scene_change",
+      "source_spans": [
+        {
+          "id": "p015",
+          "start": 3477,
+          "end": 3702
+        },
+        {
+          "id": "p018",
+          "start": 3844,
+          "end": 4068
+        },
+        {
+          "id": "p020",
+          "start": 4180,
+          "end": 4470
+        }
+      ]
+    },
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p020",
+        "p023",
+        "p025"
+      ],
+      "reason": "Thestor actively negotiates a specific trade: his knowledge and labor for the king's protection and his apprentice's freedom. He chooses to risk his safety by swearing on his craft.",
+      "id": "character_agency",
+      "source_spans": [
+        {
+          "id": "p020",
+          "start": 4180,
+          "end": 4470
+        },
+        {
+          "id": "p023",
+          "start": 4838,
+          "end": 4997
+        },
+        {
+          "id": "p025",
+          "start": 5320,
+          "end": 5535
+        }
+      ]
+    },
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p003",
+        "p013",
+        "p022"
+      ],
+      "reason": "Thestor's internal conflict between his duty to his apprentice (Meles) and his fear of the divine object is evident. Odysseus balances his curiosity with the pragmatic need to maintain control over the coalition's resources.",
+      "id": "character_depth",
+      "source_spans": [
+        {
+          "id": "p003",
+          "start": 683,
+          "end": 797
+        },
+        {
+          "id": "p013",
+          "start": 2955,
+          "end": 3206
+        },
+        {
+          "id": "p022",
+          "start": 4572,
+          "end": 4836
+        }
+      ]
+    },
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p022"
+      ],
+      "reason": "Thestor considers asking for wages directly but realizes the political impossibility of Agamemnon's treasury, forcing the pivot to a 'guarantee' of freedom.",
+      "id": "causal_alternatives",
+      "source_spans": [
+        {
+          "id": "p022",
+          "start": 4572,
+          "end": 4836
+        }
+      ]
+    },
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p019",
+        "p021"
+      ],
+      "reason": "Odysseus uses a 'test' tactic (questioning the smith's boldness) to gauge the truth of the claim before committing resources.",
+      "id": "dialogue_tactics",
+      "source_spans": [
+        {
+          "id": "p019",
+          "start": 4070,
+          "end": 4178
+        },
+        {
+          "id": "p021",
+          "start": 4472,
+          "end": 4570
+        }
+      ]
+    },
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p002",
+        "p015"
+      ],
+      "reason": "The scene correctly places the action immediately following a storm, with the ships still in a state of repair.",
+      "id": "continuity_clock",
+      "source_spans": [
+        {
+          "id": "p002",
+          "start": 178,
+          "end": 681
+        },
+        {
+          "id": "p015",
+          "start": 3477,
+          "end": 3702
+        }
+      ]
+    },
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p008",
+        "p010"
+      ],
+      "reason": "Thestor's knowledge is rooted in his personal history (Aetolia), while Odysseus's knowledge is contextualized as a 'forgotten sanctuary' he has heard of, not a divine revelation.",
+      "id": "pov_knowledge",
+      "source_spans": [
+        {
+          "id": "p008",
+          "start": 1719,
+          "end": 2091
+        },
+        {
+          "id": "p010",
+          "start": 2174,
+          "end": 2598
+        }
+      ]
+    },
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p003",
+        "p023"
+      ],
+      "reason": "The 'smith-freedom' subplot is advanced by establishing the specific terms of the bargain.",
+      "id": "subplot_function",
+      "source_spans": [
+        {
+          "id": "p003",
+          "start": 683,
+          "end": 797
+        },
+        {
+          "id": "p023",
+          "start": 4838,
+          "end": 4997
+        }
+      ]
+    },
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p001",
+        "p018"
+      ],
+      "reason": "The narrative maintains the Homeric register and the specific divergence of the divine craft without using modern terminology.",
+      "id": "reference_application",
+      "source_spans": [
+        {
+          "id": "p001",
+          "start": 0,
+          "end": 176
+        },
+        {
+          "id": "p018",
+          "start": 3844,
+          "end": 4068
+        }
+      ]
+    }
+  ],
+  "issues": [
+    {
+      "severity": "advisory",
+      "category": "character_depth",
+      "evidence_ids": [
+        "p024"
+      ],
+      "problem": "Odysseus's threat ('you will answer to me') is slightly generic for a character defined by 'measured persuasion.'",
+      "fix": "Refine the threat to be more specific to the political cost—e.g., mentioning the loss of his reputation or the king's wrath, rather than a vague 'answer to me'.",
+      "quote": "Odysseus considered his words for a moment. “A guarantee... that is a difficult thing to promise, Thestor. But I will see what I can do. I will speak with Agamemnon.” He paused, then added, “But understand this, smith: if what you say is false, if this is merely a trick to escape your duties... you will answer to me.”",
+      "quote_match": "exact"
+    }
+  ]
+}

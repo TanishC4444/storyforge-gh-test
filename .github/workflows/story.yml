@@ -10,7 +10,7 @@ on:
         description: Live inference executes inside these jobs, without child workflows
       profile:
         type: choice
-        options: [balanced, expressive, small]
+        options: [balanced, expressive, fast, small]
         default: balanced
       request_file:
         type: choice
@@ -52,7 +52,7 @@ jobs:
           import json, os, subprocess, sys
           from pathlib import Path
           request=json.loads(Path('examples',os.environ['STORY_REQUEST']+'.json').read_text())
-          if request.get('retrieval_mode')=='hybrid':
+          if request.get('retrieval_mode')=='hybrid' and not request.get('execution_policy',{}).get('resume_seed'):
               subprocess.run([sys.executable,'-m','pip','install','-e','.[rag]'],check=True)
           PY
       - name: Execute Prepare request and literary retrieval
@@ -7111,10 +7111,13 @@ jobs:
           for key,value in results.items():
               state=by_job.get(key,{})
               phase=state.get('phase','No task status; inspect setup/input steps' if value['result']=='failure' else value['result'])
+              if state.get('warnings_count'):phase+=' (%s warnings)'%state['warnings_count']
               rows.append('| %s | %s | %s | %s |'%(key,value['result'],phase,state.get('elapsed_seconds','—')))
           progress=[s.get('story_progress',{}) for s in statuses]
           accepted=max((p.get('accepted_scenes',0) for p in progress),default=0)
-          rows+=['','Accepted scenes: **%s**'%accepted]
+          rows+=['','Checkpointed scenes: **%s**'%accepted]
+          latest=max(progress,key=lambda p:p.get('accepted_scenes',0),default={})
+          rows+=['','Draft state: **%s**'%latest.get('completion_status','in_progress')]
           with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as summary:
               summary.write('\n'.join(rows)+'\n')
           print('Failed/cancelled jobs:', failed)

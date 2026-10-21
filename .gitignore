@@ -12,3 +12,5 @@ runs/
 *.db-shm
 .pytest_cache/
 model_cache/
+
+recovered/

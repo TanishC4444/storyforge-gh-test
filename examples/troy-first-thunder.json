@@ -3,7 +3,7 @@
   "max_words_ratio": 1.3,
   "auto_approve_plan": true,
   "max_repairs": 1,
-  "max_stage_retries": 2,
+  "max_stage_retries": 1,
   "runner_repo": "storyforge-inference-runner",
   "length_policy": {
     "scene_words": "guidance",
@@ -20,7 +20,7 @@
   "words_per_scene": 1400,
   "context_chars": 48000,
   "n_ctx": 16384,
-  "profile": "expressive",
+  "profile": "fast",
   "retrieval_mode": "hybrid",
   "retrieval_query": "Iliad heroic honor divine gift competing authority mortal vulnerability supplication war",
   "genre": "Mythic war epic; tragic alternate Trojan continuity",
@@ -477,5 +477,15 @@
     "authorized": "User explicitly requested launch",
     "workflow": "Dedicated four-scene, one-chapter live run",
     "no_prior_run_restart": true
+  },
+  "execution_policy": {
+    "continue_with_warnings": true,
+    "resume_seed": "recovery/troy-39512585096",
+    "purpose": "Finish an explicitly provisional draft while preserving unresolved verification and quality warnings."
+  },
+  "performance": {
+    "targeted_edits": true,
+    "combine_direction": true,
+    "reuse_saved_planning": true
   }
 }

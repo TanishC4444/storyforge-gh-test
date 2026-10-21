@@ -45,6 +45,8 @@ def lock(folder):
 def export(folder, state, req):
     folder = Path(folder)
     prefix = 'FIXTURE / PLUMBING TEST — NOT MODEL-GENERATED FICTION\n\n' if state['backend'] == 'fixture' else ''
+    if any(s.get('quality_status')=='needs_review' for s in state['accepted']):prefix+='PROVISIONAL DRAFT — unresolved quality or verification warnings; see editorial-report.json.\n\n'
+    save(folder/'editorial-report.json',{'completion_status':state.get('completion_status','in_progress'),'scenes':[{'id':s['id'],'quality_status':s.get('quality_status','reviewed'),'story':s.get('review'),'rhetoric':s.get('rhetoric_review'),'memory':s.get('memory_review'),'memory_extraction':s.get('memory_extraction')} for s in state['accepted']]})
     chapters = []
     for chapter in range(1, req['chapters'] + 1):
         scenes = [s for s in state['accepted'] if s['chapter'] == chapter]

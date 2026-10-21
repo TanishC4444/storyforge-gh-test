@@ -20,6 +20,7 @@ class Tracker:
         self.state={'task':task,'status':'running','phase':'starting','details':details,'model_calls_started':0,'model_calls_validated':0}
     def event(self,phase,message,**details):
         with self.lock:
+            if phase=='warning':self.state['warnings_count']=self.state.get('warnings_count',0)+1
             if phase=='state_loaded':self.state['story_progress']={'accepted_scenes':details.get('accepted_scenes',0),'total_scenes':details.get('planned_scenes'),'state_version':details.get('version')}
             if phase=='model_start':self.state['model_calls_started']+=1
             if phase=='validated':self.state['model_calls_validated']+=1
@@ -36,7 +37,7 @@ class Tracker:
         if snapshot.exists():
             value=load(snapshot)
             if 'request' in value:
-                self.state['story_progress']={'accepted_scenes':len(value.get('accepted',[])),'total_scenes':value['request']['chapters']*value['request']['scenes_per_chapter'],'state_version':value['version'],'complete':value.get('complete',False)}
+                self.state['story_progress']={'accepted_scenes':len(value.get('accepted',[])),'total_scenes':value['request']['chapters']*value['request']['scenes_per_chapter'],'state_version':value['version'],'complete':value.get('complete',False),'completion_status':value.get('completion_status','in_progress')}
         self.state['files']=[str(p.relative_to(self.folder)) for p in sorted(self.folder.rglob('*')) if p.is_file() and p.name not in {'status.json','events.jsonl'}]
         self.event(status,'Task completed' if status=='success' else 'Task failed; inspect error and saved artifacts',error=str(error) if error else None)
         self.summary()
@@ -44,6 +45,7 @@ class Tracker:
         target=os.getenv('GITHUB_STEP_SUMMARY')
         if not target:return
         rows=['### '+self.state['task'], '', '**Status:** '+self.state['status'],'','Elapsed: '+str(self.state.get('elapsed_seconds',0))+' seconds', '', 'Model calls started / validated: %s / %s'%(self.state['model_calls_started'],self.state['model_calls_validated'])]
+        rows+=['','Warnings: **'+str(self.state.get('warnings_count',0))+'**']
         if self.state.get('story_progress'):rows+=['','Story progress: `'+json.dumps(self.state['story_progress'])+'`']
         if self.state.get('error'):rows+=['','**Failure:** '+self.state['error'].replace('\n',' ')]
         events=[json.loads(x) for x in (self.folder/'events.jsonl').read_text().splitlines()]

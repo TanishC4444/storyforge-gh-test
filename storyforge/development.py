@@ -8,6 +8,7 @@ from .inference import ROOT
 from .retrieval import application_packet
 from .storage import save, load
 from .tracking import event
+from .resilience import enabled, warning, unavailable
 
 
 def document(state,kind):
@@ -47,13 +48,15 @@ def assess(executor,state,kind):
             tokens=1100,validator=lambda x,c=selected,g=group:resolve_review(x,data,c,g),response_schema=review_schema(selected,group))
         event('review_group_complete','Review group %s/%s finished'%(group_index,len(groups)),passed=result['pass'],issues=len(result['issues']))
         results.append(result)
+        if result.get('unverified'):return result
     return design_review({'pass':all(r['pass'] for r in results),'checks':[c for r in results for c in r['checks']],'issues':[i for r in results for i in r['issues']]},data)
 
 
 def development_stage(task,source,out,state,executor,plan_instruction,refine_instruction):
     kind='refine' if task.startswith('refine_') else 'plan'
     if task.endswith('_review'):
-        verdict=assess(executor,state,kind)
+        verdict=state.get('development_gates',{}).get(kind) if state.get('recovery',{}).get('reuse_planning') else None
+        verdict=verdict or assess(executor,state,kind)
         import hashlib,json
         state.setdefault('development_assessments',{})[kind]={'sha256':hashlib.sha256(json.dumps(document(state,kind),sort_keys=True).encode()).hexdigest(),'review':verdict}
         save(out/'review.json',verdict);save(out/'snapshot.json',state)
@@ -62,7 +65,7 @@ def development_stage(task,source,out,state,executor,plan_instruction,refine_ins
         verdict=load(source/'design-review/review.json')
         state.setdefault('development_history',[]).append({'kind':kind,'review':verdict})
         event('revision_decision','Revising design against failed checks' if not verdict['pass'] else 'Design passed; no revision model call',kind=kind,issues=len(verdict['issues']))
-        if not verdict['pass']:
+        if not verdict['pass'] and not verdict.get('unverified'):
             if kind=='refine':
                 candidate=executor.call('refiner',{'request':state['request'],'candidate':state['refinement'],'revision_requests':verdict['issues']},
                     refine_instruction+' Revise the candidate to address the development review; preserve explicit user choices and identify assumptions.',tokens=3600,validator=lambda x:contracts.refinement(x,state['request']))
@@ -81,7 +84,8 @@ def development_stage(task,source,out,state,executor,plan_instruction,refine_ins
         event('gate','Reusing unchanged passing review' if prior.get('sha256')==digest and prior.get('review',{}).get('pass') else 'Assessing revised candidate',kind=kind)
         verdict=prior['review'] if prior.get('sha256')==digest and prior.get('review',{}).get('pass') else assess(executor,state,kind)
         save(out/'review.json',verdict)
-        contracts.require(verdict['pass'],kind+' development review rejected after one revision; no story generation starts')
+        if not verdict['pass'] and enabled(state['request']):warning(out,'design_needs_review',kind+' design remains provisional')
+        else:contracts.require(verdict['pass'],kind+' development review rejected after one revision; no story generation starts')
         state.setdefault('development_gates',{})[kind]=verdict
         save(out/'snapshot.json',state)
         return state

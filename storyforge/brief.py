@@ -81,6 +81,9 @@ def validate(req, require):
             require(isinstance(subplot,dict) and subplot.get('owner') in valid_ids,'Subplot needs a valid owner')
             for key in ['id','question','intersection','removal_cost']:
                 require(isinstance(subplot.get(key),str) and bool(subplot[key].strip()),f'Subplot needs {key}')
+    for field in ['execution_policy','performance']:
+        require(isinstance(req.get(field,{}),dict),field+' must be an object')
+    if 'continue_with_warnings' in req.get('execution_policy',{}):require(type(req['execution_policy']['continue_with_warnings']) is bool,'Continuation policy must be boolean')
     return req
 
 

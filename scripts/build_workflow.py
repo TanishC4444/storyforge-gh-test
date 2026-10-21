@@ -17,7 +17,7 @@ on:
         description: Live inference executes inside these jobs, without child workflows
       profile:
         type: choice
-        options: [balanced, expressive, small]
+        options: [balanced, expressive, fast, small]
         default: balanced
       request_file:
         type: choice
@@ -45,6 +45,7 @@ jobs:
 def build(total=9, per_chapter=3, troy=False):
     header=HEADER
     if troy:
+        header=header.replace('default: balanced','default: fast')
         header=header.replace('name: Story runners','name: Troy story runners').replace('options: [silent-bell-deep, silent-bell-full, harbor]','options: [troy-first-thunder]').replace('default: silent-bell-deep','default: troy-first-thunder').replace("options: ['9', '3', '1']","options: ['4']").replace("default: '9'","default: '4'").replace('Nine scenes is the full three-chapter test','Four scenes is the full opening movement')
     blocks = [header]
     jobs = []
@@ -63,7 +64,7 @@ def build(total=9, per_chapter=3, troy=False):
         setup_backend = "fixture" if task == "prepare" else ("${{ inputs.refinement_seed_run != '' && 'fixture' || inputs.backend }}" if task == "refine" else "${{ inputs.backend }}")
         lines += ['    steps:', '      - name: Start shared job time budget', '        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + '+str(WORKER_TIMEOUT_SECONDS)+' ))" >> "$GITHUB_ENV"', '      - uses: actions/checkout@v4', '      - uses: ./.github/actions/setup-worker', '        with:', '          backend: ' + setup_backend]
         if task == 'prepare':
-            lines += ['      - name: Install local RAG encoder when requested', '        env:', '          STORY_REQUEST: ${{ inputs.request_file }}', '        run: |', "          python - <<'PY'", '          import json, os, subprocess, sys', '          from pathlib import Path', "          request=json.loads(Path('examples',os.environ['STORY_REQUEST']+'.json').read_text())", "          if request.get('retrieval_mode')=='hybrid':", "              subprocess.run([sys.executable,'-m','pip','install','-e','.[rag]'],check=True)", '          PY']
+            lines += ['      - name: Install local RAG encoder when requested', '        env:', '          STORY_REQUEST: ${{ inputs.request_file }}', '        run: |', "          python - <<'PY'", '          import json, os, subprocess, sys', '          from pathlib import Path', "          request=json.loads(Path('examples',os.environ['STORY_REQUEST']+'.json').read_text())", "          if request.get('retrieval_mode')=='hybrid' and not request.get('execution_policy',{}).get('resume_seed'):", "              subprocess.run([sys.executable,'-m','pip','install','-e','.[rag]'],check=True)", '          PY']
         if task == 'refine':
             lines += ['      - uses: actions/download-artifact@v4', "        if: inputs.refinement_seed_run != ''", '        with:', '          name: refine', '          path: inputs/seed', '          run-id: ${{ inputs.refinement_seed_run }}', '          github-token: ${{ github.token }}']
         for artifact, path, pattern in downloads:
@@ -146,10 +147,13 @@ def build(total=9, per_chapter=3, troy=False):
           for key,value in results.items():
               state=by_job.get(key,{})
               phase=state.get('phase','No task status; inspect setup/input steps' if value['result']=='failure' else value['result'])
+              if state.get('warnings_count'):phase+=' (%s warnings)'%state['warnings_count']
               rows.append('| %s | %s | %s | %s |'%(key,value['result'],phase,state.get('elapsed_seconds','—')))
           progress=[s.get('story_progress',{}) for s in statuses]
           accepted=max((p.get('accepted_scenes',0) for p in progress),default=0)
-          rows+=['','Accepted scenes: **%s**'%accepted]
+          rows+=['','Checkpointed scenes: **%s**'%accepted]
+          latest=max(progress,key=lambda p:p.get('accepted_scenes',0),default={})
+          rows+=['','Draft state: **%s**'%latest.get('completion_status','in_progress')]
           with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as summary:
               summary.write('\\n'.join(rows)+'\\n')
           print('Failed/cancelled jobs:', failed)

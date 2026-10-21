@@ -1,0 +1,43 @@
+{
+  "fixture_only": true,
+  "real_hybrid_retrieval": false,
+  "accepted_fixture_scenes": 4,
+  "chapters": 1,
+  "max_fixture_packet_characters": 45783,
+  "largest_packets": [
+    {
+      "role": "chapter_quality",
+      "characters": 45783
+    },
+    {
+      "role": "chapter_quality",
+      "characters": 45783
+    },
+    {
+      "role": "story_quality",
+      "characters": 37298
+    },
+    {
+      "role": "story_quality",
+      "characters": 37298
+    },
+    {
+      "role": "story_quality",
+      "characters": 37272
+    }
+  ],
+  "primary_source": "The Iliad (Homer)",
+  "retrieval_weights": {
+    "semantic_similarity": 0.6,
+    "keyword_match": 0.15,
+    "narrative_mechanism_match": 0.25
+  },
+  "stress_prose_words_per_scene": 1400,
+  "warning": "Fixtures test orchestration and short synthetic packets, not live literary quality or full-prose context sizes.",
+  "completion_status": "complete_with_warnings",
+  "injected_failures": [
+    "malformed_memory",
+    "unsupported_memory",
+    "review_model_outage"
+  ]
+}

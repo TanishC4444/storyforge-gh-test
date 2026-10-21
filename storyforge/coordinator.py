@@ -49,6 +49,7 @@ def packet(req, state, card):
         'pov_profile': next(c for c in req['characters'] if c['id'] == card['pov']),
         'pov_visible_memory': compact(visible(state['memories'], card['pov'])),
         'recent_ending': state['accepted'][-1]['prose'][-1600:] if state['accepted'] and state['accepted'][-1]['pov'] == card['pov'] else '',
+        'author_continuity':{'instruction':'Prior prose is an author record, NOT automatic knowledge for any character. Preserve each character’s supported knowledge boundaries.','recent_scenes':[{'id':s['id'],'pov':s['pov'],'excerpt':s['prose'][-2500:]} for s in state['accepted'][-2:]]},
         'threads': state['plan']['threads'],
         'creative_controls': {**scene_controls(req, card['id']), 'subplots':[s for s in req['plot_design'].get('subplots',[]) if s.get('owner') in card['participants']]},
         'literary_application': application_packet(req, state['retrieval'], 'writer', card['id']),

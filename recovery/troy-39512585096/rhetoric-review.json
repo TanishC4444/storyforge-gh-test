@@ -1,0 +1,166 @@
+{
+  "pass": false,
+  "checks": [
+    {
+      "verdict": "fail",
+      "evidence_ids": [
+        "p002",
+        "p028"
+      ],
+      "reason": "p002 narrates the 'general disarray' and 'low curses' which are already established by the 'broken hulls' and 'debris' imagery. p028 narrates the internal state of 'hoping' and 'taking the risk' which is already clearly communicated through the dialogue and the physical tension of the negotiation with a king.",
+      "id": "redundant_explanation",
+      "source_spans": [
+        {
+          "id": "p002",
+          "start": 178,
+          "end": 681
+        },
+        {
+          "id": "p028",
+          "start": 5894,
+          "end": 6303
+        }
+      ]
+    },
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p002",
+        "p005"
+      ],
+      "reason": "The focus on bronze filings in the beard and the tactile vibration of the iron against the teeth provides a grounded, smith-centric perspective.",
+      "id": "viewpoint_specificity",
+      "source_spans": [
+        {
+          "id": "p002",
+          "start": 178,
+          "end": 681
+        },
+        {
+          "id": "p005",
+          "start": 962,
+          "end": 1533
+        }
+      ]
+    },
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p009",
+        "p013"
+      ],
+      "reason": "Emotions are conveyed through the boy's gasp and the smith's internal weighing of 'terrifying' thoughts rather than just naming the emotions.",
+      "id": "emotional_labeling",
+      "source_spans": [
+        {
+          "id": "p009",
+          "start": 2093,
+          "end": 2172
+        },
+        {
+          "id": "p013",
+          "start": 2955,
+          "end": 3206
+        }
+      ]
+    },
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p003"
+      ],
+      "reason": "The simile of the voice as a 'frayed thread' fits the smith/weaving domain.",
+      "id": "figurative_coherence",
+      "source_spans": [
+        {
+          "id": "p003",
+          "start": 683,
+          "end": 797
+        }
+      ]
+    },
+    {
+      "verdict": "fail",
+      "evidence_ids": [
+        "p027"
+      ],
+      "reason": "The clap on the shoulder is a standard 'reassurance' beat that doesn't evolve the interaction or provide new information beyond the narrator's summary.",
+      "id": "gesture_function",
+      "source_spans": [
+        {
+          "id": "p027",
+          "start": 5738,
+          "end": 5892
+        }
+      ]
+    },
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p016",
+        "p018",
+        "p020"
+      ],
+      "reason": "The dialogue follows a rhythmic pattern of respectful petition and authoritative response consistent with the requested register.",
+      "id": "rhythm_repetition",
+      "source_spans": [
+        {
+          "id": "p016",
+          "start": 3704,
+          "end": 3728
+        },
+        {
+          "id": "p018",
+          "start": 3844,
+          "end": 4068
+        },
+        {
+          "id": "p020",
+          "start": 4180,
+          "end": 4470
+        }
+      ]
+    },
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p001"
+      ],
+      "reason": "No technical writing instructions appear in the prose.",
+      "id": "instruction_leakage",
+      "source_spans": [
+        {
+          "id": "p001",
+          "start": 0,
+          "end": 176
+        }
+      ]
+    }
+  ],
+  "issues": [
+    {
+      "severity": "blocking",
+      "category": "redundant_explanation",
+      "evidence_ids": [
+        "p002",
+        "p028"
+      ],
+      "problem": "Narrative summary restates the emotional and situational state already established by the action and dialogue.",
+      "fix": "Remove the final sentences of p002 and p028. Let the physical environment and the weight of the king's threat carry the tension.",
+      "quote": "The rain had ceased, leaving the world slick and grey, a mirror to the gloom in Thestor’s shelter. Bronze filings clung to his beard; his shoulders ached from the labor of the day, and the dampness seeped into his marrow. Around him lay the debris of the storm—broken hulls, the low curses of men, and the general disarray that follows a sea’s fury. He ignored the chaos. His apprentice, Meles, huddled near the hearth, shivering despite the meager fire, his face pinched with the anxiety of the hungry.\n\n“The wages, Master,” Meles muttered, his voice thin as a frayed thread. “Will the lords pay now, or must we wait?”\n\nThestor grunted, his eyes fixed on the forge. “Patience, boy. These men are preoccupied with their bruised pride and broken hulls. A smith’s due can wait a day.”\n\nHe turned his attention to the object that had caused this latest delay. It lay on his anvil, a curious thing pulled from the storm-tossed sea. A length of dark iron, thicker than a man’s forearm, bore strange markings etched along its surface. It was unlike any metal he had ever worked; his bronze tools glanced off it with a jarring clang that vibrated through his teeth. He had spent two days trying to discern its purpose, its construction, anything that would reveal its nature. He had managed to scrape away the salt and corrosion, revealing faint, elegant script.\n\n“I think...\\\" he began, then paused, weighing the weight of the word. “I think this is more than just iron, Meles.”\n\nMeles looked up, his eyes wide. “More? What do you mean, Master?”\n\n“The script... I have seen it before. Briefly, when I was a boy, helping my father in the temple at Aetolia. It is a mark of Hephaestus, the smith god.” Thestor said it quietly, half to himself. He had not spoken of the temple in years, of his father’s reverence for the divine craftsman. It had seemed a foolish thing then, a childish fancy. Now, it felt like a lifeline.\n\nMeles gasped. “Hephaestus himself? But... why would it be here, washed ashore?”\n\nThestor shrugged, trying to mask the hammering of his heart. He did not know why the object had come to him. He only knew it was significant. He had shown it to Odysseus yesterday, the clever king of Ithaca. Odysseus had examined it with a thoughtful frown, tracing the markings with a calloused finger. He had recognized the script, but had said little, only murmuring of a forgotten coastal sanctuary dedicated to the god.\n\n“It is damaged,” Thestor said, circling the object. “The end is broken off, and the markings are incomplete. But it is... intricate. Like nothing I have ever seen.” He ran a hand over a section of the metal. “There is a fitting here, a place for... something to connect.”\n\n“Could it be a weapon?” Meles asked, his voice a mixture of fear and excitement.\n\nThestor considered the question. A weapon forged by Hephaestus... it was a terrifying thought. But it also offered a chance. A chance for passage, for wages, for the freedom of his kin. He looked at Meles, at the boy's hopeful face, and made his move.\n\n“Perhaps,” he said, his voice carefully measured. “But I cannot say for certain. I need to examine it further, to see if I can repair the damage.” He glanced toward the entrance of the shelter. “I need a place to work, a place where I can focus without interruption.”\n\nLater that morning, Thestor found Odysseus inspecting a damaged trireme, his face grim. The king was surrounded by his officers, all arguing about the best way to repair the ship. Thestor waited until Odysseus caught his eye.\n\n“My lord,” Thestor said.\n\nOdysseus nodded curtly, waving him forward. “Thestor, is it? I understand you have found something of interest.”\n\n“I have, my lord,” Thestor replied, his voice respectful but firm. “Something... unusual.” He led the king away from the bustle of the shipwrights to a quieter spot near the shore. “I believe it is a creation of Hephaestus.”\n\nOdysseus raised an eyebrow, his expression unreadable. “Hephaestus? The smith god? You speak boldly, smith.”\n\n“I speak truthfully, my lord,” Thestor insisted. “I have seen the markings before. I believe it is part of a larger device, but it is damaged. I can repair it, if given the opportunity, but I would require a secure place to work, and passage to the coast... to the sanctuary you mentioned.”\n\nOdysseus studied him intently, his gaze piercing. “And what would you require in return, Thestor?”\n\nThestor hesitated. He could ask for wages, for passage for himself and Meles. But he knew that Agamemnon would never agree to such a thing, not when the war was draining the Achaean treasury. He needed something that would ensure their safety beyond the immediate.\n\n“Only passage for myself and my apprentice,” he said, his voice steady. “And a guarantee that we will not be pressed into service once the object is repaired.”\n\nOdysseus considered his words for a moment. “A guarantee... that is a difficult thing to promise, Thestor. But I will see what I can do. I will speak with Agamemnon.” He paused, then added, “But understand this, smith: if what you say is false, if this is merely a trick to escape your duties... you will answer to me.”\n\nThestor met the king’s gaze, the soot of the forge darkening his skin. He adjusted the leather apron he wore, the familiar weight grounding him. “I understand, my lord. I swear upon my craft that I speak the truth.”\n\nOdysseus nodded, then turned back to his officers. “See to the repairs,” he barked. “And find me a suitable place for this smith to work. Somewhere secure, somewhere out of the sight of prying eyes.”\n\nThestor watched him go, then turned to Meles, who had been waiting anxiously nearby. He clapped the boy on the shoulder, the gesture rough but reassuring.\n\n“We will be safe, boy,” he said. “We will be free.” He did not know if it was true, but he hoped that this strange object, this relic of a forgotten god, would be his ticket to a better life. He also hoped he had not made a terrible mistake. He had earned Odysseus's attention, and that was a dangerous thing. But he had no other choice. He had a household to protect, a boy to raise. He had to take the risk.",
+      "quote_match": "exact"
+    },
+    {
+      "severity": "blocking",
+      "category": "gesture_function",
+      "evidence_ids": [
+        "p027"
+      ],
+      "problem": "The gesture is a generic beat that doesn't add to the character's specific smith-like identity or the gravity of the moment.",
+      "fix": "Replace the clap with a gesture that reflects his craft or the specific weight of the secret they now share, such as a firm grip on the boy's shoulder that feels like a smith's grip on a tool.",
+      "quote": "Thestor watched him go, then turned to Meles, who had been waiting anxiously nearby. He clapped the boy on the shoulder, the gesture rough but reassuring.",
+      "quote_match": "exact"
+    }
+  ],
+  "signals": []
+}

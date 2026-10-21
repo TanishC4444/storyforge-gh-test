@@ -23,3 +23,5 @@ needs evidence_ids and a specific reason. Issues need severity, category, eviden
 problem, and an actionable fix. Any failed check or blocking issue sets pass=false.
 Small edits are acceptable when sufficient. No mandatory rewrite percentage, arbitrary
 word bans, typos, forced fragments, forced darkness, or claim to detect human authorship.
+
+For each issue, include `replacement`: the complete replacement for ONE cited paragraph, preserving facts, viewpoint and requested style. Choose one evidence ID for a direct fix. An empty replacement deletes that paragraph. Do not copy the whole scene. Report at most three actionable issues per pass, prioritizing consequential errors; assess all required checks. If no safe local replacement exists, keep the original paragraph as replacement and explain the structural limitation.

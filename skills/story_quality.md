@@ -32,3 +32,5 @@ Return only JSON:
 Assess EVERY required check. Applicable checks need source passage IDs. Not-applicable
 needs a meaningful explanation. Any failed check or blocking issue means pass=false.
 Do not invent defects to satisfy a quota. Do not return an unsupported empty approval.
+
+For each issue, include `replacement`: the complete replacement for ONE cited paragraph, preserving facts, viewpoint and requested style. Choose one evidence ID for a direct fix. An empty replacement deletes that paragraph. Do not copy the whole scene. Report at most three actionable issues per pass, prioritizing consequential errors; assess all required checks. If no safe local replacement exists, keep the original paragraph as replacement and explain the structural limitation.

@@ -16,6 +16,8 @@ from .editorial import STORY_CHECKS, RHETORIC_CHECKS, editorial_review, rhetoric
 from .development import development_stage, validate_scene
 from .storage import load, save, export
 from .tracking import tracked_stage, event, heartbeat
+from .resilience import enabled, warning, unavailable, memory_extract, load_seed
+from .patching import repair as patch_repair
 
 REFINE = 'Develop the premise, preserving explicit user choices and marking assumptions. Return only JSON with original_prompt (exact request premise), refined_prompt, central_conflict, reader_experience (strings), and preserved_user_choices, expanded_story_elements, character_tensions, subplot_possibilities, world_constraints, suggested_techniques, retrieval_references, assumptions, open_decisions (arrays). For every supplied creative category, preserve its explicit choices and develop its practical effect: medium/length, themes/tensions, scenes, world constraints, character behavior/arcs, plots/subplots, genre, tone/mood, reference influence, and figurative style. New detail is a proposal, not a user choice. No chapters yet.'
 
@@ -37,6 +39,11 @@ def actor_packet(req, state, card, cid):
             'known_facts': compact(visible(state['memories'], cid)), 'world_rules': req['world_rules']}
 
 
+def safe_review(value,prose,required,req):
+    if value.get('unverified') and enabled(req):return value
+    return editorial_review(value,prose,required)
+
+
 @tracked_stage
 def stage(task, source, out, index=0, character=None, request_file='silent-bell-full', profile='balanced', backend='fixture'):
     source, out = Path(source), Path(out)
@@ -46,6 +53,11 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         req['profile'] = profile
         contracts.require(req['chapters'] * req['scenes_per_chapter'] <= 9, 'This workflow supports at most nine scene slots')
         contracts.require(req['auto_approve_plan'], 'This automated DAG requires explicit auto_approve_plan in the request')
+        seed=load_seed(req,ROOT)
+        if seed is not None:
+            seed['backend']=backend
+            event('recovery','Reusing saved outline, refinement and scene 1; no replanning or redrafting',source_run=seed['recovery']['source_run'])
+            save(out/'snapshot.json',seed);return seed
         event('retrieval','Searching literary analyses and selecting role-specific craft guidance',mode=req['retrieval_mode'])
         with heartbeat('Retrieving classical mechanisms and role-specific craft guidance'):
             retrieved=retrieve(req)
@@ -60,6 +72,8 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
     req = state['request']
     event('state_loaded','Accepted state loaded',version=state['version'],accepted_scenes=len(state['accepted']),planned_scenes=req['chapters']*req['scenes_per_chapter'])
     executor = Executor(req, out, backend)
+    if task=='refine' and state.get('recovery',{}).get('reuse_planning'):
+        save(out/'refinement.json',state['refinement']);save(out/'snapshot.json',state);return state
     if task == 'refine' and (source / 'seed').exists():
         # Old failed attempts may have valid content rejected only for formatting.
         # Require the exact original story request; max_repairs is an execution-only setting.
@@ -89,6 +103,8 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         save(out / 'refinement.json', state['refinement'])
         save(out / 'snapshot.json', state)
         return state
+    if task=='plan' and state.get('recovery',{}).get('reuse_planning'):
+        save(out/'plan.json',state['plan']);save(out/'snapshot.json',state);output('characters',state['plan']['scenes'][0]['participants']);return state
     if task == 'plan':
         state['plan'] = executor.call('architect', planning_packet(req, state['refinement'], state['retrieval']), PLAN_INSTRUCTION, tokens=4200, validator=lambda x: contracts.plan(x, req), skill=(ROOT / 'skills/story_architect.md').read_text().split('TECHNIQUE LIBRARY')[0])
         state['plan_approved'] = True
@@ -102,6 +118,8 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         return result
     if task=='scene_design':
         old=state['plan']['scenes'][index]
+        if index==0 and state.get('recovery'):
+            save(out/'scene-design.json',old);save(out/'snapshot.json',state);output('characters',old['participants']);return state
         designed=executor.call('scene_designer',{'request_controls':controls(req),'world':req['world_design'],'plot':req['plot_design'],'characters':req['characters'],'proposed_scene':old,'accepted_memory':compact(state['memories'],36),'previous_scene':{'id':state['accepted'][-1]['id'],'prose_excerpt':state['accepted'][-1]['prose'][-4500:]} if state['accepted'] else None,'user_scene_design':[s for s in req['scene_designs'] if s['id']==old['id']],'inspiration':application_packet(req,state['retrieval'],'scene_designer',old['id'])},
             'Reconcile the proposed scene with what ACTUALLY happened. Do not rediscover an established fact. Preserve IDs, chapter, valid participant IDs, world rules, and user choices. Return one JSON scene card with id, chapter, pov, participants, location, time, goal, obstacle, intended_change, choice, consequence, new_development, and reference_uses (array of {record_id,application}). Explain development through a new tactic, cost, commitment, leverage, or interpretation, not stronger adjectives. No new events become canon here.',
             tokens=1600,validator=lambda x:validate_scene(x,req,index))
@@ -115,6 +133,8 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
     scene_packet = context(req, state, card)
     budget = min(3600, int(req['words_per_scene'] * 2.2) + 200)
     quality_skill = (ROOT / 'skills/story_quality.md').read_text()
+    if task == 'character' and index==0 and state.get('recovery'):
+        save(out/'proposal.json',{'character':character,'observable_proposal':'Recovered scene already exists; no new actions proposed.','state_version':state['version']});return
     if task == 'character':
         result = executor.call('character', actor_packet(req, state, card, character), 'Propose one observable action or spoken line pursuing your goal in this situation. Use only known facts. Do not disclose private reasoning or secrets as commentary.', tokens=220)
         save(out / 'proposal.json', {'character': character, 'observable_proposal': result, 'state_version': state['version']})
@@ -123,16 +143,22 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         proposals = [load(p) for p in sorted((source / 'characters').rglob('proposal.json'))]
         contracts.require(len(proposals) == len(card['participants']) and {p['character'] for p in proposals} == set(card['participants']), 'Missing/duplicate character proposals')
         contracts.require(all(p['state_version'] == state['version'] for p in proposals), 'Stale character proposal')
+        if req.get('performance',{}).get('combine_direction'):
+            save(out/'direction.txt',json.dumps({'scene':card,'observable_proposals':proposals}));event('direction','Reusing scene design and character proposals; no extra director call');return
         result = executor.call('director', {'scene_context': scene_packet, 'proposals': proposals}, 'Propose 3–5 concise beats. Respect POV, knowledge, rules, and intended change. Proposals are optional and are not canon.', tokens=500)
         save(out / 'direction.txt', result)
         return
+    if task=='writer' and index==0 and state.get('recovery'):
+        save(out/'draft.txt',state['recovery']['prose']);event('recovery','Recovered existing scene 1 prose; no drafting call');return
     if task == 'writer':
         scene_packet['direction'] = (source / 'direction/direction.txt').read_text()
-        result = executor.call('writer', scene_packet, 'Write complete scene prose at target_words. No summary, heading, commentary, or canon delta. Respect POV, knowledge, rules, and voices. Give choices consequences.', tokens=budget)
+        result = executor.call('writer', scene_packet, 'Write complete scene prose at target_words. No summary, heading, commentary, or canon delta. Respect POV, knowledge, rules, and voices. Give choices consequences.', tokens=budget,skill=(ROOT/'skills/distinct_writing.md').read_text())
         save(out / 'draft.txt', result)
         return
     if task == 'edit':
         draft = (source / 'draft/draft.txt').read_text()
+        if req.get('performance',{}).get('targeted_edits'):
+            save(out/'prose.txt',draft);event('edit','Full-scene rewrite skipped; parallel reviewers will propose targeted fixes');return
         result = executor.call('humanizer', {'context':{k:scene_packet[k] for k in ['scene','characters','pov_profile','pov_visible_memory','recent_ending','style_and_controls']},'style':req['style'],'world_rules':req['world_rules'],'genre':req.get('genre'),'prose': draft, 'craft':application_packet(req,state['retrieval'],'humanizer',card['id'])}, 'Edit only what needs improvement. Preserve events, evidence, knowledge, POV, deliberate style, and approximate length. Return complete prose alone.', tokens=budget, skill=(ROOT / 'skills/distinct_writing.md').read_text())
         save(out / 'prose.txt', result)
         return
@@ -142,45 +168,56 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         changed = not review['pass'] and req['max_repairs'] > 0
         before = hashlib.sha256(prose.encode()).hexdigest()
         event('repair_decision','Repair required' if changed else 'Prose unchanged; forwarding existing candidate',issues=len(review['issues']))
-        if changed:
+        patch_info={}
+        if changed and req.get('performance',{}).get('targeted_edits'):
+            try:prose,patch_info=patch_repair(executor,req,prose,[review])
+            except Exception as exc:
+                if not enabled(req):raise
+                warning(out,'patch_unavailable',exc)
+            changed=hashlib.sha256(prose.encode()).hexdigest()!=before
+        elif changed:
             prose = executor.call('writer', {'context': scene_packet, 'prose': prose, 'review': review},
                 'Repair the cited violations. Preserve unaffected facts and deliberate voice. Return complete scene prose near target_words, with no commentary.', tokens=budget, skill=(ROOT / 'skills/distinct_writing.md').read_text())
         save(out / 'prose.txt', prose)
-        save(out / 'repair.json', {'changed': changed, 'reviewed_sha256': before, 'candidate_sha256': hashlib.sha256(prose.encode()).hexdigest()})
+        save(out / 'repair.json', {'changed': changed, 'reviewed_sha256': before, 'candidate_sha256': hashlib.sha256(prose.encode()).hexdigest(),'patches':patch_info})
         return
     if task in {'rhetoric_review','verify_rhetoric'}:
         prose=(source/'edited/prose.txt').read_text()
+        if task=='rhetoric_review' and index==0 and state.get('recovery') and prose==state['recovery']['prose']:
+            save(out/'review.json',state['recovery']['reviews']['rhetoric']);event('recovery','Reusing source-matched rhetoric review and its unresolved issues');return
         if task=='verify_rhetoric' and not load(source/'edited/repair.json')['changed']:
             repair=load(source/'edited/repair.json')
             contracts.require(hashlib.sha256(prose.encode()).hexdigest()==repair['reviewed_sha256'],'Cannot reuse rhetoric review after prose changes')
-            verdict=editorial_review(load(source/'rhetoric/review.json'),prose,RHETORIC_CHECKS)
+            verdict=safe_review(load(source/'rhetoric/review.json'),prose,RHETORIC_CHECKS,req)
         else:
-            verdict=executor.call('rhetoric_quality',{**evidence_payload(prose),'required_checks':RHETORIC_CHECKS,'creative_controls':controls(req),'previous_scene':state['accepted'][-1]['prose'][-3500:] if state['accepted'] else '', 'signals':rhetoric_signals(prose),'craft':application_packet(req,state['retrieval'],'rhetoric_quality',card['id'])},'Review the complete scene in evidence_passages. Return the required editorial JSON.',tokens=2200,validator=lambda x:editorial_review(x,prose,RHETORIC_CHECKS),skill=(ROOT/'skills/rhetoric_quality.md').read_text())
+            verdict=executor.call('rhetoric_quality',{**evidence_payload(prose),'required_checks':RHETORIC_CHECKS,'creative_controls':controls(req),'previous_scene':state['accepted'][-1]['prose'][-3500:] if state['accepted'] else '', 'signals':rhetoric_signals(prose),'craft':application_packet(req,state['retrieval'],'rhetoric_quality',card['id'])},'Review the complete scene in evidence_passages. Return the required editorial JSON.',tokens=1600,validator=lambda x:editorial_review(x,prose,RHETORIC_CHECKS),skill=(ROOT/'skills/rhetoric_quality.md').read_text())
         verdict=apply_signals(verdict,rhetoric_signals(prose))
         save(out/'review.json',verdict)
         return
     if task in {'story_review', 'verify', 'memory', 'memory_final'}:
         prose = (source / 'edited/prose.txt').read_text()
+        if task=='story_review' and index==0 and state.get('recovery') and prose==state['recovery']['prose']:
+            save(out/'review.json',state['recovery']['reviews']['story']);event('recovery','Reusing source-matched story review and its unresolved issues');return
         if task in {'verify', 'memory_final'}:
             repair = load(source / 'edited/repair.json')
             contracts.require(hashlib.sha256(prose.encode()).hexdigest() == repair['candidate_sha256'], 'Candidate hash mismatch')
             if not repair['changed']:
                 contracts.require(repair['candidate_sha256'] == repair['reviewed_sha256'], 'Cannot reuse review after prose changes')
                 if task == 'verify':
-                    save(out / 'review.json', editorial_review(load(source / 'diagnosis/review.json'), prose,STORY_CHECKS))
+                    save(out / 'review.json', safe_review(load(source / 'diagnosis/review.json'), prose,STORY_CHECKS,req))
                 else:
                     save(out / 'memory.json', contracts.delta(load(source / 'initial-memory/memory.json'), prose, [c['id'] for c in req['characters']]))
                 return
         if task in {'story_review', 'verify'}:
             verdict=executor.call('story_quality',{**evidence_payload(prose),'required_checks':STORY_CHECKS,'scene':card,'creative_controls':{k:v for k,v in controls(req).items() if k!='style'},'world':req['world_design'],'plot':req['plot_design'],'characters':[c for c in req['characters'] if c['id'] in card['participants']],'world_rules':req['world_rules'],'initial_facts':req['initial_facts'],'accepted_memories':compact(state['memories'],36),'previous_scene':{'id':state['accepted'][-1]['id'],'prose_excerpt':state['accepted'][-1]['prose'][-4500:]} if state['accepted'] else None,'craft':application_packet(req,state['retrieval'],'story_quality',card['id'])},
-                'Assess the complete scene in evidence_passages against accepted knowledge and the user brief. Return the required editorial JSON.',tokens=2400,validator=lambda x:editorial_review(x,prose,STORY_CHECKS),skill=quality_skill)
+                'Assess the complete scene in evidence_passages against accepted knowledge and the user brief. Return the required editorial JSON.',tokens=1600,validator=lambda x:editorial_review(x,prose,STORY_CHECKS),skill=quality_skill)
             words = len(prose.split())
             if backend != 'fixture' and req['length_policy']['scene_words']=='strict' and not req['words_per_scene'] * req['min_words_ratio'] <= words <= req['words_per_scene'] * req['max_words_ratio']:
                 verdict['pass'] = False
                 verdict['issues'].append({'severity': 'blocking', 'category': 'length', 'quote': prose[:80], 'problem': f'{words} words outside target tolerance', 'fix': f'Return a complete scene near {req["words_per_scene"]} words.'})
             save(out / 'review.json', verdict)
         else:
-            result = executor.call('memory', {**evidence_payload(prose), 'scene': card, 'characters': [c['id'] for c in req['characters']], 'existing': compact(state['memories'])}, MEMORY_INSTRUCTION, tokens=1600, validator=lambda x: contracts.delta(x, prose, [c['id'] for c in req['characters']]))
+            result = memory_extract(executor,req,out,prose,{**evidence_payload(prose),'scene':card,'characters':[c['id'] for c in req['characters']],'existing':compact(state['memories'])},MEMORY_INSTRUCTION)
             save(out / 'memory.json', result)
         return
     if task == 'memory_review':
@@ -192,26 +229,50 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         contracts.require(len(state['accepted']) == index, 'Commit does not follow accepted scene order')
         review = load(source / 'story-review/review.json')
         memory_review = load(source / 'memory-review/review.json')
-        rhetoric_review=editorial_review(load(source/'rhetoric-review/review.json'),(source/'edited/prose.txt').read_text(),RHETORIC_CHECKS)
-        review=editorial_review(review,(source/'edited/prose.txt').read_text(),STORY_CHECKS)
+        rhetoric_review=safe_review(load(source/'rhetoric-review/review.json'),(source/'edited/prose.txt').read_text(),RHETORIC_CHECKS,req)
+        review=safe_review(review,(source/'edited/prose.txt').read_text(),STORY_CHECKS,req)
         save(out / 'reviews.json', {'story': review, 'rhetoric':rhetoric_review, 'memory': memory_review})
         event('acceptance','Checking story, rhetoric and memory gates',story=review['pass'],rhetoric=rhetoric_review['pass'],memory=memory_review['pass'])
-        contracts.require(review['pass'] and rhetoric_review['pass'] and memory_review['pass'], 'Review rejected scene or memory; no canon commit. Inspect saved review artifacts.')
+        unresolved=not (review['pass'] and rhetoric_review['pass'] and memory_review['pass'])
+        if unresolved and enabled(req):warning(out,'provisional_scene','Quality or verification remains unresolved; retaining an explicitly provisional draft.')
+        else:contracts.require(not unresolved, 'Review rejected scene or memory; no canon commit. Inspect saved review artifacts.')
         prose = (source / 'edited/prose.txt').read_text()
         memory = contracts.delta(load(source / 'memory/memory.json'), prose, [c['id'] for c in req['characters']])
+        final_patch=None
+        if unresolved and enabled(req) and req.get('performance',{}).get('targeted_edits'):
+            try:
+                revised,final_patch=patch_repair(executor,req,prose,[review,rhetoric_review])
+                if revised!=prose:
+                    reviewed_hash=hashlib.sha256(prose.encode()).hexdigest();prose=revised
+                    for verdict in [review,rhetoric_review]:verdict['reviewed_prose_sha256']=reviewed_hash;verdict['post_review_patch']=True
+                    save(out/'final-prose.txt',prose)
+                    memory=memory_extract(executor,req,out,prose,{**evidence_payload(prose),'scene':card,'characters':[c['id'] for c in req['characters']],'existing':compact(state['memories'])},MEMORY_INSTRUCTION)
+                    memory_review=executor.call('memory_quality',{'current_prose':prose,'proposed_memory':memory,'prior_memory':compact(state['memories'])},'Check supported facts and knowledge holders; return pass and issues with exact source quotations.',tokens=900,validator=lambda x:contracts.review(x,prose),skill=(ROOT/'skills/memory_quality.md').read_text())
+                    warning(out,'final_targeted_edit','Final cited issues patched; literary re-verification remains pending and the draft is provisional.')
+            except Exception as exc:warning(out,'final_patch_unavailable',exc)
+        save(out/'final-edit.json',{'patch':final_patch,'quality_reverification_pending':bool(final_patch and final_patch.get('changed'))})
+        save(out/'reviews.json',{'story':review,'rhetoric':rhetoric_review,'memory':memory_review})
+        if enabled(req) and (memory.get('quarantined') or memory.get('fallback')):
+            unresolved=True;warning(out,'memory_incomplete','Some memory could not be safely extracted; consult source prose.')
+        memory_status={'quarantined_count':len(memory.get('quarantined',[])),'fallback':memory.get('fallback'),'verified':memory_review['pass']}
+        if not memory_review['pass'] and enabled(req):
+            save(out/'quarantined-memory.json',memory);memory={'memories':[]};warning(out,'memory_quarantine','Memory verifier did not approve extracted facts; prose retained, facts withheld.')
         if (index + 1) % req['scenes_per_chapter'] == 0:
             chapter_prose = '\n\n'.join([s['prose'] for s in state['accepted'] if s['chapter'] == card['chapter']] + [prose])
-            chapter_review=executor.call('chapter_quality',{**evidence_payload(chapter_prose),'required_checks':STORY_CHECKS,'chapter':card['chapter'],'rules':req['world_rules'],'chapter_plan':[s for s in state['plan']['scenes'] if s['chapter']==card['chapter']]},'Review the full chapter in evidence_passages. Return editorial JSON.',tokens=2200,validator=lambda x:editorial_review(x,chapter_prose,STORY_CHECKS),skill=quality_skill)
+            chapter_review=executor.call('chapter_quality',{**evidence_payload(chapter_prose),'required_checks':STORY_CHECKS,'chapter':card['chapter'],'rules':req['world_rules'],'chapter_plan':[s for s in state['plan']['scenes'] if s['chapter']==card['chapter']]},'Review the full chapter in evidence_passages. Return editorial JSON.',tokens=1600,validator=lambda x:editorial_review(x,chapter_prose,STORY_CHECKS),skill=quality_skill)
             save(out / 'chapter-review.json', chapter_review)
-            contracts.require(chapter_review['pass'], 'Chapter review rejected; no final scene commit')
+            if not chapter_review['pass'] and enabled(req):
+                unresolved=True;warning(out,'chapter_needs_review','Chapter audit did not pass; exported as provisional draft.')
+            else:contracts.require(chapter_review['pass'], 'Chapter review rejected; no final scene commit')
         result = copy.deepcopy(state)
         result['version'] += 1
-        result['accepted'].append({'id': card['id'], 'chapter': card['chapter'], 'pov': card['pov'], 'participants': card['participants'], 'prose': prose, 'review': review, 'rhetoric_review':rhetoric_review, 'memory_review': memory_review, 'reference_uses':card.get('reference_uses',[]), 'state_version': result['version']})
+        result['accepted'].append({'id': card['id'], 'chapter': card['chapter'], 'pov': card['pov'], 'participants': card['participants'], 'prose': prose, 'review': review, 'rhetoric_review':rhetoric_review, 'memory_review': memory_review, 'reference_uses':card.get('reference_uses',[]), 'state_version': result['version'],'quality_status':'needs_review' if unresolved else 'reviewed','memory_extraction':memory_status})
         result['memories'].extend(dict(m, source=card['id']) for m in memory['memories'])
         result['complete'] = len(result['accepted']) == len(result['plan']['scenes'])
+        result['completion_status']='complete_with_warnings' if result['complete'] and any(s.get('quality_status')=='needs_review' for s in result['accepted']) else ('complete' if result['complete'] else 'in_progress')
         save(out / 'snapshot.json', result)
         export(out, result, req)
-        event('canon_committed','Scene accepted into canonical story',scene=card['id'],words=len(prose.split()),accepted_scenes=len(result['accepted']),state_version=result['version'])
+        event('canon_committed','Scene checkpoint saved'+(' — provisional draft' if unresolved else ' — reviewed'),scene=card['id'],quality_status='needs_review' if unresolved else 'reviewed',words=len(prose.split()),accepted_scenes=len(result['accepted']),state_version=result['version'])
         output('characters', result['plan']['scenes'][index + 1]['participants'] if not result['complete'] else [])
         return result
     raise ValueError(f'Unknown DAG task: {task}')
