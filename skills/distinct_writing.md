@@ -109,3 +109,30 @@ Maintain ancient social values and material experience without ornamental archai
 A final scene must pay off a previously established physical limitation and a
 character's costly decision on the page. Return to specific custody, bodily cost,
 or obligation afterward; do not end by explaining the moral or promising an epic.
+
+## No-dialogue narration is not pantomime
+
+Characters may bargain or give orders; narrate the resulting offer, refusal, or
+condition briefly without reproducing a speech. Do not replace every spoken line
+with pointing, meaningful looks and an explanation of what the gesture meant.
+
+Weak: “He pointed at the boy and then at the sea. The gesture was a plea for
+passage, a demand for the wages that would buy freedom.”
+Stronger approach: establish the concrete arrangement directly (the ship cannot
+carry the boy until a named debt is discharged), then show the action it causes.
+Do not copy this example's facts into the story.
+
+Weak: “His invitation felt like a shackle. He had sought escape but built a bridge
+into the heart of the conflict.”
+Stronger approach: end on the material restriction or costly act that makes escape
+harder. A berth assigned to somebody else, unfinished paid work, or tools left in
+another's custody can carry that meaning when the established facts support it.
+Do not explain the implication again afterward.
+
+Weak: “He understood that the object was not a curiosity, but a key.”
+Stronger approach: show the new use of the object and the risk taken to secure it.
+Avoid replacing that sentence with another metaphor for importance.
+
+Do not diagnose another character's inner calculation from a single look. For limited viewpoint, stay inside the focal character's perceptions, memories and imperfect inferences. An explicitly omniscient epic narrator may supply history or inner attention in separate paragraphs without granting that knowledge to other characters. A
+reader can see a ruler's tactic from whom he dismisses, what he withholds and which
+obligation he invokes. Do not turn that evidence into an omniscient explanation.

@@ -75,7 +75,7 @@ class Executor:
                 raise ContractError(f'{role} context exceeds character budget; reduce inputs or restart with a larger tested budget. No silent truncation.')
             model = PROFILES[self.req['profile']].get(role, PROFILES[self.req['profile']]['default'])
             if last_error and role in {'writer','architect'} and self.req['profile']=='fast':model='qwen3b'
-            n_ctx=min(self.req['n_ctx'],8192) if model=='qwen3b' and role not in {'writer','architect','chapter_quality'} else self.req['n_ctx']
+            n_ctx=min(self.req['n_ctx'],8192) if model=='qwen3b' and role not in {'writer','architect','chapter_quality','humanizer','refiner'} else self.req['n_ctx']
             digest = hashlib.sha256(json.dumps([self.backend, role, model, system, prompt, tokens, n_ctx, self.req['runner_repo'], response_schema,self.req.get('api_roles',{}),output_format]).encode()).hexdigest()
             path = self.folder / 'calls' / f'{role}-{digest[:20]}.json'
             save(self.folder / 'packets' / f'{role}-{digest[:20]}.json', {'role': role, 'model': model, 'system': system, 'input': packet, 'validation_error': last_error, 'max_tokens': tokens, 'n_ctx': n_ctx,'response_schema':response_schema,'format_repair_only':bool(last_error and response_schema)})
@@ -101,6 +101,10 @@ class Executor:
                                 from .resilience import warning
                                 warning(self.folder,'api_fallback',str(exc))
                                 event('fallback','Hosted provider unavailable; using existing CPU worker',role=role,local_model=model)
+                                if role=='humanizer' and kind=='gemma' and self.hosted.can_rescue() and not any(code in str(exc) for code in ['401','403']):
+                                    try:
+                                        hosted_result=self.hosted.complete('flash',system,prompt,tokens,structured=bool(validator) and output_format=='json')
+                                    except Exception as rescue_error:warning(self.folder,'flash_rescue_unavailable',str(rescue_error))
                         if hosted_result is not None:
                             output,diagnostic=hosted_result
                         else:

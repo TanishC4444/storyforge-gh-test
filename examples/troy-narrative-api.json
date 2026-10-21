@@ -25,7 +25,7 @@
   "retrieval_query": "Iliad heroic honor divine gift competing authority mortal vulnerability supplication war",
   "genre": "Mythic war epic; tragic alternate Trojan continuity",
   "reader_experience": "Wonder, anticipation, competing loyalties, martial terror and a costly local victory that opens a larger epic.",
-  "pov": "Strict third-person past tense, focalized through one designated character per scene. No dialogue, quoted speech, first-person narrator, invocation, or direct address. Narrated commitments and action carry negotiation. No character acquires narrator-only knowledge.",
+  "pov": "Third-person past-tense epic narrator, with a primary focal character per scene. The narrator may supply another character’s history or inner attention in a clearly separated paragraph, but this never grants other characters private knowledge. No dialogue, quoted speech, first-person narrator, invocation or direct address. Narrate offers and commitments briefly and show their consequences.",
   "tone_mood": "Grave and martial, with tenderness in concrete duties; wonder before divine craft and unease beneath victory. No modern sarcasm or action-film triumphalism.",
   "sensory_detail": "Concrete material detail perceived through ancient experience: bronze, sea, wool, ash, labor, bodies and weather.",
   "ending_tendency": "Resolve acquisition and first deployment, not the Trojan War. End on a concrete changed obligation, not a moral summary.",
@@ -101,7 +101,7 @@
     "interpretation": "Strong source influence and pinned source selection; strength is guidance, not a measured borrowed percentage."
   },
   "style": {
-    "narrator": "Strict third-person past tense, focalized through one designated character per scene. No dialogue, quoted speech, first-person narrator, invocation, or direct address. Narrated commitments and action carry negotiation. No character acquires narrator-only knowledge.",
+    "narrator": "Third-person past-tense epic narrator, with a primary focal character per scene. The narrator may supply another character’s history or inner attention in a clearly separated paragraph, but this never grants other characters private knowledge. No dialogue, quoted speech, first-person narrator, invocation or direct address. Narrate offers and commitments briefly and show their consequences.",
     "register": "Concrete, grave, musical ancient epic in intelligible English. Use material acts, reciprocal obligation, shame and rank; no stock modern cinematic gestures.",
     "wording": [
       "Recurring epithets at meaningful moments; avoid attaching one to every name.",

@@ -12,17 +12,17 @@ class GoogleHosted:
     def __init__(self,folder,key=None):
         self.folder=Path(folder);self.folder.mkdir(parents=True,exist_ok=True)
         self.key=key or os.getenv('GEMINI_API_KEY','');self.disabled=set()
-    def request(self,path,body):
+    def request(self,path,body,timeout=300):
         if not self.key:raise HostedError('Google API key unavailable')
         req=urllib.request.Request(BASE+path,data=json.dumps(body).encode(),headers={'x-goog-api-key':self.key,'Content-Type':'application/json'})
         try:
-            with urllib.request.urlopen(req,timeout=300) as response:return json.load(response)
+            with urllib.request.urlopen(req,timeout=timeout) as response:return json.load(response)
         except urllib.error.HTTPError as exc:
             # Do not persist provider error bodies: they may contain request data.
             raise HostedError('Google HTTP '+str(exc.code)) from None
         except (TimeoutError,OSError):raise HostedError('Google connection failed or timed out') from None
     def reserve(self,kind,tokens):
-        limits={'gemma':(24,14000,80),'flash':(4,220000,4)}
+        limits={'gemma':(24,14000,80),'flash':(4,220000,6)}
         rpm,tpm,max_calls=limits[kind]
         if tokens>tpm:raise HostedError('Input exceeds conservative hosted per-minute allowance')
         path=self.folder/'quota.json'
@@ -37,22 +37,31 @@ class GoogleHosted:
                     current['recent'].append([now,tokens]);current['calls']+=1;save(path,state);return
                 wait=max(.2,61-(now-current['recent'][0][0]))
             time.sleep(min(wait,1))
+    def can_rescue(self):
+        path=self.folder/'quota.json'
+        with (self.folder/'quota.lock').open('a') as lock:
+            fcntl.flock(lock,fcntl.LOCK_EX)
+            value=json.loads(path.read_text()) if path.exists() else {}
+            if value.get('_rescue_calls',0)>=2 or value.get('flash',{}).get('calls',0)>=5:return False
+            value['_rescue_calls']=value.get('_rescue_calls',0)+1;save(path,value);return True
+
     def complete(self,kind,system,prompt,tokens,structured=False):
         if kind in self.disabled:raise HostedError(kind+' circuit open after prior provider failure')
         model=MODELS[kind]
         contents=[{'role':'user','parts':[{'text':prompt}]}]
         body={'systemInstruction':{'parts':[{'text':system}]},'contents':contents}
         try:
-            count=self.request(model+':countTokens',body).get('totalTokens')
+            count=self.request(model+':countTokens',{'contents':[{'parts':[{'text':system+'\n'+prompt}]}]},timeout=10).get('totalTokens')
         except HostedError:count=None
         estimate=count or math.ceil(len((system+prompt).encode())/3)
+        print('Hosted '+model+': reserving '+str(estimate)+' input tokens',flush=True)
         self.reserve(kind,estimate)
         config={'maxOutputTokens':tokens,'thinkingConfig':{'thinkingLevel':'minimal' if kind=='gemma' else 'low'}}
         if structured:config['responseMimeType']='application/json'
         started=time.monotonic()
         for attempt in range(2):
             try:
-                result=self.request(model+':generateContent',{**body,'generationConfig':config});break
+                result=self.request(model+':generateContent',{**body,'generationConfig':config},timeout=150 if kind=='gemma' else 240);break
             except HostedError as exc:
                 if attempt==0 and any(code in str(exc) for code in ['500','502','503','504']):
                     time.sleep(2);self.reserve(kind,estimate);continue

@@ -55,7 +55,7 @@ def memory_extract(executor,req,out,prose,packet,instruction):
 
 
 def creative_request(req):
-    operational={'profile','max_repairs','max_stage_retries','context_chars','n_ctx','runner_repo','auto_approve_plan','execution_policy','performance'}
+    operational={'profile','max_repairs','max_stage_retries','context_chars','n_ctx','runner_repo','auto_approve_plan','execution_policy','performance','api_roles'}
     return {k:v for k,v in req.items() if k not in operational}
 
 
