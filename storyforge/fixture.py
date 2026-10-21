@@ -3,6 +3,12 @@ import json
 
 
 def respond(role, packet, req):
+    if role=='repair':return json.dumps({'replacement':packet['paragraph']+' FIXTURE repaired.','facts_changed':False})
+    if role=='global_repair':return packet['prose']
+    if role=='seam':return packet['right_entry']
+    if role=='writer_beat':return 'FIXTURE beat '+packet['beat']['action']+'.\n\nMara checked the tower latch. The hinge caught halfway.'
+    if role=='director' and 'count' in packet:
+        return json.dumps({'beats':[{'action':str(i),'entry_state':str(i),'exit_state':str(i+1)} for i in range(packet['count'])]})
     if role == 'refiner':
         value = {k: [] for k in ['preserved_user_choices', 'expanded_story_elements', 'character_tensions', 'subplot_possibilities', 'world_constraints', 'suggested_techniques', 'retrieval_references', 'assumptions', 'open_decisions']}
         value.update(original_prompt=req['premise'], refined_prompt=req['premise'], central_conflict='FIXTURE conflict', reader_experience='FIXTURE only')

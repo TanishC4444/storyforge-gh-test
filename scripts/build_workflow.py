@@ -264,6 +264,70 @@ jobs:
           if-no-files-found: warn
 """
 
+def build_experimental():
+    import re
+    header=HEADER.replace('Nine scenes is the full three-chapter test','Four scenes is the full opening movement').replace('name: Story runners','name: Troy parallel repair and beat experiment').replace('options: [silent-bell-deep, silent-bell-full, harbor]','options: [troy-parallel-experiment]').replace('default: silent-bell-deep','default: troy-parallel-experiment').replace('default: balanced','default: fast').replace("options: ['9', '3', '1']","options: ['4']").replace("default: '9'","default: '4'").replace('group: story-runners','group: story-parallel-experiment')
+    blocks=[header];keys=[]
+    def job(key,title,task,needs=(),downloads=(),index=None,condition=None,matrix=None):
+        keys.append(key);lines=[f'  {key}:',f'    name: {title}']
+        if needs:lines.append('    needs: ['+', '.join(needs)+']')
+        if condition:lines.append('    if: ${{ '+condition+' }}')
+        lines+=['    runs-on: ubuntu-latest','    timeout-minutes: 360','    outputs:']
+        for output in ['characters','needs_repair','changed','facts_changed']:lines.append(f'      {output}: ${{{{ steps.task.outputs.{output} }}}}')
+        if matrix:lines+=['    strategy:','      fail-fast: false','      max-parallel: 3','      matrix:',f'        character: ${{{{ fromJSON(needs.{matrix}.outputs.characters) }}}}']
+        lines+=['    steps:','      - name: Start shared job budget','        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"','      - uses: actions/checkout@v4','      - uses: ./.github/actions/setup-worker','        with:','          backend: '+('fixture' if task=='prepare' else '${{ inputs.backend }}')]
+        if task=='prepare':
+            lines+=['      - name: Check contracts and fixture paths','        run: python -m unittest discover -s tests -q','      - name: Install hybrid retrieval','        run: python -m pip install -e \'.[rag]\' -q']
+        for entry in downloads:
+            artifact,path,*gate=entry
+            lines+=['      - uses: actions/download-artifact@v4']
+            if gate:lines.append('        if: ${{ '+gate[0]+' }}')
+            lines+=['        with:',f'          {"pattern" if artifact.endswith("*") else "name"}: {artifact}',f'          path: inputs/{path}']
+        lines+=['      - name: Execute '+title,'        id: task','        env:',"          PYTHONUNBUFFERED: '1'",'          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}','          STORY_BACKEND: ${{ inputs.backend }}','          STORY_PROFILE: ${{ inputs.profile }}','          STORY_REQUEST: ${{ inputs.request_file }}']
+        if matrix:lines.append('          STORY_CHARACTER: ${{ matrix.character }}')
+        args=f'{task} --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"'
+        if index is not None:args+=f' --index {index}'
+        if matrix:args+=' --character "$STORY_CHARACTER"'
+        lines+=['        run: |','          backend=fixture','          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi','          python -m storyforge.dag '+args,'      - uses: actions/upload-artifact@v4','        if: always()','        with:','          name: '+key+('-${{ matrix.character }}' if matrix else ''),'          path: out/','          retention-days: 7','          overwrite: true']
+        blocks.append('\n'.join(lines)+'\n')
+    ok="always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')"
+    job('prepare','Prepare fresh brief and retrieval','prepare')
+    job('refine_bundle','Refine, develop, revise and gate','refine_bundle',['prepare'],[('prepare','state')])
+    job('plan_bundle','Outline, develop, revise and gate','plan_bundle',['refine_bundle'],[('refine_bundle','state')])
+    for i in range(4):
+        p=f's{i+1:02}';previous=f's{i:02}';state=p+'_design' if i==0 else previous+'_settle'
+        if i==0:job(state,'Scene 1 design','scene_design',['plan_bundle'],[('plan_bundle','state')],i)
+        common=[(state,'state')]
+        job(p+'_characters',p+' isolated character runners','character',[state],common,i,matrix=state)
+        job(p+'_direction',p+' direction','director',[state,p+'_characters'],common+[(p+'_characters-*','characters')],i)
+        job(p+'_draft',p+' beat-parallel writer','writer',[state,p+'_direction'],common+[(p+'_direction','direction')],i)
+        job(p+'_edit',p+' whole-scene distinct writing','edit',[state,p+'_draft'],common+[(p+'_draft','draft')],i)
+        edit=common+[(p+'_edit','edited')]
+        job(p+'_story',p+' concurrent story dimensions','story_review',[state,p+'_edit'],edit,i)
+        job(p+'_rhetoric',p+' concurrent rhetoric dimensions','rhetoric_review',[state,p+'_edit'],edit,i)
+        job(p+'_memory',p+' initial memory and independent verification','memory',[state,p+'_edit'],edit,i)
+        repair_gate=f"needs.{p}_story.outputs.needs_repair == 'true' || needs.{p}_rhetoric.outputs.needs_repair == 'true'"
+        job(p+'_repair',p+' paragraph patch batches','repair',[state,p+'_edit',p+'_story',p+'_rhetoric'],edit+[(p+'_story','diagnosis'),(p+'_rhetoric','rhetoric')],i,repair_gate)
+        changed=f"needs.{p}_repair.outputs.changed == 'true'"
+        repaired=common+[(p+'_repair','edited')]
+        job(p+'_verify',p+' changed-paragraph story verification','verify',[state,p+'_repair',p+'_story'],repaired+[(p+'_story','diagnosis')],i,changed)
+        job(p+'_verify_rhetoric',p+' changed-paragraph rhetoric verification','verify_rhetoric',[state,p+'_repair',p+'_rhetoric'],repaired+[(p+'_rhetoric','rhetoric')],i,changed)
+        facts=f"needs.{p}_repair.outputs.facts_changed == 'true'"
+        job(p+'_final_memory',p+' diff-based memory refresh','memory_final',[state,p+'_repair',p+'_memory'],repaired+[(p+'_memory','initial-memory')],i,facts)
+        job(p+'_memory_review',p+' changed-fact verification','memory_review',[state,p+'_repair',p+'_final_memory'],repaired+[(p+'_final_memory','memory')],i,f"needs.{p}_final_memory.outputs.facts_changed == 'true'")
+        needs=[state,p+'_edit',p+'_story',p+'_rhetoric',p+'_memory',p+'_repair',p+'_verify',p+'_verify_rhetoric',p+'_final_memory',p+'_memory_review']
+        extras=common+[(p+'_edit','edited'),(p+'_story','initial-story'),(p+'_rhetoric','initial-rhetoric'),(p+'_memory','memory')]
+        for suffix,path in [('repair','repair'),('verify','verified'),('verify_rhetoric','verified-rhetoric'),('final_memory','final-memory'),('memory_review','memory-review')]:extras.append((p+'_'+suffix,path,f"needs.{p}_{suffix}.result == 'success'"))
+        job(p+'_accept',p+' accept with conditional fallbacks','accept',needs,extras,i,ok)
+        if i<3:
+            following=f's{i+2:02}'
+            job(following+'_design',following+' speculative next-scene design','anticipate_design',[state,p+'_edit',p+'_memory'],edit+[(p+'_memory','memory')],i+1)
+            job(p+'_settle',p+' settle canon and reconcile next design','settle',[p+'_accept',following+'_design'],[(p+'_accept','state'),(following+'_design','anticipated')],i+1)
+    tail=build(total=4,per_chapter=4,troy=True,full_api=True,resident=False).split('  results:\n',1)[1]
+    tail=re.sub(r'    needs: \[[^\n]+\]', '    needs: ['+', '.join(keys)+']',tail,count=1)
+    blocks.append('  results:\n'+tail)
+    return '\n'.join(blocks)
+
 if __name__ == '__main__':
     (ROOT / '.github/workflows/story.yml').write_text(build())
     (ROOT / '.github/workflows/troy.yml').write_text(build(total=4,per_chapter=4,troy=True))
@@ -274,3 +338,5 @@ if __name__ == '__main__':
     multi=build(total=4,per_chapter=4,troy=True,full_api=True,resident=False)
     multi=multi.replace('Troy full prompt-to-story / hosted APIs','Troy full multi-runner / hosted APIs').replace('troy-full-api','troy-multi-api')
     (ROOT / '.github/workflows/troy-multi-api.yml').write_text(multi)
+
+    (ROOT / '.github/workflows/troy-parallel-experiment.yml').write_text(build_experimental())

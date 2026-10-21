@@ -20,6 +20,12 @@ class Tracker:
         self.state={'task':task,'status':'running','phase':'starting','details':details,'model_calls_started':0,'model_calls_validated':0}
     def event(self,phase,message,**details):
         with self.lock:
+            if phase=='api_attempt' and details.get('attempt',1)>1:
+                counters=self.state.setdefault('api_retry_counts',{})
+                key=details.get('stage') or 'unknown';counters[key]=counters.get(key,0)+1
+            if phase in {'api_retry','api_failed'}:
+                counters=self.state.setdefault('api_failure_counts',{})
+                key=str(details.get('status_code') or 'transport');counters[key]=counters.get(key,0)+1
             if phase=='warning':self.state['warnings_count']=self.state.get('warnings_count',0)+1
             if phase=='state_loaded':self.state['story_progress']={'accepted_scenes':details.get('accepted_scenes',0),'total_scenes':details.get('planned_scenes'),'state_version':details.get('version')}
             if phase=='model_start':self.state['model_calls_started']+=1
@@ -45,6 +51,7 @@ class Tracker:
         target=os.getenv('GITHUB_STEP_SUMMARY')
         if not target:return
         rows=['### '+self.state['task'], '', '**Status:** '+self.state['status'],'','Elapsed: '+str(self.state.get('elapsed_seconds',0))+' seconds', '', 'Model calls started / validated: %s / %s'%(self.state['model_calls_started'],self.state['model_calls_validated'])]
+        rows+=['','API retries by stage: `'+json.dumps(self.state.get('api_retry_counts',{}))+'`','API failures by status: `'+json.dumps(self.state.get('api_failure_counts',{}))+'`']
         rows+=['','Warnings: **'+str(self.state.get('warnings_count',0))+'**']
         if self.state.get('story_progress'):rows+=['','Story progress: `'+json.dumps(self.state['story_progress'])+'`']
         if self.state.get('error'):rows+=['','**Failure:** '+self.state['error'].replace('\n',' ')]

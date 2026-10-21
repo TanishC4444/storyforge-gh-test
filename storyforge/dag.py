@@ -56,6 +56,9 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
     if task == 'prepare':
         req = contracts.request(load(ROOT / 'examples' / f'{request_file}.json'))
         req['profile'] = profile
+        if req.get('execution_policy',{}).get('experimental'):
+            from .worker_policy import validate
+            validate(req)
         contracts.require(req['chapters'] * req['scenes_per_chapter'] <= 9, 'This workflow supports at most nine scene slots')
         contracts.require(req['auto_approve_plan'], 'This automated DAG requires explicit auto_approve_plan in the request')
         if backend=='worker' and req.get('performance',{}).get('api_batch_probes'):
@@ -105,6 +108,10 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
     state = load(source / 'state' / 'snapshot.json')
     req = state['request']
     event('state_loaded','Accepted state loaded',version=state['version'],accepted_scenes=len(state['accepted']),planned_scenes=req['chapters']*req['scenes_per_chapter'])
+    if req.get('execution_policy',{}).get('experimental'):
+        from .experimental import dispatch,UNHANDLED
+        result=dispatch(task,source,out,state,index,profile,backend,request_file)
+        if result is not UNHANDLED:return result
     executor = Executor(req, out, backend)
     if req.get('performance',{}).get('single_editorial_pass'):
         executor.req={**req,'max_stage_retries':0}
@@ -164,6 +171,9 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         allowed={r['id'] for r in application_packet(req,state['retrieval'],'scene_designer',old['id'])['references']}
         contracts.require(all(isinstance(r,dict) and r.get('record_id') in allowed for r in designed['reference_uses']),'Scene reference outside applicable source packet')
         state['plan']['scenes'][index]=designed
+        if req.get('execution_policy',{}).get('experimental'):
+            from .experimental import memory_hash
+            state['design_memory_hash']=memory_hash(state)
         save(out/'scene-design.json',designed);save(out/'snapshot.json',state)
         output('characters',designed['participants'])
         return state

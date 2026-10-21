@@ -53,6 +53,11 @@ class Executor:
                 self.hosted.inherit((self.folder.parent/'inputs').rglob('provider-budget/quota.json'))
 
     def call(self, role, packet, instruction, *, tokens=1200, validator=None, skill='', response_schema=None, output_format='json'):
+        from .worker_policy import enabled as experimental, policy, permit
+        stage_policy=policy(self.req,role,tokens) if experimental(self.req) else None
+        if stage_policy:
+            tokens=stage_policy['max_tokens']
+            self.req={**self.req,'api_roles':{**self.req.get('api_roles',{}),role:stage_policy['tier']}}
         from .output_schema import editorial_schema, refinement_schema, plan_schema, scene_schema, memory_review_schema
         if self.req.get('performance',{}).get('compact_packets'):
             from .working_context import concise_packet
@@ -116,8 +121,8 @@ class Executor:
                             for route in routes:
                                 if route=='flash' and kind!='flash' and not self.hosted.can_rescue():continue
                                 try:
-                                    with heartbeat('Hosted '+route+' / '+role+'; shared quota pacing applies'):
-                                        hosted_result=self.hosted.complete(route,system,prompt,tokens,structured=bool(validator) and output_format=='json',response_schema=response_schema,role=role)
+                                    with permit(self.req), heartbeat('Hosted '+route+' / '+role+'; shared quota pacing applies'):
+                                        hosted_result=self.hosted.complete(route,system,prompt,tokens,structured=bool(validator) and output_format=='json',response_schema=response_schema,role=role,policy=stage_policy)
                                     break
                                 except Exception as exc:
                                     warning(self.folder,'api_fallback',str(exc))

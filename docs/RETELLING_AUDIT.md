@@ -180,3 +180,52 @@ conversation. Keep responses and investigation concise and avoid redundant polli
 or checks. A local account-wide snapshot was saved under reports/chat-usage/ and
 excluded from Git; do not infer per-chat use or continue routine sampling without
 an explicit request. Separate story-model token reports remain workflow diagnostics.
+
+## Separate parallel-efficiency experiment
+
+`troy-parallel-experiment.yml` is a separate generated multi-runner workflow. The
+original multi-runner workflow remains available. Refinement/review/revision/gate
+and planning/review/revision/gate each share one runner; editing stays a whole-scene
+distinct-writing pass. Repair, changed-paragraph verification and memory refresh
+jobs are gated by explicit outputs, with conditional artifact downloads and accept
+fallbacks when those jobs are skipped. Setup-worker is unchanged.
+
+The opt-in worker policy supplies per-stage hosted tiers, supported thinking levels,
+output caps, request timeouts and bounded retries for fast/small profiles. API
+requests share a per-process semaphore. CPU inference is serialized because the
+resident model and runner RAM cannot safely support several heavy completions at
+once. Retried API requests and failures are counted by stage/status in events and
+status files. Artifact-carried provider reservations still pace distributed stages;
+this is not an account-wide semaphore across unrelated workflow runs.
+
+Story/rhetoric dimensions run concurrently inside their respective jobs. Findings
+include severity and a zero-based paragraph index, or null for a whole-scene issue.
+Repair groups findings per paragraph, generates patches concurrently and applies
+them against an immutable hash in reverse source-offset order. A global repair pass
+runs only for null-paragraph findings. facts_changed is conservative: any prose
+change refreshes affected memory rather than trusting a model's claim that facts
+were unchanged. Verification receives the diff, prior findings/assessments and canon
+context, not an unchanged full-scene resend; a final chapter audit remains required.
+
+Initial extracted memory is independently verified. Diff refresh retains only
+unchanged, source-rebound facts from that verified base, extracts from changed
+passages, and independently checks changed facts. Missing verification triggers the
+safe full-source path; quarantined facts are not silently promoted to canon.
+
+writer_beats controls an independent beat-writing experiment. A short plan defines
+entry/exit states, beat drafts run concurrently without prior beat prose, and seam
+editors own only the following beat's first paragraph. The planned exit is not an
+observed generated exit; whole-scene editing and continuity review must catch any
+mismatch. Set writer_beats to 1 to disable this feature alone if quality suffers.
+
+Next-scene design may start from an explicitly speculative snapshot while the
+current scene is reviewed. Characters and writing wait for settle: after canon
+commit it compares the speculative memory hash with actual accepted memory. A
+mismatch reruns design inline against accepted canon. Speculative facts never become
+canon merely because the design job ran.
+
+Knobs live under execution_policy in examples/troy-parallel-experiment.json:
+gate_repair_threshold, writer_beats, and per-kind concurrency. Fixture tests cover
+both repair gates, patch ownership, beat stitching, source fallbacks, a complete
+two-scene sequence, delta-only verification and forced hash-mismatch design reruns.
+Live speed and quality improvements remain unmeasured until the experiment runs.

@@ -97,7 +97,7 @@ class GoogleHosted:
                 save(path,health)
             return health.get(kind,{}).get('until',0)>time.time()
 
-    def complete(self,kind,system,prompt,tokens,structured=False,response_schema=None,role=None):
+    def complete(self,kind,system,prompt,tokens,structured=False,response_schema=None,role=None,policy=None):
         if not self.key:raise HostedError('Google API key unavailable')
         self.reserve_flash_final=(kind=='flash' and role!='chapter_quality')
         if kind in self.disabled or self.circuit(kind):raise HostedError(kind+' circuit open after prior provider failure')
@@ -111,6 +111,7 @@ class GoogleHosted:
         print('Hosted '+model+': reserving '+str(estimate)+' input tokens',flush=True)
         self.reserve(kind,estimate+tokens)
         config={'maxOutputTokens':tokens,'thinkingConfig':{'thinkingLevel':'minimal' if kind=='gemma' else 'low'}}
+        if policy:config['thinkingConfig']['thinkingLevel']='minimal' if kind=='gemma' else policy.get('thinking','low')
         # Gemini supports native JSON schemas; Gemma uses the explicit prompt
         # contract. Do not assume JSON MIME/schema compatibility across families.
         if structured and kind=='flash':
@@ -120,14 +121,21 @@ class GoogleHosted:
         for attempt in range(2):
             from .usage import record
             request_started=time.monotonic()
+            from .tracking import event
+            event('api_attempt','Starting provider request',stage=role,attempt=attempt+1,model=model)
             try:
-                result=self.request(model+':generateContent',{**body,'generationConfig':config},timeout=150 if kind=='gemma' else 240)
+                result=self.request(model+':generateContent',{**body,'generationConfig':config},timeout=policy['timeout'] if policy else (150 if kind=='gemma' else 240))
                 candidate=result.get('candidates',[{}])
                 record(self.folder,'google',model,role,result.get('usageMetadata'),attempt=attempt+1,seconds=round(time.monotonic()-request_started,3),status='returned',finish_reason=candidate[0].get('finishReason') if candidate else None,reserved_input_tokens=estimate)
                 break
             except HostedError as exc:
+                from .tracking import event
+                import re
+                status=re.search(r'HTTP (\d+)',str(exc))
+                transient=any(code in str(exc) for code in ['500','502','503','504']) or bool(policy and any(code in str(exc) for code in ['429','timed out']))
+                event('api_retry' if attempt==0 and transient else 'api_failed','Provider request rejected',stage=role,status_code=int(status.group(1)) if status else None,attempt=attempt+1,error=str(exc))
                 record(self.folder,'google',model,role,attempt=attempt+1,seconds=round(time.monotonic()-request_started,3),status=str(exc),reserved_input_tokens=estimate)
-                if attempt==0 and any(code in str(exc) for code in ['500','502','503','504']):
+                if attempt==0 and transient:
                     time.sleep(4+random.random());self.reserve(kind,estimate+tokens);continue
                 if any(code in str(exc) for code in ['400','401','403','404','429']):self.disabled.add(kind)
                 self.circuit(kind,exc)
