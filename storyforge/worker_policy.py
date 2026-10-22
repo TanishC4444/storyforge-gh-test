@@ -25,9 +25,15 @@ def policy(req,role,tokens):
     if role=='refiner_part':tier=req.get('execution_policy',{}).get('refinement_provider','cpu')
     if role in {'writer','humanizer','structural_editor'} and req.get('execution_policy',{}).get('hosted_prose'):
         tier=req['execution_policy']['hosted_prose']
+    quality=req.get('execution_policy',{}).get('model_routing')=='quality'
+    if quality:
+        tier={'writer':'flash','writer_beat':'flash','global_repair':'flash',
+              'structural_editor':'flash36','chapter_quality':'flash36',
+              'memory_quality':'gemma'}.get(role,'lite')
     if tier=='cpu':tier=None
     return {'tier':tier,'thinking':'minimal' if tier=='gemma' else 'low',
             'max_tokens':min(tokens,cap),'timeout':timeout,'retries':2,
+            'quality_routing':quality,
             'estimate_small_calls':req.get('execution_policy',{}).get('estimate_small_calls',False)}
 
 @contextmanager
@@ -48,6 +54,7 @@ def parallel(req,kind,items,fn):
 def validate(req):
     from .contracts import require
     knobs=req['execution_policy']
+    require(knobs.get('model_routing') in {None,'quality'},'Invalid model routing profile')
     require(knobs.get('hosted_prose') in {None,'gemma','flash'},'Invalid hosted prose provider')
     require(knobs.get('refinement_provider','cpu') in {'cpu','gemma'},'Invalid refinement provider')
     require(knobs.get('gate_repair_threshold','blocking') in {'blocking','advisory'},'Invalid repair gate threshold')

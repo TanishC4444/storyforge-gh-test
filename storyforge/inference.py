@@ -46,7 +46,7 @@ class Executor:
     def __init__(self, req, folder, backend):
         self.req, self.folder, self.backend = req, Path(folder), backend
         self.hosted=None
-        if backend=='worker' and req.get('api_roles'):
+        if backend=='worker' and (req.get('api_roles') or req.get('execution_policy',{}).get('model_routing')=='quality'):
             from .hosted import GoogleHosted
             self.hosted=GoogleHosted(os.getenv('STORY_QUOTA_DIR',str(self.folder/'provider-budget')))
             if req.get('performance',{}).get('inherit_provider_budget') and not os.getenv('STORY_QUOTA_DIR'):
@@ -121,10 +121,12 @@ class Executor:
                         if self.hosted and kind:
                             from .resilience import warning
                             routes=[kind]
+                            if stage_policy and stage_policy.get('quality_routing'):
+                                routes += {'flash':['flash36'],'flash36':['flash'],'lite':['flash36'],'gemma':['lite']}.get(kind,[])
                             if self.req.get('performance',{}).get('hosted_failover') or (role=='humanizer' and kind=='gemma' and 'hosted_failover' not in self.req.get('performance',{})):
                                 routes += ['gemma' if kind=='flash' else 'flash']
-                            for route in routes:
-                                if route=='flash' and kind!='flash' and not self.hosted.can_rescue():continue
+                            for route in dict.fromkeys(routes):
+                                if route=='flash' and kind!='flash' and not (stage_policy and stage_policy.get('quality_routing')) and not self.hosted.can_rescue():continue
                                 try:
                                     with permit(self.req), heartbeat('Hosted '+route+' / '+role+'; shared quota pacing applies'):
                                         hosted_result=self.hosted.complete(route,system,prompt,tokens,structured=bool(validator) and output_format=='json',response_schema=response_schema,role=role,policy=stage_policy)

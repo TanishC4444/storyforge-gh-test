@@ -66,6 +66,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -118,6 +119,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -163,6 +165,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -212,6 +215,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -257,6 +261,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -304,6 +309,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -349,6 +355,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -398,6 +405,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -445,6 +453,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -493,6 +502,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -544,6 +554,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
           STORY_CHARACTER: ${{ matrix.character }}
         run: |
           backend=fixture
@@ -595,6 +606,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -645,6 +657,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -695,6 +708,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -749,6 +763,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -799,6 +814,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -849,6 +865,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -907,6 +924,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -965,6 +983,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1019,6 +1038,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1073,6 +1093,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1127,6 +1148,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1195,6 +1217,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1243,6 +1266,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1294,6 +1318,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
           STORY_CHARACTER: ${{ matrix.character }}
         run: |
           backend=fixture
@@ -1345,6 +1370,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1395,6 +1421,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1445,6 +1472,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1499,6 +1527,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1549,6 +1578,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1599,6 +1629,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1657,6 +1688,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1715,6 +1747,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1769,6 +1802,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1823,6 +1857,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1877,6 +1912,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1945,6 +1981,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1993,6 +2030,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2044,6 +2082,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
           STORY_CHARACTER: ${{ matrix.character }}
         run: |
           backend=fixture
@@ -2095,6 +2134,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2145,6 +2185,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2195,6 +2236,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2249,6 +2291,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2299,6 +2342,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2349,6 +2393,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2407,6 +2452,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2465,6 +2511,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2519,6 +2566,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2573,6 +2621,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2627,6 +2676,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2695,6 +2745,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2743,6 +2794,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2794,6 +2846,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
           STORY_CHARACTER: ${{ matrix.character }}
         run: |
           backend=fixture
@@ -2845,6 +2898,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2895,6 +2949,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2945,6 +3000,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2999,6 +3055,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -3049,6 +3106,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -3099,6 +3157,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -3157,6 +3216,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -3215,6 +3275,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -3269,6 +3330,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -3323,6 +3385,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -3377,6 +3440,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -3445,6 +3509,7 @@ jobs:
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
