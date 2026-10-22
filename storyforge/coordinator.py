@@ -64,8 +64,8 @@ def packet(req, state, card):
     }
     if req.get('performance',{}).get('canon_index'):
         from .canon import working
-        result['author_continuity']['current_state']=working(state,query=json.dumps(card))
-        result['pov_visible_memory']=working(state,card['pov'],query=json.dumps(card))['facts']
+        result['author_continuity']['current_state']=working(state,query=json.dumps(card),budget=req.get('performance',{}).get('working_memory_chars',6500))
+        result['pov_visible_memory']=working(state,card['pov'],query=json.dumps(card),budget=req.get('performance',{}).get('working_memory_chars',6500))['facts']
     return result
 
 

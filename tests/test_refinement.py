@@ -92,6 +92,7 @@ class RefinementTests(unittest.TestCase):
             data=concise_packet({**packet(req,state,card),**author_packet(req,state,card),'prose':prose},req)
             self.assertLess(len(json.dumps(data,ensure_ascii=False,separators=(',',':')))+2500,req['context_chars'])
             for item in data['completed_events']:
-                self.assertEqual(item['omitted_prefix_characters'],len(prose)-1800)
-                self.assertEqual(item['prose'],prose[-1800:])
+                self.assertEqual(item['omitted_prefix_characters'],len(prose)-1200)
+                self.assertEqual(item['prose'],prose[-1200:])
             state['accepted'].append({**card,'prose':prose})
+            state['memories'].extend({'kind':'resource','text':'Material custody and household obligations '+('specific '*30),'known_by':['public'],'source':card['id'],'fact_key':card['id']+str(j)} for j in range(6))

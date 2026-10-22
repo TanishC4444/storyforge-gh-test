@@ -626,7 +626,8 @@
     "inherit_provider_budget": true,
     "application_plan_binding": true,
     "development_batch_size": 6,
-    "api_batch_probes": false
+    "api_batch_probes": false,
+    "working_memory_chars": 3500
   },
   "api_roles": {
     "development_editor": "gemma",

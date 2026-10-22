@@ -227,3 +227,9 @@ Duplicate endings are removed from compact packets. Optional development proposa
 have separate planning/writing budgets; explicit author controls remain intact.
 Omissions are identified, and full prose stays in checkpoints. A regression checks
 editing-packet budgets at every position in the twelve-scene experiment.
+
+Compact packets keep shared canon facts once and use explicit fact-ID references
+for the focal character's visibility list. This preserves the distinction between
+author context and character knowledge while reducing repeated context. The Troy
+working-memory projection has a 3,500-character budget and reports omitted fact
+IDs; append-only history remains available in the checkpoint.

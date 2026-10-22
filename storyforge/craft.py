@@ -39,14 +39,14 @@ def chapter_history(state,card):
     for scene in state['accepted']:
         if scene['chapter']!=card['chapter']:continue
         prose=scene['prose'];item={'id':scene['id'],'prose':prose}
-        if len(prose)>1800:
-            item.update(prose=prose[-1800:],omitted_prefix_characters=len(prose)-1800,
+        if len(prose)>1200:
+            item.update(prose=prose[-1200:],omitted_prefix_characters=len(prose)-1200,
                         source_sha256=hashlib.sha256(prose.encode()).hexdigest())
         history.append(item)
     return history
 
 
-def development_projection(state,budget=2000):
+def development_projection(state,budget=1000):
     # Only optional model proposals are selected; explicit author controls stay intact.
     selected=[];used=0
     for item in state.get('refinement',{}).get('expanded_story_elements',[]):
