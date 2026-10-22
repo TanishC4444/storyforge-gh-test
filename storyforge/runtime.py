@@ -32,4 +32,9 @@ def review_call_timeout_seconds():
 
 def inference_timeout_seconds(role):
     remaining=worker_timeout_seconds()
-    return min(remaining,review_call_timeout_seconds()) if role in REVIEW_ROLES else remaining
+    if role in REVIEW_ROLES:return min(remaining,review_call_timeout_seconds())
+    if os.getenv('STORY_BATCH_TIMEOUT_SECONDS') and role in {'writer_beat','humanizer','repair','director'}:
+        cap=int(os.environ['STORY_BATCH_TIMEOUT_SECONDS'])
+        if not 60<=cap<=1800:raise ValueError('Batch inference budget must be 60–1800 seconds')
+        return min(remaining,cap)
+    return remaining

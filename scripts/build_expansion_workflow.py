@@ -59,20 +59,22 @@ def build_expansion(total=9,per_chapter=3):
     results['steps'].insert(2,{'name':'Collect readable prose independently of canon acceptance','if':'always()','run':'python -m storyforge.expansion collect --source results --out reading'})
     results['steps'].insert(3,{'uses':'actions/upload-artifact@v4','if':'always()','with':{'name':'readable-story','path':'reading/','retention-days':30}})
     results['steps'].insert(4,{'uses':'actions/upload-artifact@v4','if':'always()','with':{'name':'universe-canon','path':'reading/canon/','retention-days':30,'if-no-files-found':'ignore'}})
+    from scripts.batched_workflow import enable
+    x=enable(x,total)
     return yaml.safe_dump(x,sort_keys=False,width=120)
 
 
 
 def build_living():
     x=yaml.safe_load(build_expansion(total=1,per_chapter=1))
-    x['name']='Living universe / local models / full runner graph'
+    x['name']='Living universe / Gemini-first / batched runner graph'
     x['concurrency']['group']='living-universe'
-    inputs=x['on']['workflow_dispatch']['inputs'];inputs['request_file']['default']='local-universe-massive';inputs['profile']['default']='expressive'
+    inputs=x['on']['workflow_dispatch']['inputs'];inputs['request_file']['default']='local-universe-massive';inputs['profile']['default']='fast'
     inputs['resume_run']=inputs.pop('canon_run');inputs['resume_run']['description']='Prior accepted universe-canon run; empty starts a world'
     inputs['checkpoint_artifact']={'type':'choice','options':['universe-canon','quickstart'],'default':'universe-canon','description':'Use quickstart only to retry a failed event while retaining its saved random draw'}
     for key,job in x['jobs'].items():
         for s in job.get('steps',[]):
-            env=s.get('env',{});env.pop('GEMINI_API_KEY',None);env.pop('GEMINI_API_KEYS',None)
+            env=s.get('env',{})
             if s.get('id')=='task' and key=='quickstart':
                 env['CANON_RUN']='${{ inputs.resume_run }}'
                 s['run']='backend=fixture\nif [ "$STORY_BACKEND" = live ]; then backend=worker; fi\nextra=()\nif [ -n "$CANON_RUN" ]; then extra=(--checkpoint inputs/canon/snapshot.json); fi\npython -m storyforge.living_prepare --backend "$backend" --source inputs/state/snapshot.json --out out "${extra[@]}"'

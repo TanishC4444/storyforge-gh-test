@@ -63,7 +63,7 @@ class ExpansionTests(unittest.TestCase):
             with self.assertRaisesRegex(ContractError,'new episode'):prepare(p/'prepare/snapshot.json',p/'next',p/'bad.json')
     def test_classic_graph_has_distinct_editors_and_readable_outputs(self):
         t=Path('.github/workflows/cinematic-expansion.yml').read_text()
-        for x in ['s01_characters:','s01_edit_plan:','s01_edit_batches:','s01_edit:','s01_memory_review:','s01_accept:','name: readable-story','name: universe-canon']:self.assertIn(x,t)
+        for x in ['s01_characters:','s01_draft_plan:','s01_write_batches:','s01_repair_plan:','s01_repair_batches:','s01_edit:','s01_memory_review:','s01_accept:','name: readable-story','name: universe-canon']:self.assertIn(x,t)
         self.assertNotIn('refine_review:',t);self.assertIn('STORY_REVIEW_TIMEOUT_SECONDS:',t)
 
 
@@ -78,14 +78,14 @@ class LivingRunnerGraphTests(unittest.TestCase):
             self.assertEqual(state['accepted'],[]);self.assertEqual(state['universe_attempts'],1)
             self.assertEqual(state['refinement_method'],'application_compiled_author_brief_no_model_calls')
             self.assertTrue((p/'quickstart/proposal.json').exists())
-            self.assertFalse(state['request']['api_roles'])
+            self.assertEqual(state['request']['api_roles']['writer_beat'],'flash')
             # Retry a failed event with preserved prior canon and advanced random stream.
             second=living(p/'prepare/snapshot.json',p/'next',p/'quickstart/snapshot.json','fixture')
             self.assertEqual(second['universe_attempts'],2);self.assertEqual(second['universe_episode'],1)
             self.assertNotEqual(second['universe_rng_state'],state['universe_rng_state'])
     def test_local_workflow_exposes_full_runner_graph_without_nested_dispatch(self):
         t=Path('.github/workflows/living-universe.yml').read_text()
-        for name in ['prepare','quickstart','s01_design','s01_characters','s01_draft','s01_edit_plan','s01_edit_batches','s01_story','s01_rhetoric','s01_memory','s01_memory_review','s01_accept']:
+        for name in ['prepare','quickstart','s01_design','s01_characters','s01_draft','s01_draft_plan','s01_write_batches','s01_repair_plan','s01_repair_batches','s01_story','s01_rhetoric','s01_memory','s01_memory_review','s01_accept']:
             self.assertIn('  '+name+':',t)
-        self.assertNotIn('GEMINI_API_KEY',t);self.assertNotIn('workflow_dispatches',t)
+        self.assertIn('GEMINI_API_KEY',t);self.assertIn('GEMINI_DISTINCT_PROJECTS',t);self.assertNotIn('workflow_dispatches',t)
         self.assertIn('python -m storyforge.living_prepare',t)
