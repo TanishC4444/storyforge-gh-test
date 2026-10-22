@@ -59,3 +59,73 @@ class CraftTests(unittest.TestCase):
             self.assertEqual([c[0] for c in calls],['structural_editor','humanizer'])
             self.assertIn('structural_editor.',calls[1][1])
             self.assertTrue((root/'out/prose.txt').exists())
+
+
+class ProseRecoveryTests(unittest.TestCase):
+    def setUp(self):
+        self.req=request(json.loads((ROOT/'examples/troy-parallel-experiment.json').read_text()))
+        self.req['api_roles']={}
+        self.good=' '.join(['bronze']*900)
+
+    def test_each_edit_pass_retries_form_and_length_before_publication(self):
+        from storyforge.tracking import Tracker,_CURRENT
+        card={**self.req['scene_designs'][0],'chapter':1}
+        state={'request':self.req,'plan':{'scenes':[card]},'accepted':[]}
+        responses=[('“A quoted short scene.”',{'finish_reason':'stop'}),
+                   (self.good,{'finish_reason':'stop'}),
+                   ('A collapsed summary.',{'finish_reason':'stop'}),
+                   (self.good+' ash',{'finish_reason':'stop'})]
+        with tempfile.TemporaryDirectory() as d,redirect_stdout(io.StringIO()):
+            root=Path(d);save(root/'inputs/draft/draft.txt',self.good)
+            tracker=Tracker(root/'out','edit');token=_CURRENT.set(tracker)
+            try:
+                with patch('storyforge.dag.context',return_value={}),patch('storyforge.local_worker.execute',side_effect=responses) as worker:
+                    dispatch('edit',root/'inputs',root/'out',state,0,'fast','worker','unused')
+            finally:_CURRENT.reset(token)
+            self.assertEqual(worker.call_count,4)
+            retry=json.loads(worker.call_args_list[1].args[2])
+            self.assertEqual(retry['rejected_prose'],responses[0][0])
+            self.assertIn('word',retry['validation_error'])
+            self.assertIn('900',json.loads(worker.call_args_list[3].args[2])['validation_error'])
+            self.assertEqual((root/'out/prose.txt').read_text(),self.good+' ash')
+            self.assertEqual(len(list((root/'out/calls').glob('*.json'))),4)
+            self.assertEqual(tracker.state['model_calls_validated'],2)
+
+    def test_repeated_invalid_edit_preserves_evidence_and_stops(self):
+        from storyforge.inference import Executor
+        with tempfile.TemporaryDirectory() as d,redirect_stdout(io.StringIO()):
+            with patch('storyforge.local_worker.execute',return_value=('“Forbidden speech.”',{'finish_reason':'stop'})) as worker:
+                with self.assertRaisesRegex(ContractError,'bounded retries'):
+                    Executor(self.req,d,'worker').call('humanizer',{'prose':self.good},'Edit.',
+                        validator=lambda p:validate_prose(p,self.req),output_format='text')
+            self.assertEqual(worker.call_count,2)
+            self.assertEqual(len(list((Path(d)/'calls').glob('*.json'))),2)
+            self.assertFalse((Path(d)/'prose.txt').exists())
+
+    def test_parallel_outline_artifacts_merge_and_reject_missing_or_stale_inputs(self):
+        from storyforge.experimental import plan_chapter,combine_chapters
+        from storyforge.retrieval import retrieve
+        req=copy.deepcopy(self.req);req['retrieval_mode']='lexical'
+        state={'version':0,'backend':'fixture','accepted':[],'memories':[],
+               'request':req,'refinement':compile_brief(req),'retrieval':retrieve(req)}
+        original=copy.deepcopy(state)
+        with tempfile.TemporaryDirectory() as d,redirect_stdout(io.StringIO()):
+            root=Path(d)
+            chunks=[plan_chapter(state,i,root/str(i),'fast','fixture','unused') for i in [3,1,2]]
+            self.assertEqual(state,original)
+            for bad in [chunks[:2],[chunks[0],chunks[0],chunks[2]],
+                        [{**chunks[0],'base_sha256':'stale'},*chunks[1:]]]:
+                with self.assertRaises(ContractError):combine_chapters(copy.deepcopy(state),bad,root/'bad')
+            result=combine_chapters(state,chunks,root/'combined')
+            self.assertEqual([c['id'] for c in result['plan']['scenes']],
+                             [f'ch{c:02}-sc{s:02}' for c in range(1,4) for s in range(1,5)])
+            self.assertEqual(len(result['chapter_development_reviews']),3)
+
+    def test_generated_outline_jobs_share_only_the_immutable_brief(self):
+        from scripts.build_workflow import build_experimental
+        text=build_experimental()
+        self.assertEqual(text,(ROOT/'.github/workflows/troy-parallel-experiment.yml').read_text())
+        for chapter in range(1,4):
+            block=text.split(f'  plan_ch{chapter:02}:',1)[1].split('\n  plan_',1)[0]
+            self.assertIn('needs: [refine_bundle]',block)
+        self.assertIn('needs: [refine_bundle, plan_ch01, plan_ch02, plan_ch03]',text)
