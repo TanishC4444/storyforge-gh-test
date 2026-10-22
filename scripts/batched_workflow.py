@@ -4,12 +4,12 @@ import copy
 def enable(x,total):
     jobs=x['jobs'];result_job=jobs['results']
     def download(name,path,pattern=False):return {'uses':'actions/download-artifact@v4','with':{'pattern' if pattern else 'name':name,'path':'inputs/'+path}}
-    def make(template,key,title,task,needs,files,index,infer=True,matrix=None,kind=None):
+    def make(template,key,title,task,needs,files,index,infer=True,matrix=None,kind=None,phase=None):
         j=copy.deepcopy(template);j['name']=title;j['needs']=needs
         j.pop('strategy',None);j.pop('outputs',None)
         if matrix:
             j['strategy']={'fail-fast':False,'max-parallel':6,'matrix':{'batch':matrix}}
-        if task in {'draft_plan','repair_plan'}:j['outputs']={'characters':'${{ steps.task.outputs.characters }}'}
+        if task in {'draft_plan','repair_plan','memory_check_plan'}:j['outputs']={'characters':'${{ steps.task.outputs.characters }}'}
         kept=[]
         for s in j['steps']:
             if s.get('uses')=='actions/download-artifact@v4':continue
@@ -22,6 +22,7 @@ def enable(x,total):
                 if matrix:env['STORY_BATCH']='${{ matrix.batch }}'
                 cmd='python -m storyforge.batch_pipeline '+task+' --backend "$backend" --index '+str(index)
                 if kind:cmd+=' --kind '+kind
+                if phase:cmd+=' --phase '+phase
                 if matrix:cmd+=(' --group "$STORY_BATCH"' if task=='review_batch' else ' --batch "$STORY_BATCH"')
                 s['run']='backend=fixture\nif [ "$STORY_BACKEND" = live ]; then backend=worker; fi\n'+cmd
                 kept.extend([download(*f) for f in files])
@@ -43,16 +44,22 @@ def enable(x,total):
         for kind in ['story','rhetoric']:
             make(old[kind],p+'_'+kind+'_batches',kind+' review checks batch ${{ matrix.batch }}','review_batch',[p+'_design',p+'_edit'],state+[(p+'_edit','edited')],i,True,[0,1,2],kind)
             make(old[kind],p+'_'+kind,'Compile '+kind+' review findings','join_reviews',[p+'_design',p+'_edit',p+'_'+kind+'_batches'],state+[(p+'_edit','edited'),(p+'_'+kind+'_batches-*','batches',True)],i,False,kind=kind)
-        findings=state+[(p+'_edit','edited'),(p+'_story','story-review'),(p+'_rhetoric','rhetoric-review')]
-        make(old['repair'],p+'_repair_plan','Group exact disputed paragraphs into repair batches','repair_plan',[p+'_design',p+'_edit',p+'_story',p+'_rhetoric'],findings,i,False)
+        def memory_graph(prefix,edited,memory,phase,joined):
+            files=state+[(edited,'edited'),(memory,'memory')]
+            make(old['memory_review'],prefix+'_plan','Allocate '+phase+' memory checks','memory_check_plan',[p+'_design',edited,memory],files,i,False,phase=phase)
+            make(old['memory_review'],prefix+'_batches',phase+' memory / continuity batch ${{ matrix.batch }}','memory_check_batch',[p+'_design',edited,memory,prefix+'_plan'],files+[(prefix+'_plan','plan')],i,True,'${{ fromJSON(needs.'+prefix+'_plan.outputs.characters) }}')
+            make(old['memory_review'],joined,'Compile '+phase+' memory findings','memory_check_join',[p+'_design',edited,memory,prefix+'_plan',prefix+'_batches'],files+[(prefix+'_plan','plan'),(prefix+'_batches-*','batches',True)],i,False)
+        memory_graph(p+'_memory_preflight',p+'_edit',p+'_memory','preflight',p+'_memory_preflight')
+        findings=state+[(p+'_edit','edited'),(p+'_story','story-review'),(p+'_rhetoric','rhetoric-review'),(p+'_memory_preflight','memory-review')]
+        make(old['repair'],p+'_repair_plan','Group exact disputed paragraphs into repair batches','repair_plan',[p+'_design',p+'_edit',p+'_story',p+'_rhetoric',p+'_memory_preflight'],findings,i,False)
         make(old['repair'],p+'_repair_batches','Fix ONLY cited paragraphs / batch ${{ matrix.batch }}','repair_batch',[p+'_design',p+'_repair_plan'],state+[(p+'_repair_plan','plan')],i,True,'${{ fromJSON(needs.'+p+'_repair_plan.outputs.characters) }}')
         make(old['repair'],p+'_repair','Merge targeted fixes; preserve untouched paragraphs','merge_repairs',[p+'_design',p+'_edit',p+'_repair_plan',p+'_repair_batches'],state+[(p+'_edit','edited'),(p+'_repair_plan','plan'),(p+'_repair_batches-*','batches',True)],i,False)
-        make(old['repair'],p+'_final_check','ONE final strict prompt check; no rewrite loop','finalize',[p+'_design',p+'_repair',p+'_story',p+'_rhetoric'],state+[(p+'_repair','edited'),(p+'_story','story-review'),(p+'_rhetoric','rhetoric-review')],i,True)
+        make(old['repair'],p+'_final_check','ONE final strict prompt check; no rewrite loop','finalize',[p+'_design',p+'_repair',p+'_story',p+'_rhetoric',p+'_memory_preflight'],state+[(p+'_repair','edited'),(p+'_story','story-review'),(p+'_rhetoric','rhetoric-review'),(p+'_memory_preflight','memory-review')],i,True)
         make(old['verify'],p+'_verify','Reuse final story verdict','verdict_view',[p+'_design',p+'_final_check'],state+[(p+'_final_check','edited')],i,False,kind='story')
         make(old['verify_rhetoric'],p+'_verify_rhetoric','Reuse final rhetoric verdict','verdict_view',[p+'_design',p+'_final_check'],state+[(p+'_final_check','edited')],i,False,kind='rhetoric')
         make(old['memory'],p+'_memory','Extract evidence-bound initial facts','extract_initial',[p+'_design',p+'_edit'],state+[(p+'_edit','edited')],i)
         make(old['final_memory'],p+'_final_memory','Refresh facts ONLY where prose changed','refresh_memory',[p+'_design',p+'_edit',p+'_final_check',p+'_memory'],state+[(p+'_edit','original'),(p+'_final_check','edited'),(p+'_memory','initial-memory')],i)
-        make(old['memory_review'],p+'_memory_review','Verify compact source-bound facts','verify_memory',[p+'_design',p+'_final_check',p+'_final_memory'],state+[(p+'_final_check','edited'),(p+'_final_memory','memory')],i)
+        memory_graph(p+'_memory_final',p+'_final_check',p+'_final_memory','final',p+'_memory_review')
         # Acceptance stays on the existing gate, consuming the one final judgment.
         accept=jobs[p+'_accept']
         accept['needs']=[p+'_design',p+'_final_check',p+'_verify',p+'_verify_rhetoric',p+'_final_memory',p+'_memory_review']

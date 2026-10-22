@@ -41,7 +41,11 @@ class BatchPipelineTests(unittest.TestCase):
             shutil.copytree(p/'initial',p/'memory-input/initial-memory')
             b.refresh_memory(s,c,p/'memory-input',p/'memory','fixture')
             shutil.copytree(p/'final',p/'mv/edited');shutil.copytree(p/'memory',p/'mv/memory')
-            self.assertTrue(b.verify_memory(s,c,p/'mv',p/'memory-review','fixture')['pass'])
+            from storyforge import memory_batches
+            mp=memory_batches.plan(s,p/'mv',p/'mv/plan','final')
+            for batch in mp['batches']:
+                memory_batches.check(s,c,p/'mv',p/'mv/batches'/batch['id'],'fixture',batch['id'])
+            self.assertTrue(memory_batches.join(s,p/'mv',p/'memory-review')['pass'])
             save(p/'accept/state/snapshot.json',s)
             shutil.copytree(p/'final',p/'accept/edited');shutil.copytree(p/'memory',p/'accept/memory')
             shutil.copytree(p/'memory-review',p/'accept/memory-review')
