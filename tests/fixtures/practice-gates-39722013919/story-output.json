@@ -1,0 +1,30 @@
+{
+  "pass": true,
+  "checks": {
+    "causal_alternatives": {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p001",
+        "p002",
+        "p003"
+      ],
+      "reason": "The text clearly presents Thestor weighing paid labor and passage against investigating the strange iron object, resulting in a concrete loss of wages and delayed departure."
+    },
+    "dialogue_tactics": {
+      "verdict": "not_applicable",
+      "evidence_ids": [
+        "p002"
+      ],
+      "reason": "There is no dialogue or quoted speech in the scene, adhering strictly to the narrative constraints."
+    },
+    "continuity_clock": {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p001",
+        "p003"
+      ],
+      "reason": "Time, resources, and positions are meticulously tracked, showing the missed tide, the departed Locrian bark, and the remaining unmastered object."
+    }
+  },
+  "issues": []
+}

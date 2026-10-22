@@ -1,0 +1,267 @@
+{
+  "prose_sha256": "aabb2600a971d331a0d7c7549f1ac090b67e41eb11f23dca4a758ba484db8213",
+  "evidence_passages": [
+    {
+      "id": "p001",
+      "text": "The gale had strewn the shingle with broken cedar and tangled cordage, and between the hauled-up hulls the smoke of green wood smarted in the eyes of tired men. Thestor had promised his labor to the master of a Locrian supply bark: three patched bronze steers, cold-hammered straight and seated into fresh oak gudgeons before noon, in exchange for two small measures of spelt and room beneath the rowing benches for his sister\u2019s son, the only boy spared when the camp cough took the tent-hands in the eighth winter. The smith knelt with his flat rasp, scoring true lines across the sheared pins. A single hour of steady filing would see the rudder hung, the grain weighed into his sack, and the boy aboard before the ebb."
+    },
+    {
+      "id": "p002",
+      "text": "Then the tide washed a sea-torn balk against the stones, and in its split heart lay an iron sleeve, crusted with bitter salt and gray bitumen. As a diver plunges through murky surf after purple murex, heedless of the sharp urchins beneath his feet, so Thestor dropped his bronze scraper and leaned over the brine-dark metal, forgetting theLocrian captain who shouted behind him at the oarsmen. The tube had neither socket for an ash shaft nor ear for a leather thong, yet it was bored clean through its center with a cold, unnatural smoothness no hearth-tongs could coax from mortal iron. Beside a sealed vent, five shallow grooves ran spiral-wise into the throat, blackened with a soot that smelled not of pine pitch or rendered fat, but of hot stone struck by summer lightning."
+    },
+    {
+      "id": "p003",
+      "text": "Footsteps grated on the wet shingle. Odysseus stood over the flotsam, cloak gathered against the spray, his keen gaze passing over the splintered timber until it caught the gleam of the scored sleeve. The king stooped, touching the blackened lip with a calloused thumb, noting the twin marks stamped near the breech\u2014neither Phoenician tally nor the knot-sign of Mycenae, but two joined hammers bound with wire. When the Locrian vessel shoved off into the foam with its steers still broken, the smith\u2019s wage and the boy\u2019s passage drifted beyond the surf. Thestor remained upon his knees, the foreign iron heavy and useless in his hands, wondering whose forge had fed a flame so pure that it melted rock within the metal while leaving the rim cold as the sea."
+    }
+  ],
+  "scene": {
+    "goal": "A household seeks passage through storm damage and an unfamiliar object complicates ordinary work.",
+    "obstacle": "No completed decipherment or usable weapon.",
+    "intended_change": "Choose to investigate rather than finish the work that would earn passage.",
+    "location": "Achaean shore",
+    "time": "Immediately following the morning tide after the autumn gale, continuing the prior established state.",
+    "pov": "thestor",
+    "participants": [
+      "thestor",
+      "odysseus"
+    ],
+    "id": "ch01-sc01",
+    "chapter": 1,
+    "choice": "Thestor sets aside the delayed bronze repairs to examine the scored iron tube cast ashore, accepting the loss of immediate wages and passage.",
+    "consequence": "The delayed departure strands his surviving apprentice on the hostile shore while the king notes the smith's dangerous curiosity.",
+    "new_development": "By trading guaranteed passage for an inspection of the unknown mechanism, Thestor binds his labor directly to the king's secret campaign.",
+    "reference_uses": [
+      {
+        "record_id": "work_136",
+        "application": "Echoes the Homeric theme of supplication and material exchange where a mortal artisan confronts the demands of kings during a protracted war."
+      }
+    ]
+  },
+  "world_rules": [
+    "Hephaestus made the weapons for a divine purpose. A particular grievance and bargain explain access; no arbitrary delivery from the sky.",
+    "Scene 1 provides only an anomalous damaged object and grounds for an expedition: NO usable gun, possession, demonstration or battlefield firing.",
+    "Cache: exactly six cumbersome single-shot weapons, with a finite supply of prepared charges explicitly fixed at acquisition. No resupply or reproduction within this arc.",
+    "Deliberate preparation, smoke, noise, imperfect aim and wet-weather failures limit use. Possession does not guarantee a hit or victory.",
+    "Describe operation only enough to understand action and failure. Omit construction recipes and technical instructions.",
+    "No modern industry, tactical jargon, technical units or modern worldview. Men interpret unfamiliar craft through their ancient experience.",
+    "Divine aid never grants perfect knowledge, unlimited supplies or immunity. A god cannot retroactively cancel an established cost.",
+    "Odysseus accepts an obligation to restore a neglected sacred trust and acknowledge the maker. Specify a future concrete vulnerability; no gratuitous sacrifice of an innocent.",
+    "Agamemnon claims the cache but depends on skilled men and coalition consent. Achilles cannot be silenced by invoking the common cause.",
+    "Trojans observe, infer and adapt plausibly; no instant knowledge of operation or inventory.",
+    "Track each weapon, custodian, condition, remaining charges, travel, wounds, witnessed facts and private bargains.",
+    "End in a costly local Greek success, NOT Troy\u2019s fall. Hector and Achilles survive; larger political and divine conflicts remain open.",
+    "This practice covers only the opening discovery. Rules about later weapons, bargains and battles are background constraints, not events to perform in this scene."
+  ],
+  "pov": "Third-person past-tense epic narrator, with a primary focal character per scene. The narrator may supply another character\u2019s history or inner attention in a clearly separated paragraph, but this never grants other characters private knowledge. No dialogue, quoted speech, first-person narrator, invocation or direct address. Narrate offers and commitments briefly and show their consequences.",
+  "accepted_facts": {
+    "prior_canon": [
+      {
+        "text": "Thestor seeks wages and passage for his surviving apprentice. He is a mortal smith, not master of divine craft.",
+        "known_by": [
+          "thestor"
+        ],
+        "kind": "event",
+        "source": "user_input",
+        "id": "m00001"
+      },
+      {
+        "text": "After nine years, the Achaean coalition remains outside Troy; Hector and Achilles live. No Greek possesses or understands the unfamiliar weapons at the opening.",
+        "known_by": [
+          "public"
+        ],
+        "kind": "event",
+        "source": "user_input",
+        "id": "m00000"
+      },
+      {
+        "text": "Agamemnon commands a coalition of rival lords; Achilles and he have strained relations over honor.",
+        "known_by": [
+          "public"
+        ],
+        "kind": "event",
+        "source": "user_input",
+        "id": "m00002"
+      }
+    ],
+    "omitted_prior_ids": []
+  },
+  "nonnegotiable_form": "Third-person past-tense epic narrator, with a primary focal character per scene. The narrator may supply another character\u2019s history or inner attention in a clearly separated paragraph, but this never grants other characters private knowledge. No dialogue, quoted speech, first-person narrator, invocation or direct address. Narrate offers and commitments briefly and show their consequences.",
+  "chapter_contract": {
+    "arc": "A household seeks passage. Storm damage exposes a troubling object; choosing to investigate costs time or wages. No completed decipherment, divine visit, expedition or weapon acquisition.",
+    "continuity": "Track time, custody of the damaged object, household obligations and who witnesses the clue.",
+    "ending": "A concrete cost and open question; no usable weapon."
+  },
+  "scene_contract": {
+    "id": "ch01-sc01",
+    "title": "What the Sea Returned",
+    "pov": "thestor",
+    "participants": [
+      "thestor",
+      "odysseus"
+    ],
+    "location": "Achaean shore",
+    "setting": "Achaean shore",
+    "dramatic_function": "A household seeks passage through storm damage. An unfamiliar object complicates ordinary work.",
+    "development": "A household seeks passage through storm damage. An unfamiliar object complicates ordinary work.",
+    "choice_and_consequence": "Choose to investigate rather than finish the work that would earn passage.",
+    "restrictions": "No completed decipherment or usable weapon."
+  },
+  "completed_events": [],
+  "earlier_chapter_continuity": "Use source-bound canon and exact chapter excerpts. Omitted prose remains in checkpoints; do not infer unseen details. Planned outcomes are not evidence.",
+  "continuity_instruction": "Completed events are author evidence, not shared character knowledge. Continue their consequences; never reenact them.",
+  "quality_contract": [
+    "Third person, past tense, no dialogue or quoted speech, no invocation, no scene headings.",
+    "Every decisive event unfolds through attempted action, resistance, a credible alternative and an irreversible choice. Avoid plot-summary transitions at the moments that matter.",
+    "Thestor pursues household departure through competent work; choosing to investigate costs time or wages. Odysseus may witness a material clue but gains no complete understanding. Only the participating characters need appear.",
+    "Use close material perception and ancient social obligations. Do not label every emotion, explain an image twice, or repeat stock eyes, hands, weight and measured voices.",
+    "An epic simile must illuminate the current physical predicament and return cleanly to action. Elevated language is neither faux-archaic filler nor a translation imitation.",
+    "No repeated paragraphs, recycled bargaining, retroactive costs, unearned knowledge, instantaneous transport or offstage solutions.",
+    "Chapter revision must preserve the sequence and strengthen setup/payoff across scene boundaries; memory is extracted only after revisions."
+  ],
+  "development_proposals": [
+    "Proposed plot: Focus scene narration strictly on Thestor in third-person past tense without dialogue.",
+    "Proposed plot: Show storm damage obstructing paid work to force the core alternative.",
+    "Proposed plot: Depict Thestor committing to investigate the strange object at a direct household cost.",
+    "Proposed plot: Ensure Odysseus witnesses the material clue without either man deciphering it.",
+    "Proposed plot: End with delayed departure, a concrete wage loss, and an unanswered question.",
+    "Proposed characters: Focus the scene entirely through Thestor's focal attention using third-person past tense without any dialogue or quoted speech.",
+    "Proposed characters: Show Thestor weighing paid repair work against the investigation of an unfamiliar damaged object.",
+    "Proposed characters: Describe Odysseus observing a material clue without either man deciphering its function or gaining a usable weapon.",
+    "Proposed characters: End the scene with a concrete cost to household departure and one new unanswered question."
+  ],
+  "proposal_policy": "Development guidance and planned twists are proposals, not facts or character knowledge. Use only what serves this scene. Setup must precede payoff; explicit user restrictions override proposals.",
+  "scene_layout": {
+    "id": "ch01-sc01",
+    "pov": "thestor",
+    "participants": [
+      "thestor",
+      "odysseus"
+    ],
+    "location": "Achaean shore",
+    "what_happens": "A household seeks passage through storm damage. An unfamiliar object complicates ordinary work.",
+    "choice_and_consequence": "Choose to investigate rather than finish the work that would earn passage.",
+    "restrictions": "No completed decipherment or usable weapon."
+  },
+  "style": {
+    "narrator": "Third-person past-tense epic narrator, with a primary focal character per scene. The narrator may supply another character\u2019s history or inner attention in a clearly separated paragraph, but this never grants other characters private knowledge. No dialogue, quoted speech, first-person narrator, invocation or direct address. Narrate offers and commitments briefly and show their consequences.",
+    "register": "Concrete, grave, musical ancient epic in intelligible English. Use material acts, reciprocal obligation, shame and rank; no stock modern cinematic gestures.",
+    "wording": [
+      "Recurring epithets at meaningful moments; avoid attaching one to every name.",
+      "Period-fitting names: unfamiliar iron object, then iron tubes or fire-bearing tubes; keep naming consistent. No modern military vocabulary.",
+      "Ancient measures and experiences; no modern technical or psychological vocabulary.",
+      "Contemporary English grammar shaped by ancient epic; no indiscriminate thee/thou or faux-biblical filler.",
+      "Gods and human motives intertwine, while choices retain consequences.",
+      "No quotation or close reproduction of a modern translation."
+    ],
+    "figurative_language": {
+      "density": "moderate",
+      "devices": [
+        "extended epic simile",
+        "recurring epithet"
+      ],
+      "image_domains": [
+        "shepherding",
+        "harvest",
+        "storms",
+        "wild animals",
+        "weaving",
+        "shipbuilding",
+        "smithwork"
+      ],
+      "guidance": "Roughly one extended comparison per scene when earned, no mandatory quota. Let its image develop before returning to action. No modern image domains or continuous ornament."
+    },
+    "interiority": "Selective focalized thought tied to a practical choice, remembered obligation or fear of a specific loss; no abstract emotional labels.",
+    "dialogue": "Forbidden: no direct or quoted speech. Do not turn speeches into repetitive reported explanations.",
+    "explanation": "Cut explanations that merely restate legible action. Preserve purposeful epic repetition, ceremonial speech, lyricism and similes."
+  },
+  "tone_mood": "Grave and martial, with tenderness in concrete duties; wonder before divine craft and unease beneath victory. No modern sarcasm or action-film triumphalism.",
+  "characters": [
+    {
+      "id": "odysseus",
+      "name": "Odysseus",
+      "goal": "Obtain an advantage that can end the siege and return his men home.",
+      "value": "Practical survival and effective counsel.",
+      "fear": "Returning with neither victory nor the men entrusted to him.",
+      "habitual_strategy": "Ask, test, bargain and reveal only what wins cooperation.",
+      "limits": "He cannot anticipate divine intentions or command every king.",
+      "voice": "Measured persuasion through concrete examples and carefully limited promises.",
+      "arc": {
+        "starting_belief": "A useful advantage can be mastered through foresight.",
+        "old_strategy": "Ask, test, bargain and reveal only what wins cooperation.",
+        "pressure_test": "The bargain binds him to an obligation he cannot safely disclose.",
+        "costly_choice": "Authorize first use despite a limitation he understands.",
+        "possible_change": "Gaining possession is different from controlling consequences."
+      },
+      "contradiction": {
+        "tension": "He sees the costs hidden in heroic boasting while concealing the costs of his own bargains."
+      },
+      "emotional_behavior": {
+        "under_pressure": "Becomes exact about names, objects and promises."
+      },
+      "voice_design": {
+        "register": "Measured persuasion through concrete examples and carefully limited promises."
+      },
+      "source_status": "Principal character adapted from Trojan epic"
+    },
+    {
+      "id": "thestor",
+      "name": "Thestor",
+      "goal": "Secure passage for his surviving apprentice and wages owed to their household.",
+      "value": "Responsibility for work and dependents.",
+      "fear": "A king demanding certainty from craft he has barely understood.",
+      "habitual_strategy": "Demonstrate a physical fact when rank makes an argument easy to dismiss.",
+      "limits": "Mortal smith, no instant mastery or ability to reproduce divine craft.",
+      "voice": "Concrete and restrained before kings, less guarded with his apprentice.",
+      "arc": {
+        "starting_belief": "Useful knowledge can purchase safety.",
+        "old_strategy": "Demonstrate a physical fact when rank makes an argument easy to dismiss.",
+        "pressure_test": "Discovery makes him necessary and prevents departure.",
+        "costly_choice": "Reveal a dangerous limitation before deployment, risking punishment.",
+        "possible_change": "Gain a voice in council at the cost of being bound to the weapon."
+      },
+      "contradiction": {
+        "tension": "Resents concealment by leaders but initially hides what makes him indispensable."
+      },
+      "emotional_behavior": {
+        "under_pressure": "Checks tools or another person\u2019s equipment when frightened."
+      },
+      "voice_design": {
+        "register": "Concrete and restrained before kings, less guarded with his apprentice."
+      },
+      "source_status": "Invented minor character"
+    }
+  ],
+  "plot": {
+    "central_question": "What becomes of heroic honor when a man of little standing can strike down a champion beyond spear reach?",
+    "arc_question": "Will Thestor finish the work needed to leave, or investigate the damaged object at a household cost?",
+    "causal_dependencies": [
+      "Storm damage obstructs paid work.",
+      "Investigation costs time or wages.",
+      "An observed material clue raises an unanswered question without yielding operational knowledge."
+    ],
+    "subplots": [
+      {
+        "id": "smith-freedom",
+        "owner": "thestor",
+        "question": "Will skill secure household freedom or bind him more tightly to the army?",
+        "independent_action": "Seek passage and withheld wages before discovery.",
+        "intersection": "Kings prevent departure once his knowledge becomes necessary.",
+        "removal_cost": "Without it the social cost is only a debate among powerful men."
+      }
+    ],
+    "alternatives_and_costs": [
+      "Finish paid repairs and leave the strange object alone.",
+      "Investigate and lose time or wages needed for household passage."
+    ],
+    "local_resolution": "Thestor commits to investigation at an immediate household cost.",
+    "unresolved": [
+      "The object remains undeciphered; household departure is delayed."
+    ]
+  },
+  "review_instruction": "Check POV and knowledge boundaries, established resources and changes, concrete character choices, causal consequences and scene restrictions. A twist needs prior setup; a planned revelation is not accepted history.",
+  "required_checks": [
+    "causal_alternatives",
+    "dialogue_tactics",
+    "continuity_clock"
+  ]
+}
