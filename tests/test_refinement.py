@@ -124,3 +124,27 @@ class RefinementTests(unittest.TestCase):
         self.assertEqual(result['scenes'][0]['pov'],self.req['scene_designs'][0]['pov'])
         self.assertEqual(result['scenes'][0]['intended_change'],self.req['scene_designs'][0]['choice_and_consequence'])
         self.assertNotIn('first deployment',self.req['ending_tendency'].lower())
+
+    def test_actual_failed_writer_reports_all_errors_in_first_retry(self):
+        from storyforge.craft import validate_prose
+        text=(ROOT/'tests/fixtures/practice-writer-39714540410/attempt-2.txt').read_text()
+        # Select the original short artifact independently of filename ordering.
+        texts=[p.read_text() for p in (ROOT/'tests/fixtures/practice-writer-39714540410').glob('*.txt')]
+        short=min(texts,key=lambda s:len(s.split()))
+        with self.assertRaises(ContractError) as caught:validate_prose(short,self.req,check_length=True)
+        self.assertIn('269 words',str(caught.exception));self.assertIn('no-dialogue',str(caught.exception))
+    def test_no_dialogue_packets_remove_voice_examples_at_every_nesting_level(self):
+        from storyforge.working_context import concise_packet
+        speaker=self.req['characters'][0]
+        packet={'characters':[speaker],'pov_profile':speaker,'author_requirements':{'characters':[speaker]}}
+        result=concise_packet(packet,self.req)
+        self.assertIn('examples',speaker['voice_design'])
+        self.assertNotIn('examples',result['pov_profile']['voice_design'])
+        self.assertNotIn('examples',result['author_requirements']['characters'][0]['voice_design'])
+
+    def test_practice_hosted_prose_keeps_validators_and_full_story_cpu_policy(self):
+        from storyforge.worker_policy import policy
+        full=request(json.loads((ROOT/'examples/troy-parallel-experiment.json').read_text()))
+        for role in ['writer','humanizer','structural_editor']:
+            self.assertEqual(policy(self.req,role,1800)['tier'],'flash')
+            self.assertIsNone(policy(full,role,1800)['tier'])

@@ -38,6 +38,8 @@ def concise_packet(packet,req):
     # reference mechanisms, limits, requested purposes and IDs remain intact.
     def walk(value):
         if isinstance(value,dict):
+            if 'no dialogue' in req.get('pov','').lower() and isinstance(value.get('voice_design'),dict):
+                value['voice_design'].pop('examples',None)
             if 'references' in value and 'craft' in value:value.pop('craft',None)
             for child in value.values():walk(child)
         elif isinstance(value,list):

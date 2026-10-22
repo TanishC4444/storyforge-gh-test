@@ -334,7 +334,8 @@
     "batched_refinement": true,
     "estimate_small_calls": true,
     "refinement_provider": "cpu",
-    "compile_scene_layout": true
+    "compile_scene_layout": true,
+    "hosted_prose": "flash"
   },
   "performance": {
     "compact_packets": true,

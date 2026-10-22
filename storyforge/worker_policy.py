@@ -23,6 +23,8 @@ def enabled(req):return bool(req.get('execution_policy',{}).get('experimental'))
 def policy(req,role,tokens):
     tier,cap,timeout=PROFILE_TABLES.get(req.get('profile'),STAGES).get(role,('gemma',tokens,120))
     if role=='refiner_part':tier=req.get('execution_policy',{}).get('refinement_provider','cpu')
+    if role in {'writer','humanizer','structural_editor'} and req.get('execution_policy',{}).get('hosted_prose'):
+        tier=req['execution_policy']['hosted_prose']
     if tier=='cpu':tier=None
     return {'tier':tier,'thinking':'minimal' if tier=='gemma' else 'low',
             'max_tokens':min(tokens,cap),'timeout':timeout,'retries':2,
@@ -46,6 +48,7 @@ def parallel(req,kind,items,fn):
 def validate(req):
     from .contracts import require
     knobs=req['execution_policy']
+    require(knobs.get('hosted_prose') in {None,'gemma','flash'},'Invalid hosted prose provider')
     require(knobs.get('refinement_provider','cpu') in {'cpu','gemma'},'Invalid refinement provider')
     require(knobs.get('gate_repair_threshold','blocking') in {'blocking','advisory'},'Invalid repair gate threshold')
     require(type(knobs.get('writer_beats',1)) is int and 1<=knobs.get('writer_beats',1)<=4,'Invalid writer beat count')
