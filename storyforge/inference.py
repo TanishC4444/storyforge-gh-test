@@ -108,7 +108,7 @@ class Executor:
                 model='qwen7b'
             if last_error and role in {'writer','architect'} and self.req['profile']=='fast' and not self.req.get('execution_policy',{}).get('cpu_quality'):model='qwen3b'
             if self.req.get('execution_policy',{}).get('literary_quality'):
-                model='glitter-12b' if role in {'writer','writer_beat','seam'} else 'gemma-4-12b'
+                model='glitter-12b' if role in {'writer','writer_beat','seam'} else 'qwen7b' if role in {'story_quality','rhetoric_quality','chapter_quality','memory_quality','development_editor'} else 'gemma-4-12b'
             n_ctx=min(self.req['n_ctx'],8192) if model=='qwen3b' and not (validator and self.req.get('performance',{}).get('compact_packets')) and role not in {'writer','architect','chapter_quality','humanizer','refiner'} else self.req['n_ctx']
             digest = hashlib.sha256(json.dumps([self.backend, role, model, system, prompt, tokens, n_ctx, self.req['runner_repo'], response_schema,self.req.get('api_roles',{}),output_format]).encode()).hexdigest()
             path = self.folder / 'calls' / f'{role}-{digest[:20]}.json'

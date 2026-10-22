@@ -42,7 +42,7 @@ class LiteraryPolicyTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d,patch('storyforge.hosted.GoogleHosted.complete',side_effect=HostedError('Google HTTP 503')) as api,patch('storyforge.local_worker.execute',return_value=('Review unavailable',{'finish_reason':'stop'})) as cpu:
             Executor(req,d,'worker').call('story_quality',{},'Review source.',output_format='text')
             self.assertEqual([call.args[0] for call in api.call_args_list],['gemma','flash36','flash'])
-            self.assertEqual(cpu.call_args.args[0],'gemma-4-12b')
+            self.assertEqual(cpu.call_args.args[0],'qwen7b')
 
     def test_literary_brief_follows_input_and_style_check_is_required(self):
         req=example();req['style']={'register':'Spare contemporary realism.'};req['adaptation']={'mode':'none'}

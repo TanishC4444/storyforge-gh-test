@@ -32,5 +32,5 @@ For a no-dialogue brief, evaluate dialogue_tactics through narrated offers, refu
 Assess every requested dimension. Only subplot_function and reference_application may be not_applicable in editorial reviews. A substantive failure needs specific source evidence and an actionable fix consistent with the author contract. Do not invent an issue quota or approve merely to complete the run.
 Distinguish blocking contradictions and unsupported knowledge from advisory stylistic preferences. For memory verification, target=memory means an extraction error; target=prose means an inconsistency demonstrated within the actual prose. Do not rewrite prose to make an inaccurate memory true. Preserve the source's specificity and uncertainty.
 During formatting-only repair, preserve judgments and reasons; do not conduct a new assessment. During an explicitly requested substantive reassessment, use the original source and this author contract; either pass or fail remains possible.
-Author contract (application-owned): '''+json.dumps(rules,ensure_ascii=False,separators=(',',':'))
+Author contract (application-owned) is in author_review_contract in the input. Form: '''+rules['nonnegotiable_form']
     return packet,skill,policy
