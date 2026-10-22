@@ -53,7 +53,12 @@ def plan_chapter(state,chapter,out,profile,backend,request_file):
     local['refinement']={**local['refinement'],'original_prompt':scoped['premise'],'refined_prompt':scoped['premise']}
     local['accepted']=[]
     out=Path(out);save(out/'inputs/state/snapshot.json',local)
-    result=run_bundle('plan_bundle',out/'inputs',out/'developed',local,0,profile,backend,request_file)
+    if req.get('execution_policy',{}).get('compile_scene_layout'):
+        from .craft import compile_scene_plan
+        result={**local,'plan':compile_scene_plan(scoped),'development_gates':{'plan':{'method':'compiled_user_layout','model_review':False}}}
+        save(out/'developed/plan.json',result['plan'])
+    else:
+        result=run_bundle('plan_bundle',out/'inputs',out/'developed',local,0,profile,backend,request_file)
     chunk={'chapter':chapter,'base_sha256':digest(json.dumps(state,sort_keys=True)),
            'plan':result['plan'],'review':result.get('development_gates',{}).get('plan')}
     save(out/'chapter-plan.json',chunk)

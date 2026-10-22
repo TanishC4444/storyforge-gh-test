@@ -24,11 +24,11 @@
   "retrieval_mode": "hybrid",
   "retrieval_query": "Iliad heroic honor divine gift competing authority mortal vulnerability supplication war",
   "genre": "Mythic war epic; tragic alternate Trojan continuity",
-  "reader_experience": "Wonder, anticipation, competing loyalties, martial terror and a costly local victory that opens a larger epic.",
+  "reader_experience": "Close material attention, household urgency, curiosity and unease when an investigation imposes a concrete cost.",
   "pov": "Third-person past-tense epic narrator, with a primary focal character per scene. The narrator may supply another character\u2019s history or inner attention in a clearly separated paragraph, but this never grants other characters private knowledge. No dialogue, quoted speech, first-person narrator, invocation or direct address. Narrate offers and commitments briefly and show their consequences.",
   "tone_mood": "Grave and martial, with tenderness in concrete duties; wonder before divine craft and unease beneath victory. No modern sarcasm or action-film triumphalism.",
   "sensory_detail": "Concrete material detail perceived through ancient experience: bronze, sea, wool, ash, labor, bodies and weather.",
-  "ending_tendency": "Resolve acquisition and first deployment, not the Trojan War. End on a concrete changed obligation, not a moral summary.",
+  "ending_tendency": "End this opening scene with delayed household departure and an unanswered question. No acquisition, trial, deployment or battle is required or allowed in this practice scene.",
   "premise": "Write one developed opening scene on the storm-damaged Achaean shore. Thestor, a mortal smith seeking passage for his household, must choose between paid repair work and investigating an unfamiliar damaged object. Odysseus witnesses a material clue but neither man deciphers it or gains a usable weapon. End with a concrete cost to household departure and one new unanswered question. Third-person past tense, focal attention on Thestor, no dialogue, quoted speech, invocation, headings or moral summary. The wider Trojan War remains unresolved.",
   "keywords": [
     {
@@ -97,7 +97,7 @@
       "Hector and Achilles alive in this installment",
       "War not resolved"
     ],
-    "divergence": "Greeks earn access to firearms from a hidden workshop of Hephaestus during the tenth campaigning season.",
+    "divergence": "Future background only: divine firearms may later enter this alternate continuity. This practice scene reveals only a damaged unknown object and cannot acquire or operate a weapon.",
     "interpretation": "Strong source influence and pinned source selection; strength is guidance, not a measured borrowed percentage."
   },
   "style": {
@@ -199,7 +199,6 @@
   "world_rules": [
     "Hephaestus made the weapons for a divine purpose. A particular grievance and bargain explain access; no arbitrary delivery from the sky.",
     "Scene 1 provides only an anomalous damaged object and grounds for an expedition: NO usable gun, possession, demonstration or battlefield firing.",
-    "Scene 2 must earn the cache through an on-page journey, resistance, bargain and physical transport. The keeper has a motive beyond exposition.",
     "Cache: exactly six cumbersome single-shot weapons, with a finite supply of prepared charges explicitly fixed at acquisition. No resupply or reproduction within this arc.",
     "Deliberate preparation, smoke, noise, imperfect aim and wet-weather failures limit use. Possession does not guarantee a hit or victory.",
     "Describe operation only enough to understand action and failure. Omit construction recipes and technical instructions.",
@@ -209,7 +208,8 @@
     "Agamemnon claims the cache but depends on skilled men and coalition consent. Achilles cannot be silenced by invoking the common cause.",
     "Trojans observe, infer and adapt plausibly; no instant knowledge of operation or inventory.",
     "Track each weapon, custodian, condition, remaining charges, travel, wounds, witnessed facts and private bargains.",
-    "End in a costly local Greek success, NOT Troy\u2019s fall. Hector and Achilles survive; larger political and divine conflicts remain open."
+    "End in a costly local Greek success, NOT Troy\u2019s fall. Hector and Achilles survive; larger political and divine conflicts remain open.",
+    "This practice covers only the opening discovery. Rules about later weapons, bargains and battles are background constraints, not events to perform in this scene."
   ],
   "world_design": {
     "technology": [
@@ -240,7 +240,7 @@
   },
   "plot_design": {
     "central_question": "What becomes of heroic honor when a man of little standing can strike down a champion beyond spear reach?",
-    "arc_question": "Will the Greeks obtain and use the weapons, and who bears the cost?",
+    "arc_question": "Will Thestor finish the work needed to leave, or investigate the damaged object at a household cost?",
     "causal_dependencies": [
       "Storm damage obstructs paid work.",
       "Investigation costs time or wages.",
@@ -333,7 +333,8 @@
     "cpu_quality": false,
     "batched_refinement": true,
     "estimate_small_calls": true,
-    "refinement_provider": "cpu"
+    "refinement_provider": "cpu",
+    "compile_scene_layout": true
   },
   "performance": {
     "compact_packets": true,
@@ -362,7 +363,7 @@
   "quality_contract": [
     "Third person, past tense, no dialogue or quoted speech, no invocation, no scene headings.",
     "Every decisive event unfolds through attempted action, resistance, a credible alternative and an irreversible choice. Avoid plot-summary transitions at the moments that matter.",
-    "Thestor pursues household departure through competent work; his usefulness gives powerful men reason to prevent it. Odysseus solves a present problem by accepting a future vulnerability. Achilles must embody the danger he argues about.",
+    "Thestor pursues household departure through competent work; choosing to investigate costs time or wages. Odysseus may witness a material clue but gains no complete understanding. Only the participating characters need appear.",
     "Use close material perception and ancient social obligations. Do not label every emotion, explain an image twice, or repeat stock eyes, hands, weight and measured voices.",
     "An epic simile must illuminate the current physical predicament and return cleanly to action. Elevated language is neither faux-archaic filler nor a translation imitation.",
     "No repeated paragraphs, recycled bargaining, retroactive costs, unearned knowledge, instantaneous transport or offstage solutions.",

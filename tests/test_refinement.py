@@ -117,3 +117,10 @@ class RefinementTests(unittest.TestCase):
         self.assertIsNone(policy(self.req,'refiner_part',850)['tier'])
         req=copy.deepcopy(self.req);req['execution_policy']['refinement_provider']='gemma'
         self.assertEqual(policy(req,'refiner_part',850)['tier'],'gemma')
+
+    def test_basic_scene_plan_preserves_authored_layout_without_model_development(self):
+        from storyforge.craft import compile_scene_plan
+        result=compile_scene_plan(self.req)
+        self.assertEqual(result['scenes'][0]['pov'],self.req['scene_designs'][0]['pov'])
+        self.assertEqual(result['scenes'][0]['intended_change'],self.req['scene_designs'][0]['choice_and_consequence'])
+        self.assertNotIn('first deployment',self.req['ending_tendency'].lower())

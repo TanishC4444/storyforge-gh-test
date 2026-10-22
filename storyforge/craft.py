@@ -32,6 +32,21 @@ def compile_brief(req):
     },req)
 
 
+def compile_scene_plan(req):
+    """A supplied scene layout can serve as a basic plan without invented events."""
+    from .contracts import plan,require
+    require(len(req['scene_designs'])==req['chapters']*req['scenes_per_chapter'],'Basic layout needs every scene')
+    scenes=[]
+    for i,source in enumerate(req['scene_designs']):
+        require(source.get('pov') and source.get('participants') and source.get('choice_and_consequence'),'Basic scene layout needs POV, participants and a consequential choice')
+        scenes.append({'id':source['id'],'chapter':i//req['scenes_per_chapter']+1,
+                       'pov':source['pov'],'participants':source['participants'],
+                       'location':source['location'],'time':source.get('time','Continue from the preceding accepted exit state; establish elapsed time explicitly.'),
+                       'goal':source['dramatic_function'],'obstacle':source.get('restrictions') or source['development'],
+                       'intended_change':source['choice_and_consequence']})
+    return plan({'title':req['title'],'scenes':scenes,'threads':[s['question'] for s in req['plot_design'].get('subplots',[])]},req)
+
+
 def chapter_history(state,card):
     """Exact bounded excerpts; full accepted prose remains in immutable checkpoints."""
     import hashlib
