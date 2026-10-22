@@ -1,0 +1,11 @@
+# Three separate story modes
+
+1. **Sequential canon** (`troy-practice.yml` for one scene, existing multi-runner workflows for full stories): write, review, repair, verify memory, then commit each scene in order.
+2. **Parallel scenes and reconciler** (`parallel-scenes.yml`): choose chapters, scenes per chapter and word target. Deepen scene contracts first, check proposed handoffs, draft on independent matrix runners, then reconcile actual prose and source-bound facts. Findings trigger bounded targeted rewriting and fresh reviews. Canon commits only after reconciliation converges. One scene tests transport and gates; at least two are needed to measure concurrency and cross-scene cohesion. The pilot supports at most 24 scenes. Bounded overlapping prose windows and fact trails avoid silently truncating a manuscript. Model audits remain fallible, especially for long-range semantic dependencies.
+3. **Living universe / local models** (`living-universe.yml`): a beginning, cast, immutable rules and initial facts define a persistent world with no predetermined total length. Each manual run has an operational time/event budget and can resume a previous checkpoint artifact. Seeded, heavily randomized shocks are proposals for a local director, not automatic canon. Glitter 12B writes; Qwen 7B plans, extracts and reviews. No Gemini credentials are exposed. Events commit only after quality and memory checks. Failed attempts preserve random draws and provisional output without changing accepted history. No schedule is installed. CPU generation can be slow on hosted runners.
+
+Fixture runs use explicitly labeled synthetic prose. They test orchestration, not literary quality, and cannot resume into live worlds. Live failures preserve checkpoints. Tests do not establish provider availability or expert literary quality.
+
+## Original retelling
+
+`outputs/troy-third-person/PRE_EDITORIAL_MODEL_STORY.txt` preserves four original accepted model scenes (3,887 words), verified against the older local coordinator's per-scene files. It includes automated model editing and documented memory recovery, but excludes the later direct Codex prose revision. The 3,676-word `FINAL_STORY.txt` is that later editorial version. Neither is an untouched output of a successful unattended Actions run.

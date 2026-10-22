@@ -277,3 +277,7 @@ failures. Editing retains its last form/length-validated candidate if a proposed
 edit is rejected or unavailable, records skipped passes in edit-report.json, and
 still requires independent story, rhetoric, memory and acceptance gates. A valid
 draft is not declared a reviewed story just because an optional edit was skipped.
+
+## Three separate modes
+
+See [mode behavior, practice runs and limitations](docs/THREE_MODES.md). The original pre-Codex model manuscript is preserved separately as [PRE_EDITORIAL_MODEL_STORY.txt](outputs/troy-third-person/PRE_EDITORIAL_MODEL_STORY.txt).

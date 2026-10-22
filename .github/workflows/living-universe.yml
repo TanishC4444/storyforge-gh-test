@@ -1,0 +1,62 @@
+name: Living universe / local models
+'on':
+  workflow_dispatch:
+    inputs:
+      backend:
+        type: choice
+        options:
+        - fixture
+        - live
+        default: fixture
+      resume_run:
+        type: string
+        default: ''
+        description: Prior universe run checkpoint; empty starts a new world
+      events:
+        type: number
+        default: 1
+        description: Operational event limit for this manual run, not total story length
+      minutes:
+        type: number
+        default: 60
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: living-universe
+  cancel-in-progress: false
+jobs:
+  grow:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      if: ${{ inputs.resume_run != '' }}
+      with:
+        name: universe-checkpoint
+        run-id: ${{ inputs.resume_run }}
+        github-token: ${{ github.token }}
+        path: out
+    - name: Execute scoped mode stage
+      id: task
+      env:
+        PYTHONUNBUFFERED: '1'
+        BACKEND: ${{ inputs.backend }}
+        SCENE_ID: ${{ matrix.scene_id }}
+        MINUTES: ${{ inputs.minutes }}
+        EVENTS: ${{ inputs.events }}
+      run: 'backend=fixture
+
+        if [ "$BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.universe --backend "$backend" --minutes "$MINUTES" --steps "$EVENTS"'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: universe-checkpoint
+        path: out/
+        retention-days: 30

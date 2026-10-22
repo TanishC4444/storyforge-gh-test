@@ -1,0 +1,210 @@
+name: Parallel scenes and reconciler
+'on':
+  workflow_dispatch:
+    inputs:
+      backend:
+        type: choice
+        options:
+        - fixture
+        - live
+        default: fixture
+      chapters:
+        type: number
+        default: 1
+      scenes:
+        type: number
+        default: 1
+      words:
+        type: number
+        default: 350
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: parallel-scenes
+  cancel-in-progress: false
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - name: Install retrieval dependencies
+      run: python -m pip install -e '.[rag]' -q
+    - name: Execute scoped mode stage
+      id: task
+      env:
+        PYTHONUNBUFFERED: '1'
+        BACKEND: ${{ inputs.backend }}
+        SCENE_ID: ${{ matrix.scene_id }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        CHAPTERS: ${{ inputs.chapters }}
+        SCENES: ${{ inputs.scenes }}
+        WORDS: ${{ inputs.words }}
+      run: 'backend=fixture
+
+        if [ "$BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.parallel_story prepare --backend "$backend" --chapters "$CHAPTERS" --scenes "$SCENES" --words
+        "$WORDS"'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: parallel-prepared
+        path: out/
+        retention-days: 30
+    outputs:
+      matrix: ${{ steps.task.outputs.matrix }}
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: parallel-prepared
+        path: inputs/state
+    - name: Execute scoped mode stage
+      id: task
+      env:
+        PYTHONUNBUFFERED: '1'
+        BACKEND: ${{ inputs.backend }}
+        SCENE_ID: ${{ matrix.scene_id }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+      run: 'backend=fixture
+
+        if [ "$BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.parallel_story contract --backend "$backend" --scene-id "$SCENE_ID"'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: contract-${{ matrix.scene_id }}
+        path: out/
+        retention-days: 30
+    needs:
+    - prepare
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+  join:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: parallel-prepared
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: contract-*
+        path: inputs/contracts
+    - name: Execute scoped mode stage
+      id: task
+      env:
+        PYTHONUNBUFFERED: '1'
+        BACKEND: ${{ inputs.backend }}
+        SCENE_ID: ${{ matrix.scene_id }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+      run: 'backend=fixture
+
+        if [ "$BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.parallel_story join --backend "$backend"'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: parallel-ready
+        path: out/
+        retention-days: 30
+    needs:
+    - contracts
+  drafts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: parallel-ready
+        path: inputs/state
+    - name: Execute scoped mode stage
+      id: task
+      env:
+        PYTHONUNBUFFERED: '1'
+        BACKEND: ${{ inputs.backend }}
+        SCENE_ID: ${{ matrix.scene_id }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+      run: 'backend=fixture
+
+        if [ "$BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.parallel_story draft --backend "$backend" --scene-id "$SCENE_ID"'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: draft-${{ matrix.scene_id }}
+        path: out/
+        retention-days: 30
+    needs:
+    - prepare
+    - join
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: parallel-ready
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: draft-*
+        path: inputs/drafts
+    - name: Execute scoped mode stage
+      id: task
+      env:
+        PYTHONUNBUFFERED: '1'
+        BACKEND: ${{ inputs.backend }}
+        SCENE_ID: ${{ matrix.scene_id }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+      run: 'backend=fixture
+
+        if [ "$BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.parallel_story reconcile --backend "$backend"'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: parallel-result
+        path: out/
+        retention-days: 30
+    needs:
+    - drafts
