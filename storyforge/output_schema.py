@@ -80,4 +80,6 @@ def scene_schema(req,packet):
 def memory_review_schema():
     issue={'type':'object','properties':{k:{'type':'string'} for k in ['category','quote','problem','fix']},'required':['severity','category','quote','problem','fix'],'additionalProperties':False}
     issue['properties']['severity']={'type':'string','enum':['blocking','advisory']}
+    issue['properties']['target']={'type':'string','enum':['memory','prose']}
+    issue['required'].append('target')
     return {'type':'object','properties':{'pass':{'type':'boolean'},'issues':{'type':'array','items':issue}},'required':['pass','issues'],'additionalProperties':False}

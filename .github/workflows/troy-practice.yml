@@ -818,8 +818,8 @@ jobs:
 
   s01_repair:
     name: s01 paragraph patch batches
-    needs: [s01_design, s01_edit, s01_story, s01_rhetoric]
-    if: ${{ always() && !cancelled() && (needs.s01_story.outputs.needs_repair == 'true' || needs.s01_rhetoric.outputs.needs_repair == 'true') }}
+    needs: [s01_design, s01_edit, s01_story, s01_rhetoric, s01_memory]
+    if: ${{ always() && !cancelled() && (needs.s01_story.outputs.needs_repair == 'true' || needs.s01_rhetoric.outputs.needs_repair == 'true' || needs.s01_memory.outputs.needs_repair == 'true') }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     outputs:
@@ -850,6 +850,10 @@ jobs:
         with:
           name: s01_rhetoric
           path: inputs/rhetoric
+      - uses: actions/download-artifact@v4
+        with:
+          name: s01_memory
+          path: inputs/initial-memory
       - name: Execute s01 paragraph patch batches
         id: task
         env:

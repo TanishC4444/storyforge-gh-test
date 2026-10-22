@@ -38,7 +38,7 @@ def bind_memory(memory,before,after):
 
 def review_memory(executor,req,prose,memories):
     if not memories:return {'pass':True,'issues':[]}
-    return executor.call('memory_quality',{'current_prose':prose,'proposed_memory':{'memories':memories}},'Verify only these changed facts and their knowledge holders against the supplied evidence. Unsupported inference fails. Return pass and issues with exact quotes.',tokens=1000,validator=lambda x:contracts.review(x,prose))
+    return executor.call('memory_quality',{'current_prose':prose,'proposed_memory':{'memories':memories}},'Verify only these changed facts and their knowledge holders against the supplied evidence. Unsupported inference fails. Classify every issue target: memory for an extraction error or unsupported knowledge; prose ONLY for a contradiction present within current_prose itself. A memory paraphrase error does not justify changing prose. Check explicit material, counts, chronology and identity consistently across all paragraphs. Return pass and issues with target and exact quotes.',tokens=1000,validator=lambda x:contracts.review(x,prose))
 
 
 def plan_chapter(state,chapter,out,profile,backend,request_file):
@@ -167,6 +167,7 @@ def dispatch(task,source,out,state,index,profile,backend,request_file):
             if path!=source/target/name:save(source/target/name,load(path) if name.endswith('.json') else path.read_text())
         for preferred,fallback,target in [('verified','initial-story','story-review'),('verified-rhetoric','initial-rhetoric','rhetoric-review')]:
             path=choose(source,preferred,fallback,'review.json');save(source/target/'review.json',load(path))
+        if (source/'memory-review/memory.json').exists():save(source/'memory/memory.json',load(source/'memory-review/memory.json'))
         path=source/'memory-review/review.json'
         if not path.exists():save(path,load(source/'memory/memory-review.json'))
         prose=(source/'edited/prose.txt').read_text()
@@ -231,14 +232,20 @@ def dispatch(task,source,out,state,index,profile,backend,request_file):
             verdict['needs_repair']=True
         save(out/'review.json',verdict);output('needs_repair',verdict['needs_repair']);return None
     if task=='repair':
-        before=(source/'edited/prose.txt').read_text();after,info=repair(executor,req,before,[load(source/'diagnosis/review.json'),load(source/'rhetoric/review.json')])
+        before=(source/'edited/prose.txt').read_text()
+        reviews=[load(source/'diagnosis/review.json'),load(source/'rhetoric/review.json')]
+        if (source/'initial-memory/memory-review.json').exists():
+            from .memory_recovery import prose_findings
+            reviews.append(prose_findings(load(source/'initial-memory/memory-review.json'),before))
+        after,info=repair(executor,req,before,reviews)
         save(out/'prose.txt',after);save(out/'repair.json',info);save(out/'before.txt',before)
         for key in ['changed','facts_changed']:output(key,info[key])
         return None
     if task=='memory':
         prose=(source/'edited/prose.txt').read_text()
-        result=memory_extract(executor,req,out,prose,{**payload(prose),'characters':[c['id'] for c in req['characters']],**recording_context(state,card)},MEMORY_INSTRUCTION)
-        verdict=review_memory(executor,req,prose,result['memories'])
+        from .memory_recovery import recover,prose_findings
+        result,verdict=recover(executor,req,out,prose,{**payload(prose),'characters':[c['id'] for c in req['characters']],**recording_context(state,card)},MEMORY_INSTRUCTION,memory_extract,review_memory)
+        output('needs_repair',bool(prose_findings(verdict,prose)['issues']))
         save(out/'memory.json',result);save(out/'memory-review.json',verdict);save(out/'source.txt',prose);return None
     if task=='memory_final':
         after=(source/'edited/prose.txt').read_text();before=(source/'initial-memory/source.txt').read_text();base=load(source/'initial-memory/memory.json')
@@ -262,5 +269,10 @@ def dispatch(task,source,out,state,index,profile,backend,request_file):
     if task=='memory_review':
         prose=(source/'edited/prose.txt').read_text();memory=load(source/'memory/memory.json')
         selected=memory.get('changed_memories',memory['memories']) if memory.get('base_verified') else memory['memories']
-        verdict=review_memory(executor,req,prose,selected);save(out/'review.json',verdict);return None
+        from .memory_recovery import recover
+        # On rejection regenerate the complete extraction; a corrected artifact
+        # replaces the whole memory candidate, never silently drops changed facts.
+        result,verdict=recover(executor,req,out,prose,{**payload(prose),'characters':[c['id'] for c in req['characters']],**recording_context(state,card)},MEMORY_INSTRUCTION,memory_extract,review_memory,result={'memories':selected})
+        if (out/'memory-recovery.json').exists():save(out/'memory.json',result)
+        save(out/'review.json',verdict);return None
     return UNHANDLED
