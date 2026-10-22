@@ -6,7 +6,7 @@ import threading
 
 # Provider tiers are existing configured models; no unverified model identifiers.
 STAGES={
- 'refiner':(None,2400,90),'architect':(None,3000,120),
+ 'refiner_part':('gemma',850,60),'refiner':(None,2400,90),'architect':(None,3000,120),
  'development_editor':(None,1200,90),'scene_designer':(None,1200,90),
  'character':('gemma',220,45),'director':(None,500,60),
  'writer':(None,4200,180),'writer_beat':(None,1100,120),
@@ -23,7 +23,8 @@ def enabled(req):return bool(req.get('execution_policy',{}).get('experimental'))
 def policy(req,role,tokens):
     tier,cap,timeout=PROFILE_TABLES.get(req.get('profile'),STAGES).get(role,('gemma',tokens,120))
     return {'tier':tier,'thinking':'minimal' if tier=='gemma' else 'low',
-            'max_tokens':min(tokens,cap),'timeout':timeout,'retries':2}
+            'max_tokens':min(tokens,cap),'timeout':timeout,'retries':2,
+            'estimate_small_calls':req.get('execution_policy',{}).get('estimate_small_calls',False)}
 
 @contextmanager
 def permit(req):
@@ -47,4 +48,4 @@ def validate(req):
     require(type(knobs.get('writer_beats',1)) is int and 1<=knobs.get('writer_beats',1)<=4,'Invalid writer beat count')
     require(isinstance(knobs.get('concurrency',{}),dict),'Concurrency must name API, review, writer and repair limits')
     for key,value in knobs.get('concurrency',{}).items():
-        require(key in {'api','reviews','writer','repair'} and type(value) is int and 1<=value<=4,'Invalid concurrency limit')
+        require(key in {'api','reviews','writer','repair','refinement'} and type(value) is int and 1<=value<=4,'Invalid concurrency limit')

@@ -41,7 +41,9 @@ def review(executor,req,prose,packet,required,role,kind,prior=None,diff=None):
         selected={p['id'] for p in diff['changed']}
         # Deletions need a surviving boundary as evidence; no full-scene resend.
         if not selected and catalog:selected.add(catalog[min(len(catalog)-1,diff['removed'][0]['index'] if diff['removed'] else 0)]['id'])
-        source['evidence_passages']=[p for p in source['evidence_passages'] if p['id'] in selected]
+        # All dimensions (especially causality, POV and continuity) need the whole
+        # candidate after a patch. Changed paragraphs remain explicit edit targets.
+        packet['verification_scope']='Reassess the complete candidate for cross-paragraph consistency; focus corrections on the supplied changes without assuming unchanged text is automatically correct.'
         packet={**packet,'changed_paragraphs':diff['changed'],'removed_paragraphs':diff['removed'],'findings':prior['issues']}
     groups=[active[i:i+3] for i in range(0,len(active),3)]
     def assess(group):

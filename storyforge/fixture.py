@@ -3,6 +3,7 @@ import json
 
 
 def respond(role, packet, req):
+    if role=='refiner_part':return json.dumps({'guidance':['Preserve the supplied '+packet['category']+' constraints through concrete action.'],'assumptions':[],'open_decisions':[]})
     if role=='repair':return json.dumps({'replacement':packet['paragraph']+' FIXTURE repaired.','facts_changed':False})
     if role=='global_repair':return packet['prose']
     if role=='seam':return packet['right_entry']
@@ -31,6 +32,10 @@ def respond(role, packet, req):
                 scenes.append({'id': f'ch{ch:02}-sc{sc:02}', 'chapter': ch, 'pov': ids[0], 'participants': ids[:2],
                                'location': 'bell tower', 'time': f'day {ch}, interval {sc}', 'goal': 'inspect the bell mechanism',
                                'obstacle': 'access requires cooperation', 'intended_change': 'a practical decision changes the inspection'})
+        for scene in scenes:
+            authored=next((s for s in req.get('scene_designs',[]) if s['id']==scene['id']),{})
+            for key in ['pov','participants','location']:
+                if key in authored:scene[key]=authored[key]
         return json.dumps({'title': req.get('title'), 'threads': ['bell repair', 'trust'], 'technique_stack': ['consequential choice'], 'scenes': scenes})
     if role in {'story_quality', 'rhetoric_quality', 'memory_quality', 'chapter_quality'}:
         if packet.get('required_checks'):
@@ -38,6 +43,9 @@ def respond(role, packet, req):
             return json.dumps({'pass':True,'checks':[{'id':key,'verdict':'pass','evidence_ids':[evidence_id],'reason':'Synthetic fixture assessment validates the contract only, not literary quality.'} for key in packet['required_checks']],'issues':[]})
         return json.dumps({'pass': True, 'issues': []})
     if role == 'memory':
+        if 'mara' not in {c['id'] for c in req['characters']}:
+            passage=packet['evidence_passages'][0]
+            return json.dumps({'memories':[{'kind':'event','text':passage['text'],'evidence_ids':[passage['id']],'known_by':[req['characters'][0]['id']]}]})
         return json.dumps({'memories': [{'kind': 'event', 'text': 'Mara checked the tower latch.', 'evidence': 'Mara checked the tower latch.', 'known_by': ['mara']} ]})
     if role == 'character':
         return packet['character'].get('name', packet['character']['id']) + ' checks the nearest fastening.'
@@ -49,6 +57,8 @@ def respond(role, packet, req):
         return packet['prose']
     if role == 'writer':
         card = packet.get('scene', packet.get('context', {}).get('scene', {}))
+        if 'no dialogue' in req.get('pov','').lower():
+            return f'FIXTURE {card.get("id", "repair")}: transport test only. The smith checked the storm-damaged fastening and chose to remain beside the damaged object. His companion observed the work. No literary quality is established by this synthetic response.'
         return (f'[FIXTURE {card.get("id", "repair")}: transport test only.]\n\nMara checked the tower latch. '
                 'The hinge caught halfway. She put the lamp down before trying again.\n\n'
                 '“Hold this,” she said.\n\nOren kept his hand on the rail. “Tell me what you are checking.”\n\n'

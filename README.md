@@ -192,3 +192,30 @@ model loads; separate runners provide the additional chapter parallelism.
 
 Validation uses fixture and mocked-model regression tests; it does not establish
 live prose quality or a measured speedup.
+
+
+## Batched refinement and one-scene live practice
+
+The Troy experiment refines five independent categories (plot, characters, world,
+scene layout, style) with at most two concurrent small calls. Each has only its
+category inputs plus the shared premise and narrative-form constraints. The
+original brief, rules and POV stay immutable; development suggestions remain
+labelled proposals. The planner receives those suggestions, while writers receive
+the applicable scene layout and full character arcs. Hosted refinement uses the
+existing GEMINI_API_KEY secret and shared per-job provider budget; unavailable
+hosted calls fall back to Qwen 3B. Small calls can avoid countTokens using a
+conservative byte-based reservation. CPU calls within a runner stay serialized.
+
+Actions → **Troy one-scene practice** → backend **live**, profile **small** tests
+one 350-word scene with the same refinement, outline, editing, independent quality,
+source-bound memory, repair, verification and acceptance stages. The full twelve-
+scene workflow remains separate. Live output must satisfy the word range and all
+required gates; a rejection is preserved as diagnostic evidence, never relabelled
+as a successful story. Each artifact retains packets, raw calls and timings.
+
+Story/rhetoric checks now receive character arcs, style, scene restrictions and
+plot dependencies alongside current canon. Re-verification sees the full revised
+scene to catch conflicts across paragraph boundaries, and acceptance requires
+reviews bound to the exact candidate hash. Scene redesign preserves an explicitly
+assigned POV. These checks improve traceability; they cannot guarantee flawless
+fiction or perfect memory.

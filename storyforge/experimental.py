@@ -91,6 +91,13 @@ def run_bundle(task,source,out,state,index,profile,backend,request_file):
         chunks=[plan_chapter(state,chapter,Path(out)/'_chapters'/str(chapter),profile,backend,request_file)
                 for chapter in range(1,state['request']['chapters']+1)]
         return combine_chapters(state,chunks,out)
+    if kind=='refine' and state['request'].get('execution_policy',{}).get('batched_refinement'):
+        from .refinement import refine,scene_layout
+        state['refinement']=refine(state['request'],state['retrieval'],out,backend)
+        state['refinement_method']='parallel_scoped_proposals_immutable_author_brief'
+        state['scene_layout']=scene_layout(state['request'])
+        save(Path(out)/'refinement.json',state['refinement']);save(Path(out)/'snapshot.json',state)
+        return state
     if kind=='refine' and state['request'].get('execution_policy',{}).get('compile_supplied_brief'):
         from .craft import compile_brief
         state['refinement']=compile_brief(state['request'])
@@ -150,6 +157,9 @@ def dispatch(task,source,out,state,index,profile,backend,request_file):
             path=choose(source,preferred,fallback,'review.json');save(source/target/'review.json',load(path))
         path=source/'memory-review/review.json'
         if not path.exists():save(path,load(source/'memory/memory-review.json'))
+        prose=(source/'edited/prose.txt').read_text()
+        for name in ['story-review','rhetoric-review']:
+            contracts.require(load(source/name/'review.json').get('reviewed_sha256')==digest(prose),'Acceptance review targets stale prose')
         if req.get('execution_policy',{}).get('chapter_revision'):
             from .craft import validate_prose
             validate_prose((source/'edited/prose.txt').read_text(),req,check_length=backend!='fixture')
@@ -180,7 +190,11 @@ def dispatch(task,source,out,state,index,profile,backend,request_file):
         checks=RHETORIC_CHECKS if kind=='rhetoric' else STORY_CHECKS
         prior=load(source/('rhetoric' if kind=='rhetoric' else 'diagnosis')/'review.json') if task.startswith('verify') else None
         diff=load(source/'edited/repair.json')['diff'] if prior else None
-        info={'scene':card,'world_rules':req['world_rules'],'pov':req.get('pov'),'accepted_facts':recording_context(state,card)}
+        info={'scene':card,'world_rules':req['world_rules'],'pov':req.get('pov'),
+              'accepted_facts':recording_context(state,card),**author_packet(req,state,card),
+              'style':req['style'],'tone_mood':req.get('tone_mood'),
+              'characters':[c for c in req['characters'] if c['id'] in card['participants']],
+              'plot':req['plot_design'],'review_instruction':'Check POV and knowledge boundaries, established resources and changes, concrete character choices, causal consequences and scene restrictions. A twist needs prior setup; a planned revelation is not accepted history.'}
         verdict=review(executor,req,prose,info,checks,'rhetoric_quality' if kind=='rhetoric' else 'story_quality',kind,prior,diff)
         if backend=='fixture' and task=='story_review' and req['execution_policy'].get('fixture_needs_repair'):
             p=passages(prose)[0];category=checks[0]

@@ -104,10 +104,15 @@ class GoogleHosted:
         model=MODELS[kind]
         contents=[{'role':'user','parts':[{'text':prompt}]}]
         body={'systemInstruction':{'parts':[{'text':system}]},'contents':contents}
-        try:
-            count=self.request(model+':countTokens',{'contents':[{'parts':[{'text':system+'\n'+prompt}]}]},timeout=10).get('totalTokens')
-        except HostedError:count=None
-        estimate=count or math.ceil(len((system+prompt).encode())/3)
+        size=len((system+prompt).encode())
+        if policy and policy.get('estimate_small_calls') and size<=4000:
+            # One token per UTF-8 byte is conservative; larger calls still count.
+            count=size
+        else:
+            try:
+                count=self.request(model+':countTokens',{'contents':[{'parts':[{'text':system+'\n'+prompt}]}]},timeout=10).get('totalTokens')
+            except HostedError:count=None
+        estimate=count or math.ceil(size/3)
         print('Hosted '+model+': reserving '+str(estimate)+' input tokens',flush=True)
         self.reserve(kind,estimate+tokens)
         config={'maxOutputTokens':tokens,'thinkingConfig':{'thinkingLevel':'minimal' if kind=='gemma' else 'low'}}

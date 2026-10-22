@@ -41,6 +41,9 @@ def author_packet(req,state,card):
         'earlier_chapter_continuity':'Use the source-bound canon and recent endings in scene_context; planned outcomes are not evidence.',
         'continuity_instruction':'Completed events are author evidence, not shared character knowledge. Continue their consequences; never reenact them.',
         'quality_contract':req.get('quality_contract',[]),
+        'development_proposals':state.get('refinement',{}).get('expanded_story_elements',[]),
+        'proposal_policy':'Development guidance and planned twists are proposals, not facts or character knowledge. Use only what serves this scene. Setup must precede payoff; explicit user restrictions override proposals.',
+        'scene_layout':next((s for s in state.get('scene_layout',[]) if s['id']==card['id']),{}),
     }
 
 
