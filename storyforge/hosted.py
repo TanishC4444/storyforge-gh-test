@@ -104,10 +104,16 @@ class GoogleHosted:
         model=MODELS[kind]
         contents=[{'role':'user','parts':[{'text':prompt}]}]
         body={'systemInstruction':{'parts':[{'text':system}]},'contents':contents}
-        try:
-            count=self.request(model+':countTokens',{'contents':[{'parts':[{'text':system+'\n'+prompt}]}]},timeout=10).get('totalTokens')
-        except HostedError:count=None
-        estimate=count or math.ceil(len((system+prompt).encode())/3)
+        size=len((system+prompt).encode())
+        if policy and policy.get('estimate_small_calls') and size<=4000:
+            # Byte count is intentionally conservative: never under-reserve an
+            # uncounted prompt merely to avoid the extra HTTP request.
+            count=size
+        else:
+            try:
+                count=self.request(model+':countTokens',{'contents':[{'parts':[{'text':system+'\n'+prompt}]}]},timeout=10).get('totalTokens')
+            except HostedError:count=None
+        estimate=count or math.ceil(size/3)
         print('Hosted '+model+': reserving '+str(estimate)+' input tokens',flush=True)
         self.reserve(kind,estimate+tokens)
         config={'maxOutputTokens':tokens,'thinkingConfig':{'thinkingLevel':'minimal' if kind=='gemma' else 'low'}}
@@ -127,6 +133,7 @@ class GoogleHosted:
                 result=self.request(model+':generateContent',{**body,'generationConfig':config},timeout=policy['timeout'] if policy else (150 if kind=='gemma' else 240))
                 candidate=result.get('candidates',[{}])
                 record(self.folder,'google',model,role,result.get('usageMetadata'),attempt=attempt+1,seconds=round(time.monotonic()-request_started,3),status='returned',finish_reason=candidate[0].get('finishReason') if candidate else None,reserved_input_tokens=estimate)
+                event('api_returned','Provider returned generation',stage=role,model=model,attempt=attempt+1,status_code=200,seconds=round(time.monotonic()-request_started,3),usage=result.get('usageMetadata',{}))
                 break
             except HostedError as exc:
                 from .tracking import event

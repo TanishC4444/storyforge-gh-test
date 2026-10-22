@@ -46,6 +46,7 @@ class Tracker:
                 self.state['story_progress']={'accepted_scenes':len(value.get('accepted',[])),'total_scenes':value['request']['chapters']*value['request']['scenes_per_chapter'],'state_version':value['version'],'complete':value.get('complete',False),'completion_status':value.get('completion_status','in_progress')}
         self.state['files']=[str(p.relative_to(self.folder)) for p in sorted(self.folder.rglob('*')) if p.is_file() and p.name not in {'status.json','events.jsonl'}]
         self.event(status,'Task completed' if status=='success' else 'Task failed; inspect error and saved artifacts',error=str(error) if error else None)
+        save(self.folder/'timeline.json',[json.loads(line) for line in (self.folder/'events.jsonl').read_text().splitlines()])
         self.summary()
     def summary(self):
         target=os.getenv('GITHUB_STEP_SUMMARY')

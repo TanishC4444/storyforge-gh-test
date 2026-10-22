@@ -9201,6 +9201,9 @@ jobs:
       - name: Save observed API and CPU usage, including failed attempts
         if: always()
         run: python -m storyforge.usage --source results --out results/usage-summary
+      - name: Measure stage performance
+        if: always()
+        run: python -m storyforge.performance --source results --out results/usage-summary --workflow .github/workflows/troy-parallel-experiment.yml
       - name: Retain usage reports for 90 days
         if: always()
         uses: actions/upload-artifact@v4

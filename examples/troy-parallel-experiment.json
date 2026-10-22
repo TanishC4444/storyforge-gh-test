@@ -612,7 +612,9 @@
     "compile_supplied_brief": true,
     "chapter_revision": true,
     "chapter_outline_chunks": true,
-    "cpu_quality": true
+    "cpu_quality": true,
+    "estimate_small_calls": true,
+    "performance_report": true
   },
   "performance": {
     "compact_packets": true,

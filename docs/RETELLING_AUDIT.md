@@ -255,3 +255,18 @@ invocations, headings, identical substantial paragraphs and, in live runs,
 undersized/oversized scenes. Failed review gates stop canon acceptance instead of
 silently declaring a provisional draft final. These checks cannot prove literary
 excellence; live prose and quality still require inspection.
+
+## Efficiency phase 1: measured small-call overhead
+
+Flags (default false): `estimate_small_calls` skips countTokens only for prompts
+at most 4,000 UTF-8 bytes, reserving one token per byte conservatively;
+`performance_report` adds the measured performance artifact. Both are enabled in
+the opt-in Troy experiment. Existing API routing remains small tasks only.
+No distributed quota guarantee or context cache is claimed. Existing per-run
+reservation inheritance cannot serialize independent GitHub runners.
+
+Tests: `test_performance.py`, fixture/mocked transport only. Verify with unittest
+discover. Metrics: countTokens calls avoided, stage p50/p95, observed worker
+critical path, actual 429 attempts, repair gate skips, verification pass rate.
+Missing measurements are null; queue/setup time and literary quality are not
+inferred from these metrics. Every finished task now writes `timeline.json`.

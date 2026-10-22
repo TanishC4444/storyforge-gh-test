@@ -329,6 +329,10 @@ def build_experimental():
             job(p+'_settle',p+' settle canon and reconcile next design','settle',[p+'_accept',following+'_design'],[(p+'_accept','state'),(following+'_design','anticipated')],i+1)
     tail=build(total=4,per_chapter=4,troy=True,full_api=True,resident=False).split('  results:\n',1)[1]
     tail=re.sub(r'    needs: \[[^\n]+\]', '    needs: ['+', '.join(keys)+']',tail,count=1)
+    import json
+    policy=json.loads((ROOT/'examples/troy-parallel-experiment.json').read_text()).get('execution_policy',{})
+    if policy.get('performance_report'):
+        tail=tail.replace('      - name: Retain usage reports for 90 days', '      - name: Measure stage performance\n        if: always()\n        run: python -m storyforge.performance --source results --out results/usage-summary --workflow .github/workflows/troy-parallel-experiment.yml\n      - name: Retain usage reports for 90 days')
     tail=tail.replace('      - name: Summarize run', '''      - name: Publish clearly labelled story download
         if: always()
         uses: actions/upload-artifact@v4

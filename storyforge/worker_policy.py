@@ -23,7 +23,8 @@ def enabled(req):return bool(req.get('execution_policy',{}).get('experimental'))
 def policy(req,role,tokens):
     tier,cap,timeout=PROFILE_TABLES.get(req.get('profile'),STAGES).get(role,('gemma',tokens,120))
     return {'tier':tier,'thinking':'minimal' if tier=='gemma' else 'low',
-            'max_tokens':min(tokens,cap),'timeout':timeout,'retries':2}
+            'max_tokens':min(tokens,cap),'timeout':timeout,'retries':2,
+            'estimate_small_calls':req.get('execution_policy',{}).get('estimate_small_calls',False)}
 
 @contextmanager
 def permit(req):
