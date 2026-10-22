@@ -75,3 +75,23 @@ class RefinementTests(unittest.TestCase):
                 with patch.object(hosted,'request',side_effect=respond),patch.object(hosted,'reserve'):
                     hosted.complete('gemma','s','p',20,policy={'timeout':10,'estimate_small_calls':flag})
                 self.assertEqual(len(calls),expected)
+
+    def test_later_chapter_edit_packets_fit_budget_with_provenance(self):
+        from storyforge.craft import author_packet,compile_brief
+        from storyforge.coordinator import packet
+        from storyforge.fixture import respond
+        from storyforge.retrieval import retrieve
+        from storyforge.working_context import concise_packet
+        req=request(json.loads((ROOT/'examples/troy-parallel-experiment.json').read_text()))
+        req['retrieval_mode']='keyword'
+        state={'request':req,'retrieval':retrieve(req),'refinement':compile_brief(req),'memories':[],
+               'accepted':[],'plan':json.loads(respond('architect',{},req))}
+        state['refinement']['expanded_story_elements']=['Proposed plot: '+('specific choices and consequences '*12) for _ in range(25)]
+        prose=' '.join(['material']*1560)
+        for card in state['plan']['scenes']:
+            data=concise_packet({**packet(req,state,card),**author_packet(req,state,card),'prose':prose},req)
+            self.assertLess(len(json.dumps(data,ensure_ascii=False,separators=(',',':')))+2500,req['context_chars'])
+            for item in data['completed_events']:
+                self.assertEqual(item['omitted_prefix_characters'],len(prose)-1800)
+                self.assertEqual(item['prose'],prose[-1800:])
+            state['accepted'].append({**card,'prose':prose})

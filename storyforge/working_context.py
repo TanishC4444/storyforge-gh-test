@@ -18,6 +18,11 @@ def creative_brief(req):
 def concise_packet(packet,req):
     result=copy.deepcopy(packet)
     if isinstance(result.get('request'),dict):result['request']=creative_brief(result['request'])
+    # Chapter excerpts already contain these endings; keep one source projection.
+    if result.get('completed_events') and isinstance(result.get('author_continuity'),dict):
+        covered={s['id'] for s in result['completed_events']}
+        result['author_continuity']['recent_scenes']=[s for s in result['author_continuity'].get('recent_scenes',[]) if s['id'] not in covered]
+        if result.get('recent_ending'):result.pop('recent_ending')
     # Craft text is retained once: the role skill supplies the rubric while scoped
     # reference mechanisms, limits, requested purposes and IDs remain intact.
     def walk(value):

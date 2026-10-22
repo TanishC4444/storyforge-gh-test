@@ -32,16 +32,38 @@ def compile_brief(req):
     },req)
 
 
+def chapter_history(state,card):
+    """Exact bounded excerpts; full accepted prose remains in immutable checkpoints."""
+    import hashlib
+    history=[]
+    for scene in state['accepted']:
+        if scene['chapter']!=card['chapter']:continue
+        prose=scene['prose'];item={'id':scene['id'],'prose':prose}
+        if len(prose)>1800:
+            item.update(prose=prose[-1800:],omitted_prefix_characters=len(prose)-1800,
+                        source_sha256=hashlib.sha256(prose.encode()).hexdigest())
+        history.append(item)
+    return history
+
+
+def development_projection(state,budget=2000):
+    # Only optional model proposals are selected; explicit author controls stay intact.
+    selected=[];used=0
+    for item in state.get('refinement',{}).get('expanded_story_elements',[]):
+        if used+len(item)<=budget:selected.append(item);used+=len(item)
+    return selected
+
+
 def author_packet(req,state,card):
     return {
         'nonnegotiable_form':req['pov'],
         'chapter_contract':req.get('chapter_contract',{}),
         'scene_contract':next((s for s in req['scene_designs'] if s['id']==card['id']),{}),
-        'completed_events':[{'id':s['id'],'prose':s['prose']} for s in state['accepted'] if s['chapter']==card['chapter']],
-        'earlier_chapter_continuity':'Use the source-bound canon and recent endings in scene_context; planned outcomes are not evidence.',
+        'completed_events':chapter_history(state,card),
+        'earlier_chapter_continuity':'Use source-bound canon and exact chapter excerpts. Omitted prose remains in checkpoints; do not infer unseen details. Planned outcomes are not evidence.',
         'continuity_instruction':'Completed events are author evidence, not shared character knowledge. Continue their consequences; never reenact them.',
         'quality_contract':req.get('quality_contract',[]),
-        'development_proposals':state.get('refinement',{}).get('expanded_story_elements',[]),
+        'development_proposals':development_projection(state),
         'proposal_policy':'Development guidance and planned twists are proposals, not facts or character knowledge. Use only what serves this scene. Setup must precede payoff; explicit user restrictions override proposals.',
         'scene_layout':next((s for s in state.get('scene_layout',[]) if s['id']==card['id']),{}),
     }

@@ -18,6 +18,8 @@ The ordered evidence_passages contain the complete CURRENT scene. Select 1–3 e
 
 
 def planning_packet(req, refinement, retrieval):
+    from .craft import development_projection
+    refinement={**refinement,'expanded_story_elements':development_projection({'refinement':refinement},budget=4000)}
     operational = {'profile', 'max_repairs', 'max_stage_retries', 'context_chars', 'n_ctx', 'runner_repo', 'retrieval_mode', 'auto_approve_plan', 'min_words_ratio', 'max_words_ratio'}
     return {'request': {k: v for k, v in req.items() if k not in operational},
             'refinement': {k: refinement[k] for k in ['refined_prompt', 'central_conflict', 'character_tensions', 'subplot_possibilities', 'world_constraints','expanded_story_elements','assumptions','open_decisions']},
