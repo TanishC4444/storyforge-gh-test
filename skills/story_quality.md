@@ -5,6 +5,8 @@ Assess every required check with source passage IDs and one specific sentence.
 - character_depth: conflicting values alter conduct, dependence or self-justification.
 - causal_alternatives: test leaving, waiting, repairing or negotiating; costs must exist.
 - dialogue_tactics: speech or narrated offers pursue conflicting aims and change leverage.
+  Under a no-dialogue brief, assess narrated offers, refusals and commitments; never
+  demand direct speech merely because this rubric uses the word dialogue.
 - continuity_clock: travel, positions, wounds, deadlines, total/usable/spent resources.
 - pov_knowledge: distinguish author knowledge, witnessed fact, inference and private belief.
 - subplot_function: an owned question intersects consequentially when relevant.
