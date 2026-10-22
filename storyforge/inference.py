@@ -209,6 +209,7 @@ class Executor:
                 semantic_retry=isinstance(exc,ReviewBriefError)
                 last_error = str(exc)
                 repair_output = cached.get('output') if cached else None
+                if isinstance(exc,TimeoutError) and role in {'development_editor','story_quality','rhetoric_quality','chapter_quality','memory_quality'}:break
         from .resilience import enabled, warning, unavailable
         if enabled(self.req) and role=='character':
             warning(self.folder,'character_proposal_unavailable',last_error)

@@ -24,7 +24,7 @@ def changes(before,after):
 def needs_repair(review,req):
     threshold=req.get('execution_policy',{}).get('gate_repair_threshold','blocking')
     require(threshold in {'blocking','advisory'},'Invalid repair threshold')
-    return review.get('unverified',False) or any(i['severity']=='blocking' or threshold=='advisory' for i in review['issues'])
+    return not review.get('pass',False) or review.get('unverified',False) or any(i['severity']=='blocking' or threshold=='advisory' for i in review['issues'])
 
 
 def bind_finding_targets(raw,catalog):
@@ -63,7 +63,8 @@ def review(executor,req,prose,packet,required,role,kind,prior=None,diff=None):
         # candidate after a patch. Changed paragraphs remain explicit edit targets.
         packet['verification_scope']='Reassess the complete candidate for cross-paragraph consistency; focus corrections on the supplied changes without assuming unchanged text is automatically correct.'
         packet={**packet,'changed_paragraphs':diff['changed'],'removed_paragraphs':diff['removed'],'findings':prior['issues']}
-    groups=[active[i:i+3] for i in range(0,len(active),3)]
+    consolidated=req.get('execution_policy',{}).get('literary_quality',False)
+    groups=[active] if consolidated else [active[i:i+3] for i in range(0,len(active),3)]
     def assess(group):
         data={**source,**packet,'required_checks':group}
         schema=editorial_schema(data)
@@ -73,8 +74,8 @@ def review(executor,req,prose,packet,required,role,kind,prior=None,diff=None):
             if isinstance(raw.get('checks'),dict):raw={**raw,'checks':[dict(c,id=k) for k,c in raw['checks'].items()]}
             raw=bind_finding_targets(raw,catalog)
             return editorial_review(raw,prose,group)
-        return executor.call(role,data,'Review only the supplied evidence and required dimensions. Every finding needs severity blocking/advisory, existing evidence_ids, and scope=paragraph for a one-paragraph fix or scope=scene for cross-paragraph/whole-scene faults. A paragraph finding cites exactly one passage ID. Do not generate paragraph numbers; the application derives them from passage IDs. Never return unrequested dimensions. Required checks must be pass or fail, except subplot_function and reference_application may be not_applicable. For dialogue_tactics, assess narrated offers, refusals, bargaining or leverage when the brief prohibits direct dialogue; absence of quoted speech does not skip the check. Prior canon is context, not prose to edit.',tokens=1200,validator=validate,response_schema=schema,skill=(ROOT/'skills'/('story_quality.md' if kind=='story' else 'rhetoric_quality.md')).read_text())
-    results=parallel(req,'reviews',groups,assess)
+        return executor.call(role,data,'Review only the supplied evidence and required dimensions. Every finding needs severity blocking/advisory, existing evidence_ids, and scope=paragraph for a one-paragraph fix or scope=scene for cross-paragraph/whole-scene faults. A paragraph finding cites exactly one passage ID. Do not generate paragraph numbers; the application derives them from passage IDs. Never return unrequested dimensions. Required checks must be pass or fail, except subplot_function and reference_application may be not_applicable. For dialogue_tactics, assess narrated offers, refusals, bargaining or leverage when the brief prohibits direct dialogue; absence of quoted speech does not skip the check. Prior canon is context, not prose to edit.',tokens=1800 if consolidated else 1200,validator=validate,response_schema=schema,skill=(ROOT/'skills'/('story_quality.md' if kind=='story' else 'rhetoric_quality.md')).read_text())
+    results=[assess(active)] if consolidated else parallel(req,'reviews',groups,assess)
     if any(r.get('unverified') for r in results):return {'pass':False,'unverified':True,'checks':[],'issues':[],'needs_repair':True,'reviewed_sha256':digest(prose)}
     result={'pass':all(r['pass'] for r in results),'checks':retained+[c for r in results for c in r['checks']],'issues':[i for r in results for i in r['issues']]}
     # Retain outstanding findings whose source paragraphs were not changed.

@@ -355,6 +355,61 @@ def build_experimental(total=12,practice=False):
     blocks.append('  results:\n'+tail)
     return '\n'.join(blocks)
 
+def build_review_recovery():
+    """Resume the native review/repair DAG using one immutable source-run scene."""
+    import re
+    text=build_experimental(total=1,practice=True)
+    header=text.split('jobs:',1)[0].replace('Troy one-scene practice','Troy practice review recovery').replace('group: story-practice','group: story-review-recovery')
+    header=header.replace('    inputs:\n','    inputs:\n      source_run:\n        type: string\n        required: true\n        description: Source practice run with a written scene and approved memory\n',1)
+    pieces=re.split(r'(?m)^  ([a-z][a-z0-9_]*):\n',text.split('jobs:\n',1)[1])
+    jobs={pieces[i]:pieces[i+1] for i in range(1,len(pieces),2)}
+    blocks=[header+'jobs:\n']
+    for key in ['s01_design','s01_edit','s01_memory']:
+        check="""          python - <<'CHECK'
+          import json
+          from pathlib import Path
+          state=json.loads(Path('out/snapshot.json').read_text())
+          assert len(state['plan']['scenes'])==1 and not state['accepted'], 'Requires an uncommitted one-scene practice'
+          assert not state['request'].get('execution_policy',{}).get('continue_with_warnings'), 'Strict gates required'
+          assert state['request'].get('execution_policy',{}).get('literary_quality'), 'Literary policy required'
+          CHECK""" if key=='s01_design' else """          test -f out/prose.txt""" if key=='s01_edit' else """          python - <<'CHECK'
+          import json,os
+          from pathlib import Path
+          review=json.loads(Path('out/memory-review.json').read_text())
+          assert review['pass'], 'Source memory must already be approved'
+          with open(os.environ['GITHUB_OUTPUT'],'a') as stream:stream.write('needs_repair=false'+chr(10))
+          CHECK"""
+        blocks.append(f"""  {key}:
+    name: Restore source {key}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    outputs:
+      needs_repair: ${{{{ steps.task.outputs.needs_repair }}}}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: {key}
+          path: out
+          run-id: ${{{{ inputs.source_run }}}}
+          github-token: ${{{{ github.token }}}}
+      - name: Validate saved checkpoint
+        id: task
+        run: |
+{check}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: {key}
+          path: out/
+""")
+    selected=['s01_story','s01_rhetoric','s01_repair','s01_verify','s01_verify_rhetoric','s01_final_memory','s01_memory_review','s01_accept','results']
+    for key in selected:
+        body=jobs[key]
+        if key=='results':
+            keep=['s01_design','s01_edit','s01_memory',*selected[:-1]]
+            body=re.sub(r'    needs: \[[^\n]+\]', '    needs: ['+', '.join(keep)+']',body,count=1)
+        blocks.append('  '+key+':\n'+body)
+    return '\n'.join(blocks)
+
 if __name__ == '__main__':
     (ROOT / '.github/workflows/story.yml').write_text(build())
     (ROOT / '.github/workflows/troy.yml').write_text(build(total=4,per_chapter=4,troy=True))
@@ -369,3 +424,5 @@ if __name__ == '__main__':
     (ROOT / '.github/workflows/troy-parallel-experiment.yml').write_text(build_experimental())
 
     (ROOT / '.github/workflows/troy-practice.yml').write_text(build_experimental(total=1,practice=True))
+
+    (ROOT / '.github/workflows/troy-review-recovery.yml').write_text(build_review_recovery())
