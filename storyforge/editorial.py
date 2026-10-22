@@ -96,3 +96,17 @@ def merge_reviews(story,rhetoric):
     return {'pass':story['pass'] and rhetoric['pass'],
             'issues':story['issues']+rhetoric['issues'],
             'story_checks':story.get('checks',[]),'rhetoric_checks':rhetoric.get('checks',[])}
+
+
+class ReviewBriefError(ContractError):
+    """The assessment requires substantive reevaluation under the author brief."""
+
+
+def validate_review_brief(value,req):
+    form=req.get('pov','').lower()
+    if 'no dialogue' not in form and 'no direct dialogue' not in form:return value
+    for issue in value.get('issues',[]):
+        fix=issue.get('fix','')
+        if re.search(r'(?i)(?:^|[.!?]\s*)(?:add|insert|include|introduce)\b[^.!?]{0,50}\b(?:direct speech|quoted (?:speech|dialogue)|spoken dialogue)\b',fix):
+            raise ReviewBriefError('Review contradicts the author form: direct dialogue is prohibited. Reassess the original prose for narrated offers, commitments, resistance and consequences; do not demand quoted speech or automatically approve the scene.')
+    return value
