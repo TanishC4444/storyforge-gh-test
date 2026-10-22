@@ -54,12 +54,12 @@ def memory_extract(executor,req,out,prose,packet,instruction,allow_public=True):
                 for old_id in update.get('supersedes',[]):
                     contracts.require(old_id in lookup,'Memory update cites unknown prior fact')
                     old=lookup[old_id]
-                    contracts.require(bool(update.get('fact_key')) and update['fact_key']==old.get('fact_key') and update['kind']==old['kind'],'Memory update changed fact identity')
+                    contracts.require(bool(update.get('fact_key')) and update['fact_key']==old.get('fact_key') and update['kind']==old['kind'],'Memory update changed fact identity: '+old_id+' requires fact_key='+repr(old.get('fact_key'))+' and kind='+old['kind']+'; unkeyed prior facts cannot be superseded. Record a separate event with supersedes=[] instead if supported by the scene.')
         return result
     prior=None
     if req.get('performance',{}).get('canon_index'):
         prior=packet.get('prior_canon',[])
-        instruction+=' For a changed resource, relationship or obligation, use a stable fact_key and explicit supersedes IDs from prior_canon. Never infer an update or erase history. Include unresolved callbacks and obligations, not only recent motion.'
+        instruction+=' For a changed resource, relationship or obligation, copy the exact fact_key and kind of the same prior fact when using its ID in supersedes. Prior facts without fact_key are immutable and cannot appear in supersedes. New events, consequences, and discoveries use a new fact_key and supersedes=[]; they do not replace the prior character or world premise. Never infer an update or erase history. Include unresolved callbacks and obligations, not only recent motion.'
     try:
         result=executor.call('memory',packet,instruction,tokens=1400 if prior is not None else 1000,validator=validate,response_schema=memory_schema(packet,ids,allow_public=allow_public,prior_memories=prior))
         if result.get('quarantined'):warning(out,'memory_quarantine','Unsupported memory entries quarantined; source prose retained.')

@@ -1,0 +1,34 @@
+{
+  "memories": [
+    {
+      "kind": "event",
+      "text": "Thestor abandons his agreement with the Locrian supply bark captain to examine an unusual iron sleeve found in the surf, losing his wage and his nephew's passage.",
+      "evidence_ids": [
+        "p001",
+        "p002",
+        "p003"
+      ],
+      "known_by": [
+        "thestor",
+        "odysseus"
+      ],
+      "fact_key": "thestor_lost_wage_for_iron",
+      "supersedes": [
+        "m00001"
+      ]
+    },
+    {
+      "kind": "event",
+      "text": "Odysseus discovers Thestor kneeling over the strange iron sleeve on the shingle and inspects its markings.",
+      "evidence_ids": [
+        "p003"
+      ],
+      "known_by": [
+        "odysseus",
+        "thestor"
+      ],
+      "fact_key": "odysseus_discovers_thestor_with_iron",
+      "supersedes": []
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 """Constrain syntax/identifiers; semantic and evidence validators still decide acceptance."""
+import copy
 def editorial_schema(packet):
     required=packet.get('required_checks')
     passages=packet.get('evidence_passages')
@@ -6,7 +7,11 @@ def editorial_schema(packet):
     evidence={'type':'array','items':{'type':'string','enum':[p['id'] for p in passages]},'minItems':1,'maxItems':3}
     check={'type':'object','properties':{'verdict':{'type':'string','enum':['pass','fail','not_applicable']},'evidence_ids':evidence,'reason':{'type':'string'}},'required':['verdict','evidence_ids','reason'],'additionalProperties':False}
     issue={'type':'object','properties':{'severity':{'type':'string','enum':['blocking','advisory']},'category':{'type':'string','enum':required},'evidence_ids':evidence,'problem':{'type':'string'},'fix':{'type':'string'},'replacement':{'type':'string'}},'required':['severity','category','evidence_ids','problem','fix','replacement'],'additionalProperties':False}
-    return {'type':'object','properties':{'pass':{'type':'boolean'},'checks':{'type':'object','properties':{key:check for key in required},'required':list(required),'additionalProperties':False},'issues':{'type':'array','items':issue}},'required':['pass','checks','issues'],'additionalProperties':False}
+    checks={key:copy.deepcopy(check) for key in required}
+    for key,spec in checks.items():
+        if key not in {'subplot_function','reference_application'}:
+            spec['properties']['verdict']['enum']=['pass','fail']
+    return {'type':'object','properties':{'pass':{'type':'boolean'},'checks':{'type':'object','properties':checks,'required':list(required),'additionalProperties':False},'issues':{'type':'array','items':issue}},'required':['pass','checks','issues'],'additionalProperties':False}
 
 
 def memory_schema(packet,character_ids,allow_public=True,prior_memories=None):
@@ -15,7 +20,8 @@ def memory_schema(packet,character_ids,allow_public=True,prior_memories=None):
     if prior_memories is not None:
         item['properties']['fact_key']={'type':'string'}
         item['required']+=['fact_key','supersedes']
-        item['properties']['supersedes']={'type':'array','items':{'type':'string','enum':[m['id'] for m in prior_memories]} if prior_memories else {'type':'string'},'maxItems':3 if prior_memories else 0}
+        updatable=[m['id'] for m in prior_memories if m.get('fact_key')]
+        item['properties']['supersedes']={'type':'array','items':{'type':'string','enum':updatable} if updatable else {'type':'string'},'maxItems':3 if updatable else 0}
     return {'type':'object','properties':{'memories':{'type':'array','items':item,'maxItems':12 if prior_memories is not None else 6}},'required':['memories'],'additionalProperties':False}
 
 

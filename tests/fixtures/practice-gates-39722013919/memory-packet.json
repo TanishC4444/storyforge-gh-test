@@ -1,0 +1,51 @@
+{
+  "prose_sha256": "aabb2600a971d331a0d7c7549f1ac090b67e41eb11f23dca4a758ba484db8213",
+  "evidence_passages": [
+    {
+      "id": "p001",
+      "text": "The gale had strewn the shingle with broken cedar and tangled cordage, and between the hauled-up hulls the smoke of green wood smarted in the eyes of tired men. Thestor had promised his labor to the master of a Locrian supply bark: three patched bronze steers, cold-hammered straight and seated into fresh oak gudgeons before noon, in exchange for two small measures of spelt and room beneath the rowing benches for his sister\u2019s son, the only boy spared when the camp cough took the tent-hands in the eighth winter. The smith knelt with his flat rasp, scoring true lines across the sheared pins. A single hour of steady filing would see the rudder hung, the grain weighed into his sack, and the boy aboard before the ebb."
+    },
+    {
+      "id": "p002",
+      "text": "Then the tide washed a sea-torn balk against the stones, and in its split heart lay an iron sleeve, crusted with bitter salt and gray bitumen. As a diver plunges through murky surf after purple murex, heedless of the sharp urchins beneath his feet, so Thestor dropped his bronze scraper and leaned over the brine-dark metal, forgetting theLocrian captain who shouted behind him at the oarsmen. The tube had neither socket for an ash shaft nor ear for a leather thong, yet it was bored clean through its center with a cold, unnatural smoothness no hearth-tongs could coax from mortal iron. Beside a sealed vent, five shallow grooves ran spiral-wise into the throat, blackened with a soot that smelled not of pine pitch or rendered fat, but of hot stone struck by summer lightning."
+    },
+    {
+      "id": "p003",
+      "text": "Footsteps grated on the wet shingle. Odysseus stood over the flotsam, cloak gathered against the spray, his keen gaze passing over the splintered timber until it caught the gleam of the scored sleeve. The king stooped, touching the blackened lip with a calloused thumb, noting the twin marks stamped near the breech\u2014neither Phoenician tally nor the knot-sign of Mycenae, but two joined hammers bound with wire. When the Locrian vessel shoved off into the foam with its steers still broken, the smith\u2019s wage and the boy\u2019s passage drifted beyond the surf. Thestor remained upon his knees, the foreign iron heavy and useless in his hands, wondering whose forge had fed a flame so pure that it melted rock within the metal while leaving the rim cold as the sea."
+    }
+  ],
+  "characters": [
+    "odysseus",
+    "thestor"
+  ],
+  "prior_canon": [
+    {
+      "text": "Thestor seeks wages and passage for his surviving apprentice. He is a mortal smith, not master of divine craft.",
+      "known_by": [
+        "thestor"
+      ],
+      "kind": "event",
+      "source": "user_input",
+      "id": "m00001"
+    },
+    {
+      "text": "After nine years, the Achaean coalition remains outside Troy; Hector and Achilles live. No Greek possesses or understands the unfamiliar weapons at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "kind": "event",
+      "source": "user_input",
+      "id": "m00000"
+    },
+    {
+      "text": "Agamemnon commands a coalition of rival lords; Achilles and he have strained relations over honor.",
+      "known_by": [
+        "public"
+      ],
+      "kind": "event",
+      "source": "user_input",
+      "id": "m00002"
+    }
+  ],
+  "omitted_prior_ids": []
+}
