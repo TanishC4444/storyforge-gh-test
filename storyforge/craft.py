@@ -39,8 +39,8 @@ def chapter_history(state,card):
     for scene in state['accepted']:
         if scene['chapter']!=card['chapter']:continue
         prose=scene['prose'];item={'id':scene['id'],'prose':prose}
-        if len(prose)>1200:
-            item.update(prose=prose[-1200:],omitted_prefix_characters=len(prose)-1200,
+        if len(prose)>1000:
+            item.update(prose=prose[-1000:],omitted_prefix_characters=len(prose)-1000,
                         source_sha256=hashlib.sha256(prose.encode()).hexdigest())
         history.append(item)
     return history
