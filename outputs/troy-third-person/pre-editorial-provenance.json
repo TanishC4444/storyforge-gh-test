@@ -1,0 +1,7 @@
+{
+  "source": "Original local retelling run: state.json accepted[].prose, verified against all four scenes/NN/accepted.txt files.",
+  "words": 3887,
+  "codex_prose_revision": false,
+  "automated_model_editing": true,
+  "note": "Development manuscript before the explicitly recorded final Codex editorial pass. Not a successful unattended Actions output."
+}
