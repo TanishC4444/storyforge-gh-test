@@ -41,3 +41,9 @@ The compiled draft goes directly to review; there is no automatic blanket pre-re
 Merging checks ownership, source hashes and duplicates, preserving all untouched prose verbatim. One final strict prompt check follows the merged repairs. Its story and rhetoric decisions are reused without another rewrite loop. Unchanged extracted facts are retained; changed passages trigger source-bound fact extraction. Compact memory verification still controls canon. Missing, invalid or unresolved model output remains explicitly provisional and readable rather than becoming an approval.
 
 The one-scene tests exercise batched writing and paragraph repair, not four separate scenes. The cinematic path supports an authored episode of up to nine scenes. The living-world path keeps randomized event proposals and manual checkpoint resume, but now also uses Gemini first and local models as bounded batch fallbacks.
+
+## Batched memory and continuity
+
+Initial facts are extracted alongside editorial review. Before paragraph repairs, parallel preflight checks each own at most three paragraphs and four extracted facts, with the complete scene available as read-only context. They check fact support, individual knowledge, entrances, custody and causal joins. Source-bound prose findings join the existing paragraph repair plan; extraction findings never trigger prose changes to make an inaccurate memory true.
+
+After repairs, changed evidence refreshes the facts. A second parallel batch matrix verifies the final facts and knowledge holders only, without reopening literary/style disagreements. Every paragraph and fact is assigned once, and joins validate immutable state, prose and fact hashes. Missing or unavailable checks cannot approve canon. One strict final editorial judgment still governs the prose; unresolved output stays provisional and readable.

@@ -125,6 +125,11 @@ def join_reviews(state,source,out,kind):
 
 def plan_repairs(state,source,out):
     prose=(Path(source)/'edited/prose.txt').read_text();reviews=[load(Path(source)/p/'review.json') for p in ['story-review','rhetoric-review']]
+    memory_path=Path(source)/'memory-review/review.json'
+    if memory_path.exists():
+        memory_review=load(memory_path)
+        require(memory_review['source_sha256']==digest(prose),'Stale preflight memory review')
+        reviews.append({'issues':[i for i in memory_review['issues'] if i.get('target')=='prose']})
     selected,_=targets(prose,reviews);catalog=passages(prose);ids=[p['id'] for p in catalog if p['id'] in selected];batches=[]
     for offset in range(0,len(ids),2):
         own=ids[offset:offset+2];positions=[i for i,p in enumerate(catalog) if p['id'] in own]
@@ -165,7 +170,10 @@ def merge_repairs(state,source,out):
 
 def finalize(state,card,source,out,backend):
     prose=(Path(source)/'edited/prose.txt').read_text();info=load(Path(source)/'edited/repair.json')
-    final=decide(state['request'],state,card,prose,[load(Path(source)/k/'review.json') for k in ['story-review','rhetoric-review']],out,backend)
+    reviews=[load(Path(source)/k/'review.json') for k in ['story-review','rhetoric-review']]
+    memory_path=Path(source)/'memory-review/review.json'
+    if memory_path.exists():reviews.append(load(memory_path))
+    final=decide(state['request'],state,card,prose,reviews,out,backend)
     save(Path(out)/'prose.txt',prose);save(Path(out)/'repair.json',{**info,'editorial_adjudication':final,'further_editorial_iteration':False});preview(out,'Final checked text - see verification status');return final
 
 def refresh_memory(state,card,source,out,backend):
@@ -205,10 +213,16 @@ def verify_memory(state,card,source,out,backend):
 
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('task');p.add_argument('--source',default='inputs');p.add_argument('--out',default='out');p.add_argument('--backend',choices=['fixture','worker'],default='fixture');p.add_argument('--index',type=int,default=0);p.add_argument('--batch');p.add_argument('--kind',choices=['story','rhetoric']);p.add_argument('--group',type=int);a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('task');p.add_argument('--source',default='inputs');p.add_argument('--out',default='out');p.add_argument('--backend',choices=['fixture','worker'],default='fixture');p.add_argument('--index',type=int,default=0);p.add_argument('--batch');p.add_argument('--kind',choices=['story','rhetoric']);p.add_argument('--group',type=int);p.add_argument('--phase',choices=['preflight','final'],default='preflight');a=p.parse_args()
     started=time.monotonic()
     source=Path(a.source);out=Path(a.out);state=load(source/'state/snapshot.json');card=state['plan']['scenes'][a.index]
-    if a.task=='draft_plan':plan_draft(state,card,source,out,a.backend)
+    if a.task.startswith('memory_check_'):
+        from . import memory_batches
+        if a.task=='memory_check_plan':memory_batches.plan(state,source,out,a.phase)
+        elif a.task=='memory_check_batch':memory_batches.check(state,card,source,out,a.backend,a.batch)
+        elif a.task=='memory_check_join':memory_batches.join(state,source,out)
+        else:raise ValueError('Unknown memory-check task')
+    elif a.task=='draft_plan':plan_draft(state,card,source,out,a.backend)
     elif a.task=='write_batch':write_batch(state,card,source,out,a.backend,a.batch)
     elif a.task=='merge_draft':merge_draft(state,source,out)
     elif a.task=='forward':save(out/'prose.txt',(source/'draft/draft.txt').read_text())
@@ -224,7 +238,7 @@ def main():
     elif a.task=='verify_memory':verify_memory(state,card,source,out,a.backend)
     else:raise ValueError('Unknown batch task')
     warnings=[]
-    for filename in ['draft-batch.json','review-batch.json','repair-batch.json','writing-report.json','repair.json','memory.json']:
+    for filename in ['draft-batch.json','review-batch.json','repair-batch.json','writing-report.json','repair.json','memory.json','memory-check-batch.json','review.json']:
         path=out/filename
         if path.exists():
             value=load(path)
