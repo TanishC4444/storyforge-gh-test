@@ -6,7 +6,7 @@ import os
 import signal
 import threading
 from .worker_policy import CPU_LOCK
-from .runtime import JOB_TIMEOUT_MINUTES, JOB_TIMEOUT_SECONDS, DOWNLOAD_TIMEOUT_SECONDS, worker_timeout_seconds
+from .runtime import JOB_TIMEOUT_MINUTES, JOB_TIMEOUT_SECONDS, DOWNLOAD_TIMEOUT_SECONDS, worker_timeout_seconds, inference_timeout_seconds, REVIEW_ROLES, REVIEW_CALL_TIMEOUT_SECONDS
 
 _SESSIONS={}
 
@@ -28,20 +28,21 @@ def _execute(model, system, prompt, tokens, n_ctx, role, response_schema=None):
         from .cpu_fallback import execute as remote
         return remote(model,system,prompt,tokens,n_ctx,role,response_schema)
     from gh_inference import ResidentSession, Limits
-    key=(model,n_ctx)
+    call_limit=REVIEW_CALL_TIMEOUT_SECONDS if role in REVIEW_ROLES else JOB_TIMEOUT_SECONDS
+    key=(model,n_ctx,call_limit)
     if key not in _SESSIONS:
         # One model resident per job; do not accumulate multiple 12B models.
         close_sessions()
         options={'chat_template_options':{'enable_thinking':False}} if model.startswith('gemma-4') else {}
         _SESSIONS[key]=ResidentSession(model,n_ctx=n_ctx,
-            limits=Limits(job_timeout_minutes=JOB_TIMEOUT_MINUTES,provider_timeout_seconds=JOB_TIMEOUT_SECONDS,download_timeout_seconds=DOWNLOAD_TIMEOUT_SECONDS),
+            limits=Limits(job_timeout_minutes=JOB_TIMEOUT_MINUTES,provider_timeout_seconds=call_limit,download_timeout_seconds=DOWNLOAD_TIMEOUT_SECONDS),
             model_options=options,runner_ram_gb=16,runner_disk_gb=14)
-    def expired(*args):raise TimeoutError('Shared job time budget exhausted; preserving cleanup time.')
+    def expired(*args):raise TimeoutError('Inference call deadline exhausted; preserving artifacts and cleanup time.')
     main=threading.current_thread() is threading.main_thread()
     worker_timeout_seconds()
     if main:
         previous=signal.signal(signal.SIGALRM,expired)
-        signal.setitimer(signal.ITIMER_REAL,worker_timeout_seconds())
+        signal.setitimer(signal.ITIMER_REAL,inference_timeout_seconds(role))
     try:
         output,diagnostic=_SESSIONS[key].complete(prompt,system=system,max_tokens=tokens,
             temperature=.7 if role in {'writer','humanizer'} else .25,response_schema=response_schema)

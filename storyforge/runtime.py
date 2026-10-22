@@ -18,3 +18,12 @@ def worker_timeout_seconds():
     if remaining <= 0:
         raise TimeoutError('Six-hour job budget exhausted; stopping before cleanup reserve.')
     return min(WORKER_TIMEOUT_SECONDS, remaining)
+
+
+REVIEW_ROLES={'development_editor','story_quality','rhetoric_quality','chapter_quality','memory_quality'}
+REVIEW_CALL_TIMEOUT_SECONDS=600
+
+
+def inference_timeout_seconds(role):
+    remaining=worker_timeout_seconds()
+    return min(remaining,REVIEW_CALL_TIMEOUT_SECONDS) if role in REVIEW_ROLES else remaining
