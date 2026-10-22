@@ -258,3 +258,16 @@ Troy workflows reuse the approved scene card plus character proposals as writer
 direction (combine_direction=true), avoiding a redundant model restatement. The
 practice's observed director call used 202.2 seconds; fixture coverage exercises
 the forwarding path. Prose and memory verification remain independent gates.
+
+Practice run 39714540410 exposed two simultaneous writer faults (269 words and
+direct dialogue). Prose validation now reports every detected form/length fault
+together so the first retry can address them all. Compact no-dialogue packets
+remove voice examples recursively, including POV profiles and scoped character
+requirements. The original brief and raw rejected attempts remain preserved.
+The failed live responses are regression fixtures; no rejected scene became canon.
+
+For the short practice, hosted_prose=flash uses the existing configured Gemini
+route for sequential drafting and editing, with bounded retries and the same
+strict prose validators. CPU fallback remains available. Full-story creative roles
+keep their CPU policy. This tests whether the hosted route can produce compliant
+prose after the observed 3B failure; it is not a claim of better literary quality.

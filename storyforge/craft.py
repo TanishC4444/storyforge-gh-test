@@ -86,12 +86,15 @@ def author_packet(req,state,card):
 
 def validate_prose(prose,req,*,check_length=False):
     require(isinstance(prose,str) and bool(prose.strip()),'Empty prose')
+    errors=[]
     if check_length and req.get('length_policy',{}).get('scene_words')=='strict':
         words=len(prose.split());target=req['words_per_scene']
-        require(target*req.get('min_words_ratio',.75)<=words<=target*req.get('max_words_ratio',1.3),f'Scene has {words} words; required range is {target*req.get("min_words_ratio",.75):g}–{target*req.get("max_words_ratio",1.3):g} words (target {target}). Develop choices and consequences without padding')
+        if not target*req.get('min_words_ratio',.75)<=words<=target*req.get('max_words_ratio',1.3):
+            errors.append(f'Scene has {words} words; required range is {target*req.get("min_words_ratio",.75):g}–{target*req.get("max_words_ratio",1.3):g} words (target {target}). Develop choices and consequences without padding')
     paragraphs=[re.sub(r'\s+',' ',p).strip() for p in re.split(r'\n\s*\n',prose) if len(p.split())>=12]
-    require(len(paragraphs)==len(set(paragraphs)),'Duplicate prose paragraph; revise before review')
+    if len(paragraphs)!=len(set(paragraphs)):errors.append('Duplicate prose paragraph; revise before review')
     if 'no dialogue' in req.get('pov','').lower():
-        require(not re.search(r'[“”"]',prose),'Quoted speech violates the no-dialogue contract')
-        require(not re.search(r'(?im)^\s*(?:sing,?\s+muse|o\s+muse|#{1,6}\s)',prose),'Invocation or heading violates prose contract')
+        if re.search(r'[“”"]',prose):errors.append('Quoted speech violates the no-dialogue contract. Narrate offers, refusals and commitments indirectly; do not reproduce speech or voice-example lines')
+        if re.search(r'(?im)^\s*(?:sing,?\s+muse|o\s+muse|#{1,6}\s)',prose):errors.append('Invocation or heading violates prose contract')
+    require(not errors,'; '.join(errors))
     return prose
