@@ -101,7 +101,7 @@ class GoogleHosted:
             prior_health=path.parent/'health.json'
             if prior_health.exists():
                 for kind,item in json.loads(prior_health.read_text()).items():
-                    if item['until']>health.get(kind,{}).get('until',0):health[kind]=item
+                    if 'HTTP 400' not in item.get('error','') and item['until']>health.get(kind,{}).get('until',0):health[kind]=item
         if ledger:
             save(self.folder/'quota.json',{kind:{'calls':len(items),'reservations':list(items.values()),
                 'recent':[[item['time'],item['tokens']] for item in items.values() if time.time()-item['time']<61]}
@@ -167,13 +167,25 @@ class GoogleHosted:
             if response_schema is not None:config['responseJsonSchema']=response_schema
         started=time.monotonic()
         attempts=1 if policy and policy.get('literary_quality') else 2
+        compatibility_retry=False
         for attempt in range(attempts):
             from .usage import record
             request_started=time.monotonic()
             from .tracking import event
             event('api_attempt','Starting provider request',stage=role,attempt=attempt+1,model=model)
             try:
-                result=self.request(model+':generateContent',{**body,'generationConfig':config},timeout=policy['timeout'] if policy else (150 if kind=='gemma' else 240))
+                try:
+                    result=self.request(model+':generateContent',{**body,'generationConfig':config},timeout=policy['timeout'] if policy else (150 if kind=='gemma' else 240))
+                except HostedError as exc:
+                    if 'HTTP 400' not in str(exc) or compatibility_retry or kind=='gemma':raise
+                    # A provider schema/configuration rejection is not a model-wide
+                    # outage. Keep the full prompt contract and application validator;
+                    # retry once using JSON MIME without native grammar/thinking knobs.
+                    compatibility_retry=True
+                    safe={k:v for k,v in config.items() if k not in {'responseJsonSchema','thinkingConfig'}}
+                    self.reserve(kind,estimate+tokens)
+                    event('api_compatibility_retry','Retrying rejected generation configuration with application validation',stage=role,model=model)
+                    result=self.request(model+':generateContent',{**body,'generationConfig':safe},timeout=policy['timeout'] if policy else 240)
                 candidate=result.get('candidates',[{}])
                 record(self.folder,'google',model,role,result.get('usageMetadata'),attempt=attempt+1,seconds=round(time.monotonic()-request_started,3),status='returned',finish_reason=candidate[0].get('finishReason') if candidate else None,reserved_input_tokens=estimate)
                 break

@@ -238,3 +238,24 @@ class OutlineFailureRegressionTests(unittest.TestCase):
         self.assertEqual(scenes['maxItems'],scenes['minItems'])
         self.assertFalse(scenes['items']['additionalProperties'])
         self.assertEqual(schema['properties']['threads']['items']['type'],'string')
+
+class ConfigurationRecoveryTests(unittest.TestCase):
+    def test_rejected_native_schema_retries_json_without_disabling_model(self):
+        result={'candidates':[{'finishReason':'STOP','content':{'parts':[{'text':'{"ok":true}'}]}}]}
+        with tempfile.TemporaryDirectory() as d:
+            h=GoogleHosted(d,'placeholder')
+            with patch.object(h,'request',side_effect=[{'totalTokens':100},HostedError('Google HTTP 400 INVALID_ARGUMENT'),result]) as request:
+                text,meta=h.complete('flash','Full application schema remains here.','source',300,structured=True,response_schema={'type':'object'},policy={'timeout':20,'literary_quality':True})
+                self.assertEqual(json.loads(text),{'ok':True})
+                safe=request.call_args.args[1]['generationConfig']
+                self.assertEqual(safe['responseMimeType'],'application/json')
+                self.assertNotIn('responseJsonSchema',safe)
+                self.assertNotIn('thinkingConfig',safe)
+                self.assertNotIn('flash',h.disabled)
+                self.assertEqual(json.loads(Path(d,'quota.json').read_text())['flash']['calls'],2)
+
+    def test_invalid_recovery_is_still_rejected_by_application(self):
+        req=example();req['api_roles']={'story_quality':'flash'};req['max_stage_retries']=0
+        with tempfile.TemporaryDirectory() as d,patch('storyforge.hosted.GoogleHosted.complete',return_value=('{}',{'finish_reason':'stop'})):
+            with self.assertRaises(Exception):
+                Executor(req,d,'worker').call('story_quality',{},'Review.',validator=lambda x: (_ for _ in ()).throw(ValueError('Missing judgments')))
