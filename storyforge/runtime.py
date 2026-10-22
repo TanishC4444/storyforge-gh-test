@@ -24,6 +24,12 @@ REVIEW_ROLES={'development_editor','story_quality','rhetoric_quality','chapter_q
 REVIEW_CALL_TIMEOUT_SECONDS=600
 
 
+def review_call_timeout_seconds():
+    value=int(os.getenv('STORY_REVIEW_TIMEOUT_SECONDS',str(REVIEW_CALL_TIMEOUT_SECONDS)))
+    if not 60<=value<=3600:raise ValueError('Review call budget must be 60–3600 seconds')
+    return value
+
+
 def inference_timeout_seconds(role):
     remaining=worker_timeout_seconds()
-    return min(remaining,REVIEW_CALL_TIMEOUT_SECONDS) if role in REVIEW_ROLES else remaining
+    return min(remaining,review_call_timeout_seconds()) if role in REVIEW_ROLES else remaining

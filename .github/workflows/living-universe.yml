@@ -1,4 +1,4 @@
-name: Living universe / local models
+name: Living universe / local models / full runner graph
 'on':
   workflow_dispatch:
     inputs:
@@ -8,17 +8,35 @@ name: Living universe / local models
         - fixture
         - live
         default: fixture
+        description: Live inference executes inside these jobs, without child workflows
+      profile:
+        type: choice
+        options:
+        - balanced
+        - expressive
+        - fast
+        - small
+        default: expressive
+      request_file:
+        type: string
+        default: local-universe-massive
+        description: Author universe bible and explicit next-scene layout in examples/
+      scene_limit:
+        type: choice
+        options:
+        - '1'
+        default: '1'
       resume_run:
         type: string
         default: ''
-        description: Prior universe run checkpoint; empty starts a new world
-      events:
-        type: number
-        default: 1
-        description: Operational event limit for this manual run, not total story length
-      minutes:
-        type: number
-        default: 60
+        description: Prior accepted universe-canon run; empty starts a world
+      checkpoint_artifact:
+        type: choice
+        options:
+        - universe-canon
+        - quickstart
+        default: universe-canon
+        description: Use quickstart only to retry a failed event while retaining its saved random draw
 permissions:
   contents: read
   actions: read
@@ -26,10 +44,59 @@ concurrency:
   group: living-universe
   cancel-in-progress: false
 jobs:
-  grow:
+  prepare:
+    name: Prepare request and literary retrieval
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 360
     steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - name: Check inference contracts before benchmark
+      run: python -m unittest discover -s tests -q
+    - name: Execute Prepare request and literary retrieval
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag prepare --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: prepare
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '1800'
+  quickstart:
+    name: Compile beginning quickly and propose one local world event
+    needs:
+    - prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
     - uses: actions/checkout@v4
     - uses: ./.github/actions/setup-worker
       with:
@@ -37,26 +104,1085 @@ jobs:
     - uses: actions/download-artifact@v4
       if: ${{ inputs.resume_run != '' }}
       with:
-        name: universe-checkpoint
+        name: ${{ inputs.checkpoint_artifact }}
+        path: inputs/canon
         run-id: ${{ inputs.resume_run }}
         github-token: ${{ github.token }}
-        path: out
-    - name: Execute scoped mode stage
+    - uses: actions/download-artifact@v4
+      with:
+        name: prepare
+        path: inputs/state
+    - name: Execute Refine initial story prompt
       id: task
       env:
-        PYTHONUNBUFFERED: '1'
-        BACKEND: ${{ inputs.backend }}
-        SCENE_ID: ${{ matrix.scene_id }}
-        MINUTES: ${{ inputs.minutes }}
-        EVENTS: ${{ inputs.events }}
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        CANON_RUN: ${{ inputs.resume_run }}
       run: 'backend=fixture
 
-        if [ "$BACKEND" = live ]; then backend=worker; fi
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
-        python -m storyforge.universe --backend "$backend" --minutes "$MINUTES" --steps "$EVENTS"'
+        extra=()
+
+        if [ -n "$CANON_RUN" ]; then extra=(--checkpoint inputs/canon/snapshot.json); fi
+
+        python -m storyforge.living_prepare --backend "$backend" --source inputs/state/snapshot.json --out out "${extra[@]}"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: quickstart
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '1800'
+  s01_design:
+    name: Chapter 1 scene 1 / reconcile design with accepted state
+    needs:
+    - quickstart
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: quickstart
+        path: inputs/state
+    - name: Execute Chapter 1 scene 1 / reconcile design with accepted state
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag scene_design --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+        --index 0
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_design
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '1800'
+  s01_characters:
+    name: Chapter 1 scene 1 / character ${{ matrix.character }}
+    needs:
+    - s01_design
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        character: ${{ fromJSON(needs.s01_design.outputs.characters) }}
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_design
+        path: inputs/state
+    - name: Execute Chapter 1 scene 1 / character ${{ matrix.character }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        STORY_CHARACTER: ${{ matrix.character }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag character --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+        --index 0 --character "$STORY_CHARACTER"
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_characters-${{ matrix.character }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '1800'
+  s01_direction:
+    name: Chapter 1 scene 1 / reconcile character choices
+    needs:
+    - s01_design
+    - s01_characters
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s01_characters-*
+        path: inputs/characters
+    - name: Execute Chapter 1 scene 1 / reconcile character choices
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag director --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+        --index 0
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_direction
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '1800'
+  s01_draft:
+    name: Chapter 1 scene 1 / writer
+    needs:
+    - s01_design
+    - s01_direction
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_direction
+        path: inputs/direction
+    - name: Execute Chapter 1 scene 1 / writer
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag writer --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index
+        0
+
+        '
+    - name: Show generated prose before final acceptance
+      if: always()
+      run: python -m storyforge.expansion preview --source out --label "Writer draft"
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_draft
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '1800'
+  s01_edit:
+    name: Chapter 3 scene 1 / merge source-bound edits
+    needs:
+    - s01_design
+    - s01_edit_plan
+    - s01_edit_batches
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_edit_plan
+        path: inputs/edit-plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s01_edit_batches-*
+        path: inputs/batches
+    - name: Execute Chapter 3 scene 1 / merge source-bound edits
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag edit_merge --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+        --index 0
+
+        '
+    - name: Show generated prose before final acceptance
+      if: always()
+      run: python -m storyforge.expansion preview --source out --label "Passage-edited draft"
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_edit
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '1800'
+  s01_story:
+    name: Chapter 1 scene 1 / story quality
+    needs:
+    - s01_design
+    - s01_draft
+    - s01_edit
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_draft
+        path: inputs/draft
+    - name: Execute Chapter 1 scene 1 / story quality
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag story_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+        --index 0
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_story
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '1800'
+  s01_rhetoric:
+    name: Chapter 1 scene 1 / rhetoric and reader inference
+    needs:
+    - s01_design
+    - s01_edit
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_edit
+        path: inputs/edited
+    - name: Execute Chapter 1 scene 1 / rhetoric and reader inference
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag rhetoric_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+        --index 0
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_rhetoric
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '1800'
+  s01_memory:
+    name: Chapter 1 scene 1 / extract memory
+    needs:
+    - s01_design
+    - s01_edit
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_edit
+        path: inputs/edited
+    - name: Execute Chapter 1 scene 1 / extract memory
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag memory --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index
+        0
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_memory
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '1800'
+  s01_repair:
+    name: Chapter 1 scene 1 / repair if needed
+    needs:
+    - s01_design
+    - s01_edit
+    - s01_story
+    - s01_rhetoric
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_story
+        path: inputs/diagnosis
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_rhetoric
+        path: inputs/rhetoric
+    - name: Execute Chapter 1 scene 1 / repair if needed
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag repair --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index
+        0
+
+        '
+    - name: Show generated prose before final acceptance
+      if: always()
+      run: python -m storyforge.expansion preview --source out --label "Review-repaired draft"
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_repair
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '1800'
+  s01_verify:
+    name: Chapter 1 scene 1 / verify final prose
+    needs:
+    - s01_design
+    - s01_repair
+    - s01_story
+    - s01_draft
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_story
+        path: inputs/diagnosis
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_draft
+        path: inputs/draft
+    - name: Execute Chapter 1 scene 1 / verify final prose
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag verify --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index
+        0
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_verify
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '1800'
+  s01_verify_rhetoric:
+    name: Chapter 1 scene 1 / verify rhetoric revision
+    needs:
+    - s01_design
+    - s01_repair
+    - s01_rhetoric
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_rhetoric
+        path: inputs/rhetoric
+    - name: Execute Chapter 1 scene 1 / verify rhetoric revision
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag verify_rhetoric --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+        --index 0
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_verify_rhetoric
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '1800'
+  s01_final_memory:
+    name: Chapter 1 scene 1 / refresh memory if prose changed
+    needs:
+    - s01_design
+    - s01_repair
+    - s01_memory
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_memory
+        path: inputs/initial-memory
+    - name: Execute Chapter 1 scene 1 / refresh memory if prose changed
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag memory_final --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+        --index 0
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_final_memory
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '1800'
+  s01_memory_review:
+    name: Chapter 1 scene 1 / verify memory
+    needs:
+    - s01_design
+    - s01_repair
+    - s01_final_memory
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_final_memory
+        path: inputs/memory
+    - name: Execute Chapter 1 scene 1 / verify memory
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag memory_review --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+        --index 0
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_memory_review
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '1800'
+  s01_accept:
+    name: Chapter 1 scene 1 / verify chapter and commit
+    needs:
+    - s01_design
+    - s01_repair
+    - s01_verify
+    - s01_verify_rhetoric
+    - s01_final_memory
+    - s01_memory_review
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_verify
+        path: inputs/story-review
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_verify_rhetoric
+        path: inputs/rhetoric-review
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_final_memory
+        path: inputs/memory
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_memory_review
+        path: inputs/memory-review
+    - name: Execute Chapter 1 scene 1 / verify chapter and commit
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag accept --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index
+        0
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_accept
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '1800'
+  results:
+    name: Collect outputs and checkpoints
+    timeout-minutes: 360
+    if: always()
+    needs:
+    - prepare
+    - quickstart
+    - s01_design
+    - s01_characters
+    - s01_direction
+    - s01_draft
+    - s01_edit
+    - s01_story
+    - s01_rhetoric
+    - s01_memory
+    - s01_repair
+    - s01_verify
+    - s01_verify_rhetoric
+    - s01_final_memory
+    - s01_memory_review
+    - s01_accept
+    - s01_edit_plan
+    - s01_edit_batches
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4
+      with:
+        path: results/
+    - name: Collect readable prose independently of canon acceptance
+      if: always()
+      run: python -m storyforge.expansion collect --source results --out reading
     - uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: universe-checkpoint
+        name: readable-story
+        path: reading/
+        retention-days: 30
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: universe-canon
+        path: reading/canon/
+        retention-days: 30
+        if-no-files-found: ignore
+    - name: Save observed API and CPU usage, including failed attempts
+      if: always()
+      run: python -m storyforge.usage --source results --out results/usage-summary
+    - name: Retain usage reports for 90 days
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: usage-${{ github.run_id }}
+        path: results/usage-summary/
+        retention-days: 30
+        if-no-files-found: warn
+    - uses: actions/upload-artifact@v4
+      with:
+        name: story-run-${{ github.run_id }}
+        path: results/
+        retention-days: 30
+        overwrite: true
+    - name: Summarize run
+      env:
+        JOB_RESULTS: ${{ toJSON(needs) }}
+      run: "python - <<'PY'\nimport json, os\nresults = json.loads(os.environ['JOB_RESULTS'])\nfailed = [k for k, v in results.items()\
+        \ if v['result'] in ['failure', 'cancelled']]\nfrom pathlib import Path\nstatuses=[]\nfor path in Path('results').rglob('status.json'):\n\
+        \    statuses.append(json.loads(path.read_text()))\nrows=['## Story workflow progress', '', '| Job | Status | Last\
+        \ phase | Seconds |', '|---|---|---|---:|']\nby_job={s.get('details',{}).get('job'):s for s in statuses}\nfor key,value\
+        \ in results.items():\n    state=by_job.get(key,{})\n    phase=state.get('phase','No task status; inspect setup/input\
+        \ steps' if value['result']=='failure' else value['result'])\n    if state.get('warnings_count'):phase+=' (%s warnings)'%state['warnings_count']\n\
+        \    rows.append('| %s | %s | %s | %s |'%(key,value['result'],phase,state.get('elapsed_seconds','\u2014')))\nprogress=[s.get('story_progress',{})\
+        \ for s in statuses]\naccepted=max((p.get('accepted_scenes',0) for p in progress),default=0)\nrows+=['','Checkpointed\
+        \ scenes: **%s**'%accepted]\nlatest=max(progress,key=lambda p:p.get('accepted_scenes',0),default={})\nrows+=['','Draft\
+        \ state: **%s**'%latest.get('completion_status','in_progress')]\nwith open(os.environ['GITHUB_STEP_SUMMARY'],'a')\
+        \ as summary:\n    summary.write('\\n'.join(rows)+'\\n')\nprint('Failed/cancelled jobs:', failed)\nif failed:\n  \
+        \  raise SystemExit(1)\nPY\n"
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '1800'
+  s01_edit_plan:
+    name: Chapter 3 scene 1 / split passage ownership
+    needs:
+    - s01_design
+    - s01_draft
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_draft
+        path: inputs/draft
+    - name: Execute Chapter 3 scene 1 / split passage ownership
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag edit_plan --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+        --index 0
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_edit_plan
         path: out/
         retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '1800'
+  s01_edit_batches:
+    name: Chapter 3 scene 1 / prose rhetoric humanizer batch ${{ matrix.character }}
+    needs:
+    - s01_design
+    - s01_edit_plan
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        character: ${{ fromJSON(needs.s01_edit_plan.outputs.characters) }}
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_edit_plan
+        path: inputs/edit-plan
+    - name: Execute Chapter 3 scene 1 / prose rhetoric humanizer batch ${{ matrix.character }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        STORY_CHARACTER: ${{ matrix.character }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag edit_batch --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+        --index 0 --character "$STORY_CHARACTER"
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_edit_batches-${{ matrix.character }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '1800'
