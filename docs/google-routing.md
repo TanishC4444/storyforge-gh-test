@@ -48,3 +48,22 @@ the supplied 28-day peak chart is not a remaining-capacity counter.
 
 References: https://ai.google.dev/gemini-api/docs/rate-limits and
 https://ai.google.dev/gemini-api/docs/models .
+
+## Literary quality mode
+
+The practice and full parallel examples now additionally enable
+`execution_policy.literary_quality`. This supersedes the fast routing above:
+writers use 3.8 Flash → 3.6 Flash → hosted Gemma 31B before CPU Glitter 12B.
+Editing and literary reviews use Flash 3.6/3.8 and Gemma 31B, with Gemma 4 12B
+as the CPU fallback; creative/critical roles do not downgrade to Flash Lite or
+Qwen 3B. Routine structured preparation may still use Lite. One attempt per hosted
+model hands transport failures to the next route; provider circuits and quota
+budgets still apply.
+
+The author writing brief is injected into hosted and CPU creative calls, and
+`style_fidelity` is an evidence-backed rhetoric dimension. The requested style
+comes from the input, so epic prose is not imposed on other genres. Passing these
+checks is evidence of compliance, not a guarantee of matching a historical author's
+literary achievement. Findings retain their original negative judgments; passage
+IDs determine paragraph locations in application code. Scene-wide findings remain
+scene-wide, and unknown evidence is rejected.

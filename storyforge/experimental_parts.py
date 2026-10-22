@@ -27,6 +27,24 @@ def needs_repair(review,req):
     return review.get('unverified',False) or any(i['severity']=='blocking' or threshold=='advisory' for i in review['issues'])
 
 
+def bind_finding_targets(raw,catalog):
+    """Passage IDs are authoritative; never ask models to count paragraphs twice."""
+    lookup={p['id']:i for i,p in enumerate(catalog)}
+    raw=copy.deepcopy(raw)
+    for issue in raw.get('issues',[]):
+        ids=issue.get('evidence_ids')
+        require(isinstance(ids,list) and bool(ids) and all(pid in lookup for pid in ids),'Finding cites unknown evidence')
+        scope=issue.get('scope')
+        if scope is None:
+            # Legacy cached outputs may contain off-by-one or one-based indices.
+            # Preserve scene-level findings and cross-passage scope, not bad metadata.
+            scope='paragraph' if issue.get('paragraph') is not None and len(ids)==1 else 'scene'
+        require(scope in {'paragraph','scene'},'Invalid finding scope')
+        require(scope!='paragraph' or len(ids)==1,'Paragraph finding must cite exactly one passage')
+        issue['paragraph']=lookup[ids[0]] if scope=='paragraph' else None
+    return raw
+
+
 def review(executor,req,prose,packet,required,role,kind,prior=None,diff=None):
     source=payload(prose);catalog=passages(prose)
     active=list(required);retained=[]
@@ -49,16 +67,13 @@ def review(executor,req,prose,packet,required,role,kind,prior=None,diff=None):
     def assess(group):
         data={**source,**packet,'required_checks':group}
         schema=editorial_schema(data)
-        schema['properties']['issues']['items']['properties']['paragraph']={'type':['integer','null'],'minimum':0,'maximum':max(0,len(catalog)-1)}
-        schema['properties']['issues']['items']['required'].append('paragraph')
+        schema['properties']['issues']['items']['properties']['scope']={'type':'string','enum':['paragraph','scene']}
+        schema['properties']['issues']['items']['required'].append('scope')
         def validate(raw):
             if isinstance(raw.get('checks'),dict):raw={**raw,'checks':[dict(c,id=k) for k,c in raw['checks'].items()]}
-            for issue in raw.get('issues',[]):
-                index=issue.get('paragraph')
-                require(index is None or type(index) is int and 0<=index<len(catalog),'Invalid paragraph index')
-                require(index is None or issue.get('evidence_ids')==[catalog[index]['id']],'Finding index disagrees with evidence')
+            raw=bind_finding_targets(raw,catalog)
             return editorial_review(raw,prose,group)
-        return executor.call(role,data,'Review only the supplied evidence and required dimensions. Every finding needs severity blocking/advisory and paragraph (zero-based index, or null for a whole-scene fault). Never return unrequested dimensions. Required checks must be pass or fail, except subplot_function and reference_application may be not_applicable. For dialogue_tactics, assess narrated offers, refusals, bargaining or leverage when the brief prohibits direct dialogue; absence of quoted speech does not skip the check. Prior canon is context, not prose to edit.',tokens=1200,validator=validate,response_schema=schema,skill=(ROOT/'skills'/('story_quality.md' if kind=='story' else 'rhetoric_quality.md')).read_text())
+        return executor.call(role,data,'Review only the supplied evidence and required dimensions. Every finding needs severity blocking/advisory, existing evidence_ids, and scope=paragraph for a one-paragraph fix or scope=scene for cross-paragraph/whole-scene faults. A paragraph finding cites exactly one passage ID. Do not generate paragraph numbers; the application derives them from passage IDs. Never return unrequested dimensions. Required checks must be pass or fail, except subplot_function and reference_application may be not_applicable. For dialogue_tactics, assess narrated offers, refusals, bargaining or leverage when the brief prohibits direct dialogue; absence of quoted speech does not skip the check. Prior canon is context, not prose to edit.',tokens=1200,validator=validate,response_schema=schema,skill=(ROOT/'skills'/('story_quality.md' if kind=='story' else 'rhetoric_quality.md')).read_text())
     results=parallel(req,'reviews',groups,assess)
     if any(r.get('unverified') for r in results):return {'pass':False,'unverified':True,'checks':[],'issues':[],'needs_repair':True,'reviewed_sha256':digest(prose)}
     result={'pass':all(r['pass'] for r in results),'checks':retained+[c for r in results for c in r['checks']],'issues':[i for r in results for i in r['issues']]}

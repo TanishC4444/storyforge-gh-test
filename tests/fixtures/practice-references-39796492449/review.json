@@ -1,0 +1,65 @@
+{
+  "pass": false,
+  "checks": {
+    "figurative_coherence": {
+      "verdict": "fail",
+      "evidence_ids": [
+        "p005"
+      ],
+      "reason": "Paragraph 5 relies on tautological, non-coherent phrasing (\"its silence a silent scream for answers\") and modern abstract imagery (\"whispering the weight of the trade-off\") that violates figurative coherence and emotional restraint."
+    },
+    "gesture_function": {
+      "verdict": "fail",
+      "evidence_ids": [
+        "p003"
+      ],
+      "reason": "Paragraph 3 uses repetitive pantomime (\"clenched his teeth, the salt-stung skin of his jaw tight with anxiety\") which restates internal emotion rather than advancing a tactical negotiation or concrete action."
+    },
+    "rhythm_repetition": {
+      "verdict": "fail",
+      "evidence_ids": [
+        "p004",
+        "p005",
+        "p006"
+      ],
+      "reason": "Paragraphs 4, 5, and 6 heavily restate the exact same trade-off, costs, and mystery (wages, passage, delayed departure, unanswered questions) without advancing the scene's pace or narrative arc."
+    }
+  },
+  "issues": [
+    {
+      "severity": "blocking",
+      "category": "figurative_coherence",
+      "evidence_ids": [
+        "p005"
+      ],
+      "problem": "The passage employs redundant phrasing and an ungrounded figurative image.",
+      "fix": "Replace with a concrete material image consistent with smithwork or storms.",
+      "replacement": "The rusted iron gave back no gleam, cold as river silt under deep water.",
+      "paragraph": 5
+    },
+    {
+      "severity": "blocking",
+      "category": "gesture_function",
+      "evidence_ids": [
+        "p003"
+      ],
+      "problem": "Physical gestures are used to label emotion rather than drive an interaction.",
+      "fix": "Focus the gesture on physical labor or immediate material checks.",
+      "replacement": "He cleared the salted brine from the winch housing with a scrap of oiled hide.",
+      "paragraph": 3
+    },
+    {
+      "severity": "blocking",
+      "category": "rhythm_repetition",
+      "evidence_ids": [
+        "p004",
+        "p005",
+        "p006"
+      ],
+      "problem": "Repeated restatement of the cost and mystery stalls the narrative rhythm.",
+      "fix": "Consolidate the reflections on wages and time into a single forward movement.",
+      "replacement": "The hours spent over the strange iron cost him the day's wage, leaving the apprentice empty-handed among the fodder sacks.",
+      "paragraph": 4
+    }
+  ]
+}

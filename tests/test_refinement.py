@@ -145,7 +145,7 @@ class RefinementTests(unittest.TestCase):
     def test_practice_and_full_story_use_quality_routing(self):
         from storyforge.worker_policy import policy
         full=request(json.loads((ROOT/'examples/troy-parallel-experiment.json').read_text()))
-        for role,tier in [('writer','flash'),('humanizer','lite'),('structural_editor','flash36')]:
+        for role,tier in [('writer','flash'),('humanizer','flash36'),('structural_editor','flash36')]:
             self.assertEqual(policy(self.req,role,1800)['tier'],tier)
             self.assertEqual(policy(full,role,1800)['tier'],tier)
 

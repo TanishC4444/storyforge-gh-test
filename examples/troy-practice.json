@@ -336,7 +336,8 @@
     "refinement_provider": "cpu",
     "compile_scene_layout": true,
     "hosted_prose": "flash",
-    "model_routing": "quality"
+    "model_routing": "quality",
+    "literary_quality": true
   },
   "performance": {
     "compact_packets": true,

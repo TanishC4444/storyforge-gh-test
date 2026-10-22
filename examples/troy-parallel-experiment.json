@@ -618,7 +618,8 @@
     "estimate_small_calls": true,
     "refinement_provider": "cpu",
     "model_routing": "quality",
-    "hosted_prose": "flash"
+    "hosted_prose": "flash",
+    "literary_quality": true
   },
   "performance": {
     "compact_packets": true,

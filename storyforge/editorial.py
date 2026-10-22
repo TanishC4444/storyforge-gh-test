@@ -5,7 +5,7 @@ from .contracts import require, review, ContractError
 from .evidence import EvidenceError, bind, payload
 
 STORY_CHECKS=['scene_change','character_agency','character_depth','causal_alternatives','dialogue_tactics','continuity_clock','pov_knowledge','subplot_function','reference_application']
-RHETORIC_CHECKS=['redundant_explanation','viewpoint_specificity','emotional_labeling','figurative_coherence','gesture_function','rhythm_repetition','instruction_leakage']
+RHETORIC_CHECKS=['redundant_explanation','viewpoint_specificity','emotional_labeling','figurative_coherence','gesture_function','rhythm_repetition','instruction_leakage','style_fidelity']
 DESIGN_CHECKS=['medium_length','themes_tensions','scene_design','world_rules','character_depth','plot_subplots','genre','tone_mood','references_adaptation','figurative_language','causal_alternatives','information_order']
 
 

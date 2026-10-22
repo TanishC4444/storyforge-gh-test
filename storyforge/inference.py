@@ -78,6 +78,8 @@ class Executor:
             instruction+=' Return only the scene cards and thread strings in the schema. Keep each scene field to one or two concrete sentences. Do not repeat the supplied brief, reference lists, stylistic devices or technique libraries.'
         from .review_policy import prepare as prepare_review
         packet,skill,review_instructions=prepare_review(self.req,role,packet,skill,ROOT)
+        from .writing_policy import instructions as writing_instructions
+        prose_instructions=writing_instructions(self.req,role)
         last_error = ''
         semantic_retry=False
         repair_output = None
@@ -95,6 +97,7 @@ class Executor:
                     system+='\nCorrect the rejected prose against the original input and validation error. Return the complete prose alone, without wrappers, headings or commentary. Preserve established events and develop missing dramatic action without padding.'
                 else:
                     prompt += '\nPrevious output failed validation: ' + last_error + '\nReturn a complete corrected artifact grounded in the original request. Supply every required field; do not substitute retrieval guidance for the premise.'
+            if prose_instructions:system+='\n'+prose_instructions
             if review_instructions:system+='\n'+review_instructions
             if response_schema is not None:
                 system+='\nRequired output JSON Schema: '+json.dumps(response_schema,separators=(',',':'))
@@ -104,12 +107,14 @@ class Executor:
             if self.req.get('execution_policy',{}).get('cpu_quality') and role in {'writer','humanizer','structural_editor','architect','scene_designer','director','global_repair','repair','chapter_quality','memory','story_quality','rhetoric_quality','development_editor'}:
                 model='qwen7b'
             if last_error and role in {'writer','architect'} and self.req['profile']=='fast' and not self.req.get('execution_policy',{}).get('cpu_quality'):model='qwen3b'
+            if self.req.get('execution_policy',{}).get('literary_quality'):
+                model='glitter-12b' if role in {'writer','writer_beat','seam'} else 'gemma-4-12b'
             n_ctx=min(self.req['n_ctx'],8192) if model=='qwen3b' and not (validator and self.req.get('performance',{}).get('compact_packets')) and role not in {'writer','architect','chapter_quality','humanizer','refiner'} else self.req['n_ctx']
             digest = hashlib.sha256(json.dumps([self.backend, role, model, system, prompt, tokens, n_ctx, self.req['runner_repo'], response_schema,self.req.get('api_roles',{}),output_format]).encode()).hexdigest()
             path = self.folder / 'calls' / f'{role}-{digest[:20]}.json'
-            save(self.folder / 'packets' / f'{role}-{digest[:20]}.json', {'role': role, 'model': model, 'system': system, 'input': packet, 'validation_error': last_error, 'max_tokens': tokens, 'n_ctx': n_ctx,'response_schema':response_schema,'format_repair_only':bool(last_error and editorial_repair)})
+            save(self.folder / 'packets' / f'{role}-{digest[:20]}.json', {'role': role, 'model': model, 'system': system, 'input': packet, 'validation_error': last_error, 'max_tokens': tokens, 'n_ctx': n_ctx,'response_schema':response_schema,'format_repair_only':bool(last_error and editorial_repair and not semantic_retry)})
             cached = load(path) if path.exists() else None
-            event('model_start','Starting %s attempt %s/%s'%(role,attempt+1,self.req['max_stage_retries']+1),model=model,role=role,input_characters=len(prompt),system_characters=len(system),context_tokens=n_ctx,output_budget=tokens,checks=packet.get('required_checks',[]),cached=bool(cached),format_repair=bool(last_error and editorial_repair),call_id=digest[:20])
+            event('model_start','Starting %s attempt %s/%s'%(role,attempt+1,self.req['max_stage_retries']+1),model=model,role=role,input_characters=len(prompt),system_characters=len(system),context_tokens=n_ctx,output_budget=tokens,checks=packet.get('required_checks',[]),cached=bool(cached),format_repair=bool(last_error and editorial_repair and not semantic_retry),call_id=digest[:20])
             try:
                 if cached is None:
                     started = time.monotonic()
@@ -129,6 +134,8 @@ class Executor:
                                 routes += {'flash':['flash36'],'flash36':['flash'],'lite':['flash36'],'gemma':['lite']}.get(kind,[])
                             if self.req.get('performance',{}).get('hosted_failover') or (role=='humanizer' and kind=='gemma' and 'hosted_failover' not in self.req.get('performance',{})):
                                 routes += ['gemma' if kind=='flash' else 'flash']
+                            if stage_policy and stage_policy.get('literary_quality') and role in {'writer','writer_beat','humanizer','structural_editor','global_repair','repair','story_quality','rhetoric_quality','chapter_quality','memory_quality','development_editor'}:
+                                routes={'flash':['flash','flash36','gemma'],'flash36':['flash36','flash','gemma'],'gemma':['gemma','flash36','flash']}.get(kind,routes)
                             for route in dict.fromkeys(routes):
                                 if route=='flash' and kind!='flash' and not (stage_policy and stage_policy.get('quality_routing')) and not self.hosted.can_rescue():continue
                                 try:
