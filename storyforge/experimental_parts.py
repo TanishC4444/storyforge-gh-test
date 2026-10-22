@@ -89,7 +89,8 @@ def repair(executor,req,prose,reviews):
     patches=dict(parallel(req,'repair',list(groups.items()),patch))
     revised=apply(prose,patches,digest(prose))
     if global_issues:
-        revised=executor.call('global_repair',{'prose':revised,'findings':global_issues,'world_rules':req['world_rules'],'style':req['style']},'Resolve the whole-scene findings in one pass. Preserve every unaffected fact and return the complete prose alone.',tokens=3200)
+        from .craft import validate_prose
+        revised=executor.call('global_repair',{'prose':revised,'findings':global_issues,'world_rules':req['world_rules'],'style':req['style']},'Resolve the whole-scene findings in one pass. Preserve every unaffected fact and return the complete prose alone.',tokens=3200,output_format='text',validator=lambda text:validate_prose(text,req,check_length=getattr(executor,'backend','fixture')!='fixture'))
     diff=changes(prose,revised)
     return revised,{'changed':revised!=prose,'facts_changed':revised!=prose,'reviewed_sha256':digest(prose),'candidate_sha256':digest(revised),'diff':diff,'global_pass':bool(global_issues)}
 

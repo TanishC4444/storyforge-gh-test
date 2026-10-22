@@ -320,8 +320,8 @@ def build_experimental(total=12,practice=False):
         job(p+'_story',p+' concurrent story dimensions','story_review',[state,p+'_edit'],edit,i)
         job(p+'_rhetoric',p+' concurrent rhetoric dimensions','rhetoric_review',[state,p+'_edit'],edit,i)
         job(p+'_memory',p+' initial memory and independent verification','memory',[state,p+'_edit'],edit,i)
-        repair_gate=f"needs.{p}_story.outputs.needs_repair == 'true' || needs.{p}_rhetoric.outputs.needs_repair == 'true'"
-        job(p+'_repair',p+' paragraph patch batches','repair',[state,p+'_edit',p+'_story',p+'_rhetoric'],edit+[(p+'_story','diagnosis'),(p+'_rhetoric','rhetoric')],i,repair_gate)
+        repair_gate=f"needs.{p}_story.outputs.needs_repair == 'true' || needs.{p}_rhetoric.outputs.needs_repair == 'true' || needs.{p}_memory.outputs.needs_repair == 'true'"
+        job(p+'_repair',p+' paragraph patch batches','repair',[state,p+'_edit',p+'_story',p+'_rhetoric',p+'_memory'],edit+[(p+'_story','diagnosis'),(p+'_rhetoric','rhetoric'),(p+'_memory','initial-memory')],i,repair_gate)
         changed=f"needs.{p}_repair.outputs.changed == 'true'"
         repaired=common+[(p+'_repair','edited')]
         job(p+'_verify',p+' changed-paragraph story verification','verify',[state,p+'_repair',p+'_story'],repaired+[(p+'_story','diagnosis')],i,changed)
