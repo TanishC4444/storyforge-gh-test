@@ -253,3 +253,8 @@ explicitly says no model design review occurred. The full experiment keeps its
 chapter developmental reviews. All prose, source-bound memory and acceptance
 gates remain in the practice workflow. Practice ending requirements are scoped
 to discovery, not the full story's acquisition/deployment arc.
+
+Troy workflows reuse the approved scene card plus character proposals as writer
+direction (combine_direction=true), avoiding a redundant model restatement. The
+practice's observed director call used 202.2 seconds; fixture coverage exercises
+the forwarding path. Prose and memory verification remain independent gates.
