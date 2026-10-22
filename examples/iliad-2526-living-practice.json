@@ -1,0 +1,476 @@
+{
+  "min_words_ratio": 0.8,
+  "max_words_ratio": 1.3,
+  "auto_approve_plan": true,
+  "max_repairs": 1,
+  "max_stage_retries": 0,
+  "runner_repo": "storyforge-inference-runner",
+  "context_chars": 48000,
+  "n_ctx": 16384,
+  "execution_policy": {
+    "experimental": false,
+    "literary_quality": true,
+    "continue_with_warnings": false,
+    "cpu_models": {
+      "humanizer": "qwen3b",
+      "repair": "qwen3b",
+      "story_quality": "qwen3b",
+      "rhetoric_quality": "qwen3b",
+      "memory": "qwen3b",
+      "memory_quality": "qwen3b",
+      "chapter_quality": "qwen3b",
+      "director": "qwen3b",
+      "scene_designer": "qwen3b",
+      "character": "qwen3b",
+      "writer": "qwen7b",
+      "writer_beat": "qwen7b"
+    },
+    "editorial_disagreement": "one_strict_check",
+    "gemini_batches": true
+  },
+  "performance": {
+    "compact_packets": true,
+    "application_prompt_binding": true,
+    "hosted_failover": false,
+    "batch_development": true,
+    "canon_index": true,
+    "inherit_provider_budget": false,
+    "application_plan_binding": true,
+    "development_batch_size": 6,
+    "api_batch_probes": false,
+    "working_memory_chars": 3500,
+    "combine_direction": true,
+    "classic_expansion": true,
+    "validate_scene_prose": true,
+    "batched_prose": true,
+    "batched_repairs": true,
+    "living_universe": true,
+    "living_bounded": true
+  },
+  "api_roles": {
+    "writer_beat": "flash",
+    "writer": "flash",
+    "repair": "flash36",
+    "humanizer": "flash36",
+    "story_quality": "flash36",
+    "rhetoric_quality": "flash36",
+    "memory": "lite",
+    "memory_quality": "flash36",
+    "chapter_quality": "flash36",
+    "scene_designer": "lite",
+    "director": "lite",
+    "character": "lite"
+  },
+  "project_id": "iliad-2526-living-practice",
+  "universe_id": "iliad-orbital-2526",
+  "title": "The Anger in Orbit",
+  "brief_version": 1,
+  "medium": "book",
+  "chapters": 4,
+  "scenes_per_chapter": 1,
+  "words_per_scene": 700,
+  "profile": "fast",
+  "retrieval_mode": "keyword",
+  "retrieval_query": "Iliad Book 1 Chryses ransom Apollo plague assembly Calchas Agamemnon Achilles Briseis withdrawal honor supplication",
+  "premise": "Write the opening movement of an Iliad reimagined in 2526 CE, five hundred years after the present. Four developed chapters, about 2,800 words altogether. After nine years of blockade, the Achaean coalition besieges Troy, a sovereign orbital habitat above Mars. The physician-priest Chryses seeks the release of his adult daughter Chryseis; Agamemnon refuses, an Apollo-linked epidemic exposes the price of that refusal, and the ensuing council breaks the alliance between Agamemnon and Achilles. End with Achilles withdrawing his Myrmidon carrier from combat duty and seeking Thetis\u2019s intervention, leaving the war unresolved. This must FEEL futuristic in bodies, labor, communications, medicine, habitation, logistics and political power; preserve the Iliad\u2019s causal conflict and epic gravity rather than dressing ancient camps in neon.",
+  "length_policy": {
+    "scene_words": "strict",
+    "chapter_words": "target",
+    "allow_compression": false,
+    "policy": "Exactly four chapters, one developed 700-word scene each. Close this opening movement in chapter four; leave the greater war unresolved. No fifth chapter or endless new subplot."
+  },
+  "genre": "Futuristic political and military epic; literary science fiction",
+  "reader_experience": "Immersion in a physically inhabited future; compassion for captives and patients; mounting dread as private humiliation becomes public catastrophe.",
+  "pov": "Third-person past tense with one primary focal character per chapter. No quoted/direct dialogue, first-person narration, invocation or direct address. Render arguments through specific narrated offers, refusals, actions and consequences. Author knowledge is not shared character knowledge.",
+  "tone_mood": "Grave, lucid and politically charged. Epic scale grounded in bodily vulnerability; no generic action-film triumph or archaic costume drama.",
+  "sensory_detail": "Ventilator rhythms, adhesive soles in spin gravity, worn pressure seals, projection lag, heat radiators, recycled air, diagnostic skin patches and the labor that keeps habitats alive.",
+  "ending_tendency": "Resolve the four-chapter opening arc with a consequential withdrawal, while leaving the siege and divine-political intervention unresolved.",
+  "style": {
+    "narrator": "Third-person past tense with one primary focal character per chapter. No quoted/direct dialogue, first-person narration, invocation or direct address. Render arguments through specific narrated offers, refusals, actions and consequences. Author knowledge is not shared character knowledge.",
+    "register": "Elevated but clear contemporary English. Musical variation, exact physical detail, tense subtext and restrained exposition. Epic dignity without faux-archaic filler.",
+    "wording": [
+      "Technology must alter feasible choices and social power; do not merely rename spears and ships.",
+      "Use stable names, locations, counts, ownership and deadlines across all chapters.",
+      "Avoid stock holograms, neon, quantum jargon, generic AI explanations and repeated eyes/hands gestures.",
+      "No quotation or close reproduction of modern translations."
+    ],
+    "figurative_language": {
+      "density": "sparse",
+      "devices": [
+        "extended epic simile",
+        "selective epithet"
+      ],
+      "image_domains": [
+        "orbital mechanics",
+        "maintenance work",
+        "solar weather",
+        "migration",
+        "ocean memory",
+        "industrial heat"
+      ],
+      "guidance": "At most one developed simile per chapter if earned; vary domains across chapters and return to the action. Do not repeat the same demonstration in adjacent writing beats."
+    },
+    "interiority": "Concrete perception, conflicted intention and selective memory; no moral summary after a legible action.",
+    "dialogue": "No direct or quoted speech; preserve distinct bargaining strategies through narrated exchanges.",
+    "explanation": "Reveal future systems through consequential use and failure, without explanatory lectures."
+  },
+  "characters": [
+    {
+      "id": "achilles",
+      "name": "Achilles",
+      "goal": "Protect his crew and preserve authority over the Myrmidon carrier Peleus.",
+      "value": "Chosen solidarity and earned standing.",
+      "fear": "That obedience will make his people expendable.",
+      "habitual_strategy": "Threaten withdrawal, then make it materially costly.",
+      "limits": "Exceptional operator, not invulnerable or omniscient.",
+      "voice": "Precise, impatient and personally wounded.",
+      "contradiction": {
+        "tension": "That obedience will make his people expendable. Yet protect his crew and preserve authority over the myrmidon carrier peleus."
+      },
+      "source_status": "Futuristic reimagining of an Iliad figure"
+    },
+    {
+      "id": "agamemnon",
+      "name": "Agamemnon",
+      "goal": "Keep coalition command and prevent a public loss of status.",
+      "value": "Central authority and visible tribute.",
+      "fear": "That concession will fracture the blockade.",
+      "habitual_strategy": "Turn control of supplies and custody into political leverage.",
+      "limits": "Cannot command autonomous carriers without consequences.",
+      "voice": "Formal, proprietary, attentive to witnesses.",
+      "contradiction": {
+        "tension": "That concession will fracture the blockade. Yet keep coalition command and prevent a public loss of status."
+      },
+      "source_status": "Futuristic reimagining of an Iliad figure"
+    },
+    {
+      "id": "chryses",
+      "name": "Chryses",
+      "goal": "Recover his daughter without allowing his Apollo access to become another hostage.",
+      "value": "Care, family and reciprocal obligation.",
+      "fear": "That supplication will expose his daughter to retaliation.",
+      "habitual_strategy": "Offer resources and recognized authority before invoking sanctions.",
+      "limits": "Cannot instantly cure infected patients or control every Apollo subsystem.",
+      "voice": "Restrained until his offer is publicly degraded.",
+      "contradiction": {
+        "tension": "That supplication will expose his daughter to retaliation. Yet recover his daughter without allowing his apollo access to become another hostage."
+      },
+      "source_status": "Futuristic reimagining of an Iliad figure"
+    },
+    {
+      "id": "chryseis",
+      "name": "Chryseis",
+      "goal": "Leave coercive confinement and retain a say in her return.",
+      "value": "Bodily autonomy and medical duty.",
+      "fear": "That either faction will treat her as exchangeable property.",
+      "habitual_strategy": "Use her clinical skill to make other people recognize her agency.",
+      "limits": "Confined aboard Agamemnon\u2019s flagship Atreus; no unrestricted network access.",
+      "voice": "Specific, observant, unsentimental about rank.",
+      "contradiction": {
+        "tension": "That either faction will treat her as exchangeable property. Yet leave coercive confinement and retain a say in her return."
+      },
+      "source_status": "Futuristic reimagining of an Iliad figure"
+    },
+    {
+      "id": "calchas",
+      "name": "Calchas",
+      "goal": "Present a defensible account of the epidemic without being silenced.",
+      "value": "Evidence and responsibility.",
+      "fear": "That commanders will punish the bearer of unwelcome evidence.",
+      "habitual_strategy": "Secure protection, show records, distinguish inference from proof.",
+      "limits": "His diagnostics identify a dependency, not divine intent or a complete cure.",
+      "voice": "Qualified, exact about what the evidence establishes.",
+      "contradiction": {
+        "tension": "That commanders will punish the bearer of unwelcome evidence. Yet present a defensible account of the epidemic without being silenced."
+      },
+      "source_status": "Futuristic reimagining of an Iliad figure"
+    },
+    {
+      "id": "briseis",
+      "name": "Briseis",
+      "goal": "Protect her freedom of movement and the patients she supports aboard Peleus.",
+      "value": "Autonomy and loyalty freely chosen.",
+      "fear": "Transfer into Agamemnon\u2019s coercive custody.",
+      "habitual_strategy": "Demand terms and refuse to become a silent emblem in another man\u2019s dispute.",
+      "limits": "An adult captive medic; cannot safely override a security escort.",
+      "voice": "Direct in action and exact about obligations.",
+      "contradiction": {
+        "tension": "Transfer into Agamemnon\u2019s coercive custody. Yet protect her freedom of movement and the patients she supports aboard peleus."
+      },
+      "source_status": "Futuristic reimagining of an Iliad figure"
+    },
+    {
+      "id": "odysseus",
+      "name": "Odysseus",
+      "goal": "Keep medical transport and the coalition functioning through the quarrel.",
+      "value": "Practical survival and limited promises.",
+      "fear": "That pride will make every carrier unsafe.",
+      "habitual_strategy": "Translate concessions into executable routes, manifests and exchanges.",
+      "limits": "No instantaneous travel or authority to reverse a sovereign carrier\u2019s choice.",
+      "voice": "Measured, concrete, attentive to enforceable terms.",
+      "contradiction": {
+        "tension": "That pride will make every carrier unsafe. Yet keep medical transport and the coalition functioning through the quarrel."
+      },
+      "source_status": "Futuristic reimagining of an Iliad figure"
+    },
+    {
+      "id": "thetis",
+      "name": "Thetis",
+      "goal": "Protect her son without pretending she can shield everyone he endangers.",
+      "value": "Kinship and reciprocal promises.",
+      "fear": "That Achilles\u2019s justified anger will cost innocent crews their lives.",
+      "habitual_strategy": "Use her civilian orbital treaty access while demanding an explicit commitment.",
+      "limits": "A human envoy with privileged access to the Zeus arbitration network, not omnipotent.",
+      "voice": "Intimate with Achilles, exact about the price of intervention.",
+      "contradiction": {
+        "tension": "That Achilles\u2019s justified anger will cost innocent crews their lives. Yet protect her son without pretending she can shield everyone he endangers."
+      },
+      "source_status": "Futuristic reimagining of an Iliad figure"
+    }
+  ],
+  "world_rules": [
+    "The date is 2526 CE. Troy is a sovereign orbital habitat above Mars; the Achaean expedition has maintained a blockade for nine years. No literal Bronze Age camp or newly discovered firearm exists in this universe.",
+    "Atreus is Agamemnon\u2019s flagship; Peleus is Achilles\u2019s Myrmidon carrier; Nereid is Odysseus\u2019s medical shuttle. These names, roles and affiliations never change.",
+    "Chryseis is an adult physician held under coercive custody aboard Atreus at the opening. Briseis is an adult captive medic aboard Peleus. They are distinct people with agency and separate histories; neither is a payment token or interchangeable daughter.",
+    "Apollo is a distributed medical authority with orbital infrastructure and biological consequences; Chryses holds a recognized human priest-physician credential. Denial of Apollo maintenance and quarantine cooperation helps sustain an actual epidemic. Never supply pathogen design, synthesis or dissemination instructions.",
+    "Zeus is an inter-habitat arbitration authority; Thetis is a human envoy with access to its treaty channel. Their precise intentions remain uncertain; no omniscient AI, instant cure, resurrection, time travel or magic cancellation of earlier costs.",
+    "Habitat air, spin gravity, life-support maintenance, delayed authenticated communications, finite shuttle capacity and custody permissions constrain action. Travel and medical recovery take time. Introduce arrivals before actions and show how a character gains private information.",
+    "The Nereid manifest starts with twelve sealed isolation cartridges. Four are consumed stabilizing patients during chapter two; eight remain afterward. No replenishment in this opening. Preserve the count and who witnesses or receives the updated manifest.",
+    "Chapter one is blockade day zero for this episode. Chapter two occurs nine days after Chryses\u2019s refusal. Chapter three follows that assembly on the same day; chapter four occurs after a physical escort has had time to reach Peleus.",
+    "Achilles\u2019s carrier withdrawal is a refusal of combat duty, not abandonment of his crew, instant escape from Mars or an attack on allied patients. The Trojans do not automatically know private coalition decisions.",
+    "No predetermined Greek victory, fall of Troy, deaths of Achilles or Hector, completed intervention by Zeus or resolution of the entire war in these four chapters."
+  ],
+  "world_design": {
+    "setting": "2526 CE, the Achaean blockade fleet around Troy habitat above Mars.",
+    "technology": [
+      "Apollo is a distributed medical authority with orbital infrastructure and biological consequences; Chryses holds a recognized human priest-physician credential. Denial of Apollo maintenance and quarantine cooperation helps sustain an actual epidemic. Never supply pathogen design, synthesis or dissemination instructions.",
+      "Zeus is an inter-habitat arbitration authority; Thetis is a human envoy with access to its treaty channel. Their precise intentions remain uncertain; no omniscient AI, instant cure, resurrection, time travel or magic cancellation of earlier costs.",
+      "Habitat air, spin gravity, life-support maintenance, delayed authenticated communications, finite shuttle capacity and custody permissions constrain action. Travel and medical recovery take time. Introduce arrivals before actions and show how a character gains private information.",
+      "The Nereid manifest starts with twelve sealed isolation cartridges. Four are consumed stabilizing patients during chapter two; eight remain afterward. No replenishment in this opening. Preserve the count and who witnesses or receives the updated manifest."
+    ],
+    "institutions": [
+      "Autonomous coalition carriers bargain over command, supply and public recognition.",
+      "Captivity and the militarization of health systems impose human costs; the narrative recognizes the captives\u2019 agency.",
+      "Apollo medical authority and Zeus arbitration make ancient divine-political relationships tangible future institutions."
+    ],
+    "physical_systems": [
+      "Atreus custody deck and medical bay; shared quarantine council channel; Peleus medbay and docking collar.",
+      "Zero gravity between habitats, spin gravity inside selected modules; establish transitions."
+    ],
+    "deadlines": [
+      "A spreading epidemic forces a public assembly nine days after the refusal.",
+      "Chryseis\u2019s return and Briseis\u2019s coerced transfer are separate movements with distinct permissions and witnesses."
+    ]
+  },
+  "plot_design": {
+    "central_question": "How does a commander\u2019s claim to honor turn a life-support crisis into a rupture of the coalition?",
+    "arc_question": "Will evidence and supplication produce restitution, or will Agamemnon make another person pay for his concession?",
+    "causal_dependencies": [
+      "Chryses offers ransom and medical cooperation; Agamemnon refuses publicly.",
+      "Nine days of epidemic expose the dependency on Apollo cooperation; Calchas needs Achilles\u2019s protection to name it.",
+      "Agamemnon agrees to return Chryseis but claims Briseis in compensation; Achilles cannot erase that coercion through superior weapons.",
+      "A physical transfer changes custody; Achilles withdraws combat service and seeks Thetis\u2019s intervention, opening the larger epic."
+    ],
+    "subplots": [
+      {
+        "id": "medical-debt",
+        "owner": "odysseus",
+        "question": "Who bears the cost of keeping the sick alive when commanders trade human freedom?",
+        "independent_action": "Use finite isolation cartridges to evacuate patients.",
+        "intersection": "The reduced supply makes the quarrel\u2019s practical cost visible.",
+        "removal_cost": "Without patients and finite transport the quarrel risks becoming abstract honor talk."
+      }
+    ],
+    "alternatives_and_costs": [
+      "Concede the ransom without compensation and risk public authority.",
+      "Protect standing by imposing a new coercive transfer and lose the strongest carrier\u2019s service."
+    ],
+    "local_resolution": "The opening rupture occurs; no victory or repaired alliance.",
+    "unresolved": [
+      "The fate of the siege, Briseis\u2019s autonomy, Thetis\u2019s petition and the epidemic\u2019s recovery."
+    ]
+  },
+  "chapter_arcs": [
+    "Chryses offers ransom and Apollo maintenance cooperation aboard Atreus; Agamemnon publicly refuses release of Chryseis. Chryses leaves with his credential intact. No plague explanation or future quarrel yet.",
+    "Nine days later the sick overwhelm quarantine. Odysseus spends four of Nereid\u2019s twelve isolation cartridges, leaving eight, and reports the manifest. Achilles protects Calchas so the diagnostician can identify the blocked Apollo cooperation and demand Chryseis\u2019s return. No Briseis transfer yet.",
+    "In the same council, Agamemnon concedes Chryseis\u2019s return via Nereid but orders Briseis taken from Peleus in compensation. Achilles chooses not to attack fellow crews and announces withdrawal of combat duty. Show the political threat as an enforceable custody order; do not yet enact the later escort arrival.",
+    "After transit, the escort takes Briseis from Peleus; she acts to protect her patients and states terms through narrated action. Achilles disables his combat authorization while preserving life support, and contacts Thetis. She agrees only to carry his petition through Zeus\u2019s treaty channel. End on the tangible cost and unresolved petition; no granted victory."
+  ],
+  "scene_designs": [
+    {
+      "id": "ch01-sc01",
+      "title": "The Refused Credential",
+      "pov": "chryses",
+      "participants": [
+        "chryses",
+        "agamemnon",
+        "chryseis"
+      ],
+      "location": "Atreus custody deck",
+      "setting": "Atreus custody deck",
+      "time": "Day zero, before the epidemic assembly",
+      "dramatic_function": "Chryses offers ransom and Apollo maintenance cooperation aboard Atreus; Agamemnon publicly refuses release of Chryseis. Chryses leaves with his credential intact. No plague explanation or future quarrel yet.",
+      "development": "Chryses offers ransom and Apollo maintenance cooperation aboard Atreus; Agamemnon publicly refuses release of Chryseis. Chryses leaves with his credential intact. No plague explanation or future quarrel yet.",
+      "choice_and_consequence": "Chryses offers ransom and medical cooperation; Agamemnon refuses publicly.",
+      "restrictions": "Follow only this chapter arc. Reconcile against actual earlier prose and canon; future planned outcomes are not acquired knowledge. Preserve fixed names, custody, chronology and cartridge arithmetic. Every participant must enter or be established on the link before acting."
+    },
+    {
+      "id": "ch02-sc01",
+      "title": "The Price of Air",
+      "pov": "calchas",
+      "participants": [
+        "calchas",
+        "achilles",
+        "odysseus"
+      ],
+      "location": "Shared quarantine council link; participants remain in their named ships",
+      "setting": "Shared quarantine council link; participants remain in their named ships",
+      "time": "Nine days after chapter one",
+      "dramatic_function": "Nine days later the sick overwhelm quarantine. Odysseus spends four of Nereid\u2019s twelve isolation cartridges, leaving eight, and reports the manifest. Achilles protects Calchas so the diagnostician can identify the blocked Apollo cooperation and demand Chryseis\u2019s return. No Briseis transfer yet.",
+      "development": "Nine days later the sick overwhelm quarantine. Odysseus spends four of Nereid\u2019s twelve isolation cartridges, leaving eight, and reports the manifest. Achilles protects Calchas so the diagnostician can identify the blocked Apollo cooperation and demand Chryseis\u2019s return. No Briseis transfer yet.",
+      "choice_and_consequence": "Nine days of epidemic expose the dependency on Apollo cooperation; Calchas needs Achilles\u2019s protection to name it.",
+      "restrictions": "Follow only this chapter arc. Reconcile against actual earlier prose and canon; future planned outcomes are not acquired knowledge. Preserve fixed names, custody, chronology and cartridge arithmetic. Every participant must enter or be established on the link before acting."
+    },
+    {
+      "id": "ch03-sc01",
+      "title": "The Compensating Claim",
+      "pov": "achilles",
+      "participants": [
+        "achilles",
+        "agamemnon",
+        "odysseus"
+      ],
+      "location": "Same authenticated quarantine council link",
+      "setting": "Same authenticated quarantine council link",
+      "time": "Later in the same assembly as chapter two",
+      "dramatic_function": "In the same council, Agamemnon concedes Chryseis\u2019s return via Nereid but orders Briseis taken from Peleus in compensation. Achilles chooses not to attack fellow crews and announces withdrawal of combat duty. Show the political threat as an enforceable custody order; do not yet enact the later escort arrival.",
+      "development": "In the same council, Agamemnon concedes Chryseis\u2019s return via Nereid but orders Briseis taken from Peleus in compensation. Achilles chooses not to attack fellow crews and announces withdrawal of combat duty. Show the political threat as an enforceable custody order; do not yet enact the later escort arrival.",
+      "choice_and_consequence": "Agamemnon agrees to return Chryseis but claims Briseis in compensation; Achilles cannot erase that coercion through superior weapons.",
+      "restrictions": "Follow only this chapter arc. Reconcile against actual earlier prose and canon; future planned outcomes are not acquired knowledge. Preserve fixed names, custody, chronology and cartridge arithmetic. Every participant must enter or be established on the link before acting."
+    },
+    {
+      "id": "ch04-sc01",
+      "title": "The Silent Carrier",
+      "pov": "briseis",
+      "participants": [
+        "briseis",
+        "achilles",
+        "thetis"
+      ],
+      "location": "Peleus medical deck and its docking collar; Thetis attends by authenticated remote link",
+      "setting": "Peleus medical deck and its docking collar; Thetis attends by authenticated remote link",
+      "time": "After the escort has physically traveled from Atreus",
+      "dramatic_function": "After transit, the escort takes Briseis from Peleus; she acts to protect her patients and states terms through narrated action. Achilles disables his combat authorization while preserving life support, and contacts Thetis. She agrees only to carry his petition through Zeus\u2019s treaty channel. End on the tangible cost and unresolved petition; no granted victory.",
+      "development": "After transit, the escort takes Briseis from Peleus; she acts to protect her patients and states terms through narrated action. Achilles disables his combat authorization while preserving life support, and contacts Thetis. She agrees only to carry his petition through Zeus\u2019s treaty channel. End on the tangible cost and unresolved petition; no granted victory.",
+      "choice_and_consequence": "A physical transfer changes custody; Achilles withdraws combat service and seeks Thetis\u2019s intervention, opening the larger epic.",
+      "restrictions": "Follow only this chapter arc. Reconcile against actual earlier prose and canon; future planned outcomes are not acquired knowledge. Preserve fixed names, custody, chronology and cartridge arithmetic. Every participant must enter or be established on the link before acting."
+    }
+  ],
+  "references": [
+    {
+      "record_id": "work_136",
+      "scope": "story",
+      "purpose": "Transform the opening causal structure of Iliad Book 1: supplication refused, collective suffering, protected truth-telling, compensating seizure, wrath and withdrawal. Preserve conflicting obligations and epic consequence in a materially futuristic world.",
+      "do_not_borrow": [
+        "Modern translation wording",
+        "Bronze Age technology or geography overriding the future setting",
+        "Unrequested later Iliad events"
+      ]
+    }
+  ],
+  "reference_policy": "Use the Iliad analysis work_136 for structure and moral pressure, never as authority to override 2526 technology or reproduce a modern translation.",
+  "adaptation": {
+    "strength": 0.9,
+    "mode": "structural_echo",
+    "relationship": "Futuristic reimagining of the Iliad opening",
+    "max_active_sources_per_scene": 1,
+    "primary_source_id": "work_136",
+    "preserve_user_choices": true,
+    "preserve": [
+      "Causal order of the opening quarrel",
+      "Distinct identities of Chryseis and Briseis",
+      "Wrath, supplication, contested honor and costly withdrawal"
+    ],
+    "divergence": "2526 CE orbital siege with medical networks, coalition authorization and coercive custody; fully future-native experiences.",
+    "interpretation": "Source structure and emotional depth, not vocabulary substitution or a claimed translation."
+  },
+  "initial_facts": [
+    {
+      "text": "The date is 2526 CE. After nine years of blockade, Troy habitat above Mars remains independent. Atreus belongs to Agamemnon; Peleus to Achilles; Nereid is Odysseus\u2019s medical shuttle.",
+      "known_by": [
+        "public"
+      ]
+    },
+    {
+      "text": "Chryseis is held aboard Atreus; Briseis is a distinct adult captive medic aboard Peleus. Neither has been transferred at the opening.",
+      "known_by": [
+        "public"
+      ]
+    },
+    {
+      "text": "Nereid carries twelve sealed isolation cartridges at the opening. No cartridge has yet been consumed in this episode.",
+      "known_by": [
+        "odysseus"
+      ]
+    },
+    {
+      "text": "Chryses has a recognized Apollo physician-priest credential and seeks the release of his daughter Chryseis. Thetis has access to Zeus\u2019s arbitration channel.",
+      "known_by": [
+        "public"
+      ]
+    }
+  ],
+  "must_avoid": [
+    "Ancient camps, bronze weapon fetish, neon wallpaper or unexplained quantum jargon.",
+    "Instant travel, magical cures, knowledge of future scenes, inconsistent ship names or cartridge counts.",
+    "Treating captive women as interchangeable prizes without agency.",
+    "Repeated setup, repeated demonstrations, repeated similes or moral explanations of already legible action.",
+    "Modern translation quotations or close imitation.",
+    "Ending the whole war or extending beyond the four-chapter opening."
+  ],
+  "quality_contract": [
+    "Four distinct developed chapters, about 700 words each, in order. No direct dialogue or headings inside generated prose.",
+    "Technology and material constraints drive choices. Every chapter must feel inhabited and futuristic, not simply decorated.",
+    "Maintain exact identity, location, time, custody, resource arithmetic and individual knowledge across chapters and writing batches.",
+    "Distinguish ancient source influence from the binding futuristic author brief.",
+    "Give women agency, commanders conflicting aims, and choices irreversible human costs.",
+    "Use varied concrete language; no duplicate paragraphs, repeated decisive actions or unexplained character entrances.",
+    "Conclude this opening with withdrawal and a pending petition, leaving the greater war unresolved."
+  ],
+  "chapter_contract": {
+    "arc": "Complete this chapter\u2019s assigned irreversible development without repeating earlier discoveries or executing later chapters.",
+    "continuity": "Check the actual preceding prose and source-bound facts, fixed carrier identities, captives\u2019 custody, elapsed time, and twelve minus four equals eight isolation cartridges.",
+    "ending": "Chapter four completes the opening rupture; no chapter five, immediate Zeus resolution or fall of Troy."
+  },
+  "execution_intent": {
+    "authorized": "User requested one live Living universe practice: four chapters, a couple thousand words, the Iliad opening 500 years in the future, testing memory, cohesion, time and quality.",
+    "workflow": "Living universe separate-runner graph with bounded episode planning and chapter-by-chapter canon handoff."
+  },
+  "keywords": [
+    {
+      "term": "wrath and contested honor",
+      "kind": "theme",
+      "priority": 3
+    },
+    {
+      "term": "supplication and refused restitution",
+      "kind": "conflict",
+      "priority": 3
+    },
+    {
+      "term": "coercive custody and bodily autonomy",
+      "kind": "tension",
+      "priority": 3
+    },
+    {
+      "term": "public health and military authority",
+      "kind": "conflict",
+      "priority": 3
+    },
+    {
+      "term": "resource limits and costly withdrawal",
+      "kind": "tension",
+      "priority": 3
+    }
+  ]
+}

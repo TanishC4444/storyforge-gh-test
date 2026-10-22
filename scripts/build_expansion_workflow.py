@@ -66,10 +66,11 @@ def build_expansion(total=9,per_chapter=3):
 
 
 def build_living():
-    x=yaml.safe_load(build_expansion(total=1,per_chapter=1))
+    x=yaml.safe_load(build_expansion(total=4,per_chapter=1))
     x['name']='Living universe / Gemini-first / batched runner graph'
     x['concurrency']['group']='living-universe'
     inputs=x['on']['workflow_dispatch']['inputs'];inputs['request_file']['default']='local-universe-massive';inputs['profile']['default']='fast'
+    inputs['scene_limit']={'type':'choice','options':['1','4'],'default':'1','description':'One growing-world event or a four-chapter bounded episode'}
     inputs['resume_run']=inputs.pop('canon_run');inputs['resume_run']['description']='Prior accepted universe-canon run; empty starts a world'
     inputs['checkpoint_artifact']={'type':'choice','options':['universe-canon','quickstart'],'default':'universe-canon','description':'Use quickstart only to retry a failed event while retaining its saved random draw'}
     for key,job in x['jobs'].items():
@@ -81,7 +82,7 @@ def build_living():
             if key=='quickstart' and s.get('uses')=='./.github/actions/setup-worker':s['with']['backend']='${{ inputs.backend }}'
             if key=='quickstart' and s.get('uses')=='actions/download-artifact@v4' and s['with'].get('name')=='universe-canon':
                 s['if']="${{ inputs.resume_run != '' }}";s['with']['run-id']='${{ inputs.resume_run }}';s['with']['name']='${{ inputs.checkpoint_artifact }}'
-        if key=='quickstart':job['name']='Compile beginning quickly and propose one local world event'
+        if key=='quickstart':job['name']='Compile universe beginning or bounded episode layout'
     return yaml.safe_dump(x,sort_keys=False,width=120)
 
 

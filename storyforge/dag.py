@@ -167,7 +167,11 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
             save(out/'scene-design.json',old);save(out/'snapshot.json',state);output('characters',old['participants']);event('design','Using approved scene card; writer reconciles with latest accepted canon');return state
         if index==0 and state.get('recovery'):
             save(out/'scene-design.json',old);save(out/'snapshot.json',state);output('characters',old['participants']);return state
-        designed=executor.call('scene_designer',{'request_controls':controls(req),'world':req['world_design'],'plot':req['plot_design'],'characters':req['characters'],'proposed_scene':old,'accepted_memory':compact(state['memories'],36),'previous_scene':{'id':state['accepted'][-1]['id'],'prose_excerpt':state['accepted'][-1]['prose'][-4500:]} if state['accepted'] else None,'user_scene_design':[s for s in req['scene_designs'] if s['id']==old['id']],'inspiration':application_packet(req,state['retrieval'],'scene_designer',old['id'])},
+        living_proposal={}
+        if req.get('performance',{}).get('living_bounded'):
+            from .living_prepare import chapter_proposal
+            living_proposal=chapter_proposal(state,out)
+        designed=executor.call('scene_designer',{'living_proposal':living_proposal,'request_controls':controls(req),'world':req['world_design'],'plot':req['plot_design'],'characters':req['characters'],'proposed_scene':old,'accepted_memory':compact(state['memories'],36),'previous_scene':{'id':state['accepted'][-1]['id'],'prose_excerpt':state['accepted'][-1]['prose'][-4500:]} if state['accepted'] else None,'user_scene_design':[s for s in req['scene_designs'] if s['id']==old['id']],'inspiration':application_packet(req,state['retrieval'],'scene_designer',old['id'])},
             'Reconcile the proposed scene with what ACTUALLY happened. Do not rediscover an established fact. Preserve IDs, chapter, valid participant IDs, world rules, and user choices. Return one JSON scene card with id, chapter, pov, participants, location, time, goal, obstacle, intended_change, choice, consequence, new_development, and reference_uses (array of {record_id,application}). Explain development through a new tactic, cost, commitment, leverage, or interpretation, not stronger adjectives. No new events become canon here.',
             tokens=1600,validator=lambda x:validate_scene(x,req,index))
         allowed={r['id'] for r in application_packet(req,state['retrieval'],'scene_designer',old['id'])['references']}
