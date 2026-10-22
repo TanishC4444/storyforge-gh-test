@@ -45,7 +45,7 @@ def actor_packet(req, state, card, cid):
 
 
 def safe_review(value,prose,required,req):
-    if value.get('unverified') and enabled(req):return value
+    if value.get('unverified') and (enabled(req) or req.get('execution_policy',{}).get('editorial_disagreement')=='one_strict_check'):return value
     return editorial_review(value,prose,required)
 
 
@@ -56,6 +56,8 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
     if task == 'prepare':
         req = contracts.request(load(ROOT / 'examples' / f'{request_file}.json'))
         req['profile'] = profile
+        if req.get('performance',{}).get('classic_expansion'):
+            req.setdefault('execution_policy',{}).setdefault('editorial_disagreement','one_strict_check')
         if req.get('execution_policy',{}).get('experimental') or req.get('performance',{}).get('classic_expansion'):
             from .worker_policy import validate
             validate(req)
@@ -249,7 +251,15 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         return
     if task == 'repair':
         prose = (source / 'edited/prose.txt').read_text()
-        review = merge_reviews(load(source / 'diagnosis/review.json'),load(source / 'rhetoric/review.json'))
+        story_verdict=load(source / 'diagnosis/review.json');rhetoric_verdict=load(source / 'rhetoric/review.json')
+        review = merge_reviews(story_verdict,rhetoric_verdict)
+        from .adjudication import enabled as settle_once,decide
+        if settle_once(req) and not review['pass']:
+            final=decide(req,state,card,prose,[story_verdict,rhetoric_verdict],out,backend)
+            save(out/'prose.txt',prose)
+            save(out/'repair.json',{'changed':False,'reviewed_sha256':hashlib.sha256(prose.encode()).hexdigest(),'candidate_sha256':hashlib.sha256(prose.encode()).hexdigest(),'editorial_adjudication':final,'further_editorial_iteration':False})
+            event('editorial_settled','One strict final check completed; no further editorial repair loop',passed=final['verdict']['pass'],unverified=final['unverified'])
+            return
         changed = not review['pass'] and req['max_repairs'] > 0
         before = hashlib.sha256(prose.encode()).hexdigest()
         event('repair_decision','Repair required' if changed else 'Prose unchanged; forwarding existing candidate',issues=len(review['issues']))
@@ -273,7 +283,8 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         if task=='verify_rhetoric' and not load(source/'edited/repair.json')['changed']:
             repair=load(source/'edited/repair.json')
             contracts.require(hashlib.sha256(prose.encode()).hexdigest()==repair['reviewed_sha256'],'Cannot reuse rhetoric review after prose changes')
-            verdict=safe_review(load(source/'rhetoric/review.json'),prose,RHETORIC_CHECKS,req)
+            final=repair.get('editorial_adjudication')
+            verdict=safe_review(final['rhetoric'] if final else load(source/'rhetoric/review.json'),prose,RHETORIC_CHECKS,req)
         else:
             verdict=executor.call('rhetoric_quality',{**evidence_payload(prose),'required_checks':RHETORIC_CHECKS,'creative_controls':controls(req),'previous_scene':state['accepted'][-1]['prose'][-3500:] if state['accepted'] else '', 'signals':rhetoric_signals(prose),'craft':application_packet(req,state['retrieval'],'rhetoric_quality',card['id'])},'Review the complete scene in evidence_passages. Return the required editorial JSON.',tokens=1600,validator=lambda x:editorial_review(x,prose,RHETORIC_CHECKS),skill=(ROOT/'skills/rhetoric_quality.md').read_text())
         verdict=apply_signals(verdict,rhetoric_signals(prose))
@@ -289,7 +300,8 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
             if not repair['changed']:
                 contracts.require(repair['candidate_sha256'] == repair['reviewed_sha256'], 'Cannot reuse review after prose changes')
                 if task == 'verify':
-                    save(out / 'review.json', safe_review(load(source / 'diagnosis/review.json'), prose,STORY_CHECKS,req))
+                    final=repair.get('editorial_adjudication')
+                    save(out / 'review.json', safe_review(final['story'] if final else load(source / 'diagnosis/review.json'), prose,STORY_CHECKS,req))
                 else:
                     save(out / 'memory.json', contracts.delta(load(source / 'initial-memory/memory.json'), prose, [c['id'] for c in req['characters']]))
                 return
@@ -318,13 +330,25 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         review=safe_review(review,(source/'edited/prose.txt').read_text(),STORY_CHECKS,req)
         save(out / 'reviews.json', {'story': review, 'rhetoric':rhetoric_review, 'memory': memory_review})
         event('acceptance','Checking story, rhetoric and memory gates',story=review['pass'],rhetoric=rhetoric_review['pass'],memory=memory_review['pass'])
+        from .adjudication import enabled as settle_once,decide,chapter_text,digest as source_digest
+        final=load(source/'edited/repair.json').get('editorial_adjudication') if (source/'edited/repair.json').exists() else None
+        prose=(source/'edited/prose.txt').read_text()
+        if settle_once(req) and not final and not (review['pass'] and rhetoric_review['pass'] and memory_review['pass']):
+            final=decide(req,state,card,prose,[review,rhetoric_review,memory_review],out,backend)
+            review,rhetoric_review=final['story'],final['rhetoric']
+        if final:
+            contracts.require(final['prose_sha256']==source_digest(prose),'Final adjudication targets stale prose')
+            save(out/'editorial-adjudication.json',final)
+        move_on=settle_once(req) and final is not None
         unresolved=not (review['pass'] and rhetoric_review['pass'] and memory_review['pass'])
-        if unresolved and enabled(req):warning(out,'provisional_scene','Quality or verification remains unresolved; retaining an explicitly provisional draft.')
+        if unresolved and move_on:
+            warning(out,'final_editorial_decision','Final check did not verify all requirements. Preserve this provisional scene, withhold its canon updates, and continue without another editorial loop.')
+        elif unresolved and enabled(req):warning(out,'provisional_scene','Quality or verification remains unresolved; retaining an explicitly provisional draft.')
         else:contracts.require(not unresolved, 'Review rejected scene or memory; no canon commit. Inspect saved review artifacts.')
         prose = (source / 'edited/prose.txt').read_text()
         memory = contracts.delta(load(source / 'memory/memory.json'), prose, [c['id'] for c in req['characters']])
         final_patch=None
-        if unresolved and enabled(req) and req.get('performance',{}).get('targeted_edits') and not req.get('performance',{}).get('single_editorial_pass'):
+        if unresolved and enabled(req) and not move_on and req.get('performance',{}).get('targeted_edits') and not req.get('performance',{}).get('single_editorial_pass'):
             try:
                 revised,final_patch=patch_repair(executor,req,prose,[review,rhetoric_review])
                 if revised!=prose:
@@ -344,24 +368,41 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
             save(out/'quarantined-memory.json',memory);memory={'memories':[]};warning(out,'memory_quarantine','Memory verifier did not approve extracted facts; prose retained, facts withheld.')
         if (index + 1) % req['scenes_per_chapter'] == 0:
             chapter_prose = '\n\n'.join([s['prose'] for s in state['accepted'] if s['chapter'] == card['chapter']] + [prose])
-            chapter_review=executor.call('chapter_quality',{**evidence_payload(chapter_prose),'required_checks':STORY_CHECKS,'chapter':card['chapter'],'rules':req['world_rules'],'chapter_plan':[s for s in state['plan']['scenes'] if s['chapter']==card['chapter']], 'nonnegotiable_form':req.get('pov'), 'quality_contract':req.get('quality_contract',[]), 'chapter_contract':req.get('chapter_contract',{}), 'creative_controls':controls(req)},'Review the full chapter in evidence_passages under the author form and chapter contract. For a no-dialogue brief, assess dialogue_tactics through narrated offers, refusals, commitments and leverage; absence of quoted speech is not itself a defect. Never propose direct dialogue against the brief. Other causal or character failures still need concrete evidence. Return editorial JSON.',tokens=1600,validator=lambda x:editorial_review(x,chapter_prose,STORY_CHECKS),skill=quality_skill)
+            if final:
+                contracts.require(final['chapter_sha256']==source_digest(chapter_prose),'Final adjudication targets stale chapter; no second debate')
+                chapter_review=final['story']
+            else:
+                chapter_review=executor.call('chapter_quality',{**evidence_payload(chapter_prose),'required_checks':STORY_CHECKS,'chapter':card['chapter'],'rules':req['world_rules'],'chapter_plan':[s for s in state['plan']['scenes'] if s['chapter']==card['chapter']], 'nonnegotiable_form':req.get('pov'), 'quality_contract':req.get('quality_contract',[]), 'chapter_contract':req.get('chapter_contract',{}), 'creative_controls':controls(req)},'Review the full chapter in evidence_passages under the author form and chapter contract. For a no-dialogue brief, assess dialogue_tactics through narrated offers, refusals, commitments and leverage; absence of quoted speech is not itself a defect. Never propose direct dialogue against the brief. Other causal or character failures still need concrete evidence. Return editorial JSON.',tokens=1600,validator=lambda x:editorial_review(x,chapter_prose,STORY_CHECKS),skill=quality_skill)
             save(out / 'chapter-review.json', chapter_review)
-            if not chapter_review['pass'] and enabled(req):
+            if not chapter_review['pass'] and settle_once(req) and not final:
+                final=decide(req,state,card,prose,[review,rhetoric_review,chapter_review],out,backend)
+                review,rhetoric_review=final['story'],final['rhetoric'];chapter_review=final['story'];move_on=True
+                save(out/'editorial-adjudication.json',final);save(out/'chapter-review.json',chapter_review)
+                unresolved=not (review['pass'] and rhetoric_review['pass'] and memory_review['pass'])
+            if (not chapter_review['pass'] or unresolved) and move_on:
+                unresolved=True;warning(out,'provisional_final_decision','Strict check finished; retain draft without canon updates or further debate.')
+            elif not chapter_review['pass'] and enabled(req):
                 unresolved=True;warning(out,'chapter_needs_review','Chapter audit did not pass; exported as provisional draft.')
             else:contracts.require(chapter_review['pass'], 'Chapter review rejected; no final scene commit')
+        save(out/'reviews.json',{'story':review,'rhetoric':rhetoric_review,'memory':memory_review})
+        canon_allowed=not unresolved and all(s.get('canon_committed',True) for s in state['accepted'])
+        if not canon_allowed and (move_on or settle_once(req)):
+            save(out/'withheld-memory.json',memory);memory={'memories':[]}
         result = copy.deepcopy(state)
         result['version'] += 1
-        result['accepted'].append({'id': card['id'], 'chapter': card['chapter'], 'pov': card['pov'], 'participants': card['participants'], 'prose': prose, 'review': review, 'rhetoric_review':rhetoric_review, 'memory_review': memory_review, 'reference_uses':card.get('reference_uses',[]), 'state_version': result['version'],'quality_status':'needs_review' if unresolved else 'reviewed','memory_extraction':memory_status})
+        result['accepted'].append({'id': card['id'], 'chapter': card['chapter'], 'pov': card['pov'], 'participants': card['participants'], 'prose': prose, 'review': review, 'rhetoric_review':rhetoric_review, 'memory_review': memory_review, 'reference_uses':card.get('reference_uses',[]), 'state_version': result['version'],'quality_status':'needs_review' if unresolved else 'reviewed','memory_extraction':memory_status,'canon_committed':canon_allowed})
         if req.get('performance',{}).get('canon_index'):
-            from .canon import append
-            append(result,memory['memories'],f'episode-{state["universe_episode"]:06}/'+card['id'] if state.get('universe_episode') else card['id'])
+            from .canon import append,index as canon_index
+            result.setdefault('canon',canon_index(result['memories']))
+            if canon_allowed or not settle_once(req):
+                append(result,memory['memories'],f'episode-{state["universe_episode"]:06}/'+card['id'] if state.get('universe_episode') else card['id'])
             save(out/'canon.json',result['canon'])
         else:result['memories'].extend(dict(m, source=card['id']) for m in memory['memories'])
         result['complete'] = len(result['accepted']) == len(result['plan']['scenes'])
         result['completion_status']='complete_with_warnings' if result['complete'] and any(s.get('quality_status')=='needs_review' for s in result['accepted']) else ('complete' if result['complete'] else 'in_progress')
         save(out / 'snapshot.json', result)
         export(out, result, req)
-        event('canon_committed','Scene checkpoint saved'+(' — provisional draft' if unresolved else ' — reviewed'),scene=card['id'],quality_status='needs_review' if unresolved else 'reviewed',words=len(prose.split()),accepted_scenes=len(result['accepted']),state_version=result['version'])
+        event('draft_retained' if not canon_allowed and settle_once(req) else 'canon_committed','Scene checkpoint saved'+(' — provisional draft' if unresolved else ' — reviewed'),scene=card['id'],quality_status='needs_review' if unresolved else 'reviewed',words=len(prose.split()),accepted_scenes=len(result['accepted']),state_version=result['version'])
         output('characters', result['plan']['scenes'][index + 1]['participants'] if not result['complete'] else [])
         return result
     raise ValueError(f'Unknown DAG task: {task}')

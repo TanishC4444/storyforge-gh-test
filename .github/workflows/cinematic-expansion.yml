@@ -611,7 +611,7 @@ jobs:
     env:
       STORY_REVIEW_TIMEOUT_SECONDS: '1800'
   s01_repair:
-    name: Chapter 1 scene 1 / repair if needed
+    name: One strict final prompt check if editorial opinions conflict
     needs:
     - s01_design
     - s01_edit
@@ -1483,7 +1483,7 @@ jobs:
     env:
       STORY_REVIEW_TIMEOUT_SECONDS: '1800'
   s02_repair:
-    name: Chapter 1 scene 2 / repair if needed
+    name: One strict final prompt check if editorial opinions conflict
     needs:
     - s02_design
     - s02_edit
@@ -2355,7 +2355,7 @@ jobs:
     env:
       STORY_REVIEW_TIMEOUT_SECONDS: '1800'
   s03_repair:
-    name: Chapter 1 scene 3 / repair if needed
+    name: One strict final prompt check if editorial opinions conflict
     needs:
     - s03_design
     - s03_edit
@@ -3227,7 +3227,7 @@ jobs:
     env:
       STORY_REVIEW_TIMEOUT_SECONDS: '1800'
   s04_repair:
-    name: Chapter 2 scene 1 / repair if needed
+    name: One strict final prompt check if editorial opinions conflict
     needs:
     - s04_design
     - s04_edit
@@ -4099,7 +4099,7 @@ jobs:
     env:
       STORY_REVIEW_TIMEOUT_SECONDS: '1800'
   s05_repair:
-    name: Chapter 2 scene 2 / repair if needed
+    name: One strict final prompt check if editorial opinions conflict
     needs:
     - s05_design
     - s05_edit
@@ -4971,7 +4971,7 @@ jobs:
     env:
       STORY_REVIEW_TIMEOUT_SECONDS: '1800'
   s06_repair:
-    name: Chapter 2 scene 3 / repair if needed
+    name: One strict final prompt check if editorial opinions conflict
     needs:
     - s06_design
     - s06_edit
@@ -5843,7 +5843,7 @@ jobs:
     env:
       STORY_REVIEW_TIMEOUT_SECONDS: '1800'
   s07_repair:
-    name: Chapter 3 scene 1 / repair if needed
+    name: One strict final prompt check if editorial opinions conflict
     needs:
     - s07_design
     - s07_edit
@@ -6715,7 +6715,7 @@ jobs:
     env:
       STORY_REVIEW_TIMEOUT_SECONDS: '1800'
   s08_repair:
-    name: Chapter 3 scene 2 / repair if needed
+    name: One strict final prompt check if editorial opinions conflict
     needs:
     - s08_design
     - s08_edit
@@ -7587,7 +7587,7 @@ jobs:
     env:
       STORY_REVIEW_TIMEOUT_SECONDS: '1800'
   s09_repair:
-    name: Chapter 3 scene 3 / repair if needed
+    name: One strict final prompt check if editorial opinions conflict
     needs:
     - s09_design
     - s09_edit

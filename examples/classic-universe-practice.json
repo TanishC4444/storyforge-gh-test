@@ -319,7 +319,8 @@
       "rhetoric_quality": "qwen7b",
       "memory_quality": "qwen7b",
       "chapter_quality": "qwen7b"
-    }
+    },
+    "editorial_disagreement": "one_strict_check"
   },
   "performance": {
     "classic_expansion": true,

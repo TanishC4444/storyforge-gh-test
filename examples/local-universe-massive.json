@@ -327,7 +327,8 @@
       "writer": "glitter-12b",
       "humanizer": "qwen3b",
       "character": "qwen3b"
-    }
+    },
+    "editorial_disagreement": "one_strict_check"
   },
   "performance": {
     "compact_packets": true,

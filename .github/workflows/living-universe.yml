@@ -600,7 +600,7 @@ jobs:
     env:
       STORY_REVIEW_TIMEOUT_SECONDS: '1800'
   s01_repair:
-    name: Chapter 1 scene 1 / repair if needed
+    name: One strict final prompt check if editorial opinions conflict
     needs:
     - s01_design
     - s01_edit
