@@ -1,0 +1,208 @@
+{
+  "pass": false,
+  "checks": [
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p001",
+        "p002",
+        "p003"
+      ],
+      "reason": "Thestor abandons finishing the repair pins that would earn immediate passage home to examine the sulfurous iron cylinder, resulting in the Locrian vessel sailing away and marooning him and his apprentice.",
+      "id": "scene_change",
+      "source_spans": [
+        {
+          "id": "p001",
+          "start": 0,
+          "end": 782
+        },
+        {
+          "id": "p002",
+          "start": 784,
+          "end": 1378
+        },
+        {
+          "id": "p003",
+          "start": 1380,
+          "end": 2093
+        }
+      ]
+    },
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p002",
+        "p003"
+      ],
+      "reason": "Weighing the cost of the sick apprentice's dwindling provisions against his curiosity and craft imperative, Thestor deliberately chooses to drop his hammer and probe the unfamiliar artifact.",
+      "id": "character_agency",
+      "source_spans": [
+        {
+          "id": "p002",
+          "start": 784,
+          "end": 1378
+        },
+        {
+          "id": "p003",
+          "start": 1380,
+          "end": 2093
+        }
+      ]
+    },
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p001",
+        "p002"
+      ],
+      "reason": "Thestor is torn between his duty of care to his sick apprentice and his irrepressible craftsman's obsession with an unexplainable metal structure.",
+      "id": "character_depth",
+      "source_spans": [
+        {
+          "id": "p001",
+          "start": 0,
+          "end": 782
+        },
+        {
+          "id": "p002",
+          "start": 784,
+          "end": 1378
+        }
+      ]
+    },
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p002",
+        "p003"
+      ],
+      "reason": "The alternative to finish the axle pins and secure the two berths is explicitly weighed against inspecting the strange metal, with the immediate cost being the departure of the ship.",
+      "id": "causal_alternatives",
+      "source_spans": [
+        {
+          "id": "p002",
+          "start": 784,
+          "end": 1378
+        },
+        {
+          "id": "p003",
+          "start": 1380,
+          "end": 2093
+        }
+      ]
+    },
+    {
+      "verdict": "fail",
+      "evidence_ids": [
+        "p003"
+      ],
+      "reason": "Odysseus approaches and touches the metal, but neither he nor Thestor speaks or negotiates; dialogue tactics and active tactical exchanges are completely absent.",
+      "id": "dialogue_tactics",
+      "source_spans": [
+        {
+          "id": "p003",
+          "start": 1380,
+          "end": 2093
+        }
+      ]
+    },
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p001",
+        "p003"
+      ],
+      "reason": "Tracks the morning wind, the tide, the apprentice's ration consumption, Odysseus's twisted ankle, and the Locrian ship weighing anchor.",
+      "id": "continuity_clock",
+      "source_spans": [
+        {
+          "id": "p001",
+          "start": 0,
+          "end": 782
+        },
+        {
+          "id": "p003",
+          "start": 1380,
+          "end": 2093
+        }
+      ]
+    },
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p002",
+        "p003"
+      ],
+      "reason": "Thestor interprets the object strictly through Bronze Age craftsmanship terminology (mandrel, seam, forge pits, hammer face) without anachronistic omniscience.",
+      "id": "pov_knowledge",
+      "source_spans": [
+        {
+          "id": "p002",
+          "start": 784,
+          "end": 1378
+        },
+        {
+          "id": "p003",
+          "start": 1380,
+          "end": 2093
+        }
+      ]
+    },
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p001",
+        "p003"
+      ],
+      "reason": "The apprentice's illness and need for sea transit to Locris intersects directly with the discovery, raising the immediate stakes of delayed passage.",
+      "id": "subplot_function",
+      "source_spans": [
+        {
+          "id": "p001",
+          "start": 0,
+          "end": 782
+        },
+        {
+          "id": "p003",
+          "start": 1380,
+          "end": 2093
+        }
+      ]
+    },
+    {
+      "verdict": "pass",
+      "evidence_ids": [
+        "p002",
+        "p003"
+      ],
+      "reason": "Applies Homeric epic simile (the ox-driver at the swollen ford) and themes of supplication and siege-burdened material exchange.",
+      "id": "reference_application",
+      "source_spans": [
+        {
+          "id": "p002",
+          "start": 784,
+          "end": 1378
+        },
+        {
+          "id": "p003",
+          "start": 1380,
+          "end": 2093
+        }
+      ]
+    }
+  ],
+  "issues": [
+    {
+      "severity": "blocking",
+      "category": "dialogue_tactics",
+      "evidence_ids": [
+        "p003"
+      ],
+      "problem": "No verbal or tactical exchange occurs between Odysseus and Thestor, leaving Odysseus's leverage and demands purely passive rather than dramatized through speech or offer.",
+      "fix": "Add direct speech or tactical maneuvering between Odysseus and Thestor regarding the mystery of the cylinder and the missed boat to establish their shifting leverage.",
+      "replacement": "The cylinder was not folded edge to edge by mortal blow, showing no seam where a mandrel had drawn it. Along its dark bore the reek was not of sea-mud but of brimstone, such as smolders in the pits beneath Lemnos. Odysseus approached across the wet pebbles, leaning upon an ash-spear to spare a twisted ankle. 'Your fire is cold, smith, and your ship has weighed,' the Ithacan said, tracing the smooth lip with a scarred thumb, finding neither rust nor maker’s mark upon the pale stone-sleeve fitted deep within the iron throat. 'Tell me what forge turned this hollow stem, and the King of Men will find your boy a dry bench on an Ithacan bench-board.' Thestor looked from the departing Locrian sail to the dark bore. 'No hammer of bronze or iron shaped it, my lord. If you want its secret, you buy my apprentice barley first.' What hearth could breathe heat into metal that showed no trace of a hammer’s face?",
+      "quote": "The cylinder was not folded edge to edge by mortal blow, showing no seam where a mandrel had drawn it. Along its dark bore the reek was not of sea-mud but of brimstone, such as smolders in the pits beneath Lemnos. Odysseus approached across the wet pebbles, leaning upon an ash-spear to spare a twisted ankle. He offered no silver, but stooped to trace the smooth lip with a scarred thumb, finding neither rust nor maker’s mark upon the pale stone-sleeve fitted deep within the iron throat. Out in the roadstead, the Locrian master hauled his stern-anchor, taking the morning wind and leaving the sick boy stranded upon the shore. What hearth could breathe heat into metal that showed no trace of a hammer’s face?",
+      "quote_match": "exact"
+    }
+  ]
+}

@@ -1,0 +1,70 @@
+name: Troy practice acceptance recovery
+on:
+  workflow_dispatch:
+    inputs:
+      source_run:
+        type: string
+        required: true
+        description: Failed one-scene practice run whose initial scene gates passed
+permissions:
+  contents: read
+  actions: read
+jobs:
+  accept:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: live
+      - uses: actions/download-artifact@v4
+        with:
+          name: s01_design
+          path: inputs/state
+          run-id: ${{ inputs.source_run }}
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s01_edit
+          path: inputs/edited
+          run-id: ${{ inputs.source_run }}
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s01_story
+          path: inputs/initial-story
+          run-id: ${{ inputs.source_run }}
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s01_rhetoric
+          path: inputs/initial-rhetoric
+          run-id: ${{ inputs.source_run }}
+          github-token: ${{ github.token }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: s01_memory
+          path: inputs/memory
+          run-id: ${{ inputs.source_run }}
+          github-token: ${{ github.token }}
+      - name: Verify checkpoint provenance and scope
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          state=json.loads(Path('inputs/state/snapshot.json').read_text())
+          assert len(state['plan']['scenes'])==1 and not state['accepted'], 'Recovery only supports an uncommitted one-scene practice'
+          assert not state['request'].get('execution_policy',{}).get('continue_with_warnings'), 'Strict gates required'
+          PY
+      - name: Reassess chapter and commit only if all gates pass
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+          PYTHONUNBUFFERED: '1'
+        run: python -m storyforge.dag accept --backend worker --profile small --request-file troy-practice --index 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recovered-practice
+          path: out/

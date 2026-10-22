@@ -77,6 +77,7 @@ class Executor:
                 instruction+=' The application assigns scene IDs and chapter numbers by requested reading order. Omit those metadata fields. Preserve the requested scene sequence in the scenes array.'
             instruction+=' Return only the scene cards and thread strings in the schema. Keep each scene field to one or two concrete sentences. Do not repeat the supplied brief, reference lists, stylistic devices or technique libraries.'
         last_error = ''
+        semantic_retry=False
         repair_output = None
         for attempt in range(self.req['max_stage_retries'] + 1):
             system = ('You are one fresh, scoped role in a story workflow. User choices and accepted canon take priority. '
@@ -84,7 +85,7 @@ class Executor:
                       + skill + '\n' + instruction)
             prompt = json.dumps(packet, ensure_ascii=False, sort_keys=True,separators=(',',':'))
             if last_error:
-                if editorial_repair and repair_output is not None:
+                if editorial_repair and repair_output is not None and not semantic_retry:
                     system='Repair JSON structure only. Preserve judgments and reasons. Do not make new literary judgments. Return the corrected JSON matching the supplied schema. If semantic reevaluation is required, stop rather than inventing evidence.'
                     prompt=json.dumps({'invalid_output':repair_output,'validation_error':last_error,'allowed_evidence_ids':[x.get('id') for x in packet.get('candidate_evidence',packet.get('evidence_passages',[]))]},ensure_ascii=False,separators=(',',':'))
                 elif output_format=='text' and repair_output is not None:
@@ -172,7 +173,7 @@ class Executor:
                 event('model_returned','Model response received; validating before acceptance',role=role,seconds=cached.get('seconds'),usage=cached['diagnostic'].get('usage'),timings=cached['diagnostic'].get('timings'),weights_reused=cached['diagnostic'].get('model_reused'),finish_reason=cached['diagnostic'].get('finish_reason'))
                 if cached['diagnostic'].get('finish_reason') not in {'stop', 'eos'}:
                     raise ContractError('Generation did not stop naturally; possible truncated artifact')
-                if last_error and editorial_repair and repair_output is not None:
+                if last_error and editorial_repair and repair_output is not None and not semantic_retry:
                     before=judgment_signature(repair_output)
                     if before is not None and before!=judgment_signature(cached['output']):
                         raise ContractError('Formatting repair changed editorial judgments; rejected.')
@@ -185,12 +186,17 @@ class Executor:
                     if isinstance(parsed,dict) and isinstance(parsed.get('checks'),dict):
                         parsed['checks']=[dict(check,id=key) for key,check in parsed['checks'].items()]
                     parsed = validator(parsed)
+                    if editorial_repair:
+                        from .editorial import validate_review_brief
+                        parsed=validate_review_brief(parsed,self.req)
                 if not isinstance(parsed, (str, dict)) or not parsed:
                     raise ContractError('Empty output')
                 event('validated','Response passed format and source validation',role=role,passed=parsed.get('pass') if isinstance(parsed,dict) else None,issues=len(parsed.get('issues',[])) if isinstance(parsed,dict) else 0,words=len(parsed.split()) if isinstance(parsed,str) else None)
                 return parsed
             except Exception as exc:
                 event('validation_failed','Response rejected: '+str(exc),role=role,next_action='Bounded retry' if attempt<self.req['max_stage_retries'] else 'Stop; no canon update')
+                from .editorial import ReviewBriefError
+                semantic_retry=isinstance(exc,ReviewBriefError)
                 last_error = str(exc)
                 repair_output = cached.get('output') if cached else None
         from .resilience import enabled, warning, unavailable
