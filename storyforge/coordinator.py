@@ -18,6 +18,8 @@ The ordered evidence_passages contain the complete CURRENT scene. Select 1–3 e
 
 
 def planning_packet(req, refinement, retrieval):
+    from .craft import development_projection
+    refinement={**refinement,'expanded_story_elements':development_projection({'refinement':refinement},budget=4000)}
     operational = {'profile', 'max_repairs', 'max_stage_retries', 'context_chars', 'n_ctx', 'runner_repo', 'retrieval_mode', 'auto_approve_plan', 'min_words_ratio', 'max_words_ratio'}
     return {'request': {k: v for k, v in req.items() if k not in operational},
             'refinement': {k: refinement[k] for k in ['refined_prompt', 'central_conflict', 'character_tensions', 'subplot_possibilities', 'world_constraints','expanded_story_elements','assumptions','open_decisions']},
@@ -46,6 +48,7 @@ def compact(memories, count=24, char_budget=4500):
 
 
 def packet(req, state, card):
+    excerpt_chars=1200 if req.get('performance',{}).get('compact_packets') else 2500
     result={
         'scene': card,
         'brief': {k: req.get(k) for k in ['premise', 'genre', 'reader_experience', 'pov', 'world_rules', 'must_avoid']},
@@ -53,7 +56,7 @@ def packet(req, state, card):
         'pov_profile': next(c for c in req['characters'] if c['id'] == card['pov']),
         'pov_visible_memory': compact(visible(state['memories'],card['pov'],{s['id']:s['participants'] for s in state['accepted']})),
         'recent_ending': state['accepted'][-1]['prose'][-1600:] if state['accepted'] and state['accepted'][-1]['pov'] == card['pov'] else '',
-        'author_continuity':{'instruction':'Prior prose is an author record, NOT automatic knowledge for any character. Preserve each character’s supported knowledge boundaries.','recent_scenes':[{'id':s['id'],'pov':s['pov'],'excerpt':s['prose'][-2500:]} for s in state['accepted'][-2:]]},
+        'author_continuity':{'instruction':'Prior prose is an author record, NOT automatic knowledge for any character. Preserve each character’s supported knowledge boundaries.','recent_scenes':[{'id':s['id'],'pov':s['pov'],'excerpt':s['prose'][-excerpt_chars:],'omitted_prefix_characters':max(0,len(s['prose'])-excerpt_chars),'source_sha256':hashlib.sha256(s['prose'].encode()).hexdigest()} for s in state['accepted'][-2:]]},
         'threads': state['plan']['threads'],
         'creative_controls': {**scene_controls(req, card['id']), 'subplots':[s for s in req['plot_design'].get('subplots',[]) if s.get('owner') in card['participants']]},
         'literary_application': application_packet(req, state['retrieval'], 'writer', card['id']),
@@ -62,8 +65,8 @@ def packet(req, state, card):
     }
     if req.get('performance',{}).get('canon_index'):
         from .canon import working
-        result['author_continuity']['current_state']=working(state,query=json.dumps(card))
-        result['pov_visible_memory']=working(state,card['pov'],query=json.dumps(card))['facts']
+        result['author_continuity']['current_state']=working(state,query=json.dumps(card),budget=req.get('performance',{}).get('working_memory_chars',6500))
+        result['pov_visible_memory']=working(state,card['pov'],query=json.dumps(card),budget=req.get('performance',{}).get('working_memory_chars',6500))['facts']
     return result
 
 
