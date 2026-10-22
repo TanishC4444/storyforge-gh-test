@@ -1,17 +1,27 @@
 """Quota-aware Google hosted inference. Secrets never enter packets or diagnostics."""
 from __future__ import annotations
-import fcntl,json,math,os,time,random,uuid,urllib.request,urllib.error
+import fcntl,json,math,os,time,random,uuid,threading,urllib.request,urllib.error
 from pathlib import Path
 from .storage import save
 
 BASE='https://generativelanguage.googleapis.com/v1beta/models/'
-MODELS={'gemma':'gemma-4-31b-it','flash':'gemini-3.8-flash'}
-class HostedError(RuntimeError):pass
+MODELS={'gemma':'gemma-4-31b-it','flash':'gemini-3.8-flash','flash36':'gemini-3.6-flash','lite':'gemini-3.5-flash-lite'}
+class HostedError(RuntimeError):
+    def __init__(self,message,*,daily=False,retry_after=60):
+        super().__init__(message);self.daily=daily;self.retry_after=retry_after
 
 class GoogleHosted:
     def __init__(self,folder,key=None):
         self.folder=Path(folder);self.folder.mkdir(parents=True,exist_ok=True)
-        self.key=key or os.getenv('GEMINI_API_KEY','');self.disabled=set();self.reserve_flash_final=False
+        primary=key or os.getenv('GEMINI_API_KEY','')
+        try:backups=json.loads(os.getenv('GEMINI_API_KEYS','[]'))
+        except ValueError:raise HostedError('GEMINI_API_KEYS must be a JSON array') from None
+        if not isinstance(backups,list) or any(not isinstance(k,str) for k in backups):
+            raise HostedError('GEMINI_API_KEYS must be a JSON array of strings')
+        self.keys=list(dict.fromkeys(k.strip() for k in [primary,*backups] if k.strip()))
+        self.key=self.keys[0] if self.keys else '';self.key_index=0
+        self.key_lock=threading.RLock()
+        self.disabled=set();self.reserve_flash_final=False;self.optimized=False
     def telemetry(self,path,seconds,outcome):
         value={'model':path.split(':')[0],'operation':path.split(':')[-1],'seconds':round(seconds,3),'outcome':outcome}
         with (self.folder/'telemetry.lock').open('a') as lock:
@@ -19,8 +29,20 @@ class GoogleHosted:
             with (self.folder/'requests.jsonl').open('a') as stream:stream.write(json.dumps(value)+'\n')
 
     def request(self,path,body,timeout=300):
+        # Credential failover is separate from model quotas. Never rotate on 429.
+        for _ in range(len(self.keys) or 1):
+            with self.key_lock:index=self.key_index;credential=self.key
+            try:return self._request(path,body,timeout,credential)
+            except HostedError as exc:
+                if not any(code in str(exc) for code in ['HTTP 401','HTTP 403','API_KEY_INVALID']):raise
+                with self.key_lock:
+                    if self.key_index==index:
+                        if index+1>=len(self.keys):raise
+                        self.key_index+=1;self.key=self.keys[self.key_index]
+
+    def _request(self,path,body,timeout=300,credential=None):
         if not self.key:raise HostedError('Google API key unavailable')
-        req=urllib.request.Request(BASE+path,data=json.dumps(body).encode(),headers={'x-goog-api-key':self.key,'Content-Type':'application/json'})
+        req=urllib.request.Request(BASE+path,data=json.dumps(body).encode(),headers={'x-goog-api-key':credential or self.key,'Content-Type':'application/json'})
         started=time.monotonic()
         try:
             with urllib.request.urlopen(req,timeout=timeout) as response:result=json.load(response)
@@ -29,19 +51,26 @@ class GoogleHosted:
         except urllib.error.HTTPError as exc:
             # Only an allowlisted status code is retained, never provider messages,
             # request text, URLs, keys, or arbitrary error details.
-            try:status=json.loads(exc.read()).get('error',{}).get('status','')
-            except (ValueError,AttributeError):status=''
+            try:
+                payload=json.loads(exc.read()).get('error',{});status=payload.get('status','')
+            except (ValueError,AttributeError):payload={};status=''
             allowed={'UNAVAILABLE','RESOURCE_EXHAUSTED','INVALID_ARGUMENT','PERMISSION_DENIED','UNAUTHENTICATED','NOT_FOUND','INTERNAL','DEADLINE_EXCEEDED'}
-            error='Google HTTP '+str(exc.code)+(' '+status if status in allowed else '')
+            invalid_key=any(isinstance(d,dict) and d.get('reason')=='API_KEY_INVALID' for d in payload.get('details',[]))
+            error='Google HTTP '+str(exc.code)+(' '+status if status in allowed else '')+(' API_KEY_INVALID' if invalid_key else '')
             self.telemetry(path,time.monotonic()-started,error)
-            raise HostedError(error) from None
+            details=payload.get('details',[])
+            daily=exc.code==429 and any('perday' in str(v.get('quotaId','')).lower() for d in details if isinstance(d,dict) for v in d.get('violations',[]) if isinstance(v,dict))
+            retry_after=60
+            try:retry_after=max(1,min(3600,int(exc.headers.get('Retry-After','60'))))
+            except (ValueError,TypeError,AttributeError):pass
+            raise HostedError(error,daily=daily,retry_after=retry_after) from None
         except (TimeoutError,OSError):
             self.telemetry(path,time.monotonic()-started,'connection_failure')
             raise HostedError('Google connection failed or timed out') from None
     def reserve(self,kind,tokens):
-        limits={'gemma':(24,14000,120),'flash':(4,220000,6)}
+        limits={'gemma':(24,14000,120),'flash':(4,220000,18 if self.optimized else 6),'flash36':(4,220000,18),'lite':(12,220000,450)}
         rpm,tpm,max_calls=limits[kind]
-        if kind=='flash' and self.reserve_flash_final:max_calls=5
+        if kind=='flash' and self.reserve_flash_final:max_calls-=1
         if tokens>tpm:raise HostedError('Input exceeds conservative hosted per-minute allowance')
         path=self.folder/'quota.json'
         while True:
@@ -60,8 +89,8 @@ class GoogleHosted:
     def inherit(self,paths):
         """Union upstream reservation IDs; shared ancestry is counted once.
 
-        Distributed requests keep hosted work on a single dependency chain, so
-        independent CPU branches cannot race to reserve provider capacity.
+        This carries ancestry across runners, but is not a distributed lock.
+        Concurrent independent jobs can still contend for project-wide quotas.
         """
         ledger={};health={}
         for path in paths:
@@ -93,12 +122,21 @@ class GoogleHosted:
             fcntl.flock(lock,fcntl.LOCK_EX)
             health=json.loads(path.read_text()) if path.exists() else {}
             if error is not None:
-                health[kind]={'until':time.time()+(3600 if any(c in str(error) for c in ['400','401','403','404','429']) else 120),'error':str(error)}
+                delay=3600 if any(c in str(error) for c in ['400','401','403','404']) else 120
+                if '429' in str(error):
+                    delay=getattr(error,'retry_after',60)
+                    if getattr(error,'daily',False):
+                        from datetime import datetime,timedelta
+                        from zoneinfo import ZoneInfo
+                        now=datetime.now(ZoneInfo('America/Los_Angeles'))
+                        delay=((now+timedelta(days=1)).replace(hour=0,minute=0,second=0,microsecond=0)-now).total_seconds()
+                health[kind]={'until':time.time()+delay,'error':str(error)}
                 save(path,health)
             return health.get(kind,{}).get('until',0)>time.time()
 
     def complete(self,kind,system,prompt,tokens,structured=False,response_schema=None,role=None,policy=None):
         if not self.key:raise HostedError('Google API key unavailable')
+        self.optimized=bool(policy and policy.get('quality_routing'))
         self.reserve_flash_final=(kind=='flash' and role!='chapter_quality')
         if kind in self.disabled or self.circuit(kind):raise HostedError(kind+' circuit open after prior provider failure')
         model=MODELS[kind]
@@ -111,7 +149,10 @@ class GoogleHosted:
         else:
             try:
                 count=self.request(model+':countTokens',{'contents':[{'parts':[{'text':system+'\n'+prompt}]}]},timeout=10).get('totalTokens')
-            except HostedError:count=None
+            except HostedError as exc:
+                if any(code in str(exc) for code in ['400','401','403','404','429']):
+                    self.circuit(kind,exc);raise
+                count=None
         estimate=count or math.ceil(size/3)
         print('Hosted '+model+': reserving '+str(estimate)+' input tokens',flush=True)
         self.reserve(kind,estimate+tokens)
@@ -119,7 +160,7 @@ class GoogleHosted:
         if policy:config['thinkingConfig']['thinkingLevel']='minimal' if kind=='gemma' else policy.get('thinking','low')
         # Gemini supports native JSON schemas; Gemma uses the explicit prompt
         # contract. Do not assume JSON MIME/schema compatibility across families.
-        if structured and kind=='flash':
+        if structured and kind!='gemma':
             config['responseMimeType']='application/json'
             if response_schema is not None:config['responseJsonSchema']=response_schema
         started=time.monotonic()
@@ -137,12 +178,12 @@ class GoogleHosted:
                 from .tracking import event
                 import re
                 status=re.search(r'HTTP (\d+)',str(exc))
-                transient=any(code in str(exc) for code in ['500','502','503','504']) or bool(policy and any(code in str(exc) for code in ['429','timed out']))
+                transient=any(code in str(exc) for code in ['500','502','503','504']) or bool(policy and any(code in str(exc) for code in ['timed out']))
                 event('api_retry' if attempt==0 and transient else 'api_failed','Provider request rejected',stage=role,status_code=int(status.group(1)) if status else None,attempt=attempt+1,error=str(exc))
                 record(self.folder,'google',model,role,attempt=attempt+1,seconds=round(time.monotonic()-request_started,3),status=str(exc),reserved_input_tokens=estimate)
                 if attempt==0 and transient:
                     time.sleep(4+random.random());self.reserve(kind,estimate+tokens);continue
-                if any(code in str(exc) for code in ['400','401','403','404','429']):self.disabled.add(kind)
+                if any(code in str(exc) for code in ['400','401','403','404']):self.disabled.add(kind)
                 self.circuit(kind,exc)
                 raise
         candidates=result.get('candidates',[])

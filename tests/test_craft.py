@@ -24,7 +24,9 @@ class CraftTests(unittest.TestCase):
         self.assertEqual(validate_prose(paragraph,self.req),paragraph)
     def test_large_scene_cannot_silently_collapse_to_summary(self):
         with self.assertRaises(ContractError):validate_prose('A short summary.',self.req,check_length=True)
-    def test_creative_roles_do_not_use_api(self):
+    def test_legacy_cpu_policy_is_available(self):
+        self.req['execution_policy'].pop('model_routing',None)
+        self.req['execution_policy'].pop('hosted_prose',None)
         for role in ['architect','writer','humanizer','structural_editor','story_quality','rhetoric_quality','chapter_quality','memory']:
             self.assertIsNone(policy(self.req,role,1000)['tier'])
         self.assertEqual(policy(self.req,'character',220)['tier'],'gemma')
@@ -68,6 +70,8 @@ class ProseRecoveryTests(unittest.TestCase):
         self.good=' '.join(['bronze']*900)
 
     def test_each_edit_pass_retries_form_and_length_before_publication(self):
+        self.req['execution_policy'].pop('model_routing',None)
+        self.req['execution_policy'].pop('hosted_prose',None)
         from storyforge.tracking import Tracker,_CURRENT
         card={**self.req['scene_designs'][0],'chapter':1}
         state={'request':self.req,'plan':{'scenes':[card]},'accepted':[]}

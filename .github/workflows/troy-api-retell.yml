@@ -32,6 +32,7 @@ jobs:
       - name: Refine, outline, draft, compare revisions and verify final story
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
           PYTHONUNBUFFERED: '1'
         run: python -m storyforge.retell --out runs/troy-third-person-api --source inputs/snapshot.json
       - name: Save observed API and CPU usage

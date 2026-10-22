@@ -26,6 +26,7 @@ jobs:
       - name: Full fresh prompt-to-story process
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
           PYTHONUNBUFFERED: '1'
         run: python -m storyforge.full_flow --out runs/troy-full-api
       - name: Save observed API and CPU usage

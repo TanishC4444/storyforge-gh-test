@@ -81,7 +81,7 @@ def validate(req, require):
             require(isinstance(subplot,dict) and subplot.get('owner') in valid_ids,'Subplot needs a valid owner')
             for key in ['id','question','intersection','removal_cost']:
                 require(isinstance(subplot.get(key),str) and bool(subplot[key].strip()),f'Subplot needs {key}')
-    require(isinstance(req.get('api_roles',{}),dict) and all(isinstance(role,str) and provider in {'gemma','flash'} for role,provider in req.get('api_roles',{}).items()),'API role routing must map role names to gemma or flash')
+    require(isinstance(req.get('api_roles',{}),dict) and all(isinstance(role,str) and provider in {'gemma','flash','flash36','lite'} for role,provider in req.get('api_roles',{}).items()),'API role routing must map role names to supported Google tiers')
     for field in ['execution_policy','performance']:
         require(isinstance(req.get(field,{}),dict),field+' must be an object')
     if 'continue_with_warnings' in req.get('execution_policy',{}):require(type(req['execution_policy']['continue_with_warnings']) is bool,'Continuation policy must be boolean')

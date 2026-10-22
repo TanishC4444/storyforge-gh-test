@@ -114,8 +114,8 @@ class RefinementTests(unittest.TestCase):
             with self.assertRaisesRegex(ContractError,'stale'):join_parts(copy.deepcopy(state),root,root/'out')
             (root/'plot/refinement-part.json').unlink()
             with self.assertRaisesRegex(ContractError,'Missing'):join_parts(copy.deepcopy(state),root,root/'out')
-        self.assertIsNone(policy(self.req,'refiner_part',850)['tier'])
-        req=copy.deepcopy(self.req);req['execution_policy']['refinement_provider']='gemma'
+        self.assertEqual(policy(self.req,'refiner_part',850)['tier'],'lite')
+        req=copy.deepcopy(self.req);req['execution_policy'].pop('model_routing',None);req['execution_policy']['refinement_provider']='gemma'
         self.assertEqual(policy(req,'refiner_part',850)['tier'],'gemma')
 
     def test_basic_scene_plan_preserves_authored_layout_without_model_development(self):
@@ -142,12 +142,12 @@ class RefinementTests(unittest.TestCase):
         self.assertNotIn('examples',result['pov_profile']['voice_design'])
         self.assertNotIn('examples',result['author_requirements']['characters'][0]['voice_design'])
 
-    def test_practice_hosted_prose_keeps_validators_and_full_story_cpu_policy(self):
+    def test_practice_and_full_story_use_quality_routing(self):
         from storyforge.worker_policy import policy
         full=request(json.loads((ROOT/'examples/troy-parallel-experiment.json').read_text()))
-        for role in ['writer','humanizer','structural_editor']:
-            self.assertEqual(policy(self.req,role,1800)['tier'],'flash')
-            self.assertIsNone(policy(full,role,1800)['tier'])
+        for role,tier in [('writer','flash'),('humanizer','lite'),('structural_editor','flash36')]:
+            self.assertEqual(policy(self.req,role,1800)['tier'],tier)
+            self.assertEqual(policy(full,role,1800)['tier'],tier)
 
     def test_optional_editor_outage_retains_valid_input_without_cpu_fallback(self):
         from storyforge.experimental import dispatch

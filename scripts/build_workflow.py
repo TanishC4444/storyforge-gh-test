@@ -85,7 +85,7 @@ def build(total=9, per_chapter=3, troy=False, continuation=False, full_api=False
             lines += ['      - uses: actions/download-artifact@v4', '        with:', f'          {"pattern" if pattern else "name"}: {artifact}', f'          path: inputs/{path}']
             if task=='resume':lines += ['          run-id: ${{ inputs.checkpoint_run }}', '          github-token: ${{ github.token }}']
         lines += [f'      - name: Execute {title}', '        id: task', '        env:', '          PYTHONUNBUFFERED: 1', '          STORY_BACKEND: ${{ inputs.backend }}', '          STORY_PROFILE: ${{ inputs.profile }}', '          STORY_REQUEST: ${{ inputs.request_file }}', '          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}']
-        if full_api:lines += ['          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}']
+        if full_api:lines += ['          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}','          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}']
         if continuation:lines += ['          CONTINUATION_RUN: ${{ inputs.checkpoint_run }}']
         if matrix:
             lines += ['          STORY_CHARACTER: ${{ matrix.character }}']
@@ -235,6 +235,7 @@ jobs:
       - name: Full fresh prompt-to-story process
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
           PYTHONUNBUFFERED: '1'
         run: python -m storyforge.full_flow --out runs/troy-full-api
       - name: Save observed API and CPU usage
@@ -288,7 +289,7 @@ def build_experimental(total=12,practice=False):
             lines+=['      - uses: actions/download-artifact@v4']
             if gate:lines.append('        if: ${{ '+gate[0]+' }}')
             lines+=['        with:',f'          {"pattern" if artifact.endswith("*") else "name"}: {artifact}',f'          path: inputs/{path}']
-        lines+=['      - name: Execute '+title,'        id: task','        env:',"          PYTHONUNBUFFERED: '1'",'          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}','          STORY_BACKEND: ${{ inputs.backend }}','          STORY_PROFILE: ${{ inputs.profile }}','          STORY_REQUEST: ${{ inputs.request_file }}']
+        lines+=['      - name: Execute '+title,'        id: task','        env:',"          PYTHONUNBUFFERED: '1'",'          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}','          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}','          STORY_BACKEND: ${{ inputs.backend }}','          STORY_PROFILE: ${{ inputs.profile }}','          STORY_REQUEST: ${{ inputs.request_file }}']
         if matrix:lines.append('          STORY_CHARACTER: ${{ matrix.character }}')
         args=f'{task} --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"'
         if index is not None:args+=f' --index {index}'

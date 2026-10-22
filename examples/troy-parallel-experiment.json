@@ -616,7 +616,9 @@
     "cpu_quality": true,
     "batched_refinement": true,
     "estimate_small_calls": true,
-    "refinement_provider": "cpu"
+    "refinement_provider": "cpu",
+    "model_routing": "quality",
+    "hosted_prose": "flash"
   },
   "performance": {
     "compact_packets": true,
