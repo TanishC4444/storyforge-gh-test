@@ -76,6 +76,8 @@ class Executor:
             if self.req.get('performance',{}).get('application_plan_binding'):
                 instruction+=' The application assigns scene IDs and chapter numbers by requested reading order. Omit those metadata fields. Preserve the requested scene sequence in the scenes array.'
             instruction+=' Return only the scene cards and thread strings in the schema. Keep each scene field to one or two concrete sentences. Do not repeat the supplied brief, reference lists, stylistic devices or technique libraries.'
+        from .review_policy import prepare as prepare_review
+        packet,skill,review_instructions=prepare_review(self.req,role,packet,skill,ROOT)
         last_error = ''
         semantic_retry=False
         repair_output = None
@@ -93,6 +95,7 @@ class Executor:
                     system+='\nCorrect the rejected prose against the original input and validation error. Return the complete prose alone, without wrappers, headings or commentary. Preserve established events and develop missing dramatic action without padding.'
                 else:
                     prompt += '\nPrevious output failed validation: ' + last_error + '\nReturn a complete corrected artifact grounded in the original request. Supply every required field; do not substitute retrieval guidance for the premise.'
+            if review_instructions:system+='\n'+review_instructions
             if response_schema is not None:
                 system+='\nRequired output JSON Schema: '+json.dumps(response_schema,separators=(',',':'))
             if len(system) + len(prompt) > self.req['context_chars']:
