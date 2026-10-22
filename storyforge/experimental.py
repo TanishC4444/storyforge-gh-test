@@ -184,11 +184,27 @@ def dispatch(task,source,out,state,index,profile,backend,request_file):
         draft=(source/'draft/draft.txt').read_text()
         data={**context(req,state,card),**author_packet(req,state,card)}
         validate=lambda prose:validate_prose(prose,req,check_length=backend!='fixture')
-        structural=executor.call('structural_editor',{**data,'prose':draft},REVISION+' First repair dramatic structure and chapter handoffs. Do not merely substitute adjectives.',tokens=4200,validator=validate,output_format='text')
-        save(out/'structural-draft.txt',structural)
-        revised=executor.call('humanizer',{**data,'prose':structural},REVISION+' Now perform the final line edit: specific perception, rhythm, coherent imagery, and no explanatory duplication.',tokens=4200,validator=validate,output_format='text')
-        validate(revised);save(out/'prose.txt',revised)
-        save(out/'edit-report.json',{'passes':['chapter_structure','scene_line_edit'],'prior_scenes':len(state['accepted'])})
+        validate(draft)
+        revised=draft;passes=[];skipped=[]
+        for role,instruction in [('structural_editor',' First repair dramatic structure and chapter handoffs. Do not merely substitute adjectives.'),
+                                 ('humanizer',' Now perform the final line edit: specific perception, rhythm, coherent imagery, and no explanatory duplication.')]:
+            try:
+                candidate=executor.call(role,{**data,'prose':revised},REVISION+instruction,tokens=4200,
+                    validator=validate,output_format='text',allow_cpu_fallback=not bool(req.get('execution_policy',{}).get('hosted_prose')))
+                validate(candidate)
+                revised=candidate;passes.append(role)
+                if role=='structural_editor':save(out/'structural-draft.txt',revised)
+            except contracts.ContractError as exc:
+                # An optional edit may not replace valid prose with an invalid
+                # candidate. Independent quality and memory gates still decide acceptance.
+                skipped.append({'role':role,'error':str(exc)})
+                from .tracking import event
+                event('edit_retained','Keeping the last validated prose after rejected optional editing',role=role,error=str(exc))
+                if req.get('execution_policy',{}).get('hosted_prose') and 'Hosted editing unavailable' in str(exc):
+                    break
+        save(out/'prose.txt',revised)
+        save(out/'edit-report.json',{'passes':passes,'skipped':skipped,'retained_valid_candidate':bool(skipped),
+                                    'quality_review_required':True,'prior_scenes':len(state['accepted'])})
         return None
     if task not in {'writer','story_review','rhetoric_review','verify','verify_rhetoric','repair','memory','memory_final','memory_review'}:return UNHANDLED
     executor=Executor(req,out,backend)

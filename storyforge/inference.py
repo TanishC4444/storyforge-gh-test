@@ -52,7 +52,7 @@ class Executor:
             if req.get('performance',{}).get('inherit_provider_budget') and not os.getenv('STORY_QUOTA_DIR'):
                 self.hosted.inherit((self.folder.parent/'inputs').rglob('provider-budget/quota.json'))
 
-    def call(self, role, packet, instruction, *, tokens=1200, validator=None, skill='', response_schema=None, output_format='json'):
+    def call(self, role, packet, instruction, *, tokens=1200, validator=None, skill='', response_schema=None, output_format='json', allow_cpu_fallback=True):
         from .worker_policy import enabled as experimental, policy, permit
         stage_policy=policy(self.req,role,tokens) if experimental(self.req) else None
         if stage_policy:
@@ -136,6 +136,8 @@ class Executor:
                         if hosted_result is not None:
                             output,diagnostic=hosted_result
                         else:
+                            if not allow_cpu_fallback:
+                                raise ContractError('Hosted editing unavailable; CPU fallback disabled for this optional edit')
                             from .local_worker import execute
                             with heartbeat('Existing CPU fallback / '+role):
                                 output, diagnostic = execute(model, system, prompt, tokens, n_ctx, role, response_schema=response_schema)
