@@ -37,7 +37,7 @@ class RefinementTests(unittest.TestCase):
         import shutil
         with tempfile.TemporaryDirectory() as d,redirect_stdout(io.StringIO()):
             root=Path(d)
-            def run(name,task,state=None,extras=(),character=None):
+            def run(name,task,state=None,extras=(),character=None,index=0):
                 inputs=root/name/'inputs'
                 if state:shutil.copytree(state,inputs/'state')
                 for path,target in extras:shutil.copytree(path,inputs/target)
@@ -45,9 +45,11 @@ class RefinementTests(unittest.TestCase):
                 from storyforge.retrieval import retrieve
                 offline=copy.deepcopy(self.req);offline['retrieval_mode']='lexical'
                 with patch('storyforge.dag.retrieve',return_value=retrieve(offline)):
-                    stage(task,inputs,out,0,character,'troy-practice','small','fixture')
+                    stage(task,inputs,out,index,character,'troy-practice','small','fixture')
                 return out
-            state=run('prepare','prepare');state=run('refine','refine_bundle',state)
+            state=run('prepare','prepare')
+            parts=[(run('part-'+name,'refine_part',state,index=i),'refinement/'+name) for i,name in enumerate(GROUPS)]
+            state=run('refine','combine_refinement',state,parts)
             self.assertEqual(load(state/'snapshot.json')['refinement_method'],'parallel_scoped_proposals_immutable_author_brief')
             chapter=run('chapter','chapter_plan',state)
             state=run('join','combine_plans',state,[(chapter,'chapters/one')]);state=run('design','scene_design',state)
@@ -96,3 +98,22 @@ class RefinementTests(unittest.TestCase):
                 self.assertEqual(item['prose'],prose[-1000:])
             state['accepted'].append({**card,'prose':prose})
             state['memories'].extend({'kind':'resource','text':'Material custody and household obligations '+('specific '*30),'known_by':['public'],'source':card['id'],'fact_key':card['id']+str(j)} for j in range(6))
+
+    def test_native_refinement_join_rejects_missing_duplicate_and_stale_parts(self):
+        from storyforge.refinement import join_parts,base_hash
+        from storyforge.worker_policy import policy
+        state={'request':self.req,'retrieval':{'sources':[]}}
+        good={'guidance':['A specific concrete consequence.'],'assumptions':[],'open_decisions':[]}
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d)
+            for name in GROUPS:save(root/name/'refinement-part.json',{'category':name,'base_sha256':base_hash(self.req,state['retrieval']),'result':good})
+            save(root/'extra/refinement-part.json',{'category':'plot','base_sha256':'stale','result':good})
+            with self.assertRaisesRegex(ContractError,'duplicate'):join_parts(copy.deepcopy(state),root,root/'out')
+            (root/'extra/refinement-part.json').unlink()
+            save(root/'plot/refinement-part.json',{'category':'plot','base_sha256':'stale','result':good})
+            with self.assertRaisesRegex(ContractError,'stale'):join_parts(copy.deepcopy(state),root,root/'out')
+            (root/'plot/refinement-part.json').unlink()
+            with self.assertRaisesRegex(ContractError,'Missing'):join_parts(copy.deepcopy(state),root,root/'out')
+        self.assertIsNone(policy(self.req,'refiner_part',850)['tier'])
+        req=copy.deepcopy(self.req);req['execution_policy']['refinement_provider']='gemma'
+        self.assertEqual(policy(req,'refiner_part',850)['tier'],'gemma')

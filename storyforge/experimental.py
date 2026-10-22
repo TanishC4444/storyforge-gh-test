@@ -135,6 +135,13 @@ def reconcile(source,out,state,index,profile,backend,request_file):
 def dispatch(task,source,out,state,index,profile,backend,request_file):
     from .dag import stage,output,context
     source=Path(source);out=Path(out);req=state['request']
+    if task=='refine_part':
+        from .refinement import run_part,GROUPS
+        contracts.require(0<=index<len(GROUPS),'Invalid refinement category index')
+        return run_part(state,list(GROUPS)[index],out,backend)
+    if task=='combine_refinement':
+        from .refinement import join_parts
+        return join_parts(state,source/'refinement',out)
     if task=='chapter_plan':return plan_chapter(state,index+1,out,profile,backend,request_file)
     if task=='combine_plans':return combine_chapters(state,[load(p) for p in sorted((source/'chapters').rglob('chapter-plan.json'))],out)
     if task in {'refine_bundle','plan_bundle'}:return run_bundle(task,source,out,state,index,profile,backend,request_file)

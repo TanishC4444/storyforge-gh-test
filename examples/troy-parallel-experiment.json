@@ -615,7 +615,8 @@
     "chapter_outline_chunks": true,
     "cpu_quality": true,
     "batched_refinement": true,
-    "estimate_small_calls": true
+    "estimate_small_calls": true,
+    "refinement_provider": "cpu"
   },
   "performance": {
     "compact_packets": true,

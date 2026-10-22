@@ -297,7 +297,11 @@ def build_experimental(total=12,practice=False):
         blocks.append('\n'.join(lines)+'\n')
     ok="always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')"
     job('prepare','Prepare fresh brief and retrieval','prepare')
-    job('refine_bundle','Refine independent brief categories in bounded batches','refine_bundle',['prepare'],[('prepare','state')])
+    refiners=['refine_'+name for name in ['plot','characters','world','scenes','style']]
+    for i,key in enumerate(refiners):
+        job(key,'Refine '+key.removeprefix('refine_')+' on an isolated small-model runner','refine_part',['prepare'],[('prepare','state')],i)
+    job('refine_bundle','Join source-bound refinement batches','combine_refinement',['prepare',*refiners],
+        [('prepare','state')]+[(key,'refinement/'+key) for key in refiners])
     chapters=[f'plan_ch{i:02}' for i in range(1,2 if practice else 4)]
     for i,key in enumerate(chapters):
         job(key,f'Develop and verify chapter {i+1} outline','chapter_plan',['refine_bundle'],[('refine_bundle','state')],i)
