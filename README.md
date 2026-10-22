@@ -281,3 +281,5 @@ draft is not declared a reviewed story just because an optional edit was skipped
 ## Three separate modes
 
 See [mode behavior, practice runs and limitations](docs/THREE_MODES.md). The original pre-Codex model manuscript is preserved separately as [PRE_EDITORIAL_MODEL_STORY.txt](outputs/troy-third-person/PRE_EDITORIAL_MODEL_STORY.txt).
+
+The [classic cinematic-universe expansion path](docs/CLASSIC_EXPANSION.md) restores separate writing and passage-editor runners, compiles initial refinement without model calls, and exposes draft text before final acceptance. The Living universe Actions workflow also uses this full runner graph.

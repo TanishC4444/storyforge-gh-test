@@ -56,7 +56,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
     if task == 'prepare':
         req = contracts.request(load(ROOT / 'examples' / f'{request_file}.json'))
         req['profile'] = profile
-        if req.get('execution_policy',{}).get('experimental'):
+        if req.get('execution_policy',{}).get('experimental') or req.get('performance',{}).get('classic_expansion'):
             from .worker_policy import validate
             validate(req)
         contracts.require(req['chapters'] * req['scenes_per_chapter'] <= (12 if req.get('execution_policy',{}).get('experimental') else 9), 'Requested scenes exceed workflow capacity')
@@ -204,7 +204,9 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         save(out/'draft.txt',state['recovery']['prose']);event('recovery','Recovered existing scene 1 prose; no drafting call');return
     if task == 'writer':
         scene_packet['direction'] = (source / 'direction/direction.txt').read_text()
-        result = executor.call('writer', scene_packet, 'Write complete scene prose at target_words. No summary, heading, commentary, or canon delta. Respect POV, knowledge, rules, and voices. Give choices consequences.', tokens=budget,skill=(ROOT/'skills/distinct_writing.md').read_text())
+        from .craft import validate_prose
+        check=(lambda text:validate_prose(text,req,check_length=backend!='fixture')) if req.get('performance',{}).get('validate_scene_prose') else None
+        result = executor.call('writer', scene_packet, 'Write complete scene prose at target_words. No summary, heading, commentary, or canon delta. Respect POV, knowledge, rules, and voices. Develop attempted action, resistance, a costly choice and its aftermath in specific detail.', tokens=budget,skill=(ROOT/'skills/distinct_writing.md').read_text(),validator=check,output_format='text')
         save(out / 'draft.txt', result)
         return
     if task == 'edit_plan':
@@ -352,7 +354,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         result['accepted'].append({'id': card['id'], 'chapter': card['chapter'], 'pov': card['pov'], 'participants': card['participants'], 'prose': prose, 'review': review, 'rhetoric_review':rhetoric_review, 'memory_review': memory_review, 'reference_uses':card.get('reference_uses',[]), 'state_version': result['version'],'quality_status':'needs_review' if unresolved else 'reviewed','memory_extraction':memory_status})
         if req.get('performance',{}).get('canon_index'):
             from .canon import append
-            append(result,memory['memories'],card['id'])
+            append(result,memory['memories'],f'episode-{state["universe_episode"]:06}/'+card['id'] if state.get('universe_episode') else card['id'])
             save(out/'canon.json',result['canon'])
         else:result['memories'].extend(dict(m, source=card['id']) for m in memory['memories'])
         result['complete'] = len(result['accepted']) == len(result['plan']['scenes'])

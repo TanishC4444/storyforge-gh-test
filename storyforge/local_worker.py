@@ -6,7 +6,7 @@ import os
 import signal
 import threading
 from .worker_policy import CPU_LOCK
-from .runtime import JOB_TIMEOUT_MINUTES, JOB_TIMEOUT_SECONDS, DOWNLOAD_TIMEOUT_SECONDS, worker_timeout_seconds, inference_timeout_seconds, REVIEW_ROLES, REVIEW_CALL_TIMEOUT_SECONDS
+from .runtime import JOB_TIMEOUT_MINUTES, JOB_TIMEOUT_SECONDS, DOWNLOAD_TIMEOUT_SECONDS, worker_timeout_seconds, inference_timeout_seconds, REVIEW_ROLES, REVIEW_CALL_TIMEOUT_SECONDS, review_call_timeout_seconds
 
 _SESSIONS={}
 
@@ -28,7 +28,7 @@ def _execute(model, system, prompt, tokens, n_ctx, role, response_schema=None):
         from .cpu_fallback import execute as remote
         return remote(model,system,prompt,tokens,n_ctx,role,response_schema)
     from gh_inference import ResidentSession, Limits
-    call_limit=REVIEW_CALL_TIMEOUT_SECONDS if role in REVIEW_ROLES else JOB_TIMEOUT_SECONDS
+    call_limit=review_call_timeout_seconds() if role in REVIEW_ROLES else JOB_TIMEOUT_SECONDS
     key=(model,n_ctx,call_limit)
     if key not in _SESSIONS:
         # One model resident per job; do not accumulate multiple 12B models.
