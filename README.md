@@ -245,3 +245,11 @@ The workflows now give each category its own runner and default refinement to CP
 or stale category artifacts. Hosted Gemma remains an explicit optional provider.
 Runner availability still determines actual overlap; there is no cross-runner
 provider quota guarantee. No comparative speedup is claimed before measurement.
+
+The one-scene practice sets compile_scene_layout=true: its supplied POV,
+participants, location and consequential choice compile into a basic scene card.
+This skips redundant model outline development for the short test; the metadata
+explicitly says no model design review occurred. The full experiment keeps its
+chapter developmental reviews. All prose, source-bound memory and acceptance
+gates remain in the practice workflow. Practice ending requirements are scoped
+to discovery, not the full story's acquisition/deployment arc.
