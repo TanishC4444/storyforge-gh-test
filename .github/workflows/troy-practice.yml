@@ -73,8 +73,8 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  refine_bundle:
-    name: Refine independent brief categories in bounded batches
+  refine_plot:
+    name: Refine plot on an isolated small-model runner
     needs: [prepare]
     if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
@@ -95,7 +95,7 @@ jobs:
         with:
           name: prepare
           path: inputs/state
-      - name: Execute Refine independent brief categories in bounded batches
+      - name: Execute Refine plot on an isolated small-model runner
         id: task
         env:
           PYTHONUNBUFFERED: '1'
@@ -106,7 +106,237 @@ jobs:
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-          python -m storyforge.dag refine_bundle --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+          python -m storyforge.dag refine_part --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: refine_plot
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  refine_characters:
+    name: Refine characters on an isolated small-model runner
+    needs: [prepare]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+      needs_repair: ${{ steps.task.outputs.needs_repair }}
+      changed: ${{ steps.task.outputs.changed }}
+      facts_changed: ${{ steps.task.outputs.facts_changed }}
+    steps:
+      - name: Start shared job budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: prepare
+          path: inputs/state
+      - name: Execute Refine characters on an isolated small-model runner
+        id: task
+        env:
+          PYTHONUNBUFFERED: '1'
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag refine_part --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: refine_characters
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  refine_world:
+    name: Refine world on an isolated small-model runner
+    needs: [prepare]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+      needs_repair: ${{ steps.task.outputs.needs_repair }}
+      changed: ${{ steps.task.outputs.changed }}
+      facts_changed: ${{ steps.task.outputs.facts_changed }}
+    steps:
+      - name: Start shared job budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: prepare
+          path: inputs/state
+      - name: Execute Refine world on an isolated small-model runner
+        id: task
+        env:
+          PYTHONUNBUFFERED: '1'
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag refine_part --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 2
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: refine_world
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  refine_scenes:
+    name: Refine scenes on an isolated small-model runner
+    needs: [prepare]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+      needs_repair: ${{ steps.task.outputs.needs_repair }}
+      changed: ${{ steps.task.outputs.changed }}
+      facts_changed: ${{ steps.task.outputs.facts_changed }}
+    steps:
+      - name: Start shared job budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: prepare
+          path: inputs/state
+      - name: Execute Refine scenes on an isolated small-model runner
+        id: task
+        env:
+          PYTHONUNBUFFERED: '1'
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag refine_part --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 3
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: refine_scenes
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  refine_style:
+    name: Refine style on an isolated small-model runner
+    needs: [prepare]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+      needs_repair: ${{ steps.task.outputs.needs_repair }}
+      changed: ${{ steps.task.outputs.changed }}
+      facts_changed: ${{ steps.task.outputs.facts_changed }}
+    steps:
+      - name: Start shared job budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: prepare
+          path: inputs/state
+      - name: Execute Refine style on an isolated small-model runner
+        id: task
+        env:
+          PYTHONUNBUFFERED: '1'
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag refine_part --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index 4
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: refine_style
+          path: out/
+          retention-days: 7
+          overwrite: true
+
+  refine_bundle:
+    name: Join source-bound refinement batches
+    needs: [prepare, refine_plot, refine_characters, refine_world, refine_scenes, refine_style]
+    if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+      needs_repair: ${{ steps.task.outputs.needs_repair }}
+      changed: ${{ steps.task.outputs.changed }}
+      facts_changed: ${{ steps.task.outputs.facts_changed }}
+    steps:
+      - name: Start shared job budget
+        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-worker
+        with:
+          backend: ${{ inputs.backend }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: prepare
+          path: inputs/state
+      - uses: actions/download-artifact@v4
+        with:
+          name: refine_plot
+          path: inputs/refinement/refine_plot
+      - uses: actions/download-artifact@v4
+        with:
+          name: refine_characters
+          path: inputs/refinement/refine_characters
+      - uses: actions/download-artifact@v4
+        with:
+          name: refine_world
+          path: inputs/refinement/refine_world
+      - uses: actions/download-artifact@v4
+        with:
+          name: refine_scenes
+          path: inputs/refinement/refine_scenes
+      - uses: actions/download-artifact@v4
+        with:
+          name: refine_style
+          path: inputs/refinement/refine_style
+      - name: Execute Join source-bound refinement batches
+        id: task
+        env:
+          PYTHONUNBUFFERED: '1'
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          STORY_BACKEND: ${{ inputs.backend }}
+          STORY_PROFILE: ${{ inputs.profile }}
+          STORY_REQUEST: ${{ inputs.request_file }}
+        run: |
+          backend=fixture
+          if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+          python -m storyforge.dag combine_refinement --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -910,7 +1140,7 @@ jobs:
     name: Collect outputs and checkpoints
     timeout-minutes: 360
     if: always()
-    needs: [prepare, refine_bundle, plan_ch01, plan_bundle, s01_design, s01_characters, s01_direction, s01_draft, s01_edit, s01_story, s01_rhetoric, s01_memory, s01_repair, s01_verify, s01_verify_rhetoric, s01_final_memory, s01_memory_review, s01_accept]
+    needs: [prepare, refine_plot, refine_characters, refine_world, refine_scenes, refine_style, refine_bundle, plan_ch01, plan_bundle, s01_design, s01_characters, s01_direction, s01_draft, s01_edit, s01_story, s01_rhetoric, s01_memory, s01_repair, s01_verify, s01_verify_rhetoric, s01_final_memory, s01_memory_review, s01_accept]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

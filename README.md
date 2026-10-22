@@ -197,11 +197,11 @@ live prose quality or a measured speedup.
 ## Batched refinement and one-scene live practice
 
 The Troy experiment refines five independent categories (plot, characters, world,
-scene layout, style) with at most two concurrent small calls. Each has only its
+scene layout, style) on five independent runner jobs. Each has only its
 category inputs plus the shared premise and narrative-form constraints. The
 original brief, rules and POV stay immutable; development suggestions remain
 labelled proposals. The planner receives those suggestions, while writers receive
-the applicable scene layout and full character arcs. Hosted refinement uses the
+the applicable scene layout and full character arcs. Optional hosted refinement uses the
 existing GEMINI_API_KEY secret and shared per-job provider budget; unavailable
 hosted calls fall back to Qwen 3B. Small calls can avoid countTokens using a
 conservative byte-based reservation. CPU calls within a runner stay serialized.
@@ -233,3 +233,15 @@ for the focal character's visibility list. This preserves the distinction betwee
 author context and character knowledge while reducing repeated context. The Troy
 working-memory projection has a 3,500-character budget and reports omitted fact
 IDs; append-only history remains available in the checkpoint.
+
+
+### Native refinement runners after the live provider test
+
+The first one-scene practice completed all five refinement parts in 310.8 seconds.
+Google returned 503 UNAVAILABLE; Qwen 3B fallback produced valid parts. CPU calls
+inside that job were serialized, so threads alone did not parallelize local models.
+The workflows now give each category its own runner and default refinement to CPU
+(`execution_policy.refinement_provider=cpu`). The join rejects missing, duplicate
+or stale category artifacts. Hosted Gemma remains an explicit optional provider.
+Runner availability still determines actual overlap; there is no cross-runner
+provider quota guarantee. No comparative speedup is claimed before measurement.
