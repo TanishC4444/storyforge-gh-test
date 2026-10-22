@@ -25,7 +25,7 @@
   "retrieval_query": "Iliad heroic honor divine gift competing authority mortal vulnerability supplication war",
   "genre": "Mythic war epic; tragic alternate Trojan continuity",
   "reader_experience": "Wonder, anticipation, competing loyalties, martial terror and a costly local victory that opens a larger epic.",
-  "pov": "Third-person past-tense epic narrator, with a primary focal character per scene. The narrator may supply another character’s history or inner attention in a clearly separated paragraph, but this never grants other characters private knowledge. No dialogue, quoted speech, first-person narrator, invocation or direct address. Narrate offers and commitments briefly and show their consequences.",
+  "pov": "Third-person past-tense epic narrator, with a primary focal character per scene. The narrator may supply another character\u2019s history or inner attention in a clearly separated paragraph, but this never grants other characters private knowledge. No dialogue, quoted speech, first-person narrator, invocation or direct address. Narrate offers and commitments briefly and show their consequences.",
   "tone_mood": "Grave and martial, with tenderness in concrete duties; wonder before divine craft and unease beneath victory. No modern sarcasm or action-film triumphalism.",
   "sensory_detail": "Concrete material detail perceived through ancient experience: bronze, sea, wool, ash, labor, bodies and weather.",
   "ending_tendency": "Resolve acquisition and first deployment, not the Trojan War. End on a concrete changed obligation, not a moral summary.",
@@ -101,7 +101,7 @@
     "interpretation": "Strong source influence and pinned source selection; strength is guidance, not a measured borrowed percentage."
   },
   "style": {
-    "narrator": "Third-person past-tense epic narrator, with a primary focal character per scene. The narrator may supply another character’s history or inner attention in a clearly separated paragraph, but this never grants other characters private knowledge. No dialogue, quoted speech, first-person narrator, invocation or direct address. Narrate offers and commitments briefly and show their consequences.",
+    "narrator": "Third-person past-tense epic narrator, with a primary focal character per scene. The narrator may supply another character\u2019s history or inner attention in a clearly separated paragraph, but this never grants other characters private knowledge. No dialogue, quoted speech, first-person narrator, invocation or direct address. Narrate offers and commitments briefly and show their consequences.",
     "register": "Concrete, grave, musical ancient epic in intelligible English. Use material acts, reciprocal obligation, shame and rank; no stock modern cinematic gestures.",
     "wording": [
       "Recurring epithets at meaningful moments; avoid attaching one to every name.",
@@ -277,7 +277,7 @@
         "tension": "Resents concealment by leaders but initially hides what makes him indispensable."
       },
       "emotional_behavior": {
-        "under_pressure": "Checks tools or another person’s equipment when frightened."
+        "under_pressure": "Checks tools or another person\u2019s equipment when frightened."
       },
       "voice_design": {
         "register": "Concrete and restrained before kings, less guarded with his apprentice.",
@@ -302,7 +302,7 @@
     "Agamemnon claims the cache but depends on skilled men and coalition consent. Achilles cannot be silenced by invoking the common cause.",
     "Trojans observe, infer and adapt plausibly; no instant knowledge of operation or inventory.",
     "Track each weapon, custodian, condition, remaining charges, travel, wounds, witnessed facts and private bargains.",
-    "End in a costly local Greek success, NOT Troy’s fall. Hector and Achilles survive; larger political and divine conflicts remain open."
+    "End in a costly local Greek success, NOT Troy\u2019s fall. Hector and Achilles survive; larger political and divine conflicts remain open."
   ],
   "world_design": {
     "technology": [
@@ -367,10 +367,10 @@
     ],
     "local_resolution": "Cache acquired; first deployment secures a contested position at irreversible human cost.",
     "unresolved": [
-      "Hector seeks the weapons’ limits.",
+      "Hector seeks the weapons\u2019 limits.",
       "Agamemnon claims greater control.",
       "Odysseus receives a concrete demand from the bargain.",
-      "Thestor’s household remains bound to the army."
+      "Thestor\u2019s household remains bound to the army."
     ]
   },
   "scene_designs": [
@@ -416,7 +416,7 @@
       "setting": "Storm-damaged coast",
       "dramatic_function": "Dramatize difficult travel and an obstacle requiring a costly practical choice.",
       "development": "Dramatize difficult travel and an obstacle requiring a costly practical choice.",
-      "choice_and_consequence": "Use the smith’s skill to earn an approach while narrowing his chance to leave.",
+      "choice_and_consequence": "Use the smith\u2019s skill to earn an approach while narrowing his chance to leave.",
       "restrictions": "Do not skip the journey or solve resistance by divine delivery."
     },
     {
@@ -462,7 +462,7 @@
       "setting": "Secluded trial ground",
       "dramatic_function": "Demonstrate power, preparation, poor aim and weather sensitivity through consequential action.",
       "development": "Demonstrate power, preparation, poor aim and weather sensitivity through consequential action.",
-      "choice_and_consequence": "Spend a counted charge and expose the operators’ vulnerability.",
+      "choice_and_consequence": "Spend a counted charge and expose the operators\u2019 vulnerability.",
       "restrictions": "Establish limits later used in the climax; no perfect weapon."
     },
     {
@@ -527,7 +527,7 @@
       "setting": "Contested fighting line",
       "dramatic_function": "Partial first use disrupts Trojans; Hector observes and adapts without knowing the mechanism.",
       "development": "Partial first use disrupts Trojans; Hector observes and adapts without knowing the mechanism.",
-      "choice_and_consequence": "An established failure exposes operators and makes Achilles’ disputed protection obligation immediate.",
+      "choice_and_consequence": "An established failure exposes operators and makes Achilles\u2019 disputed protection obligation immediate.",
       "restrictions": "Hector and Achilles survive; weapons do not guarantee victory."
     },
     {
@@ -607,12 +607,15 @@
       "api": 2,
       "reviews": 3,
       "repair": 3,
-      "writer": 2
+      "writer": 2,
+      "refinement": 2
     },
     "compile_supplied_brief": true,
     "chapter_revision": true,
     "chapter_outline_chunks": true,
-    "cpu_quality": true
+    "cpu_quality": true,
+    "batched_refinement": true,
+    "estimate_small_calls": true
   },
   "performance": {
     "compact_packets": true,
@@ -629,7 +632,8 @@
     "development_editor": "gemma",
     "story_quality": "gemma",
     "memory": "flash",
-    "chapter_quality": "flash"
+    "chapter_quality": "flash",
+    "refiner_part": "gemma"
   },
   "chapter_contract": {
     "arc": "A household attempt to leave the war becomes a divine debt and a new dependence on indispensable labor. The first victory must worsen that dependence.",

@@ -264,9 +264,11 @@ jobs:
           if-no-files-found: warn
 """
 
-def build_experimental():
+def build_experimental(total=12,practice=False):
     import re
     header=HEADER.replace('Nine scenes is the full three-chapter test','Twelve scenes across three chapters').replace('name: Story runners','name: Troy large story / chapter revisions').replace('options: [silent-bell-deep, silent-bell-full, harbor]','options: [troy-parallel-experiment]').replace('default: silent-bell-deep','default: troy-parallel-experiment').replace('default: balanced','default: fast').replace("options: ['9', '3', '1']","options: ['12']").replace("default: '9'","default: '12'").replace('group: story-runners','group: story-parallel-experiment')
+    if practice:
+        header=header.replace('Troy large story / chapter revisions','Troy one-scene practice').replace('troy-parallel-experiment','troy-practice').replace('default: fast','default: small').replace("options: ['12']","options: ['1']").replace("default: '12'","default: '1'").replace('Twelve scenes across three chapters','One short scene with refinement, writing, quality and memory gates').replace('group: story-parallel-experiment','group: story-practice')
     blocks=[header];keys=[]
     def job(key,title,task,needs=(),downloads=(),index=None,condition=None,matrix=None):
         keys.append(key);lines=[f'  {key}:',f'    name: {title}']
@@ -295,13 +297,13 @@ def build_experimental():
         blocks.append('\n'.join(lines)+'\n')
     ok="always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')"
     job('prepare','Prepare fresh brief and retrieval','prepare')
-    job('refine_bundle','Compile supplied author brief without expansion','refine_bundle',['prepare'],[('prepare','state')])
-    chapters=[f'plan_ch{i:02}' for i in range(1,4)]
+    job('refine_bundle','Refine independent brief categories in bounded batches','refine_bundle',['prepare'],[('prepare','state')])
+    chapters=[f'plan_ch{i:02}' for i in range(1,2 if practice else 4)]
     for i,key in enumerate(chapters):
         job(key,f'Develop and verify chapter {i+1} outline','chapter_plan',['refine_bundle'],[('refine_bundle','state')],i)
     job('plan_bundle','Combine verified chapter outlines','combine_plans',['refine_bundle',*chapters],
         [('refine_bundle','state')]+[(key,'chapters/'+key) for key in chapters])
-    for i in range(12):
+    for i in range(total):
         p=f's{i+1:02}';previous=f's{i:02}';state=p+'_design' if i==0 else previous+'_settle'
         if i==0:job(state,'Scene 1 design','scene_design',['plan_bundle'],[('plan_bundle','state')],i)
         common=[(state,'state')]
@@ -327,7 +329,7 @@ def build_experimental():
         for suffix,path in [('repair','repair'),('verify','verified'),('verify_rhetoric','verified-rhetoric'),('final_memory','final-memory'),('memory_review','memory-review')]:extras.append((p+'_'+suffix,path,f"needs.{p}_{suffix}.result == 'success'"))
         required=' && '.join(f"needs.{key}.result == 'success'" for key in [state,p+'_edit',p+'_story',p+'_rhetoric',p+'_memory'])
         job(p+'_accept',p+' accept with conditional fallbacks','accept',needs,extras,i,ok+' && '+required)
-        if i<11:
+        if i<total-1:
             following=f's{i+2:02}'
             job(following+'_design',following+' speculative next-scene design','anticipate_design',[state,p+'_edit',p+'_memory'],edit+[(p+'_memory','memory')],i+1)
             job(p+'_settle',p+' settle canon and reconcile next design','settle',[p+'_accept',following+'_design'],[(p+'_accept','state'),(following+'_design','anticipated')],i+1)
@@ -344,6 +346,7 @@ def build_experimental():
             results/s12_accept/READ_ME.txt
           if-no-files-found: warn
       - name: Summarize run''')
+    tail=tail.replace('s12_accept',f's{total:02}_accept')
     blocks.append('  results:\n'+tail)
     return '\n'.join(blocks)
 
@@ -359,3 +362,5 @@ if __name__ == '__main__':
     (ROOT / '.github/workflows/troy-multi-api.yml').write_text(multi)
 
     (ROOT / '.github/workflows/troy-parallel-experiment.yml').write_text(build_experimental())
+
+    (ROOT / '.github/workflows/troy-practice.yml').write_text(build_experimental(total=1,practice=True))

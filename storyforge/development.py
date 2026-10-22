@@ -106,6 +106,8 @@ def validate_scene(scene,req,index):
     ids={c['id'] for c in req['characters']}
     contracts.require(isinstance(scene,dict) and scene.get('id')==expected,'Scene design must keep scene ID')
     contracts.require(scene.get('chapter')==index//req['scenes_per_chapter']+1 and scene.get('pov') in ids,'Invalid scene design chapter/POV')
+    prescribed=next((s for s in req.get('scene_designs',[]) if s['id']==expected),{})
+    if prescribed.get('pov'):contracts.require(scene['pov']==prescribed['pov'],'Scene design changed the author-specified POV')
     participants=scene.get('participants',[])
     contracts.require(isinstance(participants,list) and bool(participants) and all(isinstance(x,str) for x in participants) and len(set(participants))==len(participants) and set(participants)<=ids and scene['pov'] in participants,'Invalid scene participants')
     for key in ['goal','obstacle','intended_change','location','time','choice','consequence','new_development']:

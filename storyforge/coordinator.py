@@ -20,7 +20,7 @@ The ordered evidence_passages contain the complete CURRENT scene. Select 1–3 e
 def planning_packet(req, refinement, retrieval):
     operational = {'profile', 'max_repairs', 'max_stage_retries', 'context_chars', 'n_ctx', 'runner_repo', 'retrieval_mode', 'auto_approve_plan', 'min_words_ratio', 'max_words_ratio'}
     return {'request': {k: v for k, v in req.items() if k not in operational},
-            'refinement': {k: refinement[k] for k in ['refined_prompt', 'central_conflict', 'character_tensions', 'subplot_possibilities', 'world_constraints']},
+            'refinement': {k: refinement[k] for k in ['refined_prompt', 'central_conflict', 'character_tensions', 'subplot_possibilities', 'world_constraints','expanded_story_elements','assumptions','open_decisions']},
             'inspiration': application_packet(req, retrieval, 'architect')}
 
 
@@ -49,7 +49,7 @@ def packet(req, state, card):
     result={
         'scene': card,
         'brief': {k: req.get(k) for k in ['premise', 'genre', 'reader_experience', 'pov', 'world_rules', 'must_avoid']},
-        'characters': [{k: c.get(k) for k in ['id', 'name', 'voice', 'voice_design']} for c in req['characters'] if c['id'] in card['participants']],
+        'characters': [{k: c.get(k) for k in ['id', 'name', 'goal', 'value', 'fear', 'arc', 'contradiction', 'emotional_behavior', 'voice', 'voice_design']} for c in req['characters'] if c['id'] in card['participants']],
         'pov_profile': next(c for c in req['characters'] if c['id'] == card['pov']),
         'pov_visible_memory': compact(visible(state['memories'],card['pov'],{s['id']:s['participants'] for s in state['accepted']})),
         'recent_ending': state['accepted'][-1]['prose'][-1600:] if state['accepted'] and state['accepted'][-1]['pov'] == card['pov'] else '',

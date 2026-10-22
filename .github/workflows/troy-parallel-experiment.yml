@@ -74,7 +74,7 @@ jobs:
           overwrite: true
 
   refine_bundle:
-    name: Compile supplied author brief without expansion
+    name: Refine independent brief categories in bounded batches
     needs: [prepare]
     if: ${{ always() && !cancelled() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && !contains(needs.*.result, 'skipped') }}
     runs-on: ubuntu-latest
@@ -95,7 +95,7 @@ jobs:
         with:
           name: prepare
           path: inputs/state
-      - name: Execute Compile supplied author brief without expansion
+      - name: Execute Refine independent brief categories in bounded batches
         id: task
         env:
           PYTHONUNBUFFERED: '1'
