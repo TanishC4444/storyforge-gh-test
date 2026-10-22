@@ -346,7 +346,8 @@
     "application_plan_binding": true,
     "development_batch_size": 6,
     "api_batch_probes": false,
-    "working_memory_chars": 3500
+    "working_memory_chars": 3500,
+    "combine_direction": true
   },
   "api_roles": {
     "development_editor": "gemma",
