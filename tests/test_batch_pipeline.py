@@ -79,6 +79,7 @@ class BatchPipelineTests(unittest.TestCase):
             def writer(executor,role,packet,instruction,**kw):
                 seen.append(role);self.assertEqual(packet['your_beat']['target_words'],300)
                 self.assertEqual(packet['author_contract']['style'],s['request']['style'])
+                self.assertEqual(packet['author_contract']['length']['target_scene_words'],300)
                 if len(seen)==1:
                     save(executor.folder/'calls/mock.json',{'role':'writer_beat','output':'"Invalid dialogue."'});raise ContractError('Quoted speech')
                 self.assertEqual(packet['rejected_batch'],'"Invalid dialogue."')

@@ -25,7 +25,9 @@ name: Living universe / Gemini-first / batched runner graph
         type: choice
         options:
         - '1'
+        - '4'
         default: '1'
+        description: One growing-world event or a four-chapter bounded episode
       resume_run:
         type: string
         default: ''
@@ -93,7 +95,7 @@ jobs:
       STORY_REVIEW_TIMEOUT_SECONDS: '600'
       STORY_BATCH_TIMEOUT_SECONDS: '600'
   quickstart:
-    name: Compile beginning quickly and propose one local world event
+    name: Compile universe beginning or bounded episode layout
     needs:
     - prepare
     runs-on: ubuntu-latest
@@ -1028,6 +1030,2631 @@ jobs:
     env:
       STORY_REVIEW_TIMEOUT_SECONDS: '600'
       STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s02_design:
+    name: Chapter 2 scene 1 / reconcile design with accepted state
+    needs:
+    - s01_accept
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_accept
+        path: inputs/state
+    - name: Execute Chapter 2 scene 1 / reconcile design with accepted state
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag scene_design --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+        --index 1
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_design
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s02_characters:
+    name: Chapter 2 scene 1 / character ${{ matrix.character }}
+    needs:
+    - s02_design
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        character: ${{ fromJSON(needs.s02_design.outputs.characters) }}
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - name: Execute Chapter 2 scene 1 / character ${{ matrix.character }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        STORY_CHARACTER: ${{ matrix.character }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag character --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+        --index 1 --character "$STORY_CHARACTER"
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_characters-${{ matrix.character }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s02_direction:
+    name: Chapter 2 scene 1 / reconcile character choices
+    needs:
+    - s02_design
+    - s02_characters
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s02_characters-*
+        path: inputs/characters
+    - name: Execute Chapter 2 scene 1 / reconcile character choices
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag director --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+        --index 1
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_direction
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s02_draft:
+    name: Compile writing batches without rewriting
+    needs:
+    - s02_design
+    - s02_draft_plan
+    - s02_write_batches
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_draft_plan
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s02_write_batches-*
+        path: inputs/batches
+    - name: Compile writing batches without rewriting
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline merge_draft --backend "$backend" --index 1'
+    - name: Show generated prose before final acceptance
+      if: always()
+      run: python -m storyforge.expansion preview --source out --label "Compile writing batches without rewriting"
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_draft
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s02_edit:
+    name: Forward prose unchanged for source-bound reviews
+    needs:
+    - s02_design
+    - s02_draft
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_draft
+        path: inputs/draft
+    - name: Forward prose unchanged for source-bound reviews
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline forward --backend "$backend" --index 1'
+    - name: Show generated prose before final acceptance
+      if: always()
+      run: python -m storyforge.expansion preview --source out --label "Forward prose unchanged for source-bound reviews"
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_edit
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s02_story:
+    name: Compile story review findings
+    needs:
+    - s02_design
+    - s02_edit
+    - s02_story_batches
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s02_story_batches-*
+        path: inputs/batches
+    - name: Compile story review findings
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline join_reviews --backend "$backend" --index 1 --kind story'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_story
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s02_rhetoric:
+    name: Compile rhetoric review findings
+    needs:
+    - s02_design
+    - s02_edit
+    - s02_rhetoric_batches
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s02_rhetoric_batches-*
+        path: inputs/batches
+    - name: Compile rhetoric review findings
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline join_reviews --backend "$backend" --index 1 --kind rhetoric'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_rhetoric
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s02_memory:
+    name: Extract evidence-bound initial facts
+    needs:
+    - s02_design
+    - s02_edit
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_edit
+        path: inputs/edited
+    - name: Extract evidence-bound initial facts
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline extract_initial --backend "$backend" --index 1'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_memory
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s02_repair:
+    name: Merge targeted fixes; preserve untouched paragraphs
+    needs:
+    - s02_design
+    - s02_edit
+    - s02_repair_plan
+    - s02_repair_batches
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_repair_plan
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s02_repair_batches-*
+        path: inputs/batches
+    - name: Merge targeted fixes; preserve untouched paragraphs
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline merge_repairs --backend "$backend" --index 1'
+    - name: Show generated prose before final acceptance
+      if: always()
+      run: python -m storyforge.expansion preview --source out --label "Merge targeted fixes; preserve untouched paragraphs"
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_repair
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s02_verify:
+    name: Reuse final story verdict
+    needs:
+    - s02_design
+    - s02_final_check
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_final_check
+        path: inputs/edited
+    - name: Reuse final story verdict
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline verdict_view --backend "$backend" --index 1 --kind story'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_verify
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s02_verify_rhetoric:
+    name: Reuse final rhetoric verdict
+    needs:
+    - s02_design
+    - s02_final_check
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_final_check
+        path: inputs/edited
+    - name: Reuse final rhetoric verdict
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline verdict_view --backend "$backend" --index 1 --kind rhetoric'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_verify_rhetoric
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s02_final_memory:
+    name: Refresh facts ONLY where prose changed
+    needs:
+    - s02_design
+    - s02_edit
+    - s02_final_check
+    - s02_memory
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_final_check
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_memory
+        path: inputs/initial-memory
+    - name: Refresh facts ONLY where prose changed
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline refresh_memory --backend "$backend" --index 1'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_final_memory
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s02_memory_review:
+    name: Compile final memory findings
+    needs:
+    - s02_design
+    - s02_final_check
+    - s02_final_memory
+    - s02_memory_final_plan
+    - s02_memory_final_batches
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_final_check
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_final_memory
+        path: inputs/memory
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_memory_final_plan
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s02_memory_final_batches-*
+        path: inputs/batches
+    - name: Compile final memory findings
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_join --backend "$backend" --index 1'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_memory_review
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s02_accept:
+    name: Chapter 2 scene 1 / verify chapter and commit
+    needs:
+    - s02_design
+    - s02_final_check
+    - s02_verify
+    - s02_verify_rhetoric
+    - s02_final_memory
+    - s02_memory_review
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_final_check
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_verify
+        path: inputs/story-review
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_verify_rhetoric
+        path: inputs/rhetoric-review
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_final_memory
+        path: inputs/memory
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_memory_review
+        path: inputs/memory-review
+    - name: Execute Chapter 2 scene 1 / verify chapter and commit
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag accept --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index
+        1
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_accept
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s03_design:
+    name: Chapter 3 scene 1 / reconcile design with accepted state
+    needs:
+    - s02_accept
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_accept
+        path: inputs/state
+    - name: Execute Chapter 3 scene 1 / reconcile design with accepted state
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag scene_design --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+        --index 2
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_design
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s03_characters:
+    name: Chapter 3 scene 1 / character ${{ matrix.character }}
+    needs:
+    - s03_design
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        character: ${{ fromJSON(needs.s03_design.outputs.characters) }}
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - name: Execute Chapter 3 scene 1 / character ${{ matrix.character }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        STORY_CHARACTER: ${{ matrix.character }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag character --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+        --index 2 --character "$STORY_CHARACTER"
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_characters-${{ matrix.character }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s03_direction:
+    name: Chapter 3 scene 1 / reconcile character choices
+    needs:
+    - s03_design
+    - s03_characters
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s03_characters-*
+        path: inputs/characters
+    - name: Execute Chapter 3 scene 1 / reconcile character choices
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag director --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+        --index 2
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_direction
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s03_draft:
+    name: Compile writing batches without rewriting
+    needs:
+    - s03_design
+    - s03_draft_plan
+    - s03_write_batches
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_draft_plan
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s03_write_batches-*
+        path: inputs/batches
+    - name: Compile writing batches without rewriting
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline merge_draft --backend "$backend" --index 2'
+    - name: Show generated prose before final acceptance
+      if: always()
+      run: python -m storyforge.expansion preview --source out --label "Compile writing batches without rewriting"
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_draft
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s03_edit:
+    name: Forward prose unchanged for source-bound reviews
+    needs:
+    - s03_design
+    - s03_draft
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_draft
+        path: inputs/draft
+    - name: Forward prose unchanged for source-bound reviews
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline forward --backend "$backend" --index 2'
+    - name: Show generated prose before final acceptance
+      if: always()
+      run: python -m storyforge.expansion preview --source out --label "Forward prose unchanged for source-bound reviews"
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_edit
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s03_story:
+    name: Compile story review findings
+    needs:
+    - s03_design
+    - s03_edit
+    - s03_story_batches
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s03_story_batches-*
+        path: inputs/batches
+    - name: Compile story review findings
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline join_reviews --backend "$backend" --index 2 --kind story'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_story
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s03_rhetoric:
+    name: Compile rhetoric review findings
+    needs:
+    - s03_design
+    - s03_edit
+    - s03_rhetoric_batches
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s03_rhetoric_batches-*
+        path: inputs/batches
+    - name: Compile rhetoric review findings
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline join_reviews --backend "$backend" --index 2 --kind rhetoric'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_rhetoric
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s03_memory:
+    name: Extract evidence-bound initial facts
+    needs:
+    - s03_design
+    - s03_edit
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_edit
+        path: inputs/edited
+    - name: Extract evidence-bound initial facts
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline extract_initial --backend "$backend" --index 2'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_memory
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s03_repair:
+    name: Merge targeted fixes; preserve untouched paragraphs
+    needs:
+    - s03_design
+    - s03_edit
+    - s03_repair_plan
+    - s03_repair_batches
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_repair_plan
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s03_repair_batches-*
+        path: inputs/batches
+    - name: Merge targeted fixes; preserve untouched paragraphs
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline merge_repairs --backend "$backend" --index 2'
+    - name: Show generated prose before final acceptance
+      if: always()
+      run: python -m storyforge.expansion preview --source out --label "Merge targeted fixes; preserve untouched paragraphs"
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_repair
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s03_verify:
+    name: Reuse final story verdict
+    needs:
+    - s03_design
+    - s03_final_check
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_final_check
+        path: inputs/edited
+    - name: Reuse final story verdict
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline verdict_view --backend "$backend" --index 2 --kind story'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_verify
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s03_verify_rhetoric:
+    name: Reuse final rhetoric verdict
+    needs:
+    - s03_design
+    - s03_final_check
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_final_check
+        path: inputs/edited
+    - name: Reuse final rhetoric verdict
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline verdict_view --backend "$backend" --index 2 --kind rhetoric'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_verify_rhetoric
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s03_final_memory:
+    name: Refresh facts ONLY where prose changed
+    needs:
+    - s03_design
+    - s03_edit
+    - s03_final_check
+    - s03_memory
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_final_check
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_memory
+        path: inputs/initial-memory
+    - name: Refresh facts ONLY where prose changed
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline refresh_memory --backend "$backend" --index 2'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_final_memory
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s03_memory_review:
+    name: Compile final memory findings
+    needs:
+    - s03_design
+    - s03_final_check
+    - s03_final_memory
+    - s03_memory_final_plan
+    - s03_memory_final_batches
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_final_check
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_final_memory
+        path: inputs/memory
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_memory_final_plan
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s03_memory_final_batches-*
+        path: inputs/batches
+    - name: Compile final memory findings
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_join --backend "$backend" --index 2'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_memory_review
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s03_accept:
+    name: Chapter 3 scene 1 / verify chapter and commit
+    needs:
+    - s03_design
+    - s03_final_check
+    - s03_verify
+    - s03_verify_rhetoric
+    - s03_final_memory
+    - s03_memory_review
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_final_check
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_verify
+        path: inputs/story-review
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_verify_rhetoric
+        path: inputs/rhetoric-review
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_final_memory
+        path: inputs/memory
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_memory_review
+        path: inputs/memory-review
+    - name: Execute Chapter 3 scene 1 / verify chapter and commit
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag accept --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index
+        2
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_accept
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s04_design:
+    name: Chapter 4 scene 1 / reconcile design with accepted state
+    needs:
+    - s03_accept
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_accept
+        path: inputs/state
+    - name: Execute Chapter 4 scene 1 / reconcile design with accepted state
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag scene_design --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+        --index 3
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_design
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s04_characters:
+    name: Chapter 4 scene 1 / character ${{ matrix.character }}
+    needs:
+    - s04_design
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        character: ${{ fromJSON(needs.s04_design.outputs.characters) }}
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - name: Execute Chapter 4 scene 1 / character ${{ matrix.character }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        STORY_CHARACTER: ${{ matrix.character }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag character --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+        --index 3 --character "$STORY_CHARACTER"
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_characters-${{ matrix.character }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s04_direction:
+    name: Chapter 4 scene 1 / reconcile character choices
+    needs:
+    - s04_design
+    - s04_characters
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s04_characters-*
+        path: inputs/characters
+    - name: Execute Chapter 4 scene 1 / reconcile character choices
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag director --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
+        --index 3
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_direction
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s04_draft:
+    name: Compile writing batches without rewriting
+    needs:
+    - s04_design
+    - s04_draft_plan
+    - s04_write_batches
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_draft_plan
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s04_write_batches-*
+        path: inputs/batches
+    - name: Compile writing batches without rewriting
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline merge_draft --backend "$backend" --index 3'
+    - name: Show generated prose before final acceptance
+      if: always()
+      run: python -m storyforge.expansion preview --source out --label "Compile writing batches without rewriting"
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_draft
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s04_edit:
+    name: Forward prose unchanged for source-bound reviews
+    needs:
+    - s04_design
+    - s04_draft
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_draft
+        path: inputs/draft
+    - name: Forward prose unchanged for source-bound reviews
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline forward --backend "$backend" --index 3'
+    - name: Show generated prose before final acceptance
+      if: always()
+      run: python -m storyforge.expansion preview --source out --label "Forward prose unchanged for source-bound reviews"
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_edit
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s04_story:
+    name: Compile story review findings
+    needs:
+    - s04_design
+    - s04_edit
+    - s04_story_batches
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s04_story_batches-*
+        path: inputs/batches
+    - name: Compile story review findings
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline join_reviews --backend "$backend" --index 3 --kind story'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_story
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s04_rhetoric:
+    name: Compile rhetoric review findings
+    needs:
+    - s04_design
+    - s04_edit
+    - s04_rhetoric_batches
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s04_rhetoric_batches-*
+        path: inputs/batches
+    - name: Compile rhetoric review findings
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline join_reviews --backend "$backend" --index 3 --kind rhetoric'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_rhetoric
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s04_memory:
+    name: Extract evidence-bound initial facts
+    needs:
+    - s04_design
+    - s04_edit
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_edit
+        path: inputs/edited
+    - name: Extract evidence-bound initial facts
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline extract_initial --backend "$backend" --index 3'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_memory
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s04_repair:
+    name: Merge targeted fixes; preserve untouched paragraphs
+    needs:
+    - s04_design
+    - s04_edit
+    - s04_repair_plan
+    - s04_repair_batches
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_repair_plan
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s04_repair_batches-*
+        path: inputs/batches
+    - name: Merge targeted fixes; preserve untouched paragraphs
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline merge_repairs --backend "$backend" --index 3'
+    - name: Show generated prose before final acceptance
+      if: always()
+      run: python -m storyforge.expansion preview --source out --label "Merge targeted fixes; preserve untouched paragraphs"
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_repair
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s04_verify:
+    name: Reuse final story verdict
+    needs:
+    - s04_design
+    - s04_final_check
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_final_check
+        path: inputs/edited
+    - name: Reuse final story verdict
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline verdict_view --backend "$backend" --index 3 --kind story'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_verify
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s04_verify_rhetoric:
+    name: Reuse final rhetoric verdict
+    needs:
+    - s04_design
+    - s04_final_check
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_final_check
+        path: inputs/edited
+    - name: Reuse final rhetoric verdict
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline verdict_view --backend "$backend" --index 3 --kind rhetoric'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_verify_rhetoric
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s04_final_memory:
+    name: Refresh facts ONLY where prose changed
+    needs:
+    - s04_design
+    - s04_edit
+    - s04_final_check
+    - s04_memory
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_final_check
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_memory
+        path: inputs/initial-memory
+    - name: Refresh facts ONLY where prose changed
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline refresh_memory --backend "$backend" --index 3'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_final_memory
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s04_memory_review:
+    name: Compile final memory findings
+    needs:
+    - s04_design
+    - s04_final_check
+    - s04_final_memory
+    - s04_memory_final_plan
+    - s04_memory_final_batches
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_final_check
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_final_memory
+        path: inputs/memory
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_memory_final_plan
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s04_memory_final_batches-*
+        path: inputs/batches
+    - name: Compile final memory findings
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_join --backend "$backend" --index 3'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_memory_review
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s04_accept:
+    name: Chapter 4 scene 1 / verify chapter and commit
+    needs:
+    - s04_design
+    - s04_final_check
+    - s04_verify
+    - s04_verify_rhetoric
+    - s04_final_memory
+    - s04_memory_review
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_final_check
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_verify
+        path: inputs/story-review
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_verify_rhetoric
+        path: inputs/rhetoric-review
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_final_memory
+        path: inputs/memory
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_memory_review
+        path: inputs/memory-review
+    - name: Execute Chapter 4 scene 1 / verify chapter and commit
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.dag accept --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST" --index
+        3
+
+        '
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_accept
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
   results:
     name: Collect outputs and checkpoints
     timeout-minutes: 360
@@ -1049,6 +3676,48 @@ jobs:
     - s01_final_memory
     - s01_memory_review
     - s01_accept
+    - s02_design
+    - s02_characters
+    - s02_direction
+    - s02_draft
+    - s02_edit
+    - s02_story
+    - s02_rhetoric
+    - s02_memory
+    - s02_repair
+    - s02_verify
+    - s02_verify_rhetoric
+    - s02_final_memory
+    - s02_memory_review
+    - s02_accept
+    - s03_design
+    - s03_characters
+    - s03_direction
+    - s03_draft
+    - s03_edit
+    - s03_story
+    - s03_rhetoric
+    - s03_memory
+    - s03_repair
+    - s03_verify
+    - s03_verify_rhetoric
+    - s03_final_memory
+    - s03_memory_review
+    - s03_accept
+    - s04_design
+    - s04_characters
+    - s04_direction
+    - s04_draft
+    - s04_edit
+    - s04_story
+    - s04_rhetoric
+    - s04_memory
+    - s04_repair
+    - s04_verify
+    - s04_verify_rhetoric
+    - s04_final_memory
+    - s04_memory_review
+    - s04_accept
     - s01_draft_plan
     - s01_write_batches
     - s01_story_batches
@@ -1061,6 +3730,42 @@ jobs:
     - s01_final_check
     - s01_memory_final_plan
     - s01_memory_final_batches
+    - s02_draft_plan
+    - s02_write_batches
+    - s02_story_batches
+    - s02_rhetoric_batches
+    - s02_memory_preflight_plan
+    - s02_memory_preflight_batches
+    - s02_memory_preflight
+    - s02_repair_plan
+    - s02_repair_batches
+    - s02_final_check
+    - s02_memory_final_plan
+    - s02_memory_final_batches
+    - s03_draft_plan
+    - s03_write_batches
+    - s03_story_batches
+    - s03_rhetoric_batches
+    - s03_memory_preflight_plan
+    - s03_memory_preflight_batches
+    - s03_memory_preflight
+    - s03_repair_plan
+    - s03_repair_batches
+    - s03_final_check
+    - s03_memory_final_plan
+    - s03_memory_final_batches
+    - s04_draft_plan
+    - s04_write_batches
+    - s04_story_batches
+    - s04_rhetoric_batches
+    - s04_memory_preflight_plan
+    - s04_memory_preflight_batches
+    - s04_memory_preflight
+    - s04_repair_plan
+    - s04_repair_batches
+    - s04_final_check
+    - s04_memory_final_plan
+    - s04_memory_final_batches
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -1918,3 +4623,2403 @@ jobs:
       max-parallel: 6
       matrix:
         batch: ${{ fromJSON(needs.s01_memory_final_plan.outputs.characters) }}
+  s02_draft_plan:
+    name: Allocate contiguous scene-writing batches
+    needs:
+    - s02_design
+    - s02_direction
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_direction
+        path: inputs/direction
+    - name: Allocate contiguous scene-writing batches
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline draft_plan --backend "$backend" --index 1'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_draft_plan
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+  s02_write_batches:
+    name: Write scene batch ${{ matrix.batch }} with Gemini-first routing
+    needs:
+    - s02_design
+    - s02_draft_plan
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_draft_plan
+        path: inputs/plan
+    - name: Write scene batch ${{ matrix.batch }} with Gemini-first routing
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline write_batch --backend "$backend" --index 1 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_write_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s02_draft_plan.outputs.characters) }}
+  s02_story_batches:
+    name: story review checks batch ${{ matrix.batch }}
+    needs:
+    - s02_design
+    - s02_edit
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_edit
+        path: inputs/edited
+    - name: story review checks batch ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline review_batch --backend "$backend" --index 1 --kind story --group "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_story_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch:
+        - 0
+        - 1
+        - 2
+  s02_rhetoric_batches:
+    name: rhetoric review checks batch ${{ matrix.batch }}
+    needs:
+    - s02_design
+    - s02_edit
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_edit
+        path: inputs/edited
+    - name: rhetoric review checks batch ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline review_batch --backend "$backend" --index 1 --kind rhetoric --group "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_rhetoric_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch:
+        - 0
+        - 1
+        - 2
+  s02_memory_preflight_plan:
+    name: Allocate preflight memory checks
+    needs:
+    - s02_design
+    - s02_edit
+    - s02_memory
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_memory
+        path: inputs/memory
+    - name: Allocate preflight memory checks
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_plan --backend "$backend" --index 1 --phase preflight'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_memory_preflight_plan
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+  s02_memory_preflight_batches:
+    name: preflight memory / continuity batch ${{ matrix.batch }}
+    needs:
+    - s02_design
+    - s02_edit
+    - s02_memory
+    - s02_memory_preflight_plan
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_memory
+        path: inputs/memory
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_memory_preflight_plan
+        path: inputs/plan
+    - name: preflight memory / continuity batch ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_batch --backend "$backend" --index 1 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_memory_preflight_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s02_memory_preflight_plan.outputs.characters) }}
+  s02_memory_preflight:
+    name: Compile preflight memory findings
+    needs:
+    - s02_design
+    - s02_edit
+    - s02_memory
+    - s02_memory_preflight_plan
+    - s02_memory_preflight_batches
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_memory
+        path: inputs/memory
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_memory_preflight_plan
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s02_memory_preflight_batches-*
+        path: inputs/batches
+    - name: Compile preflight memory findings
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_join --backend "$backend" --index 1'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_memory_preflight
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s02_repair_plan:
+    name: Group exact disputed paragraphs into repair batches
+    needs:
+    - s02_design
+    - s02_edit
+    - s02_story
+    - s02_rhetoric
+    - s02_memory_preflight
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_story
+        path: inputs/story-review
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_rhetoric
+        path: inputs/rhetoric-review
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_memory_preflight
+        path: inputs/memory-review
+    - name: Group exact disputed paragraphs into repair batches
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline repair_plan --backend "$backend" --index 1'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_repair_plan
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+  s02_repair_batches:
+    name: Fix ONLY cited paragraphs / batch ${{ matrix.batch }}
+    needs:
+    - s02_design
+    - s02_repair_plan
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_repair_plan
+        path: inputs/plan
+    - name: Fix ONLY cited paragraphs / batch ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline repair_batch --backend "$backend" --index 1 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_repair_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s02_repair_plan.outputs.characters) }}
+  s02_final_check:
+    name: ONE final strict prompt check; no rewrite loop
+    needs:
+    - s02_design
+    - s02_repair
+    - s02_story
+    - s02_rhetoric
+    - s02_memory_preflight
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_story
+        path: inputs/story-review
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_rhetoric
+        path: inputs/rhetoric-review
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_memory_preflight
+        path: inputs/memory-review
+    - name: ONE final strict prompt check; no rewrite loop
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline finalize --backend "$backend" --index 1'
+    - name: Show generated prose before final acceptance
+      if: always()
+      run: python -m storyforge.expansion preview --source out --label "ONE final strict prompt check; no rewrite loop"
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_final_check
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s02_memory_final_plan:
+    name: Allocate final memory checks
+    needs:
+    - s02_design
+    - s02_final_check
+    - s02_final_memory
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_final_check
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_final_memory
+        path: inputs/memory
+    - name: Allocate final memory checks
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_plan --backend "$backend" --index 1 --phase final'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_memory_final_plan
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+  s02_memory_final_batches:
+    name: final memory / continuity batch ${{ matrix.batch }}
+    needs:
+    - s02_design
+    - s02_final_check
+    - s02_final_memory
+    - s02_memory_final_plan
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_final_check
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_final_memory
+        path: inputs/memory
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_memory_final_plan
+        path: inputs/plan
+    - name: final memory / continuity batch ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_batch --backend "$backend" --index 1 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_memory_final_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s02_memory_final_plan.outputs.characters) }}
+  s03_draft_plan:
+    name: Allocate contiguous scene-writing batches
+    needs:
+    - s03_design
+    - s03_direction
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_direction
+        path: inputs/direction
+    - name: Allocate contiguous scene-writing batches
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline draft_plan --backend "$backend" --index 2'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_draft_plan
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+  s03_write_batches:
+    name: Write scene batch ${{ matrix.batch }} with Gemini-first routing
+    needs:
+    - s03_design
+    - s03_draft_plan
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_draft_plan
+        path: inputs/plan
+    - name: Write scene batch ${{ matrix.batch }} with Gemini-first routing
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline write_batch --backend "$backend" --index 2 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_write_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s03_draft_plan.outputs.characters) }}
+  s03_story_batches:
+    name: story review checks batch ${{ matrix.batch }}
+    needs:
+    - s03_design
+    - s03_edit
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_edit
+        path: inputs/edited
+    - name: story review checks batch ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline review_batch --backend "$backend" --index 2 --kind story --group "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_story_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch:
+        - 0
+        - 1
+        - 2
+  s03_rhetoric_batches:
+    name: rhetoric review checks batch ${{ matrix.batch }}
+    needs:
+    - s03_design
+    - s03_edit
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_edit
+        path: inputs/edited
+    - name: rhetoric review checks batch ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline review_batch --backend "$backend" --index 2 --kind rhetoric --group "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_rhetoric_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch:
+        - 0
+        - 1
+        - 2
+  s03_memory_preflight_plan:
+    name: Allocate preflight memory checks
+    needs:
+    - s03_design
+    - s03_edit
+    - s03_memory
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_memory
+        path: inputs/memory
+    - name: Allocate preflight memory checks
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_plan --backend "$backend" --index 2 --phase preflight'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_memory_preflight_plan
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+  s03_memory_preflight_batches:
+    name: preflight memory / continuity batch ${{ matrix.batch }}
+    needs:
+    - s03_design
+    - s03_edit
+    - s03_memory
+    - s03_memory_preflight_plan
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_memory
+        path: inputs/memory
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_memory_preflight_plan
+        path: inputs/plan
+    - name: preflight memory / continuity batch ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_batch --backend "$backend" --index 2 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_memory_preflight_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s03_memory_preflight_plan.outputs.characters) }}
+  s03_memory_preflight:
+    name: Compile preflight memory findings
+    needs:
+    - s03_design
+    - s03_edit
+    - s03_memory
+    - s03_memory_preflight_plan
+    - s03_memory_preflight_batches
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_memory
+        path: inputs/memory
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_memory_preflight_plan
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s03_memory_preflight_batches-*
+        path: inputs/batches
+    - name: Compile preflight memory findings
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_join --backend "$backend" --index 2'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_memory_preflight
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s03_repair_plan:
+    name: Group exact disputed paragraphs into repair batches
+    needs:
+    - s03_design
+    - s03_edit
+    - s03_story
+    - s03_rhetoric
+    - s03_memory_preflight
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_story
+        path: inputs/story-review
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_rhetoric
+        path: inputs/rhetoric-review
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_memory_preflight
+        path: inputs/memory-review
+    - name: Group exact disputed paragraphs into repair batches
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline repair_plan --backend "$backend" --index 2'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_repair_plan
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+  s03_repair_batches:
+    name: Fix ONLY cited paragraphs / batch ${{ matrix.batch }}
+    needs:
+    - s03_design
+    - s03_repair_plan
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_repair_plan
+        path: inputs/plan
+    - name: Fix ONLY cited paragraphs / batch ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline repair_batch --backend "$backend" --index 2 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_repair_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s03_repair_plan.outputs.characters) }}
+  s03_final_check:
+    name: ONE final strict prompt check; no rewrite loop
+    needs:
+    - s03_design
+    - s03_repair
+    - s03_story
+    - s03_rhetoric
+    - s03_memory_preflight
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_story
+        path: inputs/story-review
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_rhetoric
+        path: inputs/rhetoric-review
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_memory_preflight
+        path: inputs/memory-review
+    - name: ONE final strict prompt check; no rewrite loop
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline finalize --backend "$backend" --index 2'
+    - name: Show generated prose before final acceptance
+      if: always()
+      run: python -m storyforge.expansion preview --source out --label "ONE final strict prompt check; no rewrite loop"
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_final_check
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s03_memory_final_plan:
+    name: Allocate final memory checks
+    needs:
+    - s03_design
+    - s03_final_check
+    - s03_final_memory
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_final_check
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_final_memory
+        path: inputs/memory
+    - name: Allocate final memory checks
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_plan --backend "$backend" --index 2 --phase final'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_memory_final_plan
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+  s03_memory_final_batches:
+    name: final memory / continuity batch ${{ matrix.batch }}
+    needs:
+    - s03_design
+    - s03_final_check
+    - s03_final_memory
+    - s03_memory_final_plan
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_final_check
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_final_memory
+        path: inputs/memory
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_memory_final_plan
+        path: inputs/plan
+    - name: final memory / continuity batch ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_batch --backend "$backend" --index 2 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_memory_final_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s03_memory_final_plan.outputs.characters) }}
+  s04_draft_plan:
+    name: Allocate contiguous scene-writing batches
+    needs:
+    - s04_design
+    - s04_direction
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_direction
+        path: inputs/direction
+    - name: Allocate contiguous scene-writing batches
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline draft_plan --backend "$backend" --index 3'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_draft_plan
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+  s04_write_batches:
+    name: Write scene batch ${{ matrix.batch }} with Gemini-first routing
+    needs:
+    - s04_design
+    - s04_draft_plan
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_draft_plan
+        path: inputs/plan
+    - name: Write scene batch ${{ matrix.batch }} with Gemini-first routing
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline write_batch --backend "$backend" --index 3 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_write_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s04_draft_plan.outputs.characters) }}
+  s04_story_batches:
+    name: story review checks batch ${{ matrix.batch }}
+    needs:
+    - s04_design
+    - s04_edit
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_edit
+        path: inputs/edited
+    - name: story review checks batch ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline review_batch --backend "$backend" --index 3 --kind story --group "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_story_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch:
+        - 0
+        - 1
+        - 2
+  s04_rhetoric_batches:
+    name: rhetoric review checks batch ${{ matrix.batch }}
+    needs:
+    - s04_design
+    - s04_edit
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_edit
+        path: inputs/edited
+    - name: rhetoric review checks batch ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline review_batch --backend "$backend" --index 3 --kind rhetoric --group "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_rhetoric_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch:
+        - 0
+        - 1
+        - 2
+  s04_memory_preflight_plan:
+    name: Allocate preflight memory checks
+    needs:
+    - s04_design
+    - s04_edit
+    - s04_memory
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_memory
+        path: inputs/memory
+    - name: Allocate preflight memory checks
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_plan --backend "$backend" --index 3 --phase preflight'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_memory_preflight_plan
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+  s04_memory_preflight_batches:
+    name: preflight memory / continuity batch ${{ matrix.batch }}
+    needs:
+    - s04_design
+    - s04_edit
+    - s04_memory
+    - s04_memory_preflight_plan
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_memory
+        path: inputs/memory
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_memory_preflight_plan
+        path: inputs/plan
+    - name: preflight memory / continuity batch ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_batch --backend "$backend" --index 3 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_memory_preflight_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s04_memory_preflight_plan.outputs.characters) }}
+  s04_memory_preflight:
+    name: Compile preflight memory findings
+    needs:
+    - s04_design
+    - s04_edit
+    - s04_memory
+    - s04_memory_preflight_plan
+    - s04_memory_preflight_batches
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_memory
+        path: inputs/memory
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_memory_preflight_plan
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s04_memory_preflight_batches-*
+        path: inputs/batches
+    - name: Compile preflight memory findings
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_join --backend "$backend" --index 3'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_memory_preflight
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s04_repair_plan:
+    name: Group exact disputed paragraphs into repair batches
+    needs:
+    - s04_design
+    - s04_edit
+    - s04_story
+    - s04_rhetoric
+    - s04_memory_preflight
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_edit
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_story
+        path: inputs/story-review
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_rhetoric
+        path: inputs/rhetoric-review
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_memory_preflight
+        path: inputs/memory-review
+    - name: Group exact disputed paragraphs into repair batches
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline repair_plan --backend "$backend" --index 3'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_repair_plan
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+  s04_repair_batches:
+    name: Fix ONLY cited paragraphs / batch ${{ matrix.batch }}
+    needs:
+    - s04_design
+    - s04_repair_plan
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_repair_plan
+        path: inputs/plan
+    - name: Fix ONLY cited paragraphs / batch ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline repair_batch --backend "$backend" --index 3 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_repair_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s04_repair_plan.outputs.characters) }}
+  s04_final_check:
+    name: ONE final strict prompt check; no rewrite loop
+    needs:
+    - s04_design
+    - s04_repair
+    - s04_story
+    - s04_rhetoric
+    - s04_memory_preflight
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_story
+        path: inputs/story-review
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_rhetoric
+        path: inputs/rhetoric-review
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_memory_preflight
+        path: inputs/memory-review
+    - name: ONE final strict prompt check; no rewrite loop
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline finalize --backend "$backend" --index 3'
+    - name: Show generated prose before final acceptance
+      if: always()
+      run: python -m storyforge.expansion preview --source out --label "ONE final strict prompt check; no rewrite loop"
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_final_check
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s04_memory_final_plan:
+    name: Allocate final memory checks
+    needs:
+    - s04_design
+    - s04_final_check
+    - s04_final_memory
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_final_check
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_final_memory
+        path: inputs/memory
+    - name: Allocate final memory checks
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_plan --backend "$backend" --index 3 --phase final'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_memory_final_plan
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+  s04_memory_final_batches:
+    name: final memory / continuity batch ${{ matrix.batch }}
+    needs:
+    - s04_design
+    - s04_final_check
+    - s04_final_memory
+    - s04_memory_final_plan
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_final_check
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_final_memory
+        path: inputs/memory
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_memory_final_plan
+        path: inputs/plan
+    - name: final memory / continuity batch ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_batch --backend "$backend" --index 3 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_memory_final_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s04_memory_final_plan.outputs.characters) }}

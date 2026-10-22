@@ -70,6 +70,7 @@ def write_batch(state,card,source,out,backend,bid):
     local=copy.deepcopy(req);local['words_per_scene']=beat['target_words']
     data={**scene_context(state,card),'ordered_beat_plan':plan['beats'],'your_beat':beat,'direction':plan['direction'],
         'instruction':'Write only your assigned contiguous part. Other batches supply other parts. Never repeat the scene opening or narrate a later beat early.'}
+    data['author_contract']['length'].update(target_scene_words=beat['target_words'],complete_scene_target_words=req['words_per_scene'])
     errors=[];text=''
     for attempt in range(0 if backend=='fixture' else 2):
         role='writer_beat' if attempt==0 else 'repair'
