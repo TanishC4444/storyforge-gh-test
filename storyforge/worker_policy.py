@@ -30,10 +30,16 @@ def policy(req,role,tokens):
         tier={'writer':'flash','writer_beat':'flash','global_repair':'flash',
               'structural_editor':'flash36','chapter_quality':'flash36',
               'memory_quality':'gemma'}.get(role,'lite')
+    literary=req.get('execution_policy',{}).get('literary_quality',False)
+    if literary:
+        if role in {'humanizer','repair','seam','rhetoric_quality','chapter_quality','development_editor'}:tier='flash36'
+        if role=='story_quality':tier='gemma'
+        timeout=180 if role in {'writer','writer_beat','global_repair','humanizer','structural_editor'} else 120
+        if role in {'writer','humanizer','structural_editor','global_repair'}:cap=4200
     if tier=='cpu':tier=None
-    return {'tier':tier,'thinking':'minimal' if tier=='gemma' else 'low',
+    return {'tier':tier,'thinking':'minimal' if tier=='gemma' else 'medium' if literary and role in {'writer','humanizer','structural_editor','global_repair'} else 'low',
             'max_tokens':min(tokens,cap),'timeout':timeout,'retries':2,
-            'quality_routing':quality,
+            'quality_routing':quality,'literary_quality':literary,
             'estimate_small_calls':req.get('execution_policy',{}).get('estimate_small_calls',False)}
 
 @contextmanager
@@ -54,6 +60,7 @@ def parallel(req,kind,items,fn):
 def validate(req):
     from .contracts import require
     knobs=req['execution_policy']
+    require(type(knobs.get('literary_quality',False)) is bool,'Invalid literary quality policy')
     require(knobs.get('model_routing') in {None,'quality'},'Invalid model routing profile')
     require(knobs.get('hosted_prose') in {None,'gemma','flash'},'Invalid hosted prose provider')
     require(knobs.get('refinement_provider','cpu') in {'cpu','gemma'},'Invalid refinement provider')

@@ -9,6 +9,10 @@ Assess every required check using source passage IDs and one specific sentence.
 - gesture_function: gestures pursue a tactic or change an interaction; synonyms do
   not repair a repeated beat, nor does pantomime replace narrated negotiation.
 - rhythm_repetition: vary pace; keep earned patterns and cut redundant restatement.
+- style_fidelity: assess the actual syntax, rhythm, imagery, social values and
+  narrative techniques requested by author_review_contract.style and adaptation.
+  Ornate adjectives or generic epithets alone do not establish the requested voice.
+  Cite concrete departures and propose corrections within the author form.
 - instruction_leakage: prompt labels and craft instructions cannot appear as prose.
 Follow the supplied JSON schema. A failed check needs an actionable matching issue;
 failed checks or blocking issues set pass=false. No issue quota, authorship claim,

@@ -25,6 +25,7 @@ class CraftTests(unittest.TestCase):
     def test_large_scene_cannot_silently_collapse_to_summary(self):
         with self.assertRaises(ContractError):validate_prose('A short summary.',self.req,check_length=True)
     def test_legacy_cpu_policy_is_available(self):
+        self.req['execution_policy']['literary_quality']=False
         self.req['execution_policy'].pop('model_routing',None)
         self.req['execution_policy'].pop('hosted_prose',None)
         for role in ['architect','writer','humanizer','structural_editor','story_quality','rhetoric_quality','chapter_quality','memory']:

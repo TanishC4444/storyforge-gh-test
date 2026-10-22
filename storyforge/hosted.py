@@ -158,13 +158,16 @@ class GoogleHosted:
         self.reserve(kind,estimate+tokens)
         config={'maxOutputTokens':tokens,'thinkingConfig':{'thinkingLevel':'minimal' if kind=='gemma' else 'low'}}
         if policy:config['thinkingConfig']['thinkingLevel']='minimal' if kind=='gemma' else policy.get('thinking','low')
+        if policy and policy.get('literary_quality'):
+            config['temperature']=.7 if role in {'writer','writer_beat','humanizer','structural_editor','global_repair'} else .2
         # Gemini supports native JSON schemas; Gemma uses the explicit prompt
         # contract. Do not assume JSON MIME/schema compatibility across families.
         if structured and kind!='gemma':
             config['responseMimeType']='application/json'
             if response_schema is not None:config['responseJsonSchema']=response_schema
         started=time.monotonic()
-        for attempt in range(2):
+        attempts=1 if policy and policy.get('literary_quality') else 2
+        for attempt in range(attempts):
             from .usage import record
             request_started=time.monotonic()
             from .tracking import event
@@ -179,9 +182,9 @@ class GoogleHosted:
                 import re
                 status=re.search(r'HTTP (\d+)',str(exc))
                 transient=any(code in str(exc) for code in ['500','502','503','504']) or bool(policy and any(code in str(exc) for code in ['timed out']))
-                event('api_retry' if attempt==0 and transient else 'api_failed','Provider request rejected',stage=role,status_code=int(status.group(1)) if status else None,attempt=attempt+1,error=str(exc))
+                event('api_retry' if attempt+1<attempts and transient else 'api_failed','Provider request rejected',stage=role,status_code=int(status.group(1)) if status else None,attempt=attempt+1,error=str(exc))
                 record(self.folder,'google',model,role,attempt=attempt+1,seconds=round(time.monotonic()-request_started,3),status=str(exc),reserved_input_tokens=estimate)
-                if attempt==0 and transient:
+                if attempt+1<attempts and transient:
                     time.sleep(4+random.random());self.reserve(kind,estimate+tokens);continue
                 if any(code in str(exc) for code in ['400','401','403','404']):self.disabled.add(kind)
                 self.circuit(kind,exc)
