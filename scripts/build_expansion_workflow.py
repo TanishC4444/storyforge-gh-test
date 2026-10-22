@@ -45,6 +45,7 @@ def build_expansion(total=9,per_chapter=3):
             jobs[prefix+'_'+suffix]=v
     for k,v in jobs.items():
         v['env']={'STORY_REVIEW_TIMEOUT_SECONDS':'1800'}
+        if k.startswith('s') and k.endswith('_repair'):v['name']='One strict final prompt check if editorial opinions conflict'
         if k=='s01_design':v.pop('if',None)
         for s in v.get('steps',[]):
             if s.get('id')=='task':

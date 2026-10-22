@@ -19,3 +19,13 @@ Only accepted output creates a `universe-canon` checkpoint. To continue an exist
 This workflow has no Gemini credentials. Glitter 12B writes; Qwen models perform planning, passage editing and review. It is manually launched/resumed. `resume_run` with the `universe-canon` artifact continues accepted history. After a failed attempt, choosing its `quickstart` artifact preserves prior accepted history and advances the saved random stream without committing the rejected event. Fixture and live checkpoints cannot mix.
 
 The older single-coordinator universe CLI remains available for local experimentation; it is no longer the Actions architecture. Existing runs keep the workflow revision they started with, so a new launch is required to use this graph.
+
+## One final check for editorial disagreements
+
+Classic expansion requests use `execution_policy.editorial_disagreement = one_strict_check`. If a reviewer rejects the edited text, one final adjudicator independently checks all story and rhetoric dimensions against the original prompt, author contract, scoped references, actual chapter, source-bound canon and POV knowledge. Earlier opinions are allegations to verify, not votes. Stylistic preferences remain advisory. This final judgment has zero semantic/format retries; transport failover can still change provider when a provider cannot respond.
+
+The exact final decision is bound to prose, chapter, canon and author requirements. Changed-text verification and the chapter gate reuse it rather than opening another debate. A first disagreement discovered at the chapter gate receives that same one final check. If it passes, the normal independent memory requirements still apply. Mechanical author constraints cannot be waived by model approval.
+
+If the final check fails or is unavailable, the workflow retains a clearly provisional scene and continues without another rewrite/review cycle. Its new facts are withheld from canon; later scenes on that provisional branch also withhold canon updates. The exported manuscript is labeled provisional, and it cannot be imported as an accepted universe checkpoint. Readable drafts remain available even when verification is unresolved. This is forward progress through drafting, not a claim that failed reviews passed.
+
+Already-started Actions runs keep their original code and settings. The policy applies to new launches from the merged revision; it does not silently change an in-flight run.

@@ -60,6 +60,7 @@ def parallel(req,kind,items,fn):
 def validate(req):
     from .contracts import require
     knobs=req['execution_policy']
+    require(knobs.get('editorial_disagreement') in {None,'one_strict_check'},'Invalid editorial disagreement policy')
     models=knobs.get('cpu_models',{})
     require(isinstance(models,dict) and all(k in STAGES and v in {'qwen3b','qwen7b','gemma-4-12b','glitter-12b'} for k,v in models.items()),'Invalid local role model map')
     require(type(knobs.get('literary_quality',False)) is bool,'Invalid literary quality policy')

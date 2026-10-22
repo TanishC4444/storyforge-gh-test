@@ -221,7 +221,7 @@ class Executor:
             for key in ['choice','consequence','new_development']:candidate.setdefault(key,candidate.get('intended_change','Continue the user-specified scene.'))
             candidate.setdefault('reference_uses',[])
             return validator(candidate) if validator else candidate
-        if enabled(self.req) and role in {'story_quality','rhetoric_quality','chapter_quality','memory_quality','development_editor'}:
+        if (enabled(self.req) or self.req.get('execution_policy',{}).get('editorial_disagreement')=='one_strict_check') and role in {'story_quality','rhetoric_quality','chapter_quality','memory_quality','development_editor'}:
             warning(self.folder,'review_unavailable',last_error)
             return unavailable(last_error)
         raise ContractError(f'{role} failed after bounded retries: {last_error}')
