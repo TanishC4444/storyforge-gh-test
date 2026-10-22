@@ -1,6 +1,6 @@
 """Quota-aware Google hosted inference. Secrets never enter packets or diagnostics."""
 from __future__ import annotations
-import fcntl,json,math,os,time,random,uuid,threading,urllib.request,urllib.error
+import fcntl,json,math,os,time,random,uuid,threading,urllib.request,urllib.error,hashlib
 from pathlib import Path
 from .storage import save
 
@@ -11,10 +11,10 @@ class HostedError(RuntimeError):
         super().__init__(message);self.daily=daily;self.retry_after=retry_after
 
 class GoogleHosted:
-    def __init__(self,folder,key=None):
+    def __init__(self,folder,key=None,*,backup_keys=None,distinct_projects=None):
         self.folder=Path(folder);self.folder.mkdir(parents=True,exist_ok=True)
         primary=key or os.getenv('GEMINI_API_KEY','')
-        try:backups=json.loads(os.getenv('GEMINI_API_KEYS','[]'))
+        try:backups=json.loads(os.getenv('GEMINI_API_KEYS','[]')) if backup_keys is None else backup_keys
         except ValueError:raise HostedError('GEMINI_API_KEYS must be a JSON array') from None
         if not isinstance(backups,list) or any(not isinstance(k,str) for k in backups):
             raise HostedError('GEMINI_API_KEYS must be a JSON array of strings')
@@ -22,6 +22,8 @@ class GoogleHosted:
         self.key=self.keys[0] if self.keys else '';self.key_index=0
         self.key_lock=threading.RLock()
         self.disabled=set();self.reserve_flash_final=False;self.optimized=False
+        use_pool=os.getenv('GEMINI_DISTINCT_PROJECTS','').lower()=='true' if distinct_projects is None else distinct_projects
+        self.project_children=[GoogleHosted(self.folder/f'project-{i+1:02}',key=k,backup_keys=[],distinct_projects=False) for i,k in enumerate(self.keys)] if use_pool and len(self.keys)>1 else []
     def telemetry(self,path,seconds,outcome):
         value={'model':path.split(':')[0],'operation':path.split(':')[-1],'seconds':round(seconds,3),'outcome':outcome}
         with (self.folder/'telemetry.lock').open('a') as lock:
@@ -92,6 +94,11 @@ class GoogleHosted:
         This carries ancestry across runners, but is not a distributed lock.
         Concurrent independent jobs can still contend for project-wide quotas.
         """
+        paths=list(paths)
+        if self.project_children:
+            for i,child in enumerate(self.project_children):
+                child.inherit([p for p in paths if p.parent.name==f'project-{i+1:02}'])
+            return
         ledger={};health={}
         for path in paths:
             value=json.loads(path.read_text())
@@ -134,7 +141,35 @@ class GoogleHosted:
                 save(path,health)
             return health.get(kind,{}).get('until',0)>time.time()
 
+    def project_complete(self,kind,system,prompt,tokens,structured,response_schema,role,policy):
+        # The user explicitly confirmed that these credentials belong to distinct
+        # projects. Keep quotas/circuits isolated; legacy key pools do not rotate
+        # on quota errors unless this opt-in is enabled.
+        policy=policy or {'timeout':120 if role=='chapter_quality' else 90,'thinking':'low','quality_routing':True,'literary_quality':True}
+        seed=os.getenv('STORY_BATCH',os.getenv('STORY_CHARACTER',''))+os.getenv('GITHUB_JOB','')+str(role)+hashlib.sha256(prompt.encode()).hexdigest()
+        batch=os.getenv('STORY_BATCH','')
+        phase=os.getenv('GITHUB_JOB','')+str(role)
+        start=((int(hashlib.sha256(phase.encode()).hexdigest()[:8],16)+int(batch)) if batch.isdigit() else int(hashlib.sha256(seed.encode()).hexdigest()[:8],16))%len(self.project_children)
+        last=None;started=time.monotonic();budget=360 if role=='chapter_quality' else 240
+        for offset in range(len(self.project_children)):
+            slot=(start+offset)%len(self.project_children);child=self.project_children[slot]
+            remaining=budget-(time.monotonic()-started)
+            if remaining<1:break
+            route_policy={**policy,'timeout':min(policy['timeout'],remaining)}
+            try:
+                output,meta=child.complete(kind,system,prompt,tokens,structured,response_schema,role,route_policy)
+                from .tracking import event
+                event('project_route_selected','Independent project served request',project_slot=slot+1,provider=kind)
+                return output,{**meta,'project_slot':slot+1}
+            except HostedError as exc:
+                last=exc
+                from .tracking import event
+                event('project_route_unavailable','Trying another independent project',project_slot=slot+1,provider=kind,error=str(exc))
+                if any(c in str(exc) for c in ['HTTP 400','HTTP 404']):break
+        raise last or HostedError('No project route available')
+
     def complete(self,kind,system,prompt,tokens,structured=False,response_schema=None,role=None,policy=None):
+        if self.project_children:return self.project_complete(kind,system,prompt,tokens,structured,response_schema,role,policy)
         if not self.key:raise HostedError('Google API key unavailable')
         self.optimized=bool(policy and policy.get('quality_routing'))
         self.reserve_flash_final=(kind=='flash' and role!='chapter_quality')

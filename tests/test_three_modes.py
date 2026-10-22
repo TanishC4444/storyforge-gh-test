@@ -63,6 +63,6 @@ class UniverseModeTests(unittest.TestCase):
     def test_actor_view_withholds_private_rival_fact(self):
         state={'memories':[{'id':'a','kind':'event','text':'Own fact','known_by':['a']},{'id':'b','kind':'event','text':'Secret rival fact','known_by':['b']}],'accepted':[]}
         self.assertNotIn('Secret rival fact',json.dumps(u.working(state,character='a')))
-    def test_workflows_are_separate_and_universe_has_no_api_secrets_or_schedule(self):
-        text=Path('.github/workflows/living-universe.yml').read_text();self.assertNotIn('GEMINI_API_KEY',text);self.assertNotIn('schedule:',text)
+    def test_workflows_are_separate_and_universe_is_gemini_first_without_schedule(self):
+        text=Path('.github/workflows/living-universe.yml').read_text();self.assertIn('GEMINI_API_KEY',text);self.assertIn('GEMINI_DISTINCT_PROJECTS',text);self.assertNotIn('schedule:',text)
         text=Path('.github/workflows/parallel-scenes.yml').read_text();self.assertIn('matrix:',text);self.assertIn('reconcile:',text)

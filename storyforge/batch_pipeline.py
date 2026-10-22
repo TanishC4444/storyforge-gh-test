@@ -1,0 +1,235 @@
+"""Gemini-first small writing/repair batches with deterministic source-bound merges."""
+import argparse,copy,json,math,os,time
+from pathlib import Path
+from .contracts import require,delta
+from .storage import load,save
+from .inference import Executor,ROOT
+from .evidence import payload,passages
+from .canon import working,recording_context
+from .coordinator import packet,MEMORY_INSTRUCTION
+from .craft import validate_prose
+from .fast_edit import validate as validate_patch,schema as patch_schema
+from .patching import apply,digest,targets
+from .editorial import STORY_CHECKS,RHETORIC_CHECKS,editorial_review
+from .output_schema import editorial_schema
+from .resilience import memory_extract
+from .experimental import bind_memory
+from .adjudication import decide,chapter_text
+from .expansion import preview
+from .retrieval import application_packet
+from .review_policy import contract
+
+
+def output(name,value):
+    if os.getenv('GITHUB_OUTPUT'):
+        with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write(name+'='+json.dumps(value)+'\n')
+
+def bind_state(state):return digest(json.dumps(state,sort_keys=True))
+def scoped(req):
+    req=copy.deepcopy(req);req['max_stage_retries']=0;return req
+
+def scene_context(state,card,role='writer'):
+    req=state['request']
+    return {'scene':card,'original_prompt':req['premise'],'world_rules':req['world_rules'],
+        'author_contract':contract(req),
+        'scene_contract':next((c for c in req['scene_designs'] if c['id']==card['id']),{}),
+        'literary_application':application_packet(req,state['retrieval'],role,card['id']),
+        'prior_canon':working(state,query=str(card),budget=4000),
+        'pov_known_facts':working(state,character=card['pov'],query=str(card),budget=2500),
+        'prior_story_context':[{'id':s['id'],'quality_status':s.get('quality_status','reviewed'),'prose_excerpt':s['prose'][-2200:]} for s in (state.get('universe_history',[])+state['accepted'])[-2:]],
+        'participants':[{k:c.get(k) for k in ['id','name','goal','fear','contradiction']} for c in req['characters'] if c['id'] in card['participants']],
+        'author_policy':'Plans and author continuity are not automatically shared character knowledge.'}
+
+def plan_draft(state,card,source,out,backend):
+    req=state['request'];count=max(1,min(6,math.ceil(req['words_per_scene']/320)))
+    goals=[('Develop the attempted task and immediate resistance. Do not make the decisive choice yet.',card['goal']),
+           ('Develop the competing alternative and decisive choice. Preserve the initial pressure.',card['obstacle']),
+           ('Render the material consequence and aftermath. End at the planned exit; no moral summary.',card['intended_change'])]
+    beats=[]
+    for i in range(count):
+        phase=2 if count==1 else 0 if i==0 else 2 if i==count-1 else 1
+        beats.append({'id':str(i),'position':i,'count':count,'purpose':goals[phase][0],'scene_anchor':goals[phase][1],
+            'entry':'Actual initial scene conditions.' if i==0 else 'Continue the preceding planned beat without repeating its setup.',
+            'exit':card['intended_change'] if i==count-1 else 'Hand off causally to the next planned beat; its later outcome must not happen early.',
+            'target_words':req['words_per_scene']//count+(1 if i<req['words_per_scene']%count else 0)})
+    plan={'scene_id':card['id'],'state_sha256':bind_state(state),'beats':beats,'direction':(Path(source)/'direction/direction.txt').read_text()}
+    plan['plan_sha256']=digest(json.dumps(plan,sort_keys=True));save(Path(out)/'draft-plan.json',plan);output('characters',[b['id'] for b in beats]);return plan
+
+def cached_prose(folder):
+    calls=[]
+    for p in Path(folder).rglob('calls/*.json'):
+        try:c=load(p)
+        except (ValueError,OSError):continue
+        if isinstance(c.get('output'),str) and c.get('role') in {'writer_beat','humanizer','repair'}:calls.append((p.stat().st_mtime,c['output']))
+    return max(calls)[1] if calls else ''
+
+def write_batch(state,card,source,out,backend,bid):
+    req=scoped(state['request']);out=Path(out);plan=load(Path(source)/'plan/draft-plan.json')
+    require(plan['state_sha256']==bind_state(state),'Stale writing plan')
+    beat=next((b for b in plan['beats'] if b['id']==bid),None);require(beat is not None,'Unknown writing batch')
+    local=copy.deepcopy(req);local['words_per_scene']=beat['target_words']
+    data={**scene_context(state,card),'ordered_beat_plan':plan['beats'],'your_beat':beat,'direction':plan['direction'],
+        'instruction':'Write only your assigned contiguous part. Other batches supply other parts. Never repeat the scene opening or narrate a later beat early.'}
+    errors=[];text=''
+    for attempt in range(0 if backend=='fixture' else 2):
+        role='writer_beat' if attempt==0 else 'repair'
+        folder=out/str(attempt);executor=Executor(req,folder,backend)
+        try:
+            text=executor.call(role,{**data,'rejected_batch':text or None,'specific_errors':errors},
+                'Return prose for ONLY this assigned beat near its target_words. Preserve the shared chronology, POV, voice and author form. No headings, quoted dialogue against a no-dialogue brief, summaries or neighboring beats. If correcting a rejected batch, fix only that batch, never the whole scene.',
+                tokens=min(1500,int(beat['target_words']*2.4)+200),output_format='text',validator=lambda t:validate_prose(t,local,check_length=backend!='fixture'))
+            errors=[];break
+        except Exception as exc:
+            text=cached_prose(folder) or text;errors=[str(exc)]
+    if backend=='fixture':text=f'FIXTURE writing batch {bid}: the assigned planned beat is a transport test only.'
+    result={'id':bid,'scene_id':card['id'],'state_sha256':plan['state_sha256'],'plan_sha256':plan['plan_sha256'],'prose':text,'verified_form':bool(text) and not errors,'errors':errors}
+    save(out/'draft-batch.json',result)
+    if text:save(out/'draft.txt',text);preview(out,'Writing batch '+bid+' - unreviewed')
+    return result
+
+def merge_draft(state,source,out):
+    plan=load(Path(source)/'plan/draft-plan.json');require(plan['state_sha256']==bind_state(state),'Stale writing plan')
+    values=[load(p) for p in (Path(source)/'batches').rglob('draft-batch.json')];found={}
+    allowed={b['id'] for b in plan['beats']}
+    for v in values:
+        require(v['id'] in allowed and v['id'] not in found,'Duplicate or foreign writing batch')
+        require(v['state_sha256']==plan['state_sha256'] and v['plan_sha256']==plan['plan_sha256'],'Stale writing batch')
+        found[v['id']]=v
+    prose='\n\n'.join(found[b['id']]['prose'].strip() for b in plan['beats'] if b['id'] in found and found[b['id']]['prose'].strip())
+    require(bool(prose),'No writing batch produced readable prose')
+    save(Path(out)/'draft.txt',prose);save(Path(out)/'writing-report.json',{'missing':[b['id'] for b in plan['beats'] if b['id'] not in found],'batches':[{k:v for k,v in x.items() if k!='prose'} for x in found.values()],'unreviewed':True})
+    preview(out,'Compiled writing batches - unreviewed');return prose
+
+def review_batch(state,card,source,out,backend,kind,group):
+    prose=(Path(source)/'edited/prose.txt').read_text();all_checks=STORY_CHECKS if kind=='story' else RHETORIC_CHECKS
+    checks=all_checks[group*3:(group+1)*3];require(bool(checks),'Unknown review group')
+    req=scoped(state['request']);req['execution_policy'].setdefault('cpu_models',{})[kind+'_quality']='qwen3b'
+    data={**payload(prose),**scene_context(state,card,kind+'_quality'),'required_checks':checks,'prior_scene':state['accepted'][-1]['prose'][-1800:] if state['accepted'] else None}
+    try:
+        verdict=Executor(req,out,backend).call(kind+'_quality',data,
+            'Assess ONLY the requested dimensions against the actual source and author brief. Cite the exact affected paragraph IDs for every issue; do not request a whole-scene rewrite. Do not invent a preceding scene. Suggestions that contradict the author POV or no-dialogue form are invalid. Give a concrete correction and keep reasons concise.',tokens=1200,response_schema=editorial_schema(data),validator=lambda v:editorial_review(v,prose,checks))
+    except Exception as exc:verdict={'pass':False,'checks':[],'issues':[],'unverified':True,'error':str(exc)}
+    result={'kind':kind,'group':group,'state_sha256':bind_state(state),'source_sha256':digest(prose),'review':verdict}
+    save(Path(out)/'review-batch.json',result);return result
+
+def join_reviews(state,source,out,kind):
+    prose=(Path(source)/'edited/prose.txt').read_text();required=STORY_CHECKS if kind=='story' else RHETORIC_CHECKS
+    values=[load(p) for p in (Path(source)/'batches').rglob('review-batch.json')];expected=set(range(math.ceil(len(required)/3)))
+    require(len({v['group'] for v in values})==len(values),'Duplicate review batch')
+    require(all(v['kind']==kind and v['state_sha256']==bind_state(state) and v['source_sha256']==digest(prose) for v in values),'Stale or foreign review batch')
+    if {v['group'] for v in values}!=expected or any(v['review'].get('unverified') for v in values):verdict={'pass':False,'checks':[],'issues':[],'unverified':True,'error':'Missing or unverified review group'}
+    else:
+        reviews=[v['review'] for v in sorted(values,key=lambda v:v['group'])]
+        verdict=editorial_review({'pass':all(v['pass'] for v in reviews),'checks':[c for v in reviews for c in v['checks']],'issues':[i for v in reviews for i in v['issues']]},prose,required)
+    save(Path(out)/'review.json',verdict);return verdict
+
+def plan_repairs(state,source,out):
+    prose=(Path(source)/'edited/prose.txt').read_text();reviews=[load(Path(source)/p/'review.json') for p in ['story-review','rhetoric-review']]
+    selected,_=targets(prose,reviews);catalog=passages(prose);ids=[p['id'] for p in catalog if p['id'] in selected];batches=[]
+    for offset in range(0,len(ids),2):
+        own=ids[offset:offset+2];positions=[i for i,p in enumerate(catalog) if p['id'] in own]
+        context=[{'id':p['id'],'text':p['text']} for i,p in enumerate(catalog) if any(abs(i-j)<=1 for j in positions)]
+        batches.append({'id':str(len(batches)),'source_sha256':digest(prose),'owned':own,'passages':context,'findings':{pid:selected[pid]['issues'] for pid in own}})
+    if not batches:batches=[{'id':'noop','source_sha256':digest(prose),'owned':[],'passages':[],'findings':{}}]
+    plan={'state_sha256':bind_state(state),'source_sha256':digest(prose),'batches':batches};save(Path(out)/'repair-plan.json',plan);save(Path(out)/'prose.txt',prose);output('characters',[b['id'] for b in batches]);return plan
+
+def repair_batch(state,card,source,out,backend,bid):
+    plan=load(Path(source)/'plan/repair-plan.json');require(plan['state_sha256']==bind_state(state),'Stale repair plan')
+    batch=next((b for b in plan['batches'] if b['id']==bid),None);require(batch is not None,'Unknown repair batch')
+    req=scoped(state['request']);result={'replacements':{}};error=None
+    if batch['owned'] and backend!='fixture':
+        try:
+            result=Executor(req,out,backend).call('repair',{**scene_context(state,card,'humanizer'),'batch':batch,'style':req['style']},
+                'Check every allegation strictly against the original author brief and actual supplied passages. Repair ONLY owned paragraphs that have demonstrated faults. Neighboring paragraphs are read-only. Dismiss unfounded or brief-conflicting criticism with no replacement. Never apply a reviewer replacement blindly. Preserve unaffected events, voice, private knowledge and approximate paragraph length. Return replacements keyed only by owned IDs; empty replacements are allowed. No whole-scene rewrite.',
+                tokens=1800,response_schema=patch_schema(batch),validator=lambda v:validate_patch(v,batch))
+        except Exception as exc:error=str(exc)
+    save(Path(out)/'repair-batch.json',{'id':bid,'source_sha256':plan['source_sha256'],'replacements':result['replacements'],'unverified':error is not None,'error':error});return result
+
+def merge_repairs(state,source,out):
+    plan=load(Path(source)/'plan/repair-plan.json');prose=(Path(source)/'edited/prose.txt').read_text()
+    require(plan['state_sha256']==bind_state(state) and plan['source_sha256']==digest(prose),'Stale repair merge')
+    values=[load(p) for p in (Path(source)/'batches').rglob('repair-batch.json')];lookup={};edits={}
+    for v in values:
+        require(v['id'] not in lookup,'Duplicate repair result');lookup[v['id']]=v
+    allowed={b['id'] for b in plan['batches']};require(set(lookup)<=allowed,'Foreign repair result')
+    missing=[]
+    for b in plan['batches']:
+        v=lookup.get(b['id'])
+        if v is None:missing.append(b['id']);continue
+        require(v['source_sha256']==digest(prose),'Stale repair result');validate_patch(v,b)
+        require(not set(edits)&set(v['replacements']),'Conflicting edit ownership')
+        if not v.get('unverified'):edits.update(v['replacements'])
+    revised=apply(prose,edits,digest(prose));save(Path(out)/'prose.txt',revised)
+    save(Path(out)/'repair.json',{'changed':prose!=revised,'reviewed_sha256':digest(prose),'candidate_sha256':digest(revised),'batched_repair':True,'changed_paragraphs':list(edits),'missing_batches':missing,'unverified_batches':[v['id'] for v in values if v.get('unverified')]})
+    preview(out,'Compiled targeted repairs - unreviewed');return revised
+
+def finalize(state,card,source,out,backend):
+    prose=(Path(source)/'edited/prose.txt').read_text();info=load(Path(source)/'edited/repair.json')
+    final=decide(state['request'],state,card,prose,[load(Path(source)/k/'review.json') for k in ['story-review','rhetoric-review']],out,backend)
+    save(Path(out)/'prose.txt',prose);save(Path(out)/'repair.json',{**info,'editorial_adjudication':final,'further_editorial_iteration':False});preview(out,'Final checked text - see verification status');return final
+
+def refresh_memory(state,card,source,out,backend):
+    prose=(Path(source)/'edited/prose.txt').read_text();before=(Path(source)/'original/prose.txt').read_text();initial=load(Path(source)/'initial-memory/memory.json')
+    if prose==before:save(Path(out)/'memory.json',initial);return initial
+    retained,diff=bind_memory(initial,before,prose);changed={p['id'] for p in diff['changed']}
+    req=scoped(state['request']);data=payload(prose);data['evidence_passages']=[p for p in data['evidence_passages'] if p['id'] in changed]
+    additions={'memories':[]}
+    if data['evidence_passages']:
+        try:additions=memory_extract(Executor(req,out,backend),req,out,prose,{**data,'characters':[c['id'] for c in req['characters']],**recording_context(state,card)},MEMORY_INSTRUCTION+' Extract ONLY changed passages; unchanged facts are retained separately.')
+        except Exception as exc:additions={'memories':[],'unverified':True,'error':str(exc)}
+    result=delta({'memories':retained+additions['memories']},prose,[c['id'] for c in req['characters']])
+    if additions.get('unverified') or initial.get('unverified'):result.update(unverified=True,error=additions.get('error',initial.get('error','Unverified original facts remain')))
+    save(Path(out)/'memory.json',result);return result
+
+def extract_initial(state,card,source,out,backend):
+    prose=(Path(source)/'edited/prose.txt').read_text();req=scoped(state['request'])
+    try:
+        result=memory_extract(Executor(req,out,backend),req,out,prose,{**payload(prose),'characters':[c['id'] for c in req['characters']],**recording_context(state,card)},MEMORY_INSTRUCTION)
+    except Exception as exc:result={'memories':[],'unverified':True,'error':str(exc)}
+    save(Path(out)/'memory.json',result);return result
+
+
+def verify_memory(state,card,source,out,backend):
+    from .contracts import review as memory_review
+    prose=(Path(source)/'edited/prose.txt').read_text();memory=load(Path(source)/'memory/memory.json')
+    if memory.get('unverified'):
+        verdict={'pass':False,'issues':[],'unverified':True,'error':memory.get('error','Extraction unverified')}
+    else:
+        req=scoped(state['request'])
+        facts=[{k:v for k,v in m.items() if k in {'kind','text','known_by','holder','claim_source','fact_key','supersedes','evidence_ids'}} for m in memory['memories']]
+        try:
+            verdict=Executor(req,out,backend).call('memory_quality',{'current_prose':prose,'proposed_memory':{'memories':facts},'prior_canon':working(state,query=str(card),budget=3500)},
+                'Verify every extracted fact and knowledge holder against current_prose and prior canon. Do not treat a prose problem as a memory extraction error. Unsupported facts must fail. Return pass and source-quoted issues with target memory or prose.',tokens=1000,validator=lambda v:memory_review(v,prose))
+        except Exception as exc:verdict={'pass':False,'issues':[],'unverified':True,'error':str(exc)}
+    save(Path(out)/'review.json',verdict);return verdict
+
+
+def main():
+    p=argparse.ArgumentParser();p.add_argument('task');p.add_argument('--source',default='inputs');p.add_argument('--out',default='out');p.add_argument('--backend',choices=['fixture','worker'],default='fixture');p.add_argument('--index',type=int,default=0);p.add_argument('--batch');p.add_argument('--kind',choices=['story','rhetoric']);p.add_argument('--group',type=int);a=p.parse_args()
+    started=time.monotonic()
+    source=Path(a.source);out=Path(a.out);state=load(source/'state/snapshot.json');card=state['plan']['scenes'][a.index]
+    if a.task=='draft_plan':plan_draft(state,card,source,out,a.backend)
+    elif a.task=='write_batch':write_batch(state,card,source,out,a.backend,a.batch)
+    elif a.task=='merge_draft':merge_draft(state,source,out)
+    elif a.task=='forward':save(out/'prose.txt',(source/'draft/draft.txt').read_text())
+    elif a.task=='review_batch':review_batch(state,card,source,out,a.backend,a.kind,a.group)
+    elif a.task=='join_reviews':join_reviews(state,source,out,a.kind)
+    elif a.task=='repair_plan':plan_repairs(state,source,out)
+    elif a.task=='repair_batch':repair_batch(state,card,source,out,a.backend,a.batch)
+    elif a.task=='merge_repairs':merge_repairs(state,source,out)
+    elif a.task=='finalize':finalize(state,card,source,out,a.backend)
+    elif a.task=='verdict_view':save(out/'review.json',load(source/'edited/repair.json')['editorial_adjudication'][a.kind])
+    elif a.task=='refresh_memory':refresh_memory(state,card,source,out,a.backend)
+    elif a.task=='extract_initial':extract_initial(state,card,source,out,a.backend)
+    elif a.task=='verify_memory':verify_memory(state,card,source,out,a.backend)
+    else:raise ValueError('Unknown batch task')
+    warnings=[]
+    for filename in ['draft-batch.json','review-batch.json','repair-batch.json','writing-report.json','repair.json','memory.json']:
+        path=out/filename
+        if path.exists():
+            value=load(path)
+            if value.get('unverified') or value.get('errors') or value.get('missing') or value.get('missing_batches') or value.get('unverified_batches') or value.get('review',{}).get('unverified'):
+                warnings.append(filename)
+    save(out/'status.json',{'task':a.task,'status':'success','phase':'complete_with_warnings' if warnings else 'success','elapsed_seconds':round(time.monotonic()-started,3),'warning_artifacts':warnings,'fixture':a.backend=='fixture'})
+
+if __name__=='__main__':main()

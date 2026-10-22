@@ -11,7 +11,7 @@ from .universe import propose,scene_card
 
 def prepare(source,out,checkpoint=None,backend='fixture'):
     state=load(source);req=state['request'];out=Path(out)
-    require(req.get('performance',{}).get('classic_expansion') and not req.get('api_roles'),'Living runner graph requires an explicit local-only universe request')
+    require(req.get('performance',{}).get('classic_expansion') and req.get('performance',{}).get('living_universe'),'Living runner graph requires an explicit universe-event request')
     require(req['chapters']==1 and req['scenes_per_chapter']==1,'One universe event per manually resumed run')
     fid=bible(req);history=[];episode=1;rng=random.Random(104729).getstate();attempts=0
     if checkpoint:

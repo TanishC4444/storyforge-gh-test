@@ -3,7 +3,7 @@
   "max_words_ratio": 1.35,
   "auto_approve_plan": true,
   "max_repairs": 1,
-  "max_stage_retries": 1,
+  "max_stage_retries": 0,
   "runner_repo": "storyforge-inference-runner",
   "length_policy": {
     "scene_words": "strict",
@@ -314,13 +314,21 @@
     "continue_with_warnings": false,
     "experimental": false,
     "cpu_models": {
+      "humanizer": "qwen3b",
+      "repair": "qwen3b",
+      "story_quality": "qwen3b",
+      "rhetoric_quality": "qwen3b",
+      "memory": "qwen3b",
+      "memory_quality": "qwen3b",
+      "chapter_quality": "qwen3b",
+      "director": "qwen3b",
+      "scene_designer": "qwen3b",
+      "character": "qwen3b",
       "writer": "qwen7b",
-      "story_quality": "qwen7b",
-      "rhetoric_quality": "qwen7b",
-      "memory_quality": "qwen7b",
-      "chapter_quality": "qwen7b"
+      "writer_beat": "qwen7b"
     },
-    "editorial_disagreement": "one_strict_check"
+    "editorial_disagreement": "one_strict_check",
+    "gemini_batches": true
   },
   "performance": {
     "classic_expansion": true,
@@ -330,16 +338,23 @@
     "inherit_provider_budget": true,
     "hosted_failover": true,
     "combine_direction": true,
-    "validate_scene_prose": true
+    "validate_scene_prose": true,
+    "batched_prose": true,
+    "batched_repairs": true
   },
   "api_roles": {
+    "writer_beat": "flash",
     "writer": "flash",
+    "repair": "flash36",
     "humanizer": "flash36",
     "story_quality": "flash36",
     "rhetoric_quality": "flash36",
     "memory": "lite",
     "memory_quality": "flash36",
-    "chapter_quality": "flash36"
+    "chapter_quality": "flash36",
+    "scene_designer": "lite",
+    "director": "lite",
+    "character": "lite"
   },
   "chapter_contract": {
     "arc": "A household seeks passage. Storm damage exposes a troubling object; choosing to investigate costs time or wages. No completed decipherment, divine visit, expedition or weapon acquisition.",

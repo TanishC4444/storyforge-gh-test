@@ -50,7 +50,7 @@ class Executor:
             from .hosted import GoogleHosted
             self.hosted=GoogleHosted(os.getenv('STORY_QUOTA_DIR',str(self.folder/'provider-budget')))
             if req.get('performance',{}).get('inherit_provider_budget') and not os.getenv('STORY_QUOTA_DIR'):
-                self.hosted.inherit((self.folder.parent/'inputs').rglob('provider-budget/quota.json'))
+                self.hosted.inherit((self.folder.parent/'inputs').rglob('quota.json') if self.hosted.project_children else (self.folder.parent/'inputs').rglob('provider-budget/quota.json'))
 
     def call(self, role, packet, instruction, *, tokens=1200, validator=None, skill='', response_schema=None, output_format='json', allow_cpu_fallback=True):
         from .worker_policy import enabled as experimental, policy, permit
@@ -137,6 +137,8 @@ class Executor:
                                 routes += ['gemma' if kind=='flash' else 'flash']
                             if stage_policy and stage_policy.get('literary_quality') and role in {'writer','writer_beat','humanizer','structural_editor','global_repair','repair','story_quality','rhetoric_quality','chapter_quality','memory_quality','development_editor'}:
                                 routes={'flash':['flash','flash36','gemma'],'flash36':['flash36','flash','gemma'],'gemma':['gemma','flash36','flash']}.get(kind,routes)
+                            if self.req.get('execution_policy',{}).get('gemini_batches'):
+                                routes={'flash':['flash','flash36'],'flash36':['flash36','flash'],'lite':['lite','flash36']}.get(kind,[kind])
                             for route in dict.fromkeys(routes):
                                 if route=='flash' and kind!='flash' and not (stage_policy and stage_policy.get('quality_routing')) and not self.hosted.can_rescue():continue
                                 try:

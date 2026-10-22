@@ -72,6 +72,10 @@ def collect(source,out):
     if episodes:
         best=max(episodes,key=lambda s:len(s['accepted']));accepted=best['accepted']
         save(out/'canon/snapshot.json',best)
+    final_decisions={}
+    for path in root.glob('s*_final_check/editorial-adjudication.json'):
+        final_decisions[path.parent.name.split('_')[0]]=load(path)
+    drafted=max([load(p) for p in root.glob('s*_accept/snapshot.json')],key=lambda s:len(s.get('accepted',[])),default={}).get('accepted',[])
     previews={}
     for p in root.rglob('preview.json'):
         # Only top-level scene jobs, not their repeated upstream input artifacts.
@@ -84,7 +88,12 @@ def collect(source,out):
         position=int(sid[1:])-1
         known=accepted[position] if position<len(accepted) else None
         reviewed=known is not None and hashlib.sha256(known['prose'].encode()).hexdigest()==item['sha256']
-        sections.append((sid,known['prose'] if reviewed else item['prose'],'reviewed' if reviewed else item['status']))
+        status='reviewed' if reviewed else item['status']
+        if not reviewed:
+            decision=final_decisions.get(sid)
+            if decision and (not decision['verdict'].get('pass') or decision.get('unverified')):status='provisional - final check unresolved'
+            elif position<len(drafted) and drafted[position].get('quality_status')=='needs_review':status='provisional - verification unresolved'
+        sections.append((sid,known['prose'] if reviewed else item['prose'],status))
     save(out/'READABLE_DRAFT.txt','CLASSIC UNIVERSE EXPANSION\nStatus applies separately to each scene. Unreviewed prose is not accepted canon.\n\n'+'\n\n* * *\n\n'.join(sid+' | '+status+'\n\n'+prose for sid,prose,status in sections))
     save(out/'reading-status.json',{'baseline_run':BASELINE_RUN,'scenes':[{'scene_id':sid,'status':status,'words':len(p.split())} for sid,p,status in sections],'accepted_scenes':len(accepted),'prose_available':bool(sections)})
     return sections
