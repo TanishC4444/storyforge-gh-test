@@ -170,3 +170,25 @@ Memory output is schema-constrained (required wrapper, supported kinds/character
 The checked-in recovery seed preserves the previous live outline, refinement, source-matched reviews and 1,115-word scene 1. The creative brief must match before reuse; execution settings may differ. Seeded preparation skips embedding-runtime installation, planning is reused, and scene 1 is not redrafted. `recovery/troy-39512585096/scene-01.txt` is the original unapproved scene, not a newly corrected result.
 
 The full four-scene fault fixture completed with warnings while injecting malformed memory, unsupported memory facts and reviewer outages. These tests verify recovery and accurate warning labels; they do not establish live completion or prose quality.
+
+
+## Prose recovery and parallel chapter outlines
+
+The twelve-scene Troy experiment develops its three chapter outlines on separate
+Actions runners from the same immutable brief. Each chapter retains its complete
+development review/revision/gate sequence. A lightweight join checks snapshot
+hashes, rejects missing or duplicate chapters, restores reading order and validates
+the full plan. Retrieval runs once upstream and travels with every chapter packet.
+Actual overlap depends on available GitHub runners.
+
+Whole-scene drafting, structural revision and line editing validate prose within
+the existing bounded retry loop. Live strict-length scenes must meet the configured
+word range before advancing. A retry receives the rejected prose, exact validation
+error and original context; raw outputs remain in calls/. No quotation marks are
+silently stripped. Repeated failures stop before publication and canon acceptance.
+Structural and line edits remain ordered; story, rhetoric and memory branches stay
+parallel. CPU inference inside each runner remains serialized to avoid competing
+model loads; separate runners provide the additional chapter parallelism.
+
+Validation uses fixture and mocked-model regression tests; it does not establish
+live prose quality or a measured speedup.

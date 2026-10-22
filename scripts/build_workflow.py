@@ -296,7 +296,11 @@ def build_experimental():
     ok="always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled')"
     job('prepare','Prepare fresh brief and retrieval','prepare')
     job('refine_bundle','Compile supplied author brief without expansion','refine_bundle',['prepare'],[('prepare','state')])
-    job('plan_bundle','Develop and verify each chapter outline','plan_bundle',['refine_bundle'],[('refine_bundle','state')])
+    chapters=[f'plan_ch{i:02}' for i in range(1,4)]
+    for i,key in enumerate(chapters):
+        job(key,f'Develop and verify chapter {i+1} outline','chapter_plan',['refine_bundle'],[('refine_bundle','state')],i)
+    job('plan_bundle','Combine verified chapter outlines','combine_plans',['refine_bundle',*chapters],
+        [('refine_bundle','state')]+[(key,'chapters/'+key) for key in chapters])
     for i in range(12):
         p=f's{i+1:02}';previous=f's{i:02}';state=p+'_design' if i==0 else previous+'_settle'
         if i==0:job(state,'Scene 1 design','scene_design',['plan_bundle'],[('plan_bundle','state')],i)

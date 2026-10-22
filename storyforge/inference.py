@@ -87,6 +87,9 @@ class Executor:
                 if editorial_repair and repair_output is not None:
                     system='Repair JSON structure only. Preserve judgments and reasons. Do not make new literary judgments. Return the corrected JSON matching the supplied schema. If semantic reevaluation is required, stop rather than inventing evidence.'
                     prompt=json.dumps({'invalid_output':repair_output,'validation_error':last_error,'allowed_evidence_ids':[x.get('id') for x in packet.get('candidate_evidence',packet.get('evidence_passages',[]))]},ensure_ascii=False,separators=(',',':'))
+                elif output_format=='text' and repair_output is not None:
+                    prompt=json.dumps({'original_input':packet,'rejected_prose':repair_output,'validation_error':last_error},ensure_ascii=False,separators=(',',':'))
+                    system+='\nCorrect the rejected prose against the original input and validation error. Return the complete prose alone, without wrappers, headings or commentary. Preserve established events and develop missing dramatic action without padding.'
                 else:
                     prompt += '\nPrevious output failed validation: ' + last_error + '\nReturn a complete corrected artifact grounded in the original request. Supply every required field; do not substitute retrieval guidance for the premise.'
             if response_schema is not None:
