@@ -148,3 +148,38 @@ class RefinementTests(unittest.TestCase):
         for role in ['writer','humanizer','structural_editor']:
             self.assertEqual(policy(self.req,role,1800)['tier'],'flash')
             self.assertIsNone(policy(full,role,1800)['tier'])
+
+    def test_optional_editor_outage_retains_valid_input_without_cpu_fallback(self):
+        from storyforge.experimental import dispatch
+        from storyforge.inference import Executor
+        from storyforge.hosted import HostedError
+        req=copy.deepcopy(self.req);req['min_words_ratio']=.1;req['max_words_ratio']=3
+        prose=' '.join(['bronze']*350)
+        card={**req['scene_designs'][0],'chapter':1}
+        state={'request':req,'plan':{'scenes':[card]},'accepted':[]}
+        with tempfile.TemporaryDirectory() as d,redirect_stdout(io.StringIO()):
+            root=Path(d);save(root/'inputs/draft/draft.txt',prose)
+            with patch('storyforge.dag.context',return_value={}),patch('storyforge.hosted.GoogleHosted.complete',side_effect=HostedError('Google HTTP 429 RESOURCE_EXHAUSTED')),patch('storyforge.local_worker.execute') as cpu:
+                dispatch('edit',root/'inputs',root/'out',state,0,'small','worker','unused')
+            cpu.assert_not_called()
+            self.assertEqual((root/'out/prose.txt').read_text(),prose)
+            report=load(root/'out/edit-report.json')
+            self.assertTrue(report['quality_review_required']);self.assertTrue(report['retained_valid_candidate'])
+            self.assertEqual(report['passes'],[])
+
+    def test_invalid_line_edit_keeps_successful_structural_candidate(self):
+        from storyforge.experimental import dispatch
+        prose=' '.join(['bronze']*350)
+        structural=(ROOT/'tests/fixtures/practice-editor-39717076545/structural.txt').read_text()
+        rejected=(ROOT/'tests/fixtures/practice-editor-39717076545/rejected-line-edit.txt').read_text()
+        card={**self.req['scene_designs'][0],'chapter':1}
+        state={'request':self.req,'plan':{'scenes':[card]},'accepted':[]}
+        class Fake:
+            def __init__(self,*args):pass
+            def call(self,role,packet,instruction,**kwargs):
+                return kwargs['validator'](rejected if role=='humanizer' else structural)
+        with tempfile.TemporaryDirectory() as d,patch('storyforge.experimental.Executor',Fake),patch('storyforge.dag.context',return_value={}):
+            root=Path(d);save(root/'inputs/draft/draft.txt',prose)
+            dispatch('edit',root/'inputs',root/'out',state,0,'small','worker','unused')
+            self.assertEqual((root/'out/prose.txt').read_text(),structural)
+            self.assertTrue(load(root/'out/edit-report.json')['quality_review_required'])

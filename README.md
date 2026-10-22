@@ -271,3 +271,9 @@ route for sequential drafting and editing, with bounded retries and the same
 strict prose validators. CPU fallback remains available. Full-story creative roles
 keep their CPU policy. This tests whether the hosted route can produce compliant
 prose after the observed 3B failure; it is not a claim of better literary quality.
+
+Hosted optional edits no longer trigger multi-minute CPU fallback on provider
+failures. Editing retains its last form/length-validated candidate if a proposed
+edit is rejected or unavailable, records skipped passes in edit-report.json, and
+still requires independent story, rhetoric, memory and acceptance gates. A valid
+draft is not declared a reviewed story just because an optional edit was skipped.
