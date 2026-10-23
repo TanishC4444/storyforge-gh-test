@@ -44,3 +44,20 @@ class ComparisonTests(unittest.TestCase):
             self.assertEqual(len(case['chapters']),3);self.assertEqual(len(case['criteria']),5)
             state=demo.state_for(case)
             self.assertEqual(len(demo.bridge(state)['facts']),len(case['facts']))
+            self.assertEqual(state['request']['runner_repo'],'storyforge-inference-runner')
+            self.assertEqual(demo.schema_review()['properties']['checks']['items']['properties']['evidence_ids']['maxItems'],3)
+    def test_resume_reuses_exact_writer_inputs_and_counts_prior_attempt(self):
+        from storyforge.storage import save
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);previous=root/'previous';out=root/'new'
+            with patch.object(demo.Provider,'call',side_effect=['First.','Second.','Third.']):
+                before,_=demo.run_arm(self.case,'baseline',previous/'baseline')
+            save(previous/'baseline/call-01-writer/metadata.json',{'model':demo.MODELS['flash36']})
+            with patch.object(demo.Provider,'call',side_effect=AssertionError('Never regenerate saved chapters')):
+                after,text=demo.run_arm(self.case,'baseline',out,resume=previous)
+            self.assertTrue(after['complete']);self.assertEqual(after['resumed_chapters'],3)
+            self.assertEqual(text,['First.','Second.','Third.']);self.assertGreaterEqual(after['seconds'],before['seconds'])
+            save(previous/'baseline/chapter-01/writer-input.json',{'tampered':'brief'})
+            with patch.object(demo.Provider,'call',side_effect=AssertionError('Never hide a mismatched input with regeneration')):
+                failed,_=demo.run_arm(self.case,'baseline',root/'mismatch',resume=previous)
+            self.assertFalse(failed['complete']);self.assertIn('inputs differ',failed['errors'][0])
