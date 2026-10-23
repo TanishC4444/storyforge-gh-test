@@ -92,4 +92,9 @@ class HybridUniverseTests(unittest.TestCase):
             self.assertIn('env',graph);self.assertNotIn('GEMINI_API_KEY',graph['env'])
             self.assertIn('2',graph['on']['workflow_dispatch']['inputs']['scene_limit']['options'])
             self.assertIn('s01_repair',jobs['s01_memory_refresh_plan']['needs']);self.assertNotIn('s01_final_check',jobs['s01_memory_refresh_plan']['needs'])
-            self.assertIn('s01_final_memory',jobs['s01_final_batches']['needs']);self.assertIn('final_reviews',jobs['s01_final_sections']['outputs'])
+            if graph['env'].get('STORY_LEAN_LIVING')=='true':
+                self.assertNotIn('s01_final_batches',jobs)
+                self.assertIn('s01_memory_preflight',jobs['s01_final_check']['needs'])
+                self.assertIn('s01_final_memory',jobs['s01_memory_final_plan']['needs'])
+            else:
+                self.assertIn('s01_final_memory',jobs['s01_final_batches']['needs']);self.assertIn('final_reviews',jobs['s01_final_sections']['outputs'])

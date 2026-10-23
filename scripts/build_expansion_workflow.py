@@ -97,7 +97,8 @@ def build_living():
             if key=='quickstart' and s.get('uses')=='actions/download-artifact@v4' and s['with'].get('name')=='universe-canon':
                 s['if']="${{ inputs.resume_run != '' }}";s['with']['run-id']='${{ inputs.resume_run }}';s['with']['name']='${{ inputs.checkpoint_artifact }}'
         if key=='quickstart':job['name']='Compile universe beginning or bounded episode layout'
-    return dump_workflow(x)
+    from scripts.lean_living import enable as lean_living
+    return dump_workflow(lean_living(x))
 
 
 if __name__=='__main__':

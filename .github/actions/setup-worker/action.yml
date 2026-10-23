@@ -4,6 +4,9 @@ inputs:
   backend:
     required: true
     description: fixture or live
+  hosted-only:
+    default: 'false'
+    description: Use hosted providers without installing local inference libraries
 runs:
   using: composite
   steps:
@@ -11,20 +14,24 @@ runs:
       with:
         python-version: '3.11'
     - uses: actions/cache@v4
-      if: inputs.backend == 'live'
+      if: inputs.backend == 'live' && inputs.hosted-only != 'true'
       id: runtime
       with:
         path: .venv
         key: story-worker-${{ runner.os }}-${{ runner.arch }}-py311-llamacpp036-v1
     - name: Install worker runtime
-      if: inputs.backend == 'live' && steps.runtime.outputs.cache-hit != 'true'
+      if: inputs.backend == 'live' && inputs.hosted-only != 'true' && steps.runtime.outputs.cache-hit != 'true'
       shell: bash
       run: |
         python -m venv .venv
         .venv/bin/pip install --only-binary=llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cpu 'llama-cpp-python==0.3.36' -q || CMAKE_ARGS='-DGGML_METAL=off' .venv/bin/pip install 'llama-cpp-python==0.3.36' -q
     - name: Install published inference library (0.6.1)
-      if: inputs.backend == 'live'
+      if: inputs.backend == 'live' && inputs.hosted-only != 'true'
       shell: bash
       run: |
         .venv/bin/pip install 'gh-inference @ https://files.pythonhosted.org/packages/57/db/ba16b4158729255973217f74424f613615859ebe1c1cbfa43018bcda735f/gh_inference-0.6.1-py3-none-any.whl#sha256=5d4bfd21b4559bd7dcb43cc8d10add889d782679b35d024f5aff6ffac8876a90' -e . -q
         echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
+    - name: Install lightweight hosted application
+      if: inputs.backend == 'live' && inputs.hosted-only == 'true'
+      shell: bash
+      run: python -m pip install -e . -q
