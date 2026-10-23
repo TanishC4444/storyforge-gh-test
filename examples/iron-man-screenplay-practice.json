@@ -1,0 +1,763 @@
+{
+  "min_words_ratio": 0.8,
+  "max_words_ratio": 1.3,
+  "auto_approve_plan": true,
+  "max_repairs": 1,
+  "max_stage_retries": 0,
+  "runner_repo": "storyforge-inference-runner",
+  "chapters": 2,
+  "scenes_per_chapter": 1,
+  "words_per_scene": 900,
+  "context_chars": 64000,
+  "n_ctx": 16384,
+  "execution_policy": {
+    "experimental": false,
+    "literary_quality": true,
+    "continue_with_warnings": false,
+    "cpu_models": {
+      "humanizer": "qwen7b",
+      "repair": "qwen7b",
+      "story_quality": "qwen7b",
+      "rhetoric_quality": "qwen7b",
+      "memory": "qwen7b",
+      "memory_quality": "qwen7b",
+      "chapter_quality": "qwen7b",
+      "director": "qwen7b",
+      "scene_designer": "qwen7b",
+      "character": "qwen7b",
+      "writer": "qwen7b",
+      "writer_beat": "qwen7b"
+    },
+    "editorial_disagreement": "one_strict_check",
+    "gemini_batches": true,
+    "total_call_seconds": {
+      "humanizer": 180,
+      "repair": 180,
+      "story_quality": 120,
+      "rhetoric_quality": 120,
+      "memory": 180,
+      "memory_quality": 120,
+      "chapter_quality": 120,
+      "director": 120,
+      "scene_designer": 120,
+      "character": 120,
+      "writer": 180,
+      "writer_beat": 180
+    },
+    "hosted_route_seconds": 40,
+    "hosted_required_roles": [
+      "writer_beat",
+      "writer",
+      "repair",
+      "humanizer",
+      "story_quality",
+      "rhetoric_quality",
+      "memory",
+      "memory_quality",
+      "chapter_quality",
+      "scene_designer",
+      "director",
+      "character"
+    ],
+    "hosted_routes": {
+      "story_quality": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "rhetoric_quality": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "chapter_quality": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "writer": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "writer_beat": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "repair": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "humanizer": [
+        "flash",
+        "flash36",
+        "lite"
+      ],
+      "memory": [
+        "lite"
+      ],
+      "memory_quality": [
+        "lite"
+      ],
+      "director": [
+        "lite"
+      ],
+      "scene_designer": [
+        "lite"
+      ],
+      "character": [
+        "lite"
+      ]
+    },
+    "max_hosted_requests": 3,
+    "hosted_role_seconds": {
+      "writer": 90,
+      "writer_beat": 90,
+      "repair": 60,
+      "humanizer": 90,
+      "story_quality": 60,
+      "rhetoric_quality": 60,
+      "chapter_quality": 60
+    },
+    "provider_outage_recovery": {
+      "max_rounds": 3,
+      "delay_seconds": 45,
+      "buffer_seconds": 360,
+      "extra_requests": 6
+    }
+  },
+  "performance": {
+    "compact_packets": true,
+    "application_prompt_binding": true,
+    "hosted_failover": false,
+    "batch_development": true,
+    "canon_index": true,
+    "inherit_provider_budget": false,
+    "application_plan_binding": true,
+    "development_batch_size": 6,
+    "api_batch_probes": false,
+    "working_memory_chars": 3500,
+    "combine_direction": true,
+    "classic_expansion": true,
+    "validate_scene_prose": true,
+    "batched_prose": true,
+    "batched_repairs": true,
+    "living_universe": true,
+    "readable_editorial": true,
+    "summary_reviews": false,
+    "memory_pair_batches": true,
+    "empowered_editors": true,
+    "adaptive_batches": true,
+    "verified_draft_continuity": true,
+    "living_bounded": true,
+    "pipelined_living": true,
+    "strict_draft_handoff": true
+  },
+  "api_roles": {
+    "writer_beat": "flash",
+    "writer": "flash",
+    "repair": "flash36",
+    "humanizer": "flash36",
+    "story_quality": "flash36",
+    "rhetoric_quality": "flash36",
+    "memory": "lite",
+    "memory_quality": "lite",
+    "chapter_quality": "flash36",
+    "scene_designer": "lite",
+    "director": "lite",
+    "character": "lite"
+  },
+  "project_id": "iron-man-screenplay-practice",
+  "title": "Iron Man: A Different Way Out — Screenplay",
+  "brief_version": 2,
+  "medium": "screenplay",
+  "profile": "fast",
+  "retrieval_mode": "keyword",
+  "retrieval_query": "divided loyalty practical knowledge costly choice dramatic irony irreversible consequences",
+  "references": [],
+  "reference_policy": "Retrieved literary mechanisms are optional craft guidance, never Marvel canon or a command to use epic diction. The supplied foundation alone governs this alternate continuity.",
+  "genre": "Modern superhero origin thriller; an alternate-continuity Iron Man fanfiction.",
+  "reader_experience": "Recognize Tony Stark and his moral awakening, enjoy sharp character-specific dialogue, and discover an earned departure from the familiar cave escape.",
+  "pov": "Screenplay in present tense, restricted to observable action and audible dialogue in Tony and Yinsen’s immediate surroundings. Reveal emotion through behavior, silence and subtext; no internal narration or omniscient secrets.",
+  "tone_mood": "Tense, humane and technically tactile; defensive wit yields to uncomfortable responsibility. Humor must cost or reveal something.",
+  "sensory_detail": "Hot wiring insulation, grinding metal, stale cave air, damaged hearing, improvised medical care and the physical limits of a prototype.",
+  "ending_tendency": "A consequential escape attempt opens a wider MCU-style universe without resolving the whole origin or predetermining who survives.",
+  "premise": "Write two substantial, causally connected original screenplay scenes freely adapting the captivity and improvised-armored-escape premise of Iron Man (2008). Tony Stark and Ho Yinsen work under Raza’s coercion in a cave workshop. Tony starts alive because an external battery powers his chest electromagnet. His own company’s weapons are in the captors’ stores. Scene one develops the captives’ competing priorities and a costly technical or moral choice; scene two makes the actual resulting device, damage, trust, clues and expenditure determine a tense escape attempt. Keep Tony recognizable, but freely change tactics, supporting characters, discoveries and outcomes. Yinsen need not repeat the film’s fate. No famous quotations or recreated screenplay exchanges. This is a new alternate MCU continuity; wider Avengers connections may be foreshadowed through a plausible clue, never an unexplained cameo or a rescue that erases the captives’ agency. Deliver a film script with INT./EXT. location/time headings, short present-tense action paragraphs, uppercase character cues and original dialogue. No prose-fiction narration, voiceover, camera-shot list or Markdown code fences.",
+  "length_policy": {
+    "scene_words": "strict",
+    "chapter_words": "target",
+    "allow_compression": false,
+    "policy": "Two developed screenplay sequences, each approximately 900 words, with the existing 720–1170-word allowed range including dialogue, action and cues. Favor playable exchanges and consequential action over padding; this is a word target, not a page-count guarantee."
+  },
+  "keywords": [
+    {
+      "term": "responsibility for distant harm",
+      "kind": "theme",
+      "priority": 3
+    },
+    {
+      "term": "survival versus complicity",
+      "kind": "tension",
+      "priority": 3
+    },
+    {
+      "term": "trust between unequal prisoners",
+      "kind": "relationship",
+      "priority": 3
+    },
+    {
+      "term": "improvisation with persistent costs",
+      "kind": "technique",
+      "priority": 3
+    }
+  ],
+  "adaptation": {
+    "strength": 0.65,
+    "mode": "structural_echo",
+    "relationship": "alternate-continuity Iron Man origin; future cinematic-universe foundation",
+    "max_active_sources_per_scene": 1,
+    "preserve_user_choices": true,
+    "preserve": [
+      "Tony Stark is a gifted, defensive weapons industrialist whose captivity confronts him with his products’ human cost.",
+      "Yinsen is a capable person with independent moral priorities, not a disposable device.",
+      "An improvised technological choice carries a specific cost into the next scene."
+    ],
+    "divergence": "Invent original dialogue, dilemmas, escape tactics and consequences. Yinsen’s death, Raza’s survival, exposure of the weapons supply chain and the escape outcome are not fixed. Introduce at most one causally necessary original character per scene.",
+    "interpretation": "Only authored initial facts and accepted source-backed changes bind continuity. Do not import later film knowledge into characters or judge departures from the movie as errors."
+  },
+  "style": {
+    "narrator": "No prose narrator. Present-tense filmable action and audible dialogue, staying with the captives; no voiceover or private thoughts stated as fact.",
+    "register": "Contemporary screenplay: concise visual action, distinct uppercase speaker cues, original spoken dialogue and playable subtext.",
+    "wording": [
+      "Original dialogue only; no recognizable movie catchphrases or screenplay reproduction.",
+      "Engineering vocabulary may be modern but action must stay readable, emotional and fictional rather than an assembly manual.",
+      "Avoid repeated inventory lists, stock cinematic gestures and repeated summaries of Tony’s guilt.",
+      "No Homeric epithets, shepherd similes, faux-biblical register or obligatory extended comparisons."
+    ],
+    "figurative_language": {
+      "density": "sparse",
+      "devices": [
+        "concrete metaphor",
+        "ironic contrast"
+      ],
+      "image_domains": [
+        "industrial design",
+        "medicine",
+        "damaged machinery"
+      ],
+      "guidance": "Let an occasional image emerge from Tony’s immediate perception; prioritize human action and voice."
+    },
+    "interiority": "Express defensive attention, guilt and changing priorities through visible choices, hesitation and dialogue; do not describe thoughts the audience cannot see or hear.",
+    "dialogue": "Tony deflects through wit and technical precision; Yinsen is specific, dry and morally independent; Raza controls information and deadlines. Offers and threats must change leverage.",
+    "explanation": "Trust legible action; no concluding moral, inventory recital or replay of a resolved bargain."
+  },
+  "characters": [
+    {
+      "id": "tony",
+      "name": "Tony Stark",
+      "goal": "Survive captivity and stop surrendering control of his inventions.",
+      "value": "Inventive competence and personal autonomy.",
+      "fear": "Being physically helpless and morally implicated.",
+      "habitual_strategy": "Deflect with wit, take over the technical problem, avoid the personal question.",
+      "limits": "Cannot know unwitnessed secrets or override injury, power supply, geography and custody.",
+      "voice": "Quick, precise, dryly funny; jokes become shorter when the cost is personal.",
+      "arc": {
+        "starting_belief": "A sufficiently clever fix can make him independent of everyone.",
+        "old_strategy": "Deflect with wit, take over the technical problem, avoid the personal question.",
+        "pressure_test": "Survive captivity and stop surrendering control of his inventions.",
+        "costly_choice": "Spend a scarce advantage to protect another captive or refuse a profitable technical shortcut.",
+        "possible_change": "Accept an obligation demonstrated through specific action rather than a declaration."
+      },
+      "contradiction": {
+        "tension": "Inventive competence and personal autonomy. conflicts with Being physically helpless and morally implicated."
+      },
+      "emotional_behavior": {
+        "pressure": "A characteristic practical action or withheld admission must reveal the pressure."
+      },
+      "voice_design": {
+        "register": "Quick, precise, dryly funny; jokes become shorter when the cost is personal.",
+        "examples": [
+          "That is a very expensive way to misunderstand a wire.",
+          "Give me a problem I can measure."
+        ]
+      },
+      "source_status": "User-authorized alternate MCU foundation; examples are original voice hints, not required lines."
+    },
+    {
+      "id": "yinsen",
+      "name": "Ho Yinsen",
+      "goal": "Keep Tony alive while preserving the captives’ dignity and chance of survival.",
+      "value": "Care, accuracy and responsibility toward people outside this room.",
+      "fear": "Becoming a convenient sacrifice in another powerful man’s story.",
+      "habitual_strategy": "Ask one precise question and insist on a concrete answer.",
+      "limits": "Cannot know unwitnessed secrets or override injury, power supply, geography and custody.",
+      "voice": "Dry, patient, observant; capable of irritation and self-preservation.",
+      "arc": {
+        "starting_belief": "Genius is useful only when it accepts another person’s limits.",
+        "old_strategy": "Ask one precise question and insist on a concrete answer.",
+        "pressure_test": "Keep Tony alive while preserving the captives’ dignity and chance of survival.",
+        "costly_choice": "Risk his leverage or medical supplies for a joint plan without being compelled to die.",
+        "possible_change": "Accept an obligation demonstrated through specific action rather than a declaration."
+      },
+      "contradiction": {
+        "tension": "Care, accuracy and responsibility toward people outside this room. conflicts with Becoming a convenient sacrifice in another powerful man’s story."
+      },
+      "emotional_behavior": {
+        "pressure": "A characteristic practical action or withheld admission must reveal the pressure."
+      },
+      "voice_design": {
+        "register": "Dry, patient, observant; capable of irritation and self-preservation.",
+        "examples": [
+          "You have solved the noise. What about the patient?",
+          "I asked whether it would work twice."
+        ]
+      },
+      "source_status": "User-authorized alternate MCU foundation; examples are original voice hints, not required lines."
+    },
+    {
+      "id": "raza",
+      "name": "Raza",
+      "goal": "Obtain working Stark technology while maintaining control of the workshop.",
+      "value": "Control through information and asymmetric bargaining.",
+      "fear": "Appearing dependent on a prisoner’s expertise.",
+      "habitual_strategy": "Change the terms and exploit observable divisions.",
+      "limits": "Cannot know unwitnessed secrets or override injury, power supply, geography and custody.",
+      "voice": "Measured, economical and watchful; never a caricatured monologue.",
+      "arc": {
+        "starting_belief": "The dependency of a prisoner is more useful than his loyalty.",
+        "old_strategy": "Change the terms and exploit observable divisions.",
+        "pressure_test": "Obtain working Stark technology while maintaining control of the workshop.",
+        "costly_choice": "Sacrifice a resource, hostage advantage or secrecy to stop losing control.",
+        "possible_change": "Accept an obligation demonstrated through specific action rather than a declaration."
+      },
+      "contradiction": {
+        "tension": "Control through information and asymmetric bargaining. conflicts with Appearing dependent on a prisoner’s expertise."
+      },
+      "emotional_behavior": {
+        "pressure": "A characteristic practical action or withheld admission must reveal the pressure."
+      },
+      "voice_design": {
+        "register": "Measured, economical and watchful; never a caricatured monologue.",
+        "examples": [
+          "You keep asking for time as if it belongs to you.",
+          "Show me what the extra cable buys."
+        ]
+      },
+      "source_status": "User-authorized alternate MCU foundation; examples are original voice hints, not required lines."
+    },
+    {
+      "id": "pepper",
+      "name": "Pepper Potts",
+      "goal": "Find credible information about Tony without signing away his company’s safeguards.",
+      "value": "Competence and earned trust.",
+      "fear": "Mistaking familiar charm for actual honesty.",
+      "habitual_strategy": "Cross-check details and follow administrative inconsistencies.",
+      "limits": "Cannot know unwitnessed secrets or override injury, power supply, geography and custody.",
+      "voice": "Brisk, direct, specific; humor through practical correction.",
+      "arc": {
+        "starting_belief": "Reliable records can restrain reckless people.",
+        "old_strategy": "Cross-check details and follow administrative inconsistencies.",
+        "pressure_test": "Find credible information about Tony without signing away his company’s safeguards.",
+        "costly_choice": "Challenge authority despite incomplete evidence.",
+        "possible_change": "Accept an obligation demonstrated through specific action rather than a declaration."
+      },
+      "contradiction": {
+        "tension": "Competence and earned trust. conflicts with Mistaking familiar charm for actual honesty."
+      },
+      "emotional_behavior": {
+        "pressure": "A characteristic practical action or withheld admission must reveal the pressure."
+      },
+      "voice_design": {
+        "register": "Brisk, direct, specific; humor through practical correction.",
+        "examples": [
+          "The receipt and the explanation disagree.",
+          "Pick one version before I call the insurer."
+        ]
+      },
+      "source_status": "User-authorized alternate MCU foundation; examples are original voice hints, not required lines."
+    },
+    {
+      "id": "rhodey",
+      "name": "James Rhodes",
+      "goal": "Locate Tony and avoid endangering other captives.",
+      "value": "Duty and loyalty under operational constraints.",
+      "fear": "Turning loyalty into reckless collateral harm.",
+      "habitual_strategy": "Ask for verification before committing people.",
+      "limits": "Cannot know unwitnessed secrets or override injury, power supply, geography and custody.",
+      "voice": "Plainspoken, disciplined, with impatient affection toward Tony.",
+      "arc": {
+        "starting_belief": "A rescue succeeds only if its assumptions survive contact.",
+        "old_strategy": "Ask for verification before committing people.",
+        "pressure_test": "Locate Tony and avoid endangering other captives.",
+        "costly_choice": "Delay a tempting lead until it is actually credible.",
+        "possible_change": "Accept an obligation demonstrated through specific action rather than a declaration."
+      },
+      "contradiction": {
+        "tension": "Duty and loyalty under operational constraints. conflicts with Turning loyalty into reckless collateral harm."
+      },
+      "emotional_behavior": {
+        "pressure": "A characteristic practical action or withheld admission must reveal the pressure."
+      },
+      "voice_design": {
+        "register": "Plainspoken, disciplined, with impatient affection toward Tony.",
+        "examples": [
+          "That is a location, not a plan.",
+          "Tell me who verified the exit."
+        ]
+      },
+      "source_status": "User-authorized alternate MCU foundation; examples are original voice hints, not required lines."
+    },
+    {
+      "id": "obadiah",
+      "name": "Obadiah Stane",
+      "goal": "Retain influence over Stark Industries while controlling what the disappearance exposes.",
+      "value": "Institutional leverage and his own indispensability.",
+      "fear": "Losing control of the company’s succession.",
+      "habitual_strategy": "Present a private interest as responsible stewardship.",
+      "limits": "Cannot know unwitnessed secrets or override injury, power supply, geography and custody.",
+      "voice": "Warm, expansive corporate paternalism that conceals specifics.",
+      "arc": {
+        "starting_belief": "People accept control when it is described as protection.",
+        "old_strategy": "Present a private interest as responsible stewardship.",
+        "pressure_test": "Retain influence over Stark Industries while controlling what the disappearance exposes.",
+        "costly_choice": "Expose part of his network to preserve another part.",
+        "possible_change": "Accept an obligation demonstrated through specific action rather than a declaration."
+      },
+      "contradiction": {
+        "tension": "Institutional leverage and his own indispensability. conflicts with Losing control of the company’s succession."
+      },
+      "emotional_behavior": {
+        "pressure": "A characteristic practical action or withheld admission must reveal the pressure."
+      },
+      "voice_design": {
+        "register": "Warm, expansive corporate paternalism that conceals specifics.",
+        "examples": [
+          "Everybody wants certainty. We can give them continuity.",
+          "Let us keep the difficult details in this room."
+        ]
+      },
+      "source_status": "User-authorized alternate MCU foundation; examples are original voice hints, not required lines."
+    }
+  ],
+  "world_rules": [
+    "This is alternate MCU continuity centered on Tony Stark’s captivity; no later Avengers team or offstage movie outcome is assumed.",
+    "Tony begins with chest shrapnel held back by an electromagnet powered by one external car battery; interrupting it creates immediate danger.",
+    "No completed miniature reactor or powered armor exists at the start. Devices require visible work, materials and plausible elapsed time.",
+    "Stark-branded weapons crates, scrap metal and supervised workshop tools are available; new equipment needs a source and cost.",
+    "No suit has unlimited power, ammunition, cooling, mobility or invulnerability; damage and expenditure persist.",
+    "Building an armor shell must not instantly give it flight, remote control or a trusted AI assistant.",
+    "Only witnessed evidence and explicitly held initial knowledge are available to each character.",
+    "Pepper, Rhodey and Obadiah are outside the cave and cannot appear or communicate without an established route.",
+    "Raza controls the workshop door and surveillance; any defeated camera, lock or guard advantage needs a cause.",
+    "No character knows the identity of the weapons supply-chain organizer unless actual evidence supports that discovery.",
+    "Tony is protected from permanent death in this two-scene pilot. Yinsen and Raza may survive, be injured, betray a plan or die only through earned on-page events.",
+    "Invented twists must grow from planted clues or existing incentives, and persist as consequences rather than resetting the scene.",
+    "All dialogue is original. Familiar names and broad origin elements do not authorize reproducing film dialogue.",
+    "An original character may be introduced through current conflict, with a stable identity and knowledge limited to actual evidence."
+  ],
+  "initial_facts": [
+    {
+      "kind": "event",
+      "text": "Tony Stark is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "life:tony",
+      "subject": "tony",
+      "life_state": "alive"
+    },
+    {
+      "kind": "event",
+      "text": "Ho Yinsen is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "life:yinsen",
+      "subject": "yinsen",
+      "life_state": "alive"
+    },
+    {
+      "kind": "event",
+      "text": "Raza is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "life:raza",
+      "subject": "raza",
+      "life_state": "alive"
+    },
+    {
+      "kind": "event",
+      "text": "Pepper Potts is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "life:pepper",
+      "subject": "pepper",
+      "life_state": "alive"
+    },
+    {
+      "kind": "event",
+      "text": "James Rhodes is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "life:rhodey",
+      "subject": "rhodey",
+      "life_state": "alive"
+    },
+    {
+      "kind": "event",
+      "text": "Obadiah Stane is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "life:obadiah",
+      "subject": "obadiah",
+      "life_state": "alive"
+    },
+    {
+      "kind": "event",
+      "text": "Tony and Yinsen are captives in a guarded cave workshop; Raza controls their supervised access to tools.",
+      "known_by": [
+        "tony",
+        "yinsen",
+        "raza"
+      ],
+      "fact_key": "captivity"
+    },
+    {
+      "kind": "resource",
+      "text": "One external car battery currently powers Tony’s chest electromagnet; no miniature reactor exists yet.",
+      "known_by": [
+        "tony",
+        "yinsen"
+      ],
+      "fact_key": "life-support:tony"
+    },
+    {
+      "kind": "event",
+      "text": "Tony has chest shrapnel and cannot safely disconnect the electromagnet without an effective alternative.",
+      "known_by": [
+        "tony",
+        "yinsen"
+      ],
+      "fact_key": "injury:tony"
+    },
+    {
+      "kind": "resource",
+      "text": "The cave workshop has supervised welding equipment, scrap metal, copper wiring and a restricted supply of medical dressings.",
+      "known_by": [
+        "tony",
+        "yinsen",
+        "raza"
+      ],
+      "fact_key": "workshop-stock"
+    },
+    {
+      "kind": "event",
+      "text": "Crates bearing Stark Industries markings are visible among the captors’ weapons stores.",
+      "known_by": [
+        "tony",
+        "yinsen",
+        "raza"
+      ],
+      "fact_key": "stark-crates"
+    },
+    {
+      "kind": "event",
+      "text": "A security camera covers the workshop door and main bench; Raza can inspect its feed.",
+      "known_by": [
+        "tony",
+        "yinsen",
+        "raza"
+      ],
+      "fact_key": "camera-coverage"
+    },
+    {
+      "kind": "event",
+      "text": "Raza has demanded a weapons demonstration by the following evening, but has not promised to release the captives.",
+      "known_by": [
+        "tony",
+        "yinsen",
+        "raza"
+      ],
+      "fact_key": "demonstration-deadline"
+    },
+    {
+      "kind": "event",
+      "text": "There is no completed armor shell, no autonomous onboard AI and no rescue team at the cave.",
+      "known_by": [
+        "tony",
+        "yinsen",
+        "raza"
+      ],
+      "fact_key": "starting-capabilities"
+    },
+    {
+      "kind": "belief",
+      "text": "Tony initially believes he can outthink captivity without becoming dependent on anyone else.",
+      "known_by": [
+        "tony"
+      ],
+      "fact_key": "belief:tony",
+      "holder": "tony"
+    },
+    {
+      "kind": "belief",
+      "text": "Yinsen believes Tony must confront the human cost of his work, but does not consent to being treated as an expendable helper.",
+      "known_by": [
+        "yinsen"
+      ],
+      "fact_key": "belief:yinsen",
+      "holder": "yinsen"
+    },
+    {
+      "kind": "thread",
+      "text": "Tony owes Yinsen his immediate survival, while neither has agreed on the moral price of an escape.",
+      "known_by": [
+        "tony",
+        "yinsen"
+      ],
+      "fact_key": "thread:shared-escape",
+      "thread_id": "shared-escape",
+      "thread_state": "seeded"
+    },
+    {
+      "kind": "event",
+      "text": "Pepper is outside the cave and has no confirmed location for Tony.",
+      "known_by": [
+        "pepper"
+      ],
+      "fact_key": "pepper-location-knowledge"
+    },
+    {
+      "kind": "event",
+      "text": "Rhodey has no verified cave coordinates or established communication link with the captives.",
+      "known_by": [
+        "rhodey"
+      ],
+      "fact_key": "rhodey-location-knowledge"
+    },
+    {
+      "kind": "event",
+      "text": "Obadiah privately knows a company intermediary concealed an unauthorized weapons transfer; the captives do not know his involvement.",
+      "known_by": [
+        "obadiah"
+      ],
+      "fact_key": "supply-chain-secret"
+    }
+  ],
+  "world_design": {
+    "setting": "A guarded cave workshop and its adjacent service passages during Tony Stark’s captivity.",
+    "technology": "Contemporary fictional MCU engineering; damaged life support, supervised tools and improvised prototypes with persistent limits.",
+    "institutions": "Stark Industries, a coercive armed faction and a search effort without reliable coordinates.",
+    "physical_systems": "A vulnerable external chest-magnet power supply, cameras, rough terrain, heat, restricted tools and guarded exits.",
+    "deadlines": "A coerced demonstration is demanded by the following evening; the exact passage of time and any changed deadline must be explicit."
+  },
+  "plot_design": {
+    "central_question": "Can Tony use his ingenuity without treating other people as replaceable components?",
+    "causal_dependencies": [
+      "Scene two inherits only the devices, custody, injuries, trust and discoveries actually established in scene one.",
+      "A supply-chain clue is evidence with limited holders, not automatic proof of Obadiah’s guilt.",
+      "Yinsen’s fate and the escape route remain open; avoid replaying the movie’s fixed sacrifice."
+    ],
+    "subplots": [
+      {
+        "id": "shared-escape",
+        "owner": "yinsen",
+        "question": "Can Yinsen secure a joint plan without becoming its automatic sacrifice?",
+        "intersection": "The escape depends on an independent choice from him, not only Tony’s technical command.",
+        "removal_cost": "Without his agency the story becomes a gadget demonstration."
+      },
+      {
+        "id": "supply-chain",
+        "owner": "tony",
+        "question": "What does a visible company marking actually prove?",
+        "intersection": "Keeping evidence may compete with carrying equipment or protecting someone.",
+        "removal_cost": "Without it the larger universe has no earned unresolved thread."
+      }
+    ],
+    "alternatives_and_costs": [
+      "Comply enough to acquire time while strengthening the captors, or expose the deception before the escape is ready.",
+      "Preserve a technical advantage or spend it to keep a person or evidence safe."
+    ]
+  },
+  "scene_designs": [
+    {
+      "id": "ch01-sc01",
+      "pov": "tony",
+      "participants": [
+        "tony",
+        "yinsen",
+        "raza"
+      ],
+      "location": "The guarded cave workshop",
+      "setting": "A battery cable and a supervised workbench keep Tony dependent on his captors.",
+      "time": "The opening afternoon, before the demanded demonstration",
+      "dramatic_function": "Turn technical survival into a contested joint plan through dialogue and a costly choice.",
+      "development": "Let the models choose a specific invention, compromise or revealing clue under existing limits. Establish its actual resource cost, witnesses and effect on Tony’s relationship with Yinsen.",
+      "restrictions": "No instant complete armor or escape, no assumed movie dialogue, no omniscient revelation of the supply-chain organizer. Any original character must enter through a concrete cause.",
+      "choice_and_consequence": "End with a material or interpersonal change that can be used or challenged in the next scene; do not specify the exact twist in advance."
+    },
+    {
+      "id": "ch02-sc01",
+      "pov": "tony",
+      "participants": [
+        "tony",
+        "yinsen",
+        "raza"
+      ],
+      "location": "The cave workshop and the connected escape route",
+      "setting": "Only the preceding scene’s actual work and choices can support the next attempt.",
+      "time": "Later, after an explicitly justified interval before or during the coerced demonstration",
+      "dramatic_function": "Test the accepted plan against human opposition and an earned complication.",
+      "development": "Stage an escape attempt with an improvised armored element if genuinely built, or another earned tactic if the first scene made that more plausible. Give Yinsen independent agency; choose survival, injury, betrayal or setback without following the film automatically.",
+      "restrictions": "No reset of injuries, power, materials, knowledge or relationships. Do not reenact the first negotiation, force Yinsen’s death, summon an unexplained Avenger or assume later movie events.",
+      "choice_and_consequence": "Resolve a concrete immediate choice with a lasting cost and an open thread for a larger universe, even if the escape is incomplete."
+    }
+  ],
+  "chapter_contract": {
+    "arc": "Two linked screenplay sequences develop a recognizable origin through earned departures from familiar events.",
+    "continuity": "Preserve source-backed devices, damage, energy costs, witnesses, trust, custody and uncertainty.",
+    "ending": "End this short episode at a consequential turn; no requirement to finish the entire film or create the Avengers immediately."
+  },
+  "chapter_arcs": [
+    "Dependence becomes a contested joint plan through a costly choice.",
+    "That actual choice shapes an escape attempt and an earned alternate-continuity consequence."
+  ],
+  "quality_contract": [
+    "Screenplay presentation is required: INT./EXT. location/time headings, present-tense filmable action, uppercase speaker cues and original dialogue. Assess playable conflict and visual clarity; do not demand prose interiority or remove required headings.",
+    "Recognizable characters need distinct voices, conflicting aims and changing leverage; Yinsen retains agency.",
+    "Alternate events are allowed; fidelity to the original film’s exact plot or Yinsen’s original fate is not a review requirement.",
+    "Every scene adds a new consequential development; avoid repeated bargaining, inventories or moral summaries.",
+    "Memory is authoritative across scenes; no imported future movie knowledge, unexplained rescue or reset of resources.",
+    "Proposed twists and planned actions become history only when enacted on screen.",
+    "Any new power source, reserve, bypass or device used in scene two must first be built or acquired on screen; a plan alone is not evidence of completion. Check grammar and repeated gestures without turning action lines into novel narration."
+  ],
+  "must_avoid": [
+    "Copied film dialogue or scene-by-scene screenplay reproduction.",
+    "Ancient epic diction, pastoral extended similes or imported Trojan War constraints.",
+    "Instant redemption, disposable side characters, unexplained superhero cameos and omniscient secret reveals.",
+    "Technical instruction-manual passages or mechanical inventory recital.",
+    "Declaring planned inventions completed without actual work, elapsed time or consequences."
+  ],
+  "creative_freedom": {
+    "enabled": true,
+    "intensity": 0.8,
+    "new_characters": true,
+    "character_deaths": true,
+    "protected_characters": [
+      "tony"
+    ],
+    "max_new_per_scene": 1,
+    "cast_limit": 8
+  },
+  "universe_id": "iron-man-screenplay-origin",
+  "execution_intent": {
+    "authorized": "User requested a live Iron Man adaptation test as a script; use a two-scene screenplay for comparison with the successful prose test.",
+    "workflow": "Use the proven separate-runner Gemini living pipeline, full persistent memory and final approval audit."
+  }
+}
