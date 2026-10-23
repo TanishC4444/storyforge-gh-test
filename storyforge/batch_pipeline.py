@@ -98,14 +98,20 @@ def write_batch(state,card,source,out,backend,bid):
     for attempt in range(0 if backend=='fixture' else 2):
         role='writer_beat' if attempt==0 else 'repair'
         folder=out/str(attempt);executor=Executor(req,folder,backend)
+        inserting=bool(attempt and req.get('performance',{}).get('strict_draft_handoff') and local.get('length_policy',{}).get('scene_words')=='strict' and 0<len(text.split())<minimum and len(passages(text))>1)
         try:
+            if inserting:
+                from .length_expansion import expand
+                text=expand(executor,local,text,data,folder)
+                errors=[];break
             text=executor.call(role,{**data,'rejected_batch':text or None,'specific_errors':errors},
                 'Return ONLY this assigned beat near its target_words, in the application-owned medium. Preserve the shared chronology, POV, voice and author form. Use a scene heading only in the first batch if the medium requires it. No quoted dialogue against a no-dialogue brief, plot-summary substitutes or neighboring beats. If correcting a rejected batch, return the complete corrected assigned batch; when count is one this is the complete scene. Preserve its events and expand its dramatization to the required length.'+length_instruction,
                 tokens=min(4200 if adaptive(req) else 1500,int(beat['target_words']*3.2)+400),output_format='text',validator=lambda t:validate_prose(t,local,check_length=backend!='fixture'))
             validate_prose(text,local,check_length=backend!='fixture')
             errors=[];break
         except Exception as exc:
-            text=cached_prose(folder) or text;errors=[str(exc)]
+            if not inserting:text=cached_prose(folder) or text
+            errors=[str(exc)]
             if not text:break
     if backend=='fixture':text=f'FIXTURE writing batch {bid}: the assigned planned beat is a transport test only.'
     result={'id':bid,'scene_id':card['id'],'state_sha256':plan['state_sha256'],'plan_sha256':plan['plan_sha256'],'prose':text,'verified_form':bool(text) and not errors,'errors':errors}
