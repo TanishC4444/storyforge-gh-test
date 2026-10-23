@@ -60,6 +60,8 @@ def parallel(req,kind,items,fn):
 def validate(req):
     from .contracts import require
     knobs=req['execution_policy']
+    from .provider_recovery import configuration
+    configuration(req)
     require(knobs.get('editorial_disagreement') in {None,'one_strict_check'},'Invalid editorial disagreement policy')
     hosted=knobs.get('hosted_routes',{})
     require(isinstance(hosted,dict) and all(k in STAGES and isinstance(v,list) and 1<=len(v)<=3 and all(t in {'flash','flash36','lite','gemma'} for t in v) for k,v in hosted.items()),'Invalid hosted routing policy')

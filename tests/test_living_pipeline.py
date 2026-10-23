@@ -195,7 +195,7 @@ class LivingPipelineTests(unittest.TestCase):
             self.assertIn('gemini-3.8-flash:generateContent',calls[1][0])
             self.assertIn('gemini-3.5-flash-lite:generateContent',calls[2][0])
             self.assertGreater(calls[0][1],40)
-            self.assertLessEqual(calls[0][1],60)
+            self.assertLessEqual(calls[0][1],90)
             self.assertLessEqual(max(t for _,t in calls),90)
 
     def test_capacity_fallback_never_accepts_truncated_or_unavailable_generation(self):

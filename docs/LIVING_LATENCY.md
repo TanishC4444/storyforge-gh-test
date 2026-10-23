@@ -152,3 +152,19 @@ must pass the word range, form and repetition checks before handoff, then still
 undergoes literary and factual review. An invalid insertion retains the original
 draft for diagnostics, never the raw edit protocol. This adds no rewrite loop or
 extra model call beyond the existing writer plus one repair allowance.
+
+The live scale and Iron Man demos now reserve an explicit provider-outage buffer.
+If every configured route fails with a transient server/connection error, the
+worker checkpoints its exact input and waits before another capacity pass. The
+baseline 45-second delay doubles for the next pass, honors Retry-After, and adds
+small jitter. Healthy calls do not wait or consume recovery requests. Daily quota,
+authentication, configuration and generation-validation faults are not treated as
+transient capacity outages.
+
+Each call permits at most three provider passes and nine HTTP attempts including
+compatibility requests, with a shared six-minute outage buffer added to its normal
+stage deadline. The enclosing job deadline still wins. Inputs and a durable
+provider-recovery status remain available when the buffer is exhausted; no missing
+story or factual verification becomes approved. The checkpoint supports retrying
+the failed job after capacity returns. This is bounded recovery, not an assurance
+that an indefinitely unavailable external API can finish a GitHub runner job.

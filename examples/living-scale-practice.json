@@ -1559,6 +1559,12 @@
       "story_quality": 60,
       "rhetoric_quality": 60,
       "chapter_quality": 60
+    },
+    "provider_outage_recovery": {
+      "max_rounds": 3,
+      "delay_seconds": 45,
+      "buffer_seconds": 360,
+      "extra_requests": 6
     }
   },
   "performance": {
