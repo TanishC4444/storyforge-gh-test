@@ -1,0 +1,112 @@
+"""Execute every generated optimized stage and artifact edge across a larger episode."""
+import copy,fnmatch,io,json,os,shlex,shutil,sys,tempfile,unittest
+from contextlib import redirect_stdout
+from pathlib import Path
+from unittest.mock import patch
+import yaml
+from storyforge import batch_pipeline as b,living_stages as ls,memory_batches as memory
+from storyforge.dag import stage
+from storyforge.living_prepare import prepare
+from storyforge.storage import load,save
+
+class LivingPipelineTests(unittest.TestCase):
+    def test_two_scene_generated_graph_with_full_cast_rules_and_memory(self):
+        graph=yaml.safe_load(Path('.github/workflows/living-universe-pipeline.yml').read_text());jobs=graph['jobs']
+        for name,job in jobs.items():self.assertTrue(set(job.get('needs',[]))<=set(jobs),name)
+        self.assertEqual(jobs['s02_design']['needs'],['s01_accept'])
+        self.assertEqual(jobs['s01_memory_preflight_batches']['strategy']['max-parallel'],6)
+        self.assertGreater(len(jobs),60)
+        with tempfile.TemporaryDirectory() as d,patch.dict(os.environ,{'STORY_LEAN_LIVING':'true','STORY_LIVING_PIPELINE':'true','STORY_HOSTED_ONLY':'true'}),redirect_stdout(io.StringIO()):
+            root=Path(d);artifacts={};skipped=set()
+            stage('prepare',root/'none',root/'prepare',request_file='living-scale-practice',profile='fast',backend='fixture');artifacts['prepare']=root/'prepare'
+            state=prepare(root/'prepare/snapshot.json',root/'quickstart',backend='fixture');artifacts['quickstart']=root/'quickstart'
+            self.assertEqual([m['kind'] for m in state['memories']],[m['kind'] for m in state['request']['initial_facts']]);self.assertEqual(len(state['memories']),96);self.assertEqual(len(state['request']['characters']),12);self.assertEqual(len(state['request']['world_rules']),24)
+            pending={k for k in jobs if k.startswith(('s01_','s02_'))};done={'prepare','quickstart'}
+            def required(prefix,field):
+                file='extract-plan.json' if field=='refresh_required' else 'memory-plan.json'
+                plan=load(artifacts[prefix]/file)
+                return any(x['ids'] for x in plan['batches']) if field=='refresh_required' else not bool(plan.get('reused_preflight'))
+            while pending:
+                ready=sorted(k for k in pending if set(jobs[k].get('needs',[]))<=done)
+                self.assertTrue(ready,'No ready job '+str(pending))
+                for key in ready:
+                    job=jobs[key];index=int(key[1:3])-1;p=key[:3]
+                    skip=(key.endswith('_memory_refresh_batches') and not required(p+'_repair','refresh_required')) or (key.endswith('_memory_final_batches') and not required(p+'_final_memory','checks_required'))
+                    if skip:skipped.add(key);done.add(key);pending.remove(key);continue
+                    matrix=job.get('strategy',{}).get('matrix',{});axis=None
+                    if 'character' in matrix:
+                        axis='character';values=load(artifacts[p+'_design']/'snapshot.json')['plan']['scenes'][index]['participants']
+                    elif 'batch' in matrix:
+                        axis='batch';value=matrix['batch']
+                        if isinstance(value,list):values=value
+                        else:
+                            upstream=value.split('needs.',1)[1].split('.outputs.',1)[0]
+                            file='draft-plan.json' if upstream.endswith('_direction') else 'extract-plan.json' if upstream.endswith(('_draft','_repair')) else 'repair-plan.json' if upstream.endswith('_repair_plan') else 'memory-plan.json'
+                            plan=load(artifacts[upstream]/file);values=[x['id'] for x in plan.get('batches',plan.get('beats',[]))]
+                    else:values=[None]
+                    for value in values:
+                        folder=root/key/(str(value) if value is not None else 'single');source=folder/'inputs';out=folder/'out'
+                        for step in job['steps']:
+                            if step.get('uses')!='actions/download-artifact@v4':continue
+                            condition=step.get('if','')
+                            if 'refresh_required' in condition and not required(p+'_repair','refresh_required'):continue
+                            if 'checks_required' in condition and not required(p+'_final_memory','checks_required'):continue
+                            spec=step['with'];dest=folder/spec['path']
+                            if 'name' in spec:shutil.copytree(artifacts[spec['name']],dest,dirs_exist_ok=True)
+                            else:
+                                names=[name for name in artifacts if fnmatch.fnmatch(name,spec['pattern'])];self.assertTrue(names,spec)
+                                for name in names:shutil.copytree(artifacts[name],dest/name,dirs_exist_ok=True)
+                        command=next(s['run'] for s in job['steps'] if s.get('id')=='task')
+                        line=next(line for line in command.splitlines() if line.startswith('python -m'))
+                        parts=shlex.split(line.replace('$backend','fixture').replace('$STORY_BATCH',str(value)).replace('$STORY_CHARACTER',str(value)))
+                        if parts[2]=='storyforge.living_stages':ls.execute(parts[3],source,out,index,'fixture')
+                        elif parts[2]=='storyforge.dag':stage(parts[3],source,out,index=index,character=value if axis=='character' else None,profile='fast',backend='fixture')
+                        else:
+                            with patch.object(sys,'argv',['batch_pipeline']+parts[3:]+['--source',str(source),'--out',str(out)]):b.main()
+                        artifacts[key+('-'+str(value) if axis else '')]=out
+                    done.add(key);pending.remove(key)
+            state=load(artifacts['s02_accept']/'snapshot.json')
+            self.assertTrue(state['complete']);self.assertTrue(all(s['canon_committed'] for s in state['accepted']))
+            self.assertGreater(len(state['memories']),96)
+            self.assertEqual(sum(m.get('source')=='user_input' for m in state['memories']),96)
+            second=load(artifacts['s02_design']/'snapshot.json')
+            self.assertGreater(len(second['memories']),96);self.assertEqual(len(second['accepted']),1)
+            from storyforge.episode_audit import audit
+            for name,folder in artifacts.items():
+                if name.endswith(('_accept','_design','_final_memory','_memory_review')):shutil.copytree(folder,root/'results'/name)
+            assessment=audit(root/'results',root/'audit',2)
+            self.assertTrue(assessment['pass']);self.assertEqual(assessment['retained_initial_facts'],96)
+            bad=load(root/'results/s02_memory_review/review.json');bad['source_sha256']='stale';save(root/'results/s02_memory_review/review.json',bad)
+            self.assertFalse(audit(root/'results',root/'bad-audit',2)['pass'])
+            for prefix in ['s01','s02']:
+                plan=load(artifacts[prefix+'_memory']/'memory-plan.json');facts=load(artifacts[prefix+'_memory']/'memory.json')['memories']
+                before=load(artifacts[prefix+'_design']/'snapshot.json')
+                pairs={(i,j) for batch in plan['batches'] for i in batch['fact_indices'] for j in batch['prior_indices']}
+                self.assertEqual(pairs,{(i,j) for i in range(len(facts)) for j in range(len(memory.memory_canon(before)))})
+                self.assertTrue(load(artifacts[prefix+'_memory_review']/'review.json')['reused_preflight'])
+    def test_complete_ledger_is_retained_when_pov_projection_uses_ids(self):
+        from storyforge.working_context import concise_packet
+        facts=[{'id':str(i),'text':'Fact '+str(i),'known_by':['a']} for i in range(96)]
+        packet={'prior_canon':{'facts':facts},'pov_known_facts':{'facts':facts[:8]}}
+        result=concise_packet(packet,{})
+        self.assertEqual(result['prior_canon']['facts'],facts)
+        self.assertEqual([r['fact_id'] for r in result['pov_known_facts']['facts']],[str(i) for i in range(8)])
+        self.assertEqual(packet['pov_known_facts']['facts'],facts[:8])
+    def test_changed_evidence_macro_requires_fresh_final_memory_checks(self):
+        from storyforge.contracts import delta
+        with tempfile.TemporaryDirectory() as d,patch.dict(os.environ,{'STORY_LEAN_LIVING':'true','STORY_LIVING_PIPELINE':'true'}),redirect_stdout(io.StringIO()):
+            root=Path(d);stage('prepare',root/'none',root/'base',request_file='living-scale-practice',backend='fixture');state=prepare(root/'base/snapshot.json',root/'quick',backend='fixture')
+            before='Thestor put one bronze seal on the board.';after='Thestor put one spent bronze seal on the board.'
+            facts=delta({'memories':[{'kind':'event','text':before,'known_by':['thestor'],'evidence_ids':['p001']}]},before,['thestor'])
+            src=root/'merge';save(src/'state/snapshot.json',state);save(src/'edited/prose.txt',before);save(src/'initial-memory/memory.json',facts)
+            proof={'pass':True,'issues':[],'source_sha256':b.digest(before),'state_sha256':b.bind_state(state),'memory_sha256':b.bind_state(facts)}
+            save(src/'preflight-memory/review.json',proof)
+            save(src/'plan/repair-plan.json',{'state_sha256':b.bind_state(state),'source_sha256':b.digest(before),'batches':[{'id':'0','source_sha256':b.digest(before),'owned':['p001'],'passages':[{'id':'p001','text':before}]}]})
+            save(src/'batches/0/repair-batch.json',{'id':'0','source_sha256':b.digest(before),'replacements':{'p001':after},'unverified':False})
+            ls.execute('repair_refresh_plan',src,root/'repaired',0,'fixture')
+            plan=load(root/'repaired/extract-plan.json');self.assertTrue(any(x['ids'] for x in plan['batches']))
+            dest=root/'final-input';save(dest/'state/snapshot.json',state);save(dest/'edited/prose.txt',after);save(dest/'plan/extract-plan.json',plan);save(dest/'preflight-memory/review.json',proof)
+            for item in plan['batches']:memory.extract_batch(state,state['plan']['scenes'][0],dest,dest/'batches'/item['id'],'fixture',item['id'])
+            ls.execute('final_memory_plan',dest,root/'final-memory',0,'fixture')
+            final=load(root/'final-memory/memory-plan.json');self.assertFalse(final['reused_preflight'])
+            self.assertFalse((root/'final-memory/review.json').exists())

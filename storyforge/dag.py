@@ -56,6 +56,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
     if task == 'prepare':
         req = contracts.request(load(ROOT / 'examples' / f'{request_file}.json'))
         if os.getenv('STORY_LEAN_LIVING','').lower()=='true':req.setdefault('performance',{}).update(lean_living_checks=True,adaptive_batches=True,summary_reviews=False)
+        if os.getenv('STORY_LIVING_PIPELINE','').lower()=='true':req.setdefault('performance',{})['pipelined_living']=True
         req['profile'] = profile
         if req.get('performance',{}).get('classic_expansion'):
             req.setdefault('execution_policy',{}).setdefault('editorial_disagreement','one_strict_check')
@@ -84,7 +85,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         with heartbeat('Retrieving classical mechanisms and role-specific craft guidance'):
             retrieved=retrieve(req)
         state = {'version': 0, 'backend': backend, 'accepted': [],
-                 'memories': [dict(f, kind='event', source='user_input') for f in req['initial_facts']],
+                 'memories': [dict(f, kind=f.get('kind','event'), source='user_input') for f in req['initial_facts']],
                  'request_hash': hashlib.sha256(json.dumps(req, sort_keys=True).encode()).hexdigest(),
                  'retrieval': retrieved, 'request': req}
         event('retrieval_complete','Literary references selected',sources=[s['title'] for s in state['retrieval']['sources']],stale_records=state['retrieval']['stale_embedding_records'])
@@ -182,7 +183,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         from .adaptive import writing_count
         from .continuation import history as continuity_history
         beat_count=writing_count(req)
-        designed=executor.call('scene_designer',{'living_proposal':living_proposal,'request_controls':controls(req),'world':req['world_design'],'plot':req['plot_design'],'characters':req['characters'],'proposed_scene':old,'writing_batch_count':beat_count,'creative_freedom':req.get('creative_freedom',{}),'character_life_state':current_life(continuity_history(state)),'accepted_memory':bridge(state),'previous_scene':{'id':state['accepted'][-1]['id'],'quality_status':state['accepted'][-1].get('quality_status'),'canon_committed':state['accepted'][-1].get('canon_committed',True)} if state['accepted'] else None,'user_scene_design':[s for s in req['scene_designs'] if s['id']==old['id']],'inspiration':application_packet(req,state['retrieval'],'scene_designer',old['id'])},
+        designed=executor.call('scene_designer',{'living_proposal':living_proposal,'request_controls':controls(req),'world':req['world_design'],'plot':req['plot_design'],'characters':[c for c in req['characters'] if c['id'] in old['participants']] if req.get('performance',{}).get('pipelined_living') else req['characters'],'cast_registry':[{'id':c['id'],'name':c['name']} for c in req['characters']],'proposed_scene':old,'writing_batch_count':beat_count,'creative_freedom':req.get('creative_freedom',{}),'character_life_state':current_life(continuity_history(state)),'accepted_memory':bridge(state),'previous_scene':{'id':state['accepted'][-1]['id'],'quality_status':state['accepted'][-1].get('quality_status'),'canon_committed':state['accepted'][-1].get('canon_committed',True)} if state['accepted'] else None,'user_scene_design':[s for s in req['scene_designs'] if s['id']==old['id']],'inspiration':application_packet(req,state['retrieval'],'scene_designer',old['id'])},
             DIRECTOR_POLICY+' Supply writing_beats with exactly writing_batch_count entries. Each has action, entry_state and exit_state: concrete nonoverlapping proposed events, resource/custody/knowledge handoffs and a clear last exit. Allocate a revelation or action to ONE beat only; later beats cannot repeat it. The writers work in parallel against this shared contract. Reconcile the proposed scene with what ACTUALLY happened. Do not rediscover an established fact. Preserve IDs, chapter, valid participant IDs, world rules, and user choices. Return one JSON scene card with id, chapter, pov, participants, location, time, goal, obstacle, intended_change, choice, consequence, new_development, and reference_uses (array of {record_id,application}). Explain development through a new tactic, cost, commitment, leverage, or interpretation, not stronger adjectives. No new events become canon here.',
             tokens=1600,validator=lambda x:validate_scene(x,req,index,dead={cid for cid,status in current_life(continuity_history(state)).items() if status=='dead'}))
         allowed={r['id'] for r in application_packet(req,state['retrieval'],'scene_designer',old['id'])['references']}

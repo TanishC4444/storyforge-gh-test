@@ -29,6 +29,13 @@ def concise_packet(packet,req):
     if isinstance(result.get('pov_profile'),dict) and isinstance(result.get('characters'),list):
         focal=result['pov_profile']
         result['characters']=[{'id':c['id'],'profile_source':'pov_profile'} if c.get('id')==focal.get('id') else c for c in result['characters']]
+    # One complete author ledger, with a lossless POV visibility allowlist.
+    prior=result.get('prior_canon',{});view=result.get('pov_known_facts',{})
+    if isinstance(prior,dict) and isinstance(view,dict):
+        by_id={m.get('id'):m for m in prior.get('facts',[]) if m.get('id')}
+        if by_id and 'facts' in view:
+            view['facts']=[{'fact_id':m['id'],'source':'prior_canon.facts'} if m.get('id') in by_id and m==by_id[m['id']] else m for m in view['facts']]
+            view['visibility_policy']='Only these listed facts are known to this POV; other author facts remain private. References resolve against the complete prior_canon ledger above.'
     # Chapter excerpts already contain these endings; keep one source projection.
     if result.get('completed_events') and isinstance(result.get('author_continuity'),dict):
         covered={s['id'] for s in result['completed_events']}

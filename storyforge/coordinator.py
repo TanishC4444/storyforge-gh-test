@@ -84,7 +84,7 @@ def run(req, folder, backend='fixture', *, stop_after=None, approve_plan=False):
             contracts.require(state['backend'] == backend, 'Cannot mix fixture and live state')
         else:
             state = {'version': 0, 'backend': backend, 'request_hash': fingerprint, 'accepted': [],
-                     'memories': [dict(f, kind='event', source='user_input') for f in req['initial_facts']]}
+                     'memories': [dict(f, kind=f.get('kind','event'), source='user_input') for f in req['initial_facts']]}
             save(folder / 'request.json', req)
             save(state_path, state)
         executor = Executor(req, folder, backend)

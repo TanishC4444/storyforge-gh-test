@@ -1,0 +1,1623 @@
+{
+  "min_words_ratio": 0.8,
+  "max_words_ratio": 1.3,
+  "auto_approve_plan": true,
+  "max_repairs": 1,
+  "max_stage_retries": 0,
+  "runner_repo": "storyforge-inference-runner",
+  "length_policy": {
+    "scene_words": "strict",
+    "chapter_words": "target",
+    "allow_compression": false,
+    "policy": "Two developed scenes of approximately 900 words each; the size of the fictional universe remains open."
+  },
+  "project_id": "living-scale-practice",
+  "title": "The Last Gate of the Shore",
+  "brief_version": 2,
+  "medium": "short_story",
+  "chapters": 2,
+  "scenes_per_chapter": 1,
+  "words_per_scene": 900,
+  "context_chars": 48000,
+  "n_ctx": 16384,
+  "profile": "expressive",
+  "retrieval_mode": "keyword",
+  "retrieval_query": "Iliad heroic honor divine gift competing authority mortal vulnerability supplication war",
+  "genre": "Epic historical fiction with original characters and ancient material obligations.",
+  "reader_experience": "Close material attention, household urgency, curiosity and unease when an investigation imposes a concrete cost.",
+  "pov": "Third-person past tense with one primary focal character per scene. No direct or quoted dialogue. Indirect reports, narrated offers, refusals, promises and commitments are explicitly permitted. No invocation or direct address.",
+  "tone_mood": "Grave and martial, with tenderness in concrete duties; wonder before divine craft and unease beneath victory. No modern sarcasm or action-film triumphalism.",
+  "sensory_detail": "Concrete material detail perceived through ancient experience: bronze, sea, wool, ash, labor, bodies and weather.",
+  "ending_tendency": "Leave consequential open threads; the world has no predetermined final ending.",
+  "premise": "Write two developed, causally connected scenes on the storm-damaged Achaean shore. Twelve named people have distinct duties, private knowledge, tools and debts, but only the planned participants act on-page. Thestor must spend one of his two single-use gate seals to get a household through the inner gate. Lyra must later spend the remaining seal on the outer barrier and solve a powerless latch through the red release pin she actually possesses. Costs and knowledge must carry between scenes through actual witnessed events. Make each bargain and rescue emotionally specific; avoid a mechanical inventory recital. The Trojan War remains unresolved.",
+  "keywords": [
+    {
+      "term": "heroic honor versus impersonal killing",
+      "kind": "tension",
+      "priority": 3
+    },
+    {
+      "term": "divine gift with an unequally distributed cost",
+      "kind": "conflict",
+      "priority": 3
+    },
+    {
+      "term": "authority versus practical knowledge",
+      "kind": "conflict",
+      "priority": 3
+    },
+    {
+      "term": "glory and mortal vulnerability",
+      "kind": "theme",
+      "priority": 3
+    },
+    {
+      "term": "loyalty to comrades versus obedience to a king",
+      "kind": "tension",
+      "priority": 2
+    },
+    {
+      "term": "extended epic simile",
+      "kind": "technique",
+      "priority": 2
+    },
+    {
+      "term": "supplication and refused counsel",
+      "kind": "technique",
+      "priority": 2
+    }
+  ],
+  "reference_policy": "Pin Iliad analysis work_136 as primary. Supplement only when it serves an actual gap. This is alternate continuity, not an episode narrated by Homer. Analyses alone are not authority for exact historical facts; preserve source limitations. No modern translation passages.",
+  "references": [],
+  "adaptation": {
+    "strength": 0.9,
+    "mode": "structural_echo",
+    "relationship": "alternate-continuity spinoff",
+    "max_active_sources_per_scene": 1,
+    "preserve_user_choices": true,
+    "primary_source_id": "work_136",
+    "preserve": [
+      "Recognizable principal relationships and ancient social values",
+      "Hector and Achilles alive in this installment",
+      "War not resolved"
+    ],
+    "divergence": "Future background only: divine firearms may later enter this alternate continuity. This practice scene reveals only a damaged unknown object and cannot acquire or operate a weapon.",
+    "interpretation": "Strong source influence and pinned source selection; strength is guidance, not a measured borrowed percentage."
+  },
+  "style": {
+    "narrator": "Third-person past-tense epic narrator, with a primary focal character per scene. The narrator may supply another character\u2019s history or inner attention in a clearly separated paragraph, but this never grants other characters private knowledge. No dialogue, quoted speech, first-person narrator, invocation or direct address. Narrate offers and commitments briefly and show their consequences.",
+    "register": "Concrete, grave, musical ancient epic in intelligible English. Use material acts, reciprocal obligation, shame and rank; no stock modern cinematic gestures.",
+    "wording": [
+      "Recurring epithets at meaningful moments; avoid attaching one to every name.",
+      "Period-fitting names: unfamiliar iron object, then iron tubes or fire-bearing tubes; keep naming consistent. No modern military vocabulary.",
+      "Ancient measures and experiences; no modern technical or psychological vocabulary.",
+      "Contemporary English grammar shaped by ancient epic; no indiscriminate thee/thou or faux-biblical filler.",
+      "Gods and human motives intertwine, while choices retain consequences.",
+      "No quotation or close reproduction of a modern translation."
+    ],
+    "figurative_language": {
+      "density": "moderate",
+      "devices": [
+        "extended epic simile",
+        "recurring epithet"
+      ],
+      "image_domains": [
+        "shepherding",
+        "harvest",
+        "storms",
+        "wild animals",
+        "weaving",
+        "shipbuilding",
+        "smithwork"
+      ],
+      "guidance": "Roughly one extended comparison per scene when earned, no mandatory quota. Let its image develop before returning to action. No modern image domains or continuous ornament."
+    },
+    "interiority": "Selective focalized thought tied to a practical choice, remembered obligation or fear of a specific loss; no abstract emotional labels.",
+    "dialogue": "No direct/quoted speech. Indirect narrated offers and refusals are permitted, but do not repeat an already completed negotiation.",
+    "explanation": "Cut explanations that merely restate legible action. Preserve purposeful epic repetition, ceremonial speech, lyricism and similes."
+  },
+  "characters": [
+    {
+      "id": "thestor",
+      "name": "Thestor",
+      "goal": "secure passage for his household",
+      "value": "values competent work",
+      "fear": "fears becoming useful enough to enslave",
+      "habitual_strategy": "Make a concrete offer tied to smith work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "A smith speaks through the practical terms of their work; distinct, economical diction.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "secure passage for his household",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values competent work but fears becoming useful enough to enslave"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    },
+    {
+      "id": "odysseus",
+      "name": "Odysseus",
+      "goal": "keep the shore alliance intact",
+      "value": "values cunning",
+      "fear": "fears a promise he cannot reinterpret",
+      "habitual_strategy": "Make a concrete offer tied to commander work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "A commander speaks through the practical terms of their work; distinct, economical diction.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "keep the shore alliance intact",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values cunning but fears a promise he cannot reinterpret"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    },
+    {
+      "id": "lyra",
+      "name": "Lyra",
+      "goal": "open the gate without surrendering its record",
+      "value": "values exact accounts",
+      "fear": "fears discovering her own signature",
+      "habitual_strategy": "Make a concrete offer tied to gate warden work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "A gate warden speaks through the practical terms of their work; distinct, economical diction.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "open the gate without surrendering its record",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values exact accounts but fears discovering her own signature"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    },
+    {
+      "id": "eurybates",
+      "name": "Eurybates",
+      "goal": "carry a verifiable order through hostile ground",
+      "value": "values loyalty",
+      "fear": "fears becoming the bearer of a lie",
+      "habitual_strategy": "Make a concrete offer tied to herald work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "A herald speaks through the practical terms of their work; distinct, economical diction.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "carry a verifiable order through hostile ground",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values loyalty but fears becoming the bearer of a lie"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    },
+    {
+      "id": "briseis",
+      "name": "Briseis",
+      "goal": "move the injured before the tide turns",
+      "value": "values mercy",
+      "fear": "fears trading one life for another",
+      "habitual_strategy": "Make a concrete offer tied to healer work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "A healer speaks through the practical terms of their work; distinct, economical diction.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "move the injured before the tide turns",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values mercy but fears trading one life for another"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    },
+    {
+      "id": "leontes",
+      "name": "Leontes",
+      "goal": "land his boat without abandoning his crew",
+      "value": "values practical duty",
+      "fear": "fears another unpaid oath",
+      "habitual_strategy": "Make a concrete offer tied to boatman work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "A boatman speaks through the practical terms of their work; distinct, economical diction.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "land his boat without abandoning his crew",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values practical duty but fears another unpaid oath"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    },
+    {
+      "id": "manto",
+      "name": "Manto",
+      "goal": "keep relief grain out of private hands",
+      "value": "values equal measures",
+      "fear": "fears starvation within her own house",
+      "habitual_strategy": "Make a concrete offer tied to grain steward work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "A grain steward speaks through the practical terms of their work; distinct, economical diction.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "keep relief grain out of private hands",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values equal measures but fears starvation within her own house"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    },
+    {
+      "id": "diores",
+      "name": "Diores",
+      "goal": "shore the failing quay before departure",
+      "value": "values sound work",
+      "fear": "fears a repair built on concealed rot",
+      "habitual_strategy": "Make a concrete offer tied to carpenter work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "A carpenter speaks through the practical terms of their work; distinct, economical diction.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "shore the failing quay before departure",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values sound work but fears a repair built on concealed rot"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    },
+    {
+      "id": "phaon",
+      "name": "Phaon",
+      "goal": "give one trustworthy warning",
+      "value": "values clarity",
+      "fear": "fears being ignored after an earlier false alarm",
+      "habitual_strategy": "Make a concrete offer tied to lookout work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "A lookout speaks through the practical terms of their work; distinct, economical diction.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "give one trustworthy warning",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values clarity but fears being ignored after an earlier false alarm"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    },
+    {
+      "id": "neris",
+      "name": "Neris",
+      "goal": "preserve the terms of every obligation",
+      "value": "values exact words",
+      "fear": "fears the power that can erase them",
+      "habitual_strategy": "Make a concrete offer tied to scribe work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "A scribe speaks through the practical terms of their work; distinct, economical diction.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "preserve the terms of every obligation",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values exact words but fears the power that can erase them"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    },
+    {
+      "id": "melas",
+      "name": "Melas",
+      "goal": "bring the relief chest to its proper owner",
+      "value": "values paid labor",
+      "fear": "fears being held for another man's theft",
+      "habitual_strategy": "Make a concrete offer tied to porter work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "A porter speaks through the practical terms of their work; distinct, economical diction.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "bring the relief chest to its proper owner",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values paid labor but fears being held for another man's theft"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    },
+    {
+      "id": "tima",
+      "name": "Tima",
+      "goal": "keep the last boat seaworthy",
+      "value": "values shared risk",
+      "fear": "fears taking passengers she cannot save",
+      "habitual_strategy": "Make a concrete offer tied to ferryman work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "A ferryman speaks through the practical terms of their work; distinct, economical diction.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "keep the last boat seaworthy",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values shared risk but fears taking passengers she cannot save"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    }
+  ],
+  "world_rules": [
+    "Exactly two single-use bronze gate seals exist at the opening; spending one destroys it permanently.",
+    "One seal opens the inner gate once; a second seal opens the outer barrier once.",
+    "No replacement seals, duplicate seals, supernatural refunds or offstage resupply exist.",
+    "Only Thestor and Lyra know the opening seal count until an actual disclosure.",
+    "A person knows private information only after a witnessed disclosure or discovery.",
+    "Author knowledge, future scene plans and another character's private memory are not shared knowledge.",
+    "Travel between the gate and quay takes physical effort and cannot be instantaneous.",
+    "The flooded low path remains impassable during this episode.",
+    "The collapsed western quay cannot suddenly serve as a safe landing.",
+    "The eastern gate is the only usable evacuation route.",
+    "The red release pin is held by Lyra at opening; track its custody.",
+    "The red pin opens only the powerless outer latch; it cannot create resources or open the inner gate.",
+    "Any tool transfer must happen on-page or be explicitly reported by an accountable witness.",
+    "The departure roster exists on one tablet; no unexplained copy can solve a dispute.",
+    "There are three intact mooring ropes at the opening; track any expenditure or damage.",
+    "The first relief chest contains six linen rolls; expenditure reduces that count.",
+    "Four unopened barley sacks exist at the grain shed; no hidden extra store appears.",
+    "Neris alone knows the second relief chest was never loaded; others cannot use that secret without learning it.",
+    "A belief that the quay will hold is uncertain, not a forecast guaranteed by narration.",
+    "A witnessed debt may change through explicit payment, release or a new agreement; preserve its history.",
+    "A confirmed death cannot be reversed; there are no substitutes, clones or concealed survivals.",
+    "An injury, lost tool, abandoned load or broken promise has consequences in later scenes.",
+    "Divine intervention cannot cancel an established cost, grant omniscience or refund a spent seal.",
+    "Keep ancient material perception, named social obligations and distinct character aims; no modern jargon or mechanical status summaries."
+  ],
+  "world_design": {
+    "setting": "Storm-damaged Achaean harbor and its two gates.",
+    "technology": "Bronze seals, wax tablets, rope, wooden gates; no modern machinery.",
+    "institutions": "A shore commander, gate warden and labor debts witnessed on a public tally.",
+    "physical_systems": "A rising tide and a powerless outer latch; costs are material.",
+    "deadlines": "Evacuation must precede the next high-water mark."
+  },
+  "plot_design": {
+    "central_question": "Can reciprocal obligations move a household before the harbor closes?",
+    "causal_dependencies": [
+      "The first seal is spent in scene one; only the actual remainder may reach scene two.",
+      "The red pin remains a specific custody-bound tool, not a magic rescue."
+    ],
+    "subplots": [
+      {
+        "id": "return-lyra",
+        "owner": "lyra",
+        "question": "Will she risk the borrowed pin?",
+        "intersection": "The final latch requires the pin she promised to return.",
+        "removal_cost": "Without the promise her last choice has no personal cost."
+      }
+    ],
+    "alternatives_and_costs": [
+      "Keep the seals and abandon a household, or spend them and lose the protection of controlled access."
+    ]
+  },
+  "scene_designs": [
+    {
+      "id": "ch01-sc01",
+      "pov": "thestor",
+      "participants": [
+        "thestor",
+        "odysseus",
+        "lyra",
+        "eurybates"
+      ],
+      "location": "The eastern inner gate",
+      "setting": "The tide pushes scraps of wreckage against a gate crowded by households.",
+      "time": "Before the first boat departs",
+      "dramatic_function": "Spend exactly one seal to open the inner gate and secure a household passage.",
+      "development": "Thestor and Odysseus reach one costly witnessed agreement; Thestor spends one seal and visibly transfers the remaining single unused seal to Lyra.",
+      "restrictions": "Do not open the outer barrier, spend the second seal, reveal Neris's secret or use Lyra's red pin yet.",
+      "choice_and_consequence": "The household passes the inner gate; one irreversible seal expenditure and explicit custody transfer change the next scene."
+    },
+    {
+      "id": "ch02-sc01",
+      "pov": "lyra",
+      "participants": [
+        "lyra",
+        "briseis",
+        "leontes",
+        "melas"
+      ],
+      "location": "The outer barrier and eastern quay",
+      "setting": "The remaining boat strains against its ropes as water nears the white marker.",
+      "time": "After the household reaches the outer barrier",
+      "dramatic_function": "Spend the remaining seal once, then land the household through a powerless outer latch.",
+      "development": "Lyra receives only what actually arrived from scene one, spends the last seal on the barrier, and uses her own red release pin at the powerless latch at a concrete personal cost. Briseis and Leontes have competing duties.",
+      "restrictions": "No reset of seals or inventory; do not replay the first bargain, reveal Neris's secret, use the collapsed quay, add power, or give the red pin a new function.",
+      "choice_and_consequence": "The household boards or lands through an earned physical solution, both seals remain spent, and an obligation remains meaningful."
+    }
+  ],
+  "must_avoid": [
+    "Modern diction or modern psychological frameworks.",
+    "Modern translation quotation or close imitation of a particular translation.",
+    "Handwaved acquisition, immediate complete understanding, unlimited ammunition.",
+    "Repeated discovery scenes, decorative speeches without competing aims.",
+    "Explaining already legible gestures or declaring that war changed forever.",
+    "Removing ceremonial speech, earned similes or purposeful epic repetition merely to modernize prose.",
+    "Resolving the whole Trojan War or killing Hector or Achilles."
+  ],
+  "initial_facts": [
+    {
+      "kind": "event",
+      "text": "Thestor begins at the storm-damaged eastern harbor.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "opening:thestor"
+    },
+    {
+      "kind": "resource",
+      "text": "Thestor holds two notched tongs.",
+      "known_by": [
+        "thestor"
+      ],
+      "fact_key": "custody:thestor"
+    },
+    {
+      "kind": "event",
+      "text": "Thestor is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "subject": "thestor",
+      "life_state": "alive",
+      "fact_key": "life:thestor"
+    },
+    {
+      "kind": "relationship",
+      "text": "Thestor owes Odysseus one witnessed day of labor.",
+      "known_by": [
+        "thestor",
+        "odysseus"
+      ],
+      "fact_key": "debt:thestor"
+    },
+    {
+      "kind": "belief",
+      "text": "Thestor believes the quay will hold until the second tide, but has no proof.",
+      "known_by": [
+        "thestor"
+      ],
+      "holder": "thestor",
+      "fact_key": "belief:thestor"
+    },
+    {
+      "kind": "event",
+      "text": "Thestor alone saw a blue cord tied to smith supplies before dawn.",
+      "known_by": [
+        "thestor"
+      ],
+      "fact_key": "private:thestor"
+    },
+    {
+      "kind": "thread",
+      "text": "Thestor promised to return the borrowed two notched tongs after the evacuation.",
+      "known_by": [
+        "thestor",
+        "odysseus"
+      ],
+      "thread_id": "return-thestor",
+      "thread_state": "seeded",
+      "fact_key": "thread:return-thestor"
+    },
+    {
+      "kind": "event",
+      "text": "Odysseus begins at the storm-damaged eastern harbor.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "opening:odysseus"
+    },
+    {
+      "kind": "resource",
+      "text": "Odysseus holds an ivory tally.",
+      "known_by": [
+        "odysseus"
+      ],
+      "fact_key": "custody:odysseus"
+    },
+    {
+      "kind": "event",
+      "text": "Odysseus is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "subject": "odysseus",
+      "life_state": "alive",
+      "fact_key": "life:odysseus"
+    },
+    {
+      "kind": "relationship",
+      "text": "Odysseus owes Lyra one witnessed day of labor.",
+      "known_by": [
+        "odysseus",
+        "lyra"
+      ],
+      "fact_key": "debt:odysseus"
+    },
+    {
+      "kind": "belief",
+      "text": "Odysseus believes the quay will hold until the second tide, but has no proof.",
+      "known_by": [
+        "odysseus"
+      ],
+      "holder": "odysseus",
+      "fact_key": "belief:odysseus"
+    },
+    {
+      "kind": "event",
+      "text": "Odysseus alone saw a blue cord tied to commander supplies before dawn.",
+      "known_by": [
+        "odysseus"
+      ],
+      "fact_key": "private:odysseus"
+    },
+    {
+      "kind": "thread",
+      "text": "Odysseus promised to return the borrowed an ivory tally after the evacuation.",
+      "known_by": [
+        "odysseus",
+        "lyra"
+      ],
+      "thread_id": "return-odysseus",
+      "thread_state": "seeded",
+      "fact_key": "thread:return-odysseus"
+    },
+    {
+      "kind": "event",
+      "text": "Lyra begins at the storm-damaged eastern harbor.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "opening:lyra"
+    },
+    {
+      "kind": "resource",
+      "text": "Lyra holds a red release pin.",
+      "known_by": [
+        "lyra"
+      ],
+      "fact_key": "custody:lyra"
+    },
+    {
+      "kind": "event",
+      "text": "Lyra is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "subject": "lyra",
+      "life_state": "alive",
+      "fact_key": "life:lyra"
+    },
+    {
+      "kind": "relationship",
+      "text": "Lyra owes Eurybates one witnessed day of labor.",
+      "known_by": [
+        "lyra",
+        "eurybates"
+      ],
+      "fact_key": "debt:lyra"
+    },
+    {
+      "kind": "belief",
+      "text": "Lyra believes the quay will hold until the second tide, but has no proof.",
+      "known_by": [
+        "lyra"
+      ],
+      "holder": "lyra",
+      "fact_key": "belief:lyra"
+    },
+    {
+      "kind": "event",
+      "text": "Lyra alone saw a blue cord tied to gate warden supplies before dawn.",
+      "known_by": [
+        "lyra"
+      ],
+      "fact_key": "private:lyra"
+    },
+    {
+      "kind": "thread",
+      "text": "Lyra promised to return the borrowed a red release pin after the evacuation.",
+      "known_by": [
+        "lyra",
+        "eurybates"
+      ],
+      "thread_id": "return-lyra",
+      "thread_state": "seeded",
+      "fact_key": "thread:return-lyra"
+    },
+    {
+      "kind": "event",
+      "text": "Eurybates begins at the storm-damaged eastern harbor.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "opening:eurybates"
+    },
+    {
+      "kind": "resource",
+      "text": "Eurybates holds a wax-sealed roster.",
+      "known_by": [
+        "eurybates"
+      ],
+      "fact_key": "custody:eurybates"
+    },
+    {
+      "kind": "event",
+      "text": "Eurybates is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "subject": "eurybates",
+      "life_state": "alive",
+      "fact_key": "life:eurybates"
+    },
+    {
+      "kind": "relationship",
+      "text": "Eurybates owes Briseis one witnessed day of labor.",
+      "known_by": [
+        "eurybates",
+        "briseis"
+      ],
+      "fact_key": "debt:eurybates"
+    },
+    {
+      "kind": "belief",
+      "text": "Eurybates believes the quay will hold until the second tide, but has no proof.",
+      "known_by": [
+        "eurybates"
+      ],
+      "holder": "eurybates",
+      "fact_key": "belief:eurybates"
+    },
+    {
+      "kind": "event",
+      "text": "Eurybates alone saw a blue cord tied to herald supplies before dawn.",
+      "known_by": [
+        "eurybates"
+      ],
+      "fact_key": "private:eurybates"
+    },
+    {
+      "kind": "thread",
+      "text": "Eurybates promised to return the borrowed a wax-sealed roster after the evacuation.",
+      "known_by": [
+        "eurybates",
+        "briseis"
+      ],
+      "thread_id": "return-eurybates",
+      "thread_state": "seeded",
+      "fact_key": "thread:return-eurybates"
+    },
+    {
+      "kind": "event",
+      "text": "Briseis begins at the storm-damaged eastern harbor.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "opening:briseis"
+    },
+    {
+      "kind": "resource",
+      "text": "Briseis holds a folded linen bandage.",
+      "known_by": [
+        "briseis"
+      ],
+      "fact_key": "custody:briseis"
+    },
+    {
+      "kind": "event",
+      "text": "Briseis is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "subject": "briseis",
+      "life_state": "alive",
+      "fact_key": "life:briseis"
+    },
+    {
+      "kind": "relationship",
+      "text": "Briseis owes Leontes one witnessed day of labor.",
+      "known_by": [
+        "briseis",
+        "leontes"
+      ],
+      "fact_key": "debt:briseis"
+    },
+    {
+      "kind": "belief",
+      "text": "Briseis believes the quay will hold until the second tide, but has no proof.",
+      "known_by": [
+        "briseis"
+      ],
+      "holder": "briseis",
+      "fact_key": "belief:briseis"
+    },
+    {
+      "kind": "event",
+      "text": "Briseis alone saw a blue cord tied to healer supplies before dawn.",
+      "known_by": [
+        "briseis"
+      ],
+      "fact_key": "private:briseis"
+    },
+    {
+      "kind": "thread",
+      "text": "Briseis promised to return the borrowed a folded linen bandage after the evacuation.",
+      "known_by": [
+        "briseis",
+        "leontes"
+      ],
+      "thread_id": "return-briseis",
+      "thread_state": "seeded",
+      "fact_key": "thread:return-briseis"
+    },
+    {
+      "kind": "event",
+      "text": "Leontes begins at the storm-damaged eastern harbor.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "opening:leontes"
+    },
+    {
+      "kind": "resource",
+      "text": "Leontes holds a frayed sounding line.",
+      "known_by": [
+        "leontes"
+      ],
+      "fact_key": "custody:leontes"
+    },
+    {
+      "kind": "event",
+      "text": "Leontes is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "subject": "leontes",
+      "life_state": "alive",
+      "fact_key": "life:leontes"
+    },
+    {
+      "kind": "relationship",
+      "text": "Leontes owes Manto one witnessed day of labor.",
+      "known_by": [
+        "leontes",
+        "manto"
+      ],
+      "fact_key": "debt:leontes"
+    },
+    {
+      "kind": "belief",
+      "text": "Leontes believes the quay will hold until the second tide, but has no proof.",
+      "known_by": [
+        "leontes"
+      ],
+      "holder": "leontes",
+      "fact_key": "belief:leontes"
+    },
+    {
+      "kind": "event",
+      "text": "Leontes alone saw a blue cord tied to boatman supplies before dawn.",
+      "known_by": [
+        "leontes"
+      ],
+      "fact_key": "private:leontes"
+    },
+    {
+      "kind": "thread",
+      "text": "Leontes promised to return the borrowed a frayed sounding line after the evacuation.",
+      "known_by": [
+        "leontes",
+        "manto"
+      ],
+      "thread_id": "return-leontes",
+      "thread_state": "seeded",
+      "fact_key": "thread:return-leontes"
+    },
+    {
+      "kind": "event",
+      "text": "Manto begins at the storm-damaged eastern harbor.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "opening:manto"
+    },
+    {
+      "kind": "resource",
+      "text": "Manto holds a bronze grain scoop.",
+      "known_by": [
+        "manto"
+      ],
+      "fact_key": "custody:manto"
+    },
+    {
+      "kind": "event",
+      "text": "Manto is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "subject": "manto",
+      "life_state": "alive",
+      "fact_key": "life:manto"
+    },
+    {
+      "kind": "relationship",
+      "text": "Manto owes Diores one witnessed day of labor.",
+      "known_by": [
+        "manto",
+        "diores"
+      ],
+      "fact_key": "debt:manto"
+    },
+    {
+      "kind": "belief",
+      "text": "Manto believes the quay will hold until the second tide, but has no proof.",
+      "known_by": [
+        "manto"
+      ],
+      "holder": "manto",
+      "fact_key": "belief:manto"
+    },
+    {
+      "kind": "event",
+      "text": "Manto alone saw a blue cord tied to grain steward supplies before dawn.",
+      "known_by": [
+        "manto"
+      ],
+      "fact_key": "private:manto"
+    },
+    {
+      "kind": "thread",
+      "text": "Manto promised to return the borrowed a bronze grain scoop after the evacuation.",
+      "known_by": [
+        "manto",
+        "diores"
+      ],
+      "thread_id": "return-manto",
+      "thread_state": "seeded",
+      "fact_key": "thread:return-manto"
+    },
+    {
+      "kind": "event",
+      "text": "Diores begins at the storm-damaged eastern harbor.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "opening:diores"
+    },
+    {
+      "kind": "resource",
+      "text": "Diores holds a wooden plumb bob.",
+      "known_by": [
+        "diores"
+      ],
+      "fact_key": "custody:diores"
+    },
+    {
+      "kind": "event",
+      "text": "Diores is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "subject": "diores",
+      "life_state": "alive",
+      "fact_key": "life:diores"
+    },
+    {
+      "kind": "relationship",
+      "text": "Diores owes Phaon one witnessed day of labor.",
+      "known_by": [
+        "diores",
+        "phaon"
+      ],
+      "fact_key": "debt:diores"
+    },
+    {
+      "kind": "belief",
+      "text": "Diores believes the quay will hold until the second tide, but has no proof.",
+      "known_by": [
+        "diores"
+      ],
+      "holder": "diores",
+      "fact_key": "belief:diores"
+    },
+    {
+      "kind": "event",
+      "text": "Diores alone saw a blue cord tied to carpenter supplies before dawn.",
+      "known_by": [
+        "diores"
+      ],
+      "fact_key": "private:diores"
+    },
+    {
+      "kind": "thread",
+      "text": "Diores promised to return the borrowed a wooden plumb bob after the evacuation.",
+      "known_by": [
+        "diores",
+        "phaon"
+      ],
+      "thread_id": "return-diores",
+      "thread_state": "seeded",
+      "fact_key": "thread:return-diores"
+    },
+    {
+      "kind": "event",
+      "text": "Phaon begins at the storm-damaged eastern harbor.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "opening:phaon"
+    },
+    {
+      "kind": "resource",
+      "text": "Phaon holds a cracked signal mirror.",
+      "known_by": [
+        "phaon"
+      ],
+      "fact_key": "custody:phaon"
+    },
+    {
+      "kind": "event",
+      "text": "Phaon is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "subject": "phaon",
+      "life_state": "alive",
+      "fact_key": "life:phaon"
+    },
+    {
+      "kind": "relationship",
+      "text": "Phaon owes Neris one witnessed day of labor.",
+      "known_by": [
+        "phaon",
+        "neris"
+      ],
+      "fact_key": "debt:phaon"
+    },
+    {
+      "kind": "belief",
+      "text": "Phaon believes the quay will hold until the second tide, but has no proof.",
+      "known_by": [
+        "phaon"
+      ],
+      "holder": "phaon",
+      "fact_key": "belief:phaon"
+    },
+    {
+      "kind": "event",
+      "text": "Phaon alone saw a blue cord tied to lookout supplies before dawn.",
+      "known_by": [
+        "phaon"
+      ],
+      "fact_key": "private:phaon"
+    },
+    {
+      "kind": "thread",
+      "text": "Phaon promised to return the borrowed a cracked signal mirror after the evacuation.",
+      "known_by": [
+        "phaon",
+        "neris"
+      ],
+      "thread_id": "return-phaon",
+      "thread_state": "seeded",
+      "fact_key": "thread:return-phaon"
+    },
+    {
+      "kind": "event",
+      "text": "Neris begins at the storm-damaged eastern harbor.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "opening:neris"
+    },
+    {
+      "kind": "resource",
+      "text": "Neris holds a reed stylus.",
+      "known_by": [
+        "neris"
+      ],
+      "fact_key": "custody:neris"
+    },
+    {
+      "kind": "event",
+      "text": "Neris is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "subject": "neris",
+      "life_state": "alive",
+      "fact_key": "life:neris"
+    },
+    {
+      "kind": "relationship",
+      "text": "Neris owes Melas one witnessed day of labor.",
+      "known_by": [
+        "neris",
+        "melas"
+      ],
+      "fact_key": "debt:neris"
+    },
+    {
+      "kind": "belief",
+      "text": "Neris believes the quay will hold until the second tide, but has no proof.",
+      "known_by": [
+        "neris"
+      ],
+      "holder": "neris",
+      "fact_key": "belief:neris"
+    },
+    {
+      "kind": "event",
+      "text": "Neris alone saw a blue cord tied to scribe supplies before dawn.",
+      "known_by": [
+        "neris"
+      ],
+      "fact_key": "private:neris"
+    },
+    {
+      "kind": "thread",
+      "text": "Neris promised to return the borrowed a reed stylus after the evacuation.",
+      "known_by": [
+        "neris",
+        "melas"
+      ],
+      "thread_id": "return-neris",
+      "thread_state": "seeded",
+      "fact_key": "thread:return-neris"
+    },
+    {
+      "kind": "event",
+      "text": "Melas begins at the storm-damaged eastern harbor.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "opening:melas"
+    },
+    {
+      "kind": "resource",
+      "text": "Melas holds a leather carrying strap.",
+      "known_by": [
+        "melas"
+      ],
+      "fact_key": "custody:melas"
+    },
+    {
+      "kind": "event",
+      "text": "Melas is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "subject": "melas",
+      "life_state": "alive",
+      "fact_key": "life:melas"
+    },
+    {
+      "kind": "relationship",
+      "text": "Melas owes Tima one witnessed day of labor.",
+      "known_by": [
+        "melas",
+        "tima"
+      ],
+      "fact_key": "debt:melas"
+    },
+    {
+      "kind": "belief",
+      "text": "Melas believes the quay will hold until the second tide, but has no proof.",
+      "known_by": [
+        "melas"
+      ],
+      "holder": "melas",
+      "fact_key": "belief:melas"
+    },
+    {
+      "kind": "event",
+      "text": "Melas alone saw a blue cord tied to porter supplies before dawn.",
+      "known_by": [
+        "melas"
+      ],
+      "fact_key": "private:melas"
+    },
+    {
+      "kind": "thread",
+      "text": "Melas promised to return the borrowed a leather carrying strap after the evacuation.",
+      "known_by": [
+        "melas",
+        "tima"
+      ],
+      "thread_id": "return-melas",
+      "thread_state": "seeded",
+      "fact_key": "thread:return-melas"
+    },
+    {
+      "kind": "event",
+      "text": "Tima begins at the storm-damaged eastern harbor.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "opening:tima"
+    },
+    {
+      "kind": "resource",
+      "text": "Tima holds a worn steering oar.",
+      "known_by": [
+        "tima"
+      ],
+      "fact_key": "custody:tima"
+    },
+    {
+      "kind": "event",
+      "text": "Tima is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "subject": "tima",
+      "life_state": "alive",
+      "fact_key": "life:tima"
+    },
+    {
+      "kind": "relationship",
+      "text": "Tima owes Thestor one witnessed day of labor.",
+      "known_by": [
+        "tima",
+        "thestor"
+      ],
+      "fact_key": "debt:tima"
+    },
+    {
+      "kind": "belief",
+      "text": "Tima believes the quay will hold until the second tide, but has no proof.",
+      "known_by": [
+        "tima"
+      ],
+      "holder": "tima",
+      "fact_key": "belief:tima"
+    },
+    {
+      "kind": "event",
+      "text": "Tima alone saw a blue cord tied to ferryman supplies before dawn.",
+      "known_by": [
+        "tima"
+      ],
+      "fact_key": "private:tima"
+    },
+    {
+      "kind": "thread",
+      "text": "Tima promised to return the borrowed a worn steering oar after the evacuation.",
+      "known_by": [
+        "tima",
+        "thestor"
+      ],
+      "thread_id": "return-tima",
+      "thread_state": "seeded",
+      "fact_key": "thread:return-tima"
+    },
+    {
+      "kind": "resource",
+      "text": "Thestor holds exactly two unused bronze gate seals.",
+      "known_by": [
+        "thestor",
+        "lyra"
+      ],
+      "fact_key": "gate-seals"
+    },
+    {
+      "kind": "resource",
+      "text": "The eastern quay holds exactly three intact mooring ropes.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "quay-ropes"
+    },
+    {
+      "kind": "resource",
+      "text": "The first relief chest contains six linen rolls.",
+      "known_by": [
+        "briseis",
+        "melas"
+      ],
+      "fact_key": "linen-rolls"
+    },
+    {
+      "kind": "resource",
+      "text": "The grain shed holds four unopened sacks of barley.",
+      "known_by": [
+        "manto",
+        "neris"
+      ],
+      "fact_key": "barley-sacks"
+    },
+    {
+      "kind": "event",
+      "text": "The low coastal path is already under water.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "low-path"
+    },
+    {
+      "kind": "event",
+      "text": "The western quay collapsed before this episode and cannot take a boat.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "western-quay"
+    },
+    {
+      "kind": "event",
+      "text": "A tall white marker on the eastern gate shows the safe high-water limit.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "water-marker"
+    },
+    {
+      "kind": "event",
+      "text": "The departure roster is written on one wax tablet held by Eurybates.",
+      "known_by": [
+        "eurybates",
+        "lyra"
+      ],
+      "fact_key": "roster"
+    },
+    {
+      "kind": "event",
+      "text": "A public debt tally stands beside the gate.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "debt-tally"
+    },
+    {
+      "kind": "event",
+      "text": "The first boat waits outside the eastern gate with its mast lowered.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "first-boat"
+    },
+    {
+      "kind": "event",
+      "text": "Lyra knows the red release pin can open the powerless outer latch.",
+      "known_by": [
+        "lyra"
+      ],
+      "fact_key": "pin-function"
+    },
+    {
+      "kind": "event",
+      "text": "Only Neris knows that the second relief chest was never loaded.",
+      "known_by": [
+        "neris"
+      ],
+      "fact_key": "missing-chest"
+    }
+  ],
+  "execution_intent": {
+    "authorized": "User requested a short live one-scene practice after merging fixes.",
+    "workflow": "Same separate-runner gates as the full experiment, with one scene and smaller CPU models."
+  },
+  "execution_policy": {
+    "experimental": false,
+    "literary_quality": true,
+    "continue_with_warnings": false,
+    "cpu_models": {
+      "humanizer": "qwen7b",
+      "repair": "qwen7b",
+      "story_quality": "qwen7b",
+      "rhetoric_quality": "qwen7b",
+      "memory": "qwen7b",
+      "memory_quality": "qwen7b",
+      "chapter_quality": "qwen7b",
+      "director": "qwen7b",
+      "scene_designer": "qwen7b",
+      "character": "qwen7b",
+      "writer": "qwen7b",
+      "writer_beat": "qwen7b"
+    },
+    "editorial_disagreement": "one_strict_check",
+    "gemini_batches": true,
+    "total_call_seconds": {
+      "humanizer": 180,
+      "repair": 180,
+      "story_quality": 120,
+      "rhetoric_quality": 120,
+      "memory": 180,
+      "memory_quality": 120,
+      "chapter_quality": 120,
+      "director": 120,
+      "scene_designer": 120,
+      "character": 120,
+      "writer": 180,
+      "writer_beat": 180
+    },
+    "hosted_route_seconds": 40,
+    "hosted_required_roles": [
+      "writer_beat",
+      "writer",
+      "repair",
+      "humanizer",
+      "story_quality",
+      "rhetoric_quality",
+      "memory",
+      "memory_quality",
+      "chapter_quality",
+      "scene_designer",
+      "director",
+      "character"
+    ],
+    "hosted_routes": {
+      "story_quality": [
+        "flash36"
+      ],
+      "rhetoric_quality": [
+        "flash36"
+      ],
+      "chapter_quality": [
+        "flash36"
+      ],
+      "writer": [
+        "flash36",
+        "flash"
+      ],
+      "writer_beat": [
+        "flash36",
+        "flash"
+      ],
+      "repair": [
+        "flash36",
+        "flash"
+      ],
+      "humanizer": [
+        "flash",
+        "flash36"
+      ],
+      "memory": [
+        "lite"
+      ],
+      "memory_quality": [
+        "lite"
+      ],
+      "director": [
+        "lite"
+      ],
+      "scene_designer": [
+        "lite"
+      ],
+      "character": [
+        "lite"
+      ]
+    },
+    "max_hosted_requests": 2
+  },
+  "performance": {
+    "compact_packets": true,
+    "application_prompt_binding": true,
+    "hosted_failover": false,
+    "batch_development": true,
+    "canon_index": true,
+    "inherit_provider_budget": false,
+    "application_plan_binding": true,
+    "development_batch_size": 6,
+    "api_batch_probes": false,
+    "working_memory_chars": 3500,
+    "combine_direction": true,
+    "classic_expansion": true,
+    "validate_scene_prose": true,
+    "batched_prose": true,
+    "batched_repairs": true,
+    "living_universe": true,
+    "readable_editorial": true,
+    "summary_reviews": false,
+    "memory_pair_batches": true,
+    "empowered_editors": true,
+    "adaptive_batches": true,
+    "verified_draft_continuity": true,
+    "living_bounded": true,
+    "pipelined_living": true
+  },
+  "api_roles": {
+    "writer_beat": "flash",
+    "writer": "flash",
+    "repair": "flash36",
+    "humanizer": "flash36",
+    "story_quality": "flash36",
+    "rhetoric_quality": "flash36",
+    "memory": "lite",
+    "memory_quality": "lite",
+    "chapter_quality": "flash36",
+    "scene_designer": "lite",
+    "director": "lite",
+    "character": "lite"
+  },
+  "chapter_contract": {
+    "arc": "Consequential actions change a persistent world without a predetermined ending.",
+    "continuity": "Preserve custody, time, condition, obligations and individual knowledge.",
+    "ending": "An episode can end with a consequential open thread; no forced resolution."
+  },
+  "quality_contract": [
+    "No direct or quoted dialogue; indirect narration of offers and commitments is explicitly permitted.",
+    "Maintain all actual costs, witnesses, individual knowledge and resource custody between scenes.",
+    "Each scene must add a new consequential action, not replay the earlier bargain or rescue.",
+    "Use vivid ancient material detail, character agency, subtext and a costly choice; never recite an inventory.",
+    "Only planned participants must appear; the remaining cast still has persistent memories and obligations."
+  ],
+  "chapter_arcs": [
+    "A household seeks passage. Storm damage exposes a troubling object; choosing to investigate costs time or wages. No completed decipherment, divine visit, expedition or weapon acquisition."
+  ],
+  "universe_id": "shore-gate-scale",
+  "creative_freedom": {
+    "enabled": true,
+    "intensity": 0.35,
+    "new_characters": false,
+    "character_deaths": false,
+    "protected_characters": [
+      "thestor",
+      "odysseus",
+      "lyra",
+      "eurybates",
+      "briseis",
+      "leontes",
+      "manto",
+      "diores",
+      "phaon",
+      "neris",
+      "melas",
+      "tima"
+    ],
+    "max_new_per_scene": 0,
+    "cast_limit": 16
+  }
+}
