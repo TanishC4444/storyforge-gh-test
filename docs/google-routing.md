@@ -94,3 +94,9 @@ checks is evidence of compliance, not a guarantee of matching a historical autho
 literary achievement. Findings retain their original negative judgments; passage
 IDs determine paragraph locations in application code. Scene-wide findings remain
 scene-wide, and unknown evidence is rejected.
+
+Known model-specific project cooldowns are excluded before choosing the bounded
+project attempts. This inspects local health records without an HTTP request;
+unknown projects still obey the same attempt cap, and other models are unaffected.
+Cooldowns are inherited only where the caller supplies upstream quota artifacts;
+this does not create a distributed cross-run health service.

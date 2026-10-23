@@ -51,3 +51,9 @@ The corrected run reuses returned original drafts only when saved writer inputs
 and model exactly match. It never regenerates a completed baseline to chase a
 more favorable comparison. Previous attempt usage and active time remain included
 in cumulative metrics; `active_attempt_seconds` identifies the new work alone.
+
+Recovery inherits per-project quota/cooldown records and can select only unfinished
+cases via the `cases` JSON array input. Unchanged editorial assessments and memory
+proofs are reused with exact input/source/state binding. Known cooled projects are
+skipped by reading local health records, not by probing the API; the two-request
+cap is unchanged.

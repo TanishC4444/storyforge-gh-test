@@ -61,3 +61,16 @@ class ComparisonTests(unittest.TestCase):
             with patch.object(demo.Provider,'call',side_effect=AssertionError('Never hide a mismatched input with regeneration')):
                 failed,_=demo.run_arm(self.case,'baseline',root/'mismatch',resume=previous)
             self.assertFalse(failed['complete']);self.assertIn('inputs differ',failed['errors'][0])
+    def test_verified_unchanged_memory_is_reused_without_model_calls(self):
+        from storyforge.contracts import delta
+        from storyforge.storage import save
+        from storyforge.batch_pipeline import bind_state
+        state=demo.state_for(self.case);prose='Iona held one unused emergency cell after opening the gate.'
+        facts=delta({'memories':[{'kind':'resource','text':'Iona holds one unused emergency cell.','known_by':['iona','val'],'evidence_ids':['p001'],'fact_key':'ferry-cells','supersedes':['m00000']}]},prose,['iona','val','sen'])
+        proof={'pass':True,'issues':[],'source_sha256':demo.digest(prose),'state_sha256':bind_state(state),'memory_sha256':bind_state(facts)}
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);prior=root/'prior';save(prior/'verified/review.json',proof);save(prior/'memory/memory.json',facts)
+            with patch.object(demo.memory,'extract_plan',side_effect=AssertionError('No inference for unchanged proof')):
+                demo.retain_memory(state,{'id':'ch01-sc01'},prose,root/'new',prior=prior)
+            self.assertEqual(len(state['draft_memories']),1);self.assertEqual(len(state['memories']),1)
+            self.assertTrue(load(root/'new/reuse.json')['unchanged_source_state_and_memory'])

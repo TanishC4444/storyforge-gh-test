@@ -88,8 +88,16 @@ def repair_scene(provider,case,history,prose,review):
     return apply(prose,result['replacements'],digest(prose))
 
 
-def retain_memory(state,card,prose,folder):
+def retain_memory(state,card,prose,folder,prior=None):
     folder=Path(folder);save(folder/'edited/prose.txt',prose)
+    if prior and (prior/'verified/review.json').exists() and (prior/'memory/memory.json').exists():
+        from storyforge.batch_pipeline import bind_state
+        proof=load(prior/'verified/review.json');facts=load(prior/'memory/memory.json')
+        if proof.get('pass') and not proof.get('unverified') and proof.get('source_sha256')==digest(prose) and proof.get('state_sha256')==bind_state(state) and proof.get('memory_sha256')==bind_state(facts):
+            append_verified_branch(state,facts,card['id'],prose,proof)
+            shutil.copytree(prior,folder,dirs_exist_ok=True)
+            save(folder/'reuse.json',{'unchanged_source_state_and_memory':True,'source_sha256':digest(prose)})
+            return
     p=memory.extract_plan(state,folder,folder/'plan')
     for b in p['batches']:
         memory.extract_batch(state,card,folder,folder/'batches'/b['id'],'worker',b['id'])
@@ -110,7 +118,9 @@ def run_arm(case,arm,out,resume=None):
     out=Path(out);provider=Provider(out);state=state_for(case);history=[];started=time.monotonic();reviews=[]
     prior=Path(resume)/arm if resume else None
     prior_result=load(prior/'result.json') if prior and (prior/'result.json').exists() else {}
-    if prior_result:shutil.copytree(prior,out/'previous-attempt')
+    if prior_result:
+        shutil.copytree(prior,out/'previous-attempt')
+        provider.client.inherit(prior.rglob('quota.json'))
     resumed=0
     result={'arm':arm,'model':MODELS['flash36'],'complete':False,'chapters_written':0,'errors':[],'editorial':reviews}
     try:
@@ -132,7 +142,11 @@ def run_arm(case,arm,out,resume=None):
             save(chapter/'prose.txt',prose)
             if arm=='storyforge':
                 try:
-                    verdict=review_scene(provider,case,history,prose,state);save(chapter/'review.json',verdict)
+                    if previous and (previous/'review.json').exists() and (previous/'prose.txt').read_text()==prose:
+                        verdict=editorial_review(load(previous/'review.json'),prose,CHECKS)
+                        save(chapter/'review-reused.json',{'source_sha256':digest(prose),'identical_writer_input':True})
+                    else:verdict=review_scene(provider,case,history,prose,state)
+                    save(chapter/'review.json',verdict)
                     if any(x['severity']=='blocking' for x in verdict['issues']):
                         proposed=repair_scene(provider,case,history,prose,verdict);save(chapter/'proposed-repair.txt',proposed)
                         final=review_scene(provider,case,history,proposed,state);save(chapter/'strict-final-review.json',final)
@@ -145,7 +159,7 @@ def run_arm(case,arm,out,resume=None):
             history.append(prose);result['chapters_written']=len(history)
             save(out/'story.txt',case['title']+'\n\n'+'\n\n'.join(f'Chapter {j+1}\n\n{text}' for j,text in enumerate(history)))
             if arm=='storyforge' and i<len(case['chapters'])-1:
-                retain_memory(state,card,prose,chapter/'memory')
+                retain_memory(state,card,prose,chapter/'memory',prior=previous/'memory' if previous else None)
                 state['accepted'].append({'id':card['id'],'prose':prose,'participants':card['participants'],'canon_committed':False})
                 state['version']+=1
         result['complete']=True
