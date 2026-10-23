@@ -1,5 +1,5 @@
 """Small role packets; full source material remains in checkpoints and provenance."""
-import copy
+import copy,json
 
 OPERATIONAL={'project_id','profile','max_repairs','max_stage_retries','context_chars','n_ctx',
              'runner_repo','auto_approve_plan','execution_intent','execution_policy','performance',
@@ -36,6 +36,25 @@ def concise_packet(packet,req):
         if by_id and 'facts' in view:
             view['facts']=[{'fact_id':m['id'],'source':'prior_canon.facts'} if m.get('id') in by_id and m==by_id[m['id']] else m for m in view['facts']]
             view['visibility_policy']='Only these listed facts are known to this POV; other author facts remain private. References resolve against the complete prior_canon ledger above.'
+    if req.get('performance',{}).get('pipelined_living'):
+        # Lossless sharing only: one ledger, explicit knowledge allowlists, and
+        # authored profiles remain complete. Do not summarize or slice memory.
+        if result.get('world_rules')==result.get('author_contract',{}).get('world_rules'):
+            result.pop('world_rules',None)
+        if isinstance(result.get('direction'),str):
+            try:direction=json.loads(result['direction'])
+            except ValueError:direction=None
+            if isinstance(direction,dict):
+                if 'scene' in direction and direction['scene']==result.get('scene'):
+                    direction['scene']={'source':'scene'}
+                ledger={m.get('id') for m in result.get('prior_canon',{}).get('facts',[])}
+                for actor in direction.get('observable_proposals',[]):
+                    if actor.get('method')!='source_bound_character_context_no_inference':continue
+                    actor['known_facts']=[m['fact_id'] if isinstance(m,dict) and m.get('source')=='prior_canon.facts' and m.get('fact_id') in ledger else m for m in actor.get('known_facts',[])]
+                    actor['knowledge_policy']+=' String IDs in known_facts resolve only against prior_canon.facts; all other facts stay private.'
+                result['direction']=direction
+        if result.get('your_beat') in result.get('ordered_beat_plan',[]):
+            result['your_beat']={'id':result['your_beat']['id'],'source':'ordered_beat_plan'}
     # Chapter excerpts already contain these endings; keep one source projection.
     if result.get('completed_events') and isinstance(result.get('author_continuity'),dict):
         covered={s['id'] for s in result['completed_events']}

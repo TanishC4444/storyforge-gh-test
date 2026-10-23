@@ -82,6 +82,9 @@ def execute(task,source,out,index=0,backend='fixture'):
             copy_file(source/'findings'/kind/'review.json',source/kind/'review.json')
         b.finalize(state,card,source,out,backend)
     elif task=='accept':
+        if state['request'].get('performance',{}).get('strict_draft_handoff'):
+            from .craft import validate_prose
+            validate_prose((source/'edited/prose.txt').read_text(),state['request'],check_length=backend!='fixture')
         final=load(source/'edited/repair.json')['editorial_adjudication']
         save(source/'story-review/review.json',final['story']);save(source/'rhetoric-review/review.json',final['rhetoric'])
         stage('accept',source,out,index=index,backend=backend)

@@ -210,3 +210,58 @@ class LivingPipelineTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d,patch.dict(os.environ,{'GEMINI_API_KEY':'placeholder','GEMINI_API_KEYS':'[]','GEMINI_DISTINCT_PROJECTS':'true'}),patch('urllib.request.urlopen',side_effect=serve),patch('storyforge.local_worker.execute',side_effect=AssertionError('No CPU fallback')):
             with self.assertRaises(ContractError):Executor(req,d,'worker').call('writer_beat',{},'Write.',output_format='text',tokens=200)
             self.assertEqual(len(calls),3)
+
+    def test_strict_short_draft_expands_once_before_handoff(self):
+        from storyforge.craft import validate_prose
+        with tempfile.TemporaryDirectory() as d,patch.dict(os.environ,{'STORY_LEAN_LIVING':'true','STORY_LIVING_PIPELINE':'true'}),redirect_stdout(io.StringIO()):
+            root=Path(d);stage('prepare',root/'none',root/'base',request_file='living-scale-practice',backend='fixture')
+            state=prepare(root/'base/snapshot.json',root/'quick',backend='fixture');card=state['plan']['scenes'][0]
+            save(root/'source/direction/direction.txt','Use the authored scene and its exact knowledge restrictions.')
+            b.plan_draft(state,card,root/'source',root/'source/plan','fixture')
+            short=' '.join('action'+str(i) for i in range(551));expanded=' '.join('action'+str(i) for i in range(900))
+            with patch('storyforge.hosted.GoogleHosted.complete',side_effect=[(short,{'finish_reason':'stop','model':'test'}),(expanded,{'finish_reason':'stop','model':'test'})]) as provider:
+                result=b.write_batch(state,card,root/'source',root/'batch','worker','0')
+            self.assertEqual(provider.call_count,2)
+            self.assertEqual([c.kwargs['role'] for c in provider.call_args_list],['writer_beat','repair'])
+            self.assertTrue(result['verified_form']);self.assertEqual(result['errors'],[])
+            self.assertEqual(len(result['prose'].split()),900)
+            validate_prose(result['prose'],state['request'],check_length=True)
+            repair_packet=load(next((root/'batch/1/packets').glob('*.json')))
+            self.assertIn('551 words',repair_packet['input']['specific_errors'][0])
+            self.assertEqual(repair_packet['input']['rejected_batch'],short)
+
+    def test_strict_merge_rejects_short_or_unverified_drafts(self):
+        with tempfile.TemporaryDirectory() as d,redirect_stdout(io.StringIO()):
+            root=Path(d);stage('prepare',root/'none',root/'base',request_file='living-scale-practice',backend='fixture')
+            state=prepare(root/'base/snapshot.json',root/'quick',backend='fixture');state['backend']='worker';card=state['plan']['scenes'][0]
+            save(root/'source/direction/direction.txt','Keep source canon.')
+            plan=b.plan_draft(state,card,root/'source',root/'source/plan','fixture')
+            value={'id':'0','state_sha256':plan['state_sha256'],'plan_sha256':plan['plan_sha256'],'prose':' '.join(['word']*551),'verified_form':True,'errors':[]}
+            save(root/'source/batches/0/draft-batch.json',value)
+            with self.assertRaisesRegex(ValueError,'551 words'):b.merge_draft(state,root/'source',root/'bad')
+            value.update(prose=' '.join(['word']*900),verified_form=False,errors=['Rejected by form validator'])
+            save(root/'source/batches/0/draft-batch.json',value)
+            with self.assertRaisesRegex(ValueError,'Unverified writing batch'):b.merge_draft(state,root/'source',root/'bad')
+            self.assertFalse((root/'bad/draft.txt').exists())
+
+    def test_direction_sharing_preserves_full_memory_profiles_and_private_beliefs(self):
+        from storyforge.working_context import concise_packet
+        from storyforge.canon import bridge
+        with tempfile.TemporaryDirectory() as d,redirect_stdout(io.StringIO()):
+            root=Path(d);stage('prepare',root/'none',root/'base',request_file='living-scale-practice',backend='fixture')
+            state=prepare(root/'base/snapshot.json',root/'quick',backend='fixture');req=state['request'];card=state['plan']['scenes'][0]
+            data=b.scene_context(state,card)
+            prior=bridge(state);facts=prior['facts'];belief={'id':'old-private','text':'An outdated private belief','known_by':['lyra']}
+            profiles=req['characters'][:4]
+            actors=[{'character':c['id'],'method':'source_bound_character_context_no_inference','character_profile':c,'knowledge_policy':'Only listed facts are known.','known_facts':[{'fact_id':m['id'],'source':'prior_canon.facts'} for m in facts[:12]]+[belief]} for c in profiles]
+            data['direction']=json.dumps({'scene':card,'observable_proposals':actors})
+            before=copy.deepcopy(data);compact=concise_packet(data,req)
+            self.assertEqual(data,before);self.assertEqual(compact['prior_canon'],prior)
+            self.assertEqual(len(compact['prior_canon']['facts']),96)
+            self.assertEqual(compact['direction']['scene'],{'source':'scene'})
+            self.assertNotIn('world_rules',compact)
+            self.assertEqual(compact['author_contract']['world_rules'],req['world_rules'])
+            for original,projected in zip(actors,compact['direction']['observable_proposals']):
+                self.assertEqual(projected['character_profile'],original['character_profile'])
+                self.assertEqual(projected['known_facts'],[m['id'] for m in facts[:12]]+[belief])
+            self.assertLess(len(json.dumps(compact)),len(json.dumps(before)))

@@ -113,3 +113,17 @@ have this capacity fallback. At most three HTTP requests are allowed per call;
 this does not rotate through all keys or change approvals into warnings. If every
 provider fails, the workflow preserves diagnostics and remains failed rather than
 inventing prose or marking an unreviewed story approved.
+
+Strict draft handoffs now require every expected writing batch to pass the actual
+form and length validator. A short candidate gets one complete, source-grounded
+expansion attempt with its exact word-range error and a larger output allowance.
+Failed expansion retains readable prose for diagnostics but stops the writer and
+merge; acceptance independently rechecks form and length. No lowered word target
+or provisional approval is substituted.
+
+Pipeline writer packets share identical scene cards, world rules, beat cards and
+actor fact references rather than repeating them in serialized direction text.
+All current facts, complete authored actor profiles, knowledge allowlists and
+historical beliefs remain. Replaying the failed scene-two packet with a 900-word
+rejected candidate yields about 51,500 input characters before the system prompt,
+within the existing 64,000-character budget. No memory cutoff was increased.
