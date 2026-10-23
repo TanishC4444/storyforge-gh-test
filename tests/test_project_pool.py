@@ -65,3 +65,20 @@ class IndependentProjectTests(unittest.TestCase):
             for child in h.project_children:child.complete=rejected
             with self.assertRaises(HostedError):h.complete('flash','s','p',100,role='repair')
             self.assertEqual(len(calls),1)
+
+    def test_known_cooled_projects_do_not_consume_bounded_selections(self):
+        with self.env(),tempfile.TemporaryDirectory() as d,patch.dict(os.environ,{'STORY_BATCH':'0'}):
+            h=GoogleHosted(d)
+            for child in h.project_children:child.complete=lambda *a,**k:('text',{'model':'test'})
+            _,meta=h.complete('flash','s','p',100,role='writer_beat');start=meta['project_slot']-1
+            for offset in range(2):h.project_children[(start+offset)%6].circuit('flash',HostedError('Google HTTP 429',retry_after=60))
+            calls=[]
+            for i,child in enumerate(h.project_children):
+                def serve(*a,_slot=i,**k):calls.append(_slot);return 'text',{'model':'test'}
+                child.complete=serve
+            _,meta=h.complete('flash','s','p',100,role='writer_beat',policy={'timeout':10,'max_project_attempts':2})
+            self.assertEqual(calls,[(start+2)%6])
+            for child in h.project_children:child.circuit('flash',HostedError('Google HTTP 429',retry_after=60))
+            calls.clear()
+            with self.assertRaises(HostedError):h.complete('flash','s','p',100,role='writer_beat',policy={'timeout':10,'max_project_attempts':2})
+            self.assertEqual(calls,[])

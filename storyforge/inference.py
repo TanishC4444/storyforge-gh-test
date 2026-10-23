@@ -57,6 +57,7 @@ class Executor:
 
     @scoped_call_budget
     def call(self, role, packet, instruction, *, tokens=1200, validator=None, skill='', response_schema=None, output_format='json', allow_cpu_fallback=True):
+        if os.getenv('STORY_HOSTED_ONLY','').lower()=='true':allow_cpu_fallback=False
         if role in self.req.get('execution_policy',{}).get('hosted_required_roles',[]):allow_cpu_fallback=False
         from .worker_policy import enabled as experimental, policy, permit
         stage_policy=policy(self.req,role,tokens) if experimental(self.req) else None

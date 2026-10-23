@@ -55,6 +55,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
     out.mkdir(parents=True, exist_ok=True)
     if task == 'prepare':
         req = contracts.request(load(ROOT / 'examples' / f'{request_file}.json'))
+        if os.getenv('STORY_LEAN_LIVING','').lower()=='true':req.setdefault('performance',{}).update(lean_living_checks=True,adaptive_batches=True,summary_reviews=False)
         req['profile'] = profile
         if req.get('performance',{}).get('classic_expansion'):
             req.setdefault('execution_policy',{}).setdefault('editorial_disagreement','one_strict_check')

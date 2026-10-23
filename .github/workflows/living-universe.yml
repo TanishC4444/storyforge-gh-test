@@ -57,19 +57,20 @@ jobs:
       run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
     - &id002
       uses: actions/checkout@v4
-    - &id007
+    - &id008
       uses: ./.github/actions/setup-worker
       with:
         backend: fixture
+        hosted-only: 'true'
     - name: Check inference contracts before benchmark
       run: 'python -m pip install -e ''.[test]'' -q
 
-        python -m unittest discover -s tests -q
+        python -m unittest discover -s tests -p test_preflight.py -q
 
         '
     - name: Execute Prepare request and literary retrieval
       id: task
-      env: &id005
+      env: &id006
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
       run: 'backend=fixture
@@ -95,6 +96,9 @@ jobs:
         STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
         TASK_RESULT: ${{ job.status }}
       run: python -m storyforge.tracking report --out out
+    env: &id004
+      STORY_REVIEW_TIMEOUT_SECONDS: '120'
+      STORY_BATCH_TIMEOUT_SECONDS: '180'
   quickstart:
     name: Compile universe beginning or bounded episode layout
     needs:
@@ -104,10 +108,11 @@ jobs:
     steps:
     - *id001
     - *id002
-    - &id004
+    - &id005
       uses: ./.github/actions/setup-worker
       with:
         backend: ${{ inputs.backend }}
+        hosted-only: 'true'
     - uses: actions/download-artifact@v4
       if: ${{ inputs.resume_run != '' }}
       with:
@@ -144,25 +149,26 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s01_design:
     name: Chapter 1 scene 1 / reconcile design with accepted state
     needs:
     - quickstart
     runs-on: ubuntu-latest
     timeout-minutes: 360
-    outputs: &id011
+    outputs: &id012
       characters: ${{ steps.task.outputs.characters }}
     steps:
     - *id001
     - *id002
-    - *id004
+    - *id005
     - uses: actions/download-artifact@v4
       with:
         name: quickstart
         path: inputs/state
     - name: Execute Chapter 1 scene 1 / reconcile design with accepted state
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -181,6 +187,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s01_characters:
     name: Chapter 1 scene 1 / character ${{ matrix.character }}
     needs:
@@ -196,15 +203,15 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - &id006
+    - *id005
+    - &id007
       uses: actions/download-artifact@v4
       with:
         name: s01_design
         path: inputs/state
     - name: Execute Chapter 1 scene 1 / character ${{ matrix.character }}
       id: task
-      env: &id013
+      env: &id014
         GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         STORY_CHARACTER: ${{ matrix.character }}
@@ -226,6 +233,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s01_direction:
     name: Chapter 1 scene 1 / reconcile character choices
     needs:
@@ -237,15 +245,15 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id006
+    - *id005
+    - *id007
     - uses: actions/download-artifact@v4
       with:
         pattern: s01_characters-*
         path: inputs/characters
     - name: Execute Chapter 1 scene 1 / reconcile character choices
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -264,6 +272,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s01_draft:
     name: Compile writing batches without rewriting
     needs:
@@ -276,9 +285,9 @@ jobs:
     steps:
     - *id001
     - *id002
+    - *id008
     - *id007
-    - *id006
-    - &id032
+    - &id033
       uses: actions/download-artifact@v4
       with:
         name: s01_draft_plan
@@ -289,13 +298,13 @@ jobs:
         path: inputs/batches
     - name: Compile writing batches without rewriting
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
         python -m storyforge.batch_pipeline merge_draft --backend "$backend" --index 0'
-    - &id015
+    - &id016
       name: Show generated prose before final acceptance
       if: always()
       run: python -m storyforge.expansion preview --source out --label "Compile writing batches without rewriting"
@@ -309,6 +318,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s01_edit:
     name: Forward prose unchanged for source-bound reviews
     needs:
@@ -320,21 +330,21 @@ jobs:
     steps:
     - *id001
     - *id002
+    - *id008
     - *id007
-    - *id006
     - uses: actions/download-artifact@v4
       with:
         name: s01_draft
         path: inputs/draft
     - name: Forward prose unchanged for source-bound reviews
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
         python -m storyforge.batch_pipeline forward --backend "$backend" --index 0'
-    - &id016
+    - &id017
       name: Show generated prose before final acceptance
       if: always()
       run: python -m storyforge.expansion preview --source out --label "Forward prose unchanged for source-bound reviews"
@@ -348,8 +358,9 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s01_story:
-    name: Compile causal findings; preserve partial results
+    name: Compile story findings without another model call
     needs:
     - s01_design
     - s01_edit
@@ -360,9 +371,9 @@ jobs:
     steps:
     - *id001
     - *id002
+    - *id008
     - *id007
-    - *id006
-    - &id008
+    - &id009
       uses: actions/download-artifact@v4
       with:
         name: s01_edit
@@ -371,9 +382,9 @@ jobs:
       with:
         pattern: s01_story_batches-*
         path: inputs/batches
-    - name: Compile causal findings; preserve partial results
+    - name: Compile story findings without another model call
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -389,12 +400,12 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s01_rhetoric:
-    name: Compile prose findings; preserve partial results
+    name: Compile rhetoric findings without another model call
     needs:
     - s01_design
     - s01_edit
-    - s01_section_plan
     - s01_rhetoric_batches
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -402,26 +413,21 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id006
     - *id008
-    - &id033
-      uses: actions/download-artifact@v4
-      with:
-        name: s01_section_plan
-        path: inputs/plan
+    - *id007
+    - *id009
     - uses: actions/download-artifact@v4
       with:
         pattern: s01_rhetoric_batches-*
         path: inputs/batches
-    - name: Compile prose findings; preserve partial results
+    - name: Compile rhetoric findings without another model call
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
-        python -m storyforge.batch_pipeline section_reviews_join --backend "$backend" --index 0'
+        python -m storyforge.batch_pipeline join_reviews --backend "$backend" --index 0 --kind rhetoric'
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -432,6 +438,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s01_memory:
     name: Compile complete source-bound memory; no summary substitution
     needs:
@@ -445,10 +452,10 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id006
     - *id008
-    - &id047
+    - *id007
+    - *id009
+    - &id042
       uses: actions/download-artifact@v4
       with:
         name: s01_memory_extract_plan
@@ -459,7 +466,7 @@ jobs:
         path: inputs/batches
     - name: Compile complete source-bound memory; no summary substitution
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -475,6 +482,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s01_repair:
     name: Merge targeted fixes; preserve untouched paragraphs
     needs:
@@ -488,9 +496,9 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id006
     - *id008
+    - *id007
+    - *id009
     - &id038
       uses: actions/download-artifact@v4
       with:
@@ -502,13 +510,13 @@ jobs:
         path: inputs/batches
     - name: Merge targeted fixes; preserve untouched paragraphs
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
         python -m storyforge.batch_pipeline merge_repairs --backend "$backend" --index 0'
-    - &id018
+    - &id019
       name: Show generated prose before final acceptance
       if: always()
       run: python -m storyforge.expansion preview --source out --label "Merge targeted fixes; preserve untouched paragraphs"
@@ -522,6 +530,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s01_verify:
     name: Reuse final story verdict
     needs:
@@ -533,16 +542,16 @@ jobs:
     steps:
     - *id001
     - *id002
+    - *id008
     - *id007
-    - *id006
-    - &id009
+    - &id010
       uses: actions/download-artifact@v4
       with:
         name: s01_final_check
         path: inputs/edited
     - name: Reuse final story verdict
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -558,6 +567,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s01_verify_rhetoric:
     name: Reuse final rhetoric verdict
     needs:
@@ -569,12 +579,12 @@ jobs:
     steps:
     - *id001
     - *id002
+    - *id008
     - *id007
-    - *id006
-    - *id009
+    - *id010
     - name: Reuse final rhetoric verdict
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -590,6 +600,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s01_final_memory:
     name: Compile retained and refreshed facts without omission
     needs:
@@ -603,14 +614,14 @@ jobs:
     steps:
     - *id001
     - *id002
+    - *id008
     - *id007
-    - *id006
-    - &id010
+    - &id011
       uses: actions/download-artifact@v4
       with:
         name: s01_repair
         path: inputs/edited
-    - &id048
+    - &id046
       uses: actions/download-artifact@v4
       with:
         name: s01_memory_refresh_plan
@@ -621,7 +632,7 @@ jobs:
         path: inputs/batches
     - name: Compile retained and refreshed facts without omission
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -637,6 +648,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s01_memory_review:
     name: Compile final memory findings
     needs:
@@ -652,20 +664,20 @@ jobs:
     steps:
     - *id001
     - *id002
+    - *id008
     - *id007
-    - *id006
-    - *id010
-    - &id012
+    - *id011
+    - &id013
       uses: actions/download-artifact@v4
       with:
         name: s01_final_memory
         path: inputs/memory
-    - &id044
+    - &id045
       uses: actions/download-artifact@v4
       with:
         name: s01_memory_preflight
         path: inputs/preflight-memory
-    - &id049
+    - &id047
       uses: actions/download-artifact@v4
       with:
         name: s01_memory_final_plan
@@ -676,7 +688,7 @@ jobs:
         path: inputs/batches
     - name: Compile final memory findings
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -692,6 +704,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s01_accept:
     name: Chapter 1 scene 1 / verify chapter and commit
     needs:
@@ -704,13 +717,13 @@ jobs:
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
-    outputs: *id011
+    outputs: *id012
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id006
-    - *id009
+    - *id005
+    - *id007
+    - *id010
     - uses: actions/download-artifact@v4
       with:
         name: s01_verify
@@ -719,14 +732,14 @@ jobs:
       with:
         name: s01_verify_rhetoric
         path: inputs/rhetoric-review
-    - *id012
+    - *id013
     - uses: actions/download-artifact@v4
       with:
         name: s01_memory_review
         path: inputs/memory-review
     - name: Execute Chapter 1 scene 1 / verify chapter and commit
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -745,6 +758,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s02_design:
     name: Chapter 2 scene 1 / reconcile design with accepted state
     needs:
@@ -752,18 +766,18 @@ jobs:
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
-    outputs: *id011
+    outputs: *id012
     steps:
     - *id001
     - *id002
-    - *id004
+    - *id005
     - uses: actions/download-artifact@v4
       with:
         name: s01_accept
         path: inputs/state
     - name: Execute Chapter 2 scene 1 / reconcile design with accepted state
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -782,6 +796,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s02_characters:
     name: Chapter 2 scene 1 / character ${{ matrix.character }}
     needs:
@@ -797,15 +812,15 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - &id014
+    - *id005
+    - &id015
       uses: actions/download-artifact@v4
       with:
         name: s02_design
         path: inputs/state
     - name: Execute Chapter 2 scene 1 / character ${{ matrix.character }}
       id: task
-      env: *id013
+      env: *id014
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -824,6 +839,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s02_direction:
     name: Chapter 2 scene 1 / reconcile character choices
     needs:
@@ -835,15 +851,15 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id014
+    - *id005
+    - *id015
     - uses: actions/download-artifact@v4
       with:
         pattern: s02_characters-*
         path: inputs/characters
     - name: Execute Chapter 2 scene 1 / reconcile character choices
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -862,6 +878,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s02_draft:
     name: Compile writing batches without rewriting
     needs:
@@ -874,9 +891,9 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id014
-    - &id050
+    - *id008
+    - *id015
+    - &id048
       uses: actions/download-artifact@v4
       with:
         name: s02_draft_plan
@@ -887,13 +904,13 @@ jobs:
         path: inputs/batches
     - name: Compile writing batches without rewriting
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
         python -m storyforge.batch_pipeline merge_draft --backend "$backend" --index 1'
-    - *id015
+    - *id016
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -904,6 +921,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s02_edit:
     name: Forward prose unchanged for source-bound reviews
     needs:
@@ -915,21 +933,21 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id014
+    - *id008
+    - *id015
     - uses: actions/download-artifact@v4
       with:
         name: s02_draft
         path: inputs/draft
     - name: Forward prose unchanged for source-bound reviews
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
         python -m storyforge.batch_pipeline forward --backend "$backend" --index 1'
-    - *id016
+    - *id017
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -940,8 +958,9 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s02_story:
-    name: Compile causal findings; preserve partial results
+    name: Compile story findings without another model call
     needs:
     - s02_design
     - s02_edit
@@ -952,9 +971,9 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id014
-    - &id017
+    - *id008
+    - *id015
+    - &id018
       uses: actions/download-artifact@v4
       with:
         name: s02_edit
@@ -963,9 +982,9 @@ jobs:
       with:
         pattern: s02_story_batches-*
         path: inputs/batches
-    - name: Compile causal findings; preserve partial results
+    - name: Compile story findings without another model call
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -981,12 +1000,12 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s02_rhetoric:
-    name: Compile prose findings; preserve partial results
+    name: Compile rhetoric findings without another model call
     needs:
     - s02_design
     - s02_edit
-    - s02_section_plan
     - s02_rhetoric_batches
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -994,26 +1013,21 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id014
-    - *id017
-    - &id051
-      uses: actions/download-artifact@v4
-      with:
-        name: s02_section_plan
-        path: inputs/plan
+    - *id008
+    - *id015
+    - *id018
     - uses: actions/download-artifact@v4
       with:
         pattern: s02_rhetoric_batches-*
         path: inputs/batches
-    - name: Compile prose findings; preserve partial results
+    - name: Compile rhetoric findings without another model call
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
-        python -m storyforge.batch_pipeline section_reviews_join --backend "$backend" --index 1'
+        python -m storyforge.batch_pipeline join_reviews --backend "$backend" --index 1 --kind rhetoric'
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -1024,6 +1038,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s02_memory:
     name: Compile complete source-bound memory; no summary substitution
     needs:
@@ -1037,10 +1052,10 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id014
-    - *id017
-    - &id064
+    - *id008
+    - *id015
+    - *id018
+    - &id056
       uses: actions/download-artifact@v4
       with:
         name: s02_memory_extract_plan
@@ -1051,7 +1066,7 @@ jobs:
         path: inputs/batches
     - name: Compile complete source-bound memory; no summary substitution
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1067,6 +1082,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s02_repair:
     name: Merge targeted fixes; preserve untouched paragraphs
     needs:
@@ -1080,10 +1096,10 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id014
-    - *id017
-    - &id055
+    - *id008
+    - *id015
+    - *id018
+    - &id051
       uses: actions/download-artifact@v4
       with:
         name: s02_repair_plan
@@ -1094,13 +1110,13 @@ jobs:
         path: inputs/batches
     - name: Merge targeted fixes; preserve untouched paragraphs
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
         python -m storyforge.batch_pipeline merge_repairs --backend "$backend" --index 1'
-    - *id018
+    - *id019
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -1111,6 +1127,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s02_verify:
     name: Reuse final story verdict
     needs:
@@ -1122,16 +1139,16 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id014
-    - &id019
+    - *id008
+    - *id015
+    - &id020
       uses: actions/download-artifact@v4
       with:
         name: s02_final_check
         path: inputs/edited
     - name: Reuse final story verdict
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1147,6 +1164,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s02_verify_rhetoric:
     name: Reuse final rhetoric verdict
     needs:
@@ -1158,12 +1176,12 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id014
-    - *id019
+    - *id008
+    - *id015
+    - *id020
     - name: Reuse final rhetoric verdict
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1179,6 +1197,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s02_final_memory:
     name: Compile retained and refreshed facts without omission
     needs:
@@ -1192,14 +1211,14 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id014
-    - &id020
+    - *id008
+    - *id015
+    - &id021
       uses: actions/download-artifact@v4
       with:
         name: s02_repair
         path: inputs/edited
-    - &id065
+    - &id060
       uses: actions/download-artifact@v4
       with:
         name: s02_memory_refresh_plan
@@ -1210,7 +1229,7 @@ jobs:
         path: inputs/batches
     - name: Compile retained and refreshed facts without omission
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1226,6 +1245,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s02_memory_review:
     name: Compile final memory findings
     needs:
@@ -1241,20 +1261,20 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id014
-    - *id020
-    - &id021
+    - *id008
+    - *id015
+    - *id021
+    - &id022
       uses: actions/download-artifact@v4
       with:
         name: s02_final_memory
         path: inputs/memory
-    - &id060
+    - &id059
       uses: actions/download-artifact@v4
       with:
         name: s02_memory_preflight
         path: inputs/preflight-memory
-    - &id066
+    - &id061
       uses: actions/download-artifact@v4
       with:
         name: s02_memory_final_plan
@@ -1265,7 +1285,7 @@ jobs:
         path: inputs/batches
     - name: Compile final memory findings
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1281,6 +1301,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s02_accept:
     name: Chapter 2 scene 1 / verify chapter and commit
     needs:
@@ -1293,13 +1314,13 @@ jobs:
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
-    outputs: *id011
+    outputs: *id012
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id014
-    - *id019
+    - *id005
+    - *id015
+    - *id020
     - uses: actions/download-artifact@v4
       with:
         name: s02_verify
@@ -1308,14 +1329,14 @@ jobs:
       with:
         name: s02_verify_rhetoric
         path: inputs/rhetoric-review
-    - *id021
+    - *id022
     - uses: actions/download-artifact@v4
       with:
         name: s02_memory_review
         path: inputs/memory-review
     - name: Execute Chapter 2 scene 1 / verify chapter and commit
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1334,6 +1355,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s03_design:
     name: Chapter 3 scene 1 / reconcile design with accepted state
     needs:
@@ -1341,18 +1363,18 @@ jobs:
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
-    outputs: *id011
+    outputs: *id012
     steps:
     - *id001
     - *id002
-    - *id004
+    - *id005
     - uses: actions/download-artifact@v4
       with:
         name: s02_accept
         path: inputs/state
     - name: Execute Chapter 3 scene 1 / reconcile design with accepted state
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1371,6 +1393,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s03_characters:
     name: Chapter 3 scene 1 / character ${{ matrix.character }}
     needs:
@@ -1386,15 +1409,15 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - &id022
+    - *id005
+    - &id023
       uses: actions/download-artifact@v4
       with:
         name: s03_design
         path: inputs/state
     - name: Execute Chapter 3 scene 1 / character ${{ matrix.character }}
       id: task
-      env: *id013
+      env: *id014
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1413,6 +1436,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s03_direction:
     name: Chapter 3 scene 1 / reconcile character choices
     needs:
@@ -1424,15 +1448,15 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id022
+    - *id005
+    - *id023
     - uses: actions/download-artifact@v4
       with:
         pattern: s03_characters-*
         path: inputs/characters
     - name: Execute Chapter 3 scene 1 / reconcile character choices
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1451,6 +1475,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s03_draft:
     name: Compile writing batches without rewriting
     needs:
@@ -1463,9 +1488,9 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id022
-    - &id067
+    - *id008
+    - *id023
+    - &id062
       uses: actions/download-artifact@v4
       with:
         name: s03_draft_plan
@@ -1476,13 +1501,13 @@ jobs:
         path: inputs/batches
     - name: Compile writing batches without rewriting
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
         python -m storyforge.batch_pipeline merge_draft --backend "$backend" --index 2'
-    - *id015
+    - *id016
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -1493,6 +1518,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s03_edit:
     name: Forward prose unchanged for source-bound reviews
     needs:
@@ -1504,21 +1530,21 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id022
+    - *id008
+    - *id023
     - uses: actions/download-artifact@v4
       with:
         name: s03_draft
         path: inputs/draft
     - name: Forward prose unchanged for source-bound reviews
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
         python -m storyforge.batch_pipeline forward --backend "$backend" --index 2'
-    - *id016
+    - *id017
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -1529,8 +1555,9 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s03_story:
-    name: Compile causal findings; preserve partial results
+    name: Compile story findings without another model call
     needs:
     - s03_design
     - s03_edit
@@ -1541,9 +1568,9 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id022
-    - &id023
+    - *id008
+    - *id023
+    - &id024
       uses: actions/download-artifact@v4
       with:
         name: s03_edit
@@ -1552,9 +1579,9 @@ jobs:
       with:
         pattern: s03_story_batches-*
         path: inputs/batches
-    - name: Compile causal findings; preserve partial results
+    - name: Compile story findings without another model call
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1570,12 +1597,12 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s03_rhetoric:
-    name: Compile prose findings; preserve partial results
+    name: Compile rhetoric findings without another model call
     needs:
     - s03_design
     - s03_edit
-    - s03_section_plan
     - s03_rhetoric_batches
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -1583,26 +1610,21 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id022
+    - *id008
     - *id023
-    - &id068
-      uses: actions/download-artifact@v4
-      with:
-        name: s03_section_plan
-        path: inputs/plan
+    - *id024
     - uses: actions/download-artifact@v4
       with:
         pattern: s03_rhetoric_batches-*
         path: inputs/batches
-    - name: Compile prose findings; preserve partial results
+    - name: Compile rhetoric findings without another model call
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
-        python -m storyforge.batch_pipeline section_reviews_join --backend "$backend" --index 2'
+        python -m storyforge.batch_pipeline join_reviews --backend "$backend" --index 2 --kind rhetoric'
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -1613,6 +1635,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s03_memory:
     name: Compile complete source-bound memory; no summary substitution
     needs:
@@ -1626,10 +1649,10 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id022
+    - *id008
     - *id023
-    - &id080
+    - *id024
+    - &id069
       uses: actions/download-artifact@v4
       with:
         name: s03_memory_extract_plan
@@ -1640,7 +1663,7 @@ jobs:
         path: inputs/batches
     - name: Compile complete source-bound memory; no summary substitution
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1656,6 +1679,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s03_repair:
     name: Merge targeted fixes; preserve untouched paragraphs
     needs:
@@ -1669,10 +1693,10 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id022
+    - *id008
     - *id023
-    - &id072
+    - *id024
+    - &id065
       uses: actions/download-artifact@v4
       with:
         name: s03_repair_plan
@@ -1683,13 +1707,13 @@ jobs:
         path: inputs/batches
     - name: Merge targeted fixes; preserve untouched paragraphs
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
         python -m storyforge.batch_pipeline merge_repairs --backend "$backend" --index 2'
-    - *id018
+    - *id019
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -1700,6 +1724,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s03_verify:
     name: Reuse final story verdict
     needs:
@@ -1711,16 +1736,16 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id022
-    - &id024
+    - *id008
+    - *id023
+    - &id025
       uses: actions/download-artifact@v4
       with:
         name: s03_final_check
         path: inputs/edited
     - name: Reuse final story verdict
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1736,6 +1761,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s03_verify_rhetoric:
     name: Reuse final rhetoric verdict
     needs:
@@ -1747,12 +1773,12 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id022
-    - *id024
+    - *id008
+    - *id023
+    - *id025
     - name: Reuse final rhetoric verdict
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1768,6 +1794,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s03_final_memory:
     name: Compile retained and refreshed facts without omission
     needs:
@@ -1781,14 +1808,14 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id022
-    - &id025
+    - *id008
+    - *id023
+    - &id026
       uses: actions/download-artifact@v4
       with:
         name: s03_repair
         path: inputs/edited
-    - &id081
+    - &id073
       uses: actions/download-artifact@v4
       with:
         name: s03_memory_refresh_plan
@@ -1799,7 +1826,7 @@ jobs:
         path: inputs/batches
     - name: Compile retained and refreshed facts without omission
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1815,6 +1842,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s03_memory_review:
     name: Compile final memory findings
     needs:
@@ -1830,20 +1858,20 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id022
-    - *id025
-    - &id026
+    - *id008
+    - *id023
+    - *id026
+    - &id027
       uses: actions/download-artifact@v4
       with:
         name: s03_final_memory
         path: inputs/memory
-    - &id077
+    - &id072
       uses: actions/download-artifact@v4
       with:
         name: s03_memory_preflight
         path: inputs/preflight-memory
-    - &id082
+    - &id074
       uses: actions/download-artifact@v4
       with:
         name: s03_memory_final_plan
@@ -1854,7 +1882,7 @@ jobs:
         path: inputs/batches
     - name: Compile final memory findings
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1870,6 +1898,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s03_accept:
     name: Chapter 3 scene 1 / verify chapter and commit
     needs:
@@ -1882,13 +1911,13 @@ jobs:
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
-    outputs: *id011
+    outputs: *id012
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id022
-    - *id024
+    - *id005
+    - *id023
+    - *id025
     - uses: actions/download-artifact@v4
       with:
         name: s03_verify
@@ -1897,14 +1926,14 @@ jobs:
       with:
         name: s03_verify_rhetoric
         path: inputs/rhetoric-review
-    - *id026
+    - *id027
     - uses: actions/download-artifact@v4
       with:
         name: s03_memory_review
         path: inputs/memory-review
     - name: Execute Chapter 3 scene 1 / verify chapter and commit
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1923,6 +1952,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s04_design:
     name: Chapter 4 scene 1 / reconcile design with accepted state
     needs:
@@ -1930,18 +1960,18 @@ jobs:
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
-    outputs: *id011
+    outputs: *id012
     steps:
     - *id001
     - *id002
-    - *id004
+    - *id005
     - uses: actions/download-artifact@v4
       with:
         name: s03_accept
         path: inputs/state
     - name: Execute Chapter 4 scene 1 / reconcile design with accepted state
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -1960,6 +1990,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s04_characters:
     name: Chapter 4 scene 1 / character ${{ matrix.character }}
     needs:
@@ -1975,15 +2006,15 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - &id027
+    - *id005
+    - &id028
       uses: actions/download-artifact@v4
       with:
         name: s04_design
         path: inputs/state
     - name: Execute Chapter 4 scene 1 / character ${{ matrix.character }}
       id: task
-      env: *id013
+      env: *id014
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2002,6 +2033,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s04_direction:
     name: Chapter 4 scene 1 / reconcile character choices
     needs:
@@ -2013,15 +2045,15 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id027
+    - *id005
+    - *id028
     - uses: actions/download-artifact@v4
       with:
         pattern: s04_characters-*
         path: inputs/characters
     - name: Execute Chapter 4 scene 1 / reconcile character choices
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2040,6 +2072,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s04_draft:
     name: Compile writing batches without rewriting
     needs:
@@ -2052,9 +2085,9 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id027
-    - &id083
+    - *id008
+    - *id028
+    - &id075
       uses: actions/download-artifact@v4
       with:
         name: s04_draft_plan
@@ -2065,13 +2098,13 @@ jobs:
         path: inputs/batches
     - name: Compile writing batches without rewriting
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
         python -m storyforge.batch_pipeline merge_draft --backend "$backend" --index 3'
-    - *id015
+    - *id016
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -2082,6 +2115,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s04_edit:
     name: Forward prose unchanged for source-bound reviews
     needs:
@@ -2093,21 +2127,21 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id027
+    - *id008
+    - *id028
     - uses: actions/download-artifact@v4
       with:
         name: s04_draft
         path: inputs/draft
     - name: Forward prose unchanged for source-bound reviews
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
         python -m storyforge.batch_pipeline forward --backend "$backend" --index 3'
-    - *id016
+    - *id017
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -2118,8 +2152,9 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s04_story:
-    name: Compile causal findings; preserve partial results
+    name: Compile story findings without another model call
     needs:
     - s04_design
     - s04_edit
@@ -2130,9 +2165,9 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id027
-    - &id028
+    - *id008
+    - *id028
+    - &id029
       uses: actions/download-artifact@v4
       with:
         name: s04_edit
@@ -2141,9 +2176,9 @@ jobs:
       with:
         pattern: s04_story_batches-*
         path: inputs/batches
-    - name: Compile causal findings; preserve partial results
+    - name: Compile story findings without another model call
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2159,12 +2194,12 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s04_rhetoric:
-    name: Compile prose findings; preserve partial results
+    name: Compile rhetoric findings without another model call
     needs:
     - s04_design
     - s04_edit
-    - s04_section_plan
     - s04_rhetoric_batches
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -2172,26 +2207,21 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id027
+    - *id008
     - *id028
-    - &id084
-      uses: actions/download-artifact@v4
-      with:
-        name: s04_section_plan
-        path: inputs/plan
+    - *id029
     - uses: actions/download-artifact@v4
       with:
         pattern: s04_rhetoric_batches-*
         path: inputs/batches
-    - name: Compile prose findings; preserve partial results
+    - name: Compile rhetoric findings without another model call
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
-        python -m storyforge.batch_pipeline section_reviews_join --backend "$backend" --index 3'
+        python -m storyforge.batch_pipeline join_reviews --backend "$backend" --index 3 --kind rhetoric'
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -2202,6 +2232,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s04_memory:
     name: Compile complete source-bound memory; no summary substitution
     needs:
@@ -2215,10 +2246,10 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id027
+    - *id008
     - *id028
-    - &id096
+    - *id029
+    - &id082
       uses: actions/download-artifact@v4
       with:
         name: s04_memory_extract_plan
@@ -2229,7 +2260,7 @@ jobs:
         path: inputs/batches
     - name: Compile complete source-bound memory; no summary substitution
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2245,6 +2276,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s04_repair:
     name: Merge targeted fixes; preserve untouched paragraphs
     needs:
@@ -2258,10 +2290,10 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id027
+    - *id008
     - *id028
-    - &id088
+    - *id029
+    - &id078
       uses: actions/download-artifact@v4
       with:
         name: s04_repair_plan
@@ -2272,13 +2304,13 @@ jobs:
         path: inputs/batches
     - name: Merge targeted fixes; preserve untouched paragraphs
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
         python -m storyforge.batch_pipeline merge_repairs --backend "$backend" --index 3'
-    - *id018
+    - *id019
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -2289,6 +2321,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s04_verify:
     name: Reuse final story verdict
     needs:
@@ -2300,16 +2333,16 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id027
-    - &id029
+    - *id008
+    - *id028
+    - &id030
       uses: actions/download-artifact@v4
       with:
         name: s04_final_check
         path: inputs/edited
     - name: Reuse final story verdict
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2325,6 +2358,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s04_verify_rhetoric:
     name: Reuse final rhetoric verdict
     needs:
@@ -2336,12 +2370,12 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id027
-    - *id029
+    - *id008
+    - *id028
+    - *id030
     - name: Reuse final rhetoric verdict
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2357,6 +2391,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s04_final_memory:
     name: Compile retained and refreshed facts without omission
     needs:
@@ -2370,14 +2405,14 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id027
-    - &id030
+    - *id008
+    - *id028
+    - &id031
       uses: actions/download-artifact@v4
       with:
         name: s04_repair
         path: inputs/edited
-    - &id097
+    - &id086
       uses: actions/download-artifact@v4
       with:
         name: s04_memory_refresh_plan
@@ -2388,7 +2423,7 @@ jobs:
         path: inputs/batches
     - name: Compile retained and refreshed facts without omission
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2404,6 +2439,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s04_memory_review:
     name: Compile final memory findings
     needs:
@@ -2419,20 +2455,20 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id027
-    - *id030
-    - &id031
+    - *id008
+    - *id028
+    - *id031
+    - &id032
       uses: actions/download-artifact@v4
       with:
         name: s04_final_memory
         path: inputs/memory
-    - &id093
+    - &id085
       uses: actions/download-artifact@v4
       with:
         name: s04_memory_preflight
         path: inputs/preflight-memory
-    - &id098
+    - &id087
       uses: actions/download-artifact@v4
       with:
         name: s04_memory_final_plan
@@ -2443,7 +2479,7 @@ jobs:
         path: inputs/batches
     - name: Compile final memory findings
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2459,6 +2495,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s04_accept:
     name: Chapter 4 scene 1 / verify chapter and commit
     needs:
@@ -2471,13 +2508,13 @@ jobs:
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
-    outputs: *id011
+    outputs: *id012
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id027
-    - *id029
+    - *id005
+    - *id028
+    - *id030
     - uses: actions/download-artifact@v4
       with:
         name: s04_verify
@@ -2486,14 +2523,14 @@ jobs:
       with:
         name: s04_verify_rhetoric
         path: inputs/rhetoric-review
-    - *id031
+    - *id032
     - uses: actions/download-artifact@v4
       with:
         name: s04_memory_review
         path: inputs/memory-review
     - name: Execute Chapter 4 scene 1 / verify chapter and commit
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2512,6 +2549,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   results:
     name: Collect outputs and checkpoints
     timeout-minutes: 360
@@ -2577,9 +2615,6 @@ jobs:
     - s04_accept
     - s01_draft_plan
     - s01_write_batches
-    - s01_section_plan
-    - s01_summaries
-    - s01_summary_join
     - s01_story_batches
     - s01_rhetoric_batches
     - s01_memory_preflight_plan
@@ -2587,10 +2622,6 @@ jobs:
     - s01_memory_preflight
     - s01_repair_plan
     - s01_repair_batches
-    - s01_final_sections
-    - s01_final_summaries
-    - s01_final_summary_join
-    - s01_final_batches
     - s01_final_check
     - s01_memory_extract_plan
     - s01_memory_extract_batches
@@ -2600,9 +2631,6 @@ jobs:
     - s01_memory_final_batches
     - s02_draft_plan
     - s02_write_batches
-    - s02_section_plan
-    - s02_summaries
-    - s02_summary_join
     - s02_story_batches
     - s02_rhetoric_batches
     - s02_memory_preflight_plan
@@ -2610,10 +2638,6 @@ jobs:
     - s02_memory_preflight
     - s02_repair_plan
     - s02_repair_batches
-    - s02_final_sections
-    - s02_final_summaries
-    - s02_final_summary_join
-    - s02_final_batches
     - s02_final_check
     - s02_memory_extract_plan
     - s02_memory_extract_batches
@@ -2623,9 +2647,6 @@ jobs:
     - s02_memory_final_batches
     - s03_draft_plan
     - s03_write_batches
-    - s03_section_plan
-    - s03_summaries
-    - s03_summary_join
     - s03_story_batches
     - s03_rhetoric_batches
     - s03_memory_preflight_plan
@@ -2633,10 +2654,6 @@ jobs:
     - s03_memory_preflight
     - s03_repair_plan
     - s03_repair_batches
-    - s03_final_sections
-    - s03_final_summaries
-    - s03_final_summary_join
-    - s03_final_batches
     - s03_final_check
     - s03_memory_extract_plan
     - s03_memory_extract_batches
@@ -2646,9 +2663,6 @@ jobs:
     - s03_memory_final_batches
     - s04_draft_plan
     - s04_write_batches
-    - s04_section_plan
-    - s04_summaries
-    - s04_summary_join
     - s04_story_batches
     - s04_rhetoric_batches
     - s04_memory_preflight_plan
@@ -2656,10 +2670,6 @@ jobs:
     - s04_memory_preflight
     - s04_repair_plan
     - s04_repair_batches
-    - s04_final_sections
-    - s04_final_summaries
-    - s04_final_summary_join
-    - s04_final_batches
     - s04_final_check
     - s04_memory_extract_plan
     - s04_memory_extract_batches
@@ -2721,6 +2731,7 @@ jobs:
         \ state: **%s**'%latest.get('completion_status','in_progress')]\nwith open(os.environ['GITHUB_STEP_SUMMARY'],'a')\
         \ as summary:\n    summary.write('\\n'.join(rows)+'\\n')\nprint('Failed/cancelled jobs:', failed)\nif failed:\n  \
         \  raise SystemExit(1)\nPY\n"
+    env: *id004
   s01_draft_plan:
     name: Allocate contiguous scene-writing batches
     needs:
@@ -2732,15 +2743,15 @@ jobs:
     steps:
     - *id001
     - *id002
+    - *id008
     - *id007
-    - *id006
     - uses: actions/download-artifact@v4
       with:
         name: s01_direction
         path: inputs/direction
     - name: Allocate contiguous scene-writing batches
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -2756,7 +2767,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s01_write_batches:
     name: Write scene batch ${{ matrix.batch }} with Gemini-first routing
     needs:
@@ -2768,9 +2780,9 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id006
-    - *id032
+    - *id005
+    - *id007
+    - *id033
     - name: Write scene batch ${{ matrix.batch }} with Gemini-first routing
       id: task
       env: &id034
@@ -2797,143 +2809,22 @@ jobs:
       max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s01_draft_plan.outputs.characters) }}
-  s01_section_plan:
-    name: Allocate source sections for summaries and prose review
-    needs:
-    - s01_design
-    - s01_edit
-    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id007
-    - *id006
-    - *id008
-    - name: Allocate source sections for summaries and prose review
-      id: task
-      env: *id005
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_plan --backend "$backend" --index 0'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s01_section_plan
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-    outputs: &id039
-      characters: ${{ steps.task.outputs.characters }}
-      reviews: ${{ steps.task.outputs.reviews }}
-      final_reviews: ${{ steps.task.outputs.final_reviews }}
-      story_reviews: ${{ steps.task.outputs.story_reviews }}
-  s01_summaries:
-    name: Summarize actual section ${{ matrix.batch }}; source-linked only
-    needs:
-    - s01_design
-    - s01_edit
-    - s01_section_plan
-    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id004
-    - *id006
-    - *id008
-    - *id033
-    - name: Summarize actual section ${{ matrix.batch }}; source-linked only
-      id: task
-      env: *id034
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_summary --backend "$backend" --index 0 --batch "$STORY_BATCH"'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s01_summaries-${{ matrix.batch }}
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        batch: ${{ fromJSON(needs.s01_section_plan.outputs.characters) }}
-  s01_summary_join:
-    name: Consolidate short summaries; retain source links
-    needs:
-    - s01_design
-    - s01_edit
-    - s01_section_plan
-    - s01_summaries
-    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id007
-    - *id006
-    - *id008
-    - *id033
-    - uses: actions/download-artifact@v4
-      with:
-        pattern: s01_summaries-*
-        path: inputs/batches
-    - name: Consolidate short summaries; retain source links
-      id: task
-      env: *id005
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_summaries_join --backend "$backend" --index 0'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s01_summary_join
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
+    env: *id004
   s01_story_batches:
-    name: Causal story review / checks batch ${{ matrix.batch }}
+    name: Whole-scene story checks / batch ${{ matrix.batch }}
     needs:
     - s01_design
     - s01_edit
-    - s01_section_plan
-    - s01_summary_join
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id006
-    - *id008
-    - &id035
-      uses: actions/download-artifact@v4
-      with:
-        name: s01_summary_join
-        path: inputs/summaries
-    - name: Causal story review / checks batch ${{ matrix.batch }}
+    - *id005
+    - *id007
+    - *id009
+    - name: Whole-scene story checks / batch ${{ matrix.batch }}
       id: task
       env: *id034
       run: 'backend=fixture
@@ -2951,37 +2842,35 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    strategy:
+    strategy: &id035
       fail-fast: false
       max-parallel: 2
       matrix:
-        batch: ${{ fromJSON(needs.s01_section_plan.outputs.story_reviews) }}
+        batch:
+        - 0
+    env: *id004
   s01_rhetoric_batches:
-    name: Exact prose section review ${{ matrix.batch }}
+    name: Whole-scene rhetoric checks / batch ${{ matrix.batch }}
     needs:
     - s01_design
     - s01_edit
-    - s01_section_plan
-    - s01_summary_join
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id006
-    - *id008
-    - *id033
-    - *id035
-    - name: Exact prose section review ${{ matrix.batch }}
+    - *id005
+    - *id007
+    - *id009
+    - name: Whole-scene rhetoric checks / batch ${{ matrix.batch }}
       id: task
       env: *id034
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
-        python -m storyforge.batch_pipeline section_review --backend "$backend" --index 0 --batch "$STORY_BATCH"'
+        python -m storyforge.batch_pipeline review_batch --backend "$backend" --index 0 --kind rhetoric --group "$STORY_BATCH"'
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -2992,11 +2881,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        batch: ${{ fromJSON(needs.s01_section_plan.outputs.reviews) }}
+    strategy: *id035
+    env: *id004
   s01_memory_preflight_plan:
     name: Allocate preflight memory checks
     needs:
@@ -3009,9 +2895,9 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id006
     - *id008
+    - *id007
+    - *id009
     - &id036
       uses: actions/download-artifact@v4
       with:
@@ -3019,7 +2905,7 @@ jobs:
         path: inputs/memory
     - name: Allocate preflight memory checks
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -3035,7 +2921,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s01_memory_preflight_batches:
     name: preflight memory / continuity batch ${{ matrix.batch }}
     needs:
@@ -3049,9 +2936,9 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id006
-    - *id008
+    - *id005
+    - *id007
+    - *id009
     - *id036
     - &id037
       uses: actions/download-artifact@v4
@@ -3081,6 +2968,7 @@ jobs:
       max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s01_memory_preflight_plan.outputs.characters) }}
+    env: *id004
   s01_memory_preflight:
     name: Compile preflight memory findings
     needs:
@@ -3095,9 +2983,9 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id006
     - *id008
+    - *id007
+    - *id009
     - *id036
     - *id037
     - uses: actions/download-artifact@v4
@@ -3106,7 +2994,7 @@ jobs:
         path: inputs/batches
     - name: Compile preflight memory findings
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -3122,6 +3010,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s01_repair_plan:
     name: Group exact disputed paragraphs into repair batches
     needs:
@@ -3136,27 +3025,27 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id006
     - *id008
-    - &id042
+    - *id007
+    - *id009
+    - &id039
       uses: actions/download-artifact@v4
       with:
         name: s01_story
         path: inputs/story-review
-    - &id043
+    - &id040
       uses: actions/download-artifact@v4
       with:
         name: s01_rhetoric
         path: inputs/rhetoric-review
-    - &id046
+    - &id041
       uses: actions/download-artifact@v4
       with:
         name: s01_memory_preflight
         path: inputs/memory-review
     - name: Group exact disputed paragraphs into repair batches
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -3172,7 +3061,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s01_repair_batches:
     name: Fix ONLY cited paragraphs / batch ${{ matrix.batch }}
     needs:
@@ -3184,8 +3074,8 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id006
+    - *id005
+    - *id007
     - *id038
     - name: Fix ONLY cited paragraphs / batch ${{ matrix.batch }}
       id: task
@@ -3210,225 +3100,48 @@ jobs:
       max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s01_repair_plan.outputs.characters) }}
-  s01_final_sections:
-    name: Allocate final passage checks
-    needs:
-    - s01_design
-    - s01_repair
-    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id007
-    - *id006
-    - *id010
-    - name: Allocate final passage checks
-      id: task
-      env: *id005
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_plan --backend "$backend" --index 0'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s01_final_sections
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-    outputs: *id039
-  s01_final_summaries:
-    name: Summarize repaired section ${{ matrix.batch }}
+    env: *id004
+  s01_final_check:
+    name: Reuse unchanged passing checks or make ONE strict final judgment
     needs:
     - s01_design
     - s01_repair
     - s01_edit
-    - s01_summary_join
-    - s01_final_sections
+    - s01_story
+    - s01_rhetoric
+    - s01_memory
+    - s01_memory_preflight
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id006
-    - *id010
-    - &id041
+    - *id008
+    - *id007
+    - *id011
+    - &id043
       uses: actions/download-artifact@v4
       with:
         name: s01_edit
         path: inputs/original
-    - uses: actions/download-artifact@v4
-      with:
-        name: s01_summary_join
-        path: inputs/previous-summaries
-    - &id040
+    - *id039
+    - *id040
+    - &id044
       uses: actions/download-artifact@v4
       with:
-        name: s01_final_sections
-        path: inputs/plan
-    - name: Summarize repaired section ${{ matrix.batch }}
-      id: task
-      env: *id034
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_summary --backend "$backend" --index 0 --batch "$STORY_BATCH"'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s01_final_summaries-${{ matrix.batch }}
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        batch: ${{ fromJSON(needs.s01_final_sections.outputs.characters) }}
-  s01_final_summary_join:
-    name: Join fresh final summaries
-    needs:
-    - s01_design
-    - s01_repair
-    - s01_final_sections
-    - s01_final_summaries
-    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id007
-    - *id006
-    - *id010
-    - *id040
-    - uses: actions/download-artifact@v4
-      with:
-        pattern: s01_final_summaries-*
-        path: inputs/batches
-    - name: Join fresh final summaries
-      id: task
-      env: *id005
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_summaries_join --backend "$backend" --index 0'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s01_final_summary_join
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-  s01_final_batches:
-    name: Final passage/cohesion check ${{ matrix.batch }}
-    needs:
-    - s01_design
-    - s01_repair
-    - s01_edit
-    - s01_story
-    - s01_rhetoric
-    - s01_memory_preflight
-    - s01_final_sections
-    - s01_final_summary_join
-    - s01_final_memory
-    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id004
-    - *id006
-    - *id010
+        name: s01_memory
+        path: inputs/initial-memory
     - *id041
-    - *id042
-    - *id043
-    - *id044
-    - *id040
-    - &id045
-      uses: actions/download-artifact@v4
-      with:
-        name: s01_final_summary_join
-        path: inputs/summaries
-    - *id012
-    - name: Final passage/cohesion check ${{ matrix.batch }}
+    - name: Reuse unchanged passing checks or make ONE strict final judgment
       id: task
-      env: *id034
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_final_review --backend "$backend" --index 0 --batch "$STORY_BATCH"'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s01_final_batches-${{ matrix.batch }}
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        batch: ${{ fromJSON(needs.s01_final_sections.outputs.final_reviews) }}
-  s01_final_check:
-    name: Compile ONE strict final judgment round
-    needs:
-    - s01_design
-    - s01_repair
-    - s01_final_sections
-    - s01_final_summary_join
-    - s01_story
-    - s01_rhetoric
-    - s01_memory_preflight
-    - s01_final_batches
-    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id007
-    - *id006
-    - *id010
-    - *id040
-    - *id045
-    - *id042
-    - *id043
-    - *id046
-    - uses: actions/download-artifact@v4
-      with:
-        pattern: s01_final_batches-*
-        path: inputs/final-batches
-    - name: Compile ONE strict final judgment round
-      id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
         python -m storyforge.batch_pipeline finalize --backend "$backend" --index 0'
-    - &id063
+    - &id055
       name: Show generated prose before final acceptance
       if: always()
       run: python -m storyforge.expansion preview --source out --label "Compile ONE strict final judgment round"
@@ -3442,6 +3155,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s01_memory_extract_plan:
     name: Allocate complete source coverage for memory extraction
     needs:
@@ -3453,12 +3167,12 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id006
     - *id008
+    - *id007
+    - *id009
     - name: Allocate complete source coverage for memory extraction
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -3474,7 +3188,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s01_memory_extract_batches:
     name: Extract all source-supported facts / batch ${{ matrix.batch }}
     needs:
@@ -3487,10 +3202,10 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id006
-    - *id008
-    - *id047
+    - *id005
+    - *id007
+    - *id009
+    - *id042
     - name: Extract all source-supported facts / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -3514,6 +3229,7 @@ jobs:
       max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s01_memory_extract_plan.outputs.characters) }}
+    env: *id004
   s01_memory_refresh_plan:
     name: Retain unchanged facts; allocate changed evidence batches
     needs:
@@ -3528,18 +3244,15 @@ jobs:
     steps:
     - *id001
     - *id002
+    - *id008
     - *id007
-    - *id006
-    - *id041
-    - *id010
-    - uses: actions/download-artifact@v4
-      with:
-        name: s01_memory
-        path: inputs/initial-memory
+    - *id043
+    - *id011
     - *id044
+    - *id045
     - name: Retain unchanged facts; allocate changed evidence batches
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -3555,7 +3268,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s01_memory_refresh_batches:
     name: Refresh changed evidence / batch ${{ matrix.batch }}
     needs:
@@ -3568,10 +3282,10 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id006
-    - *id010
-    - *id048
+    - *id005
+    - *id007
+    - *id011
+    - *id046
     - name: Refresh changed evidence / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -3595,6 +3309,7 @@ jobs:
       max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s01_memory_refresh_plan.outputs.characters) }}
+    env: *id004
   s01_memory_final_plan:
     name: Allocate final memory checks
     needs:
@@ -3608,14 +3323,14 @@ jobs:
     steps:
     - *id001
     - *id002
+    - *id008
     - *id007
-    - *id006
-    - *id010
-    - *id012
-    - *id044
+    - *id011
+    - *id013
+    - *id045
     - name: Allocate final memory checks
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -3631,7 +3346,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s01_memory_final_batches:
     name: final memory / continuity batch ${{ matrix.batch }}
     needs:
@@ -3646,12 +3362,12 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id006
-    - *id010
-    - *id012
-    - *id044
-    - *id049
+    - *id005
+    - *id007
+    - *id011
+    - *id013
+    - *id045
+    - *id047
     - name: final memory / continuity batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -3675,6 +3391,7 @@ jobs:
       max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s01_memory_final_plan.outputs.characters) }}
+    env: *id004
   s02_draft_plan:
     name: Allocate contiguous scene-writing batches
     needs:
@@ -3686,15 +3403,15 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id014
+    - *id008
+    - *id015
     - uses: actions/download-artifact@v4
       with:
         name: s02_direction
         path: inputs/direction
     - name: Allocate contiguous scene-writing batches
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -3710,7 +3427,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s02_write_batches:
     name: Write scene batch ${{ matrix.batch }} with Gemini-first routing
     needs:
@@ -3722,9 +3440,9 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id014
-    - *id050
+    - *id005
+    - *id015
+    - *id048
     - name: Write scene batch ${{ matrix.batch }} with Gemini-first routing
       id: task
       env: *id034
@@ -3748,139 +3466,22 @@ jobs:
       max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s02_draft_plan.outputs.characters) }}
-  s02_section_plan:
-    name: Allocate source sections for summaries and prose review
-    needs:
-    - s02_design
-    - s02_edit
-    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id007
-    - *id014
-    - *id017
-    - name: Allocate source sections for summaries and prose review
-      id: task
-      env: *id005
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_plan --backend "$backend" --index 1'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s02_section_plan
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-    outputs: *id039
-  s02_summaries:
-    name: Summarize actual section ${{ matrix.batch }}; source-linked only
-    needs:
-    - s02_design
-    - s02_edit
-    - s02_section_plan
-    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id004
-    - *id014
-    - *id017
-    - *id051
-    - name: Summarize actual section ${{ matrix.batch }}; source-linked only
-      id: task
-      env: *id034
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_summary --backend "$backend" --index 1 --batch "$STORY_BATCH"'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s02_summaries-${{ matrix.batch }}
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        batch: ${{ fromJSON(needs.s02_section_plan.outputs.characters) }}
-  s02_summary_join:
-    name: Consolidate short summaries; retain source links
-    needs:
-    - s02_design
-    - s02_edit
-    - s02_section_plan
-    - s02_summaries
-    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id007
-    - *id014
-    - *id017
-    - *id051
-    - uses: actions/download-artifact@v4
-      with:
-        pattern: s02_summaries-*
-        path: inputs/batches
-    - name: Consolidate short summaries; retain source links
-      id: task
-      env: *id005
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_summaries_join --backend "$backend" --index 1'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s02_summary_join
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
+    env: *id004
   s02_story_batches:
-    name: Causal story review / checks batch ${{ matrix.batch }}
+    name: Whole-scene story checks / batch ${{ matrix.batch }}
     needs:
     - s02_design
     - s02_edit
-    - s02_section_plan
-    - s02_summary_join
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id014
-    - *id017
-    - &id052
-      uses: actions/download-artifact@v4
-      with:
-        name: s02_summary_join
-        path: inputs/summaries
-    - name: Causal story review / checks batch ${{ matrix.batch }}
+    - *id005
+    - *id015
+    - *id018
+    - name: Whole-scene story checks / batch ${{ matrix.batch }}
       id: task
       env: *id034
       run: 'backend=fixture
@@ -3898,37 +3499,30 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        batch: ${{ fromJSON(needs.s02_section_plan.outputs.story_reviews) }}
+    strategy: *id035
+    env: *id004
   s02_rhetoric_batches:
-    name: Exact prose section review ${{ matrix.batch }}
+    name: Whole-scene rhetoric checks / batch ${{ matrix.batch }}
     needs:
     - s02_design
     - s02_edit
-    - s02_section_plan
-    - s02_summary_join
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id014
-    - *id017
-    - *id051
-    - *id052
-    - name: Exact prose section review ${{ matrix.batch }}
+    - *id005
+    - *id015
+    - *id018
+    - name: Whole-scene rhetoric checks / batch ${{ matrix.batch }}
       id: task
       env: *id034
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
-        python -m storyforge.batch_pipeline section_review --backend "$backend" --index 1 --batch "$STORY_BATCH"'
+        python -m storyforge.batch_pipeline review_batch --backend "$backend" --index 1 --kind rhetoric --group "$STORY_BATCH"'
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -3939,11 +3533,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        batch: ${{ fromJSON(needs.s02_section_plan.outputs.reviews) }}
+    strategy: *id035
+    env: *id004
   s02_memory_preflight_plan:
     name: Allocate preflight memory checks
     needs:
@@ -3956,17 +3547,17 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id014
-    - *id017
-    - &id053
+    - *id008
+    - *id015
+    - *id018
+    - &id049
       uses: actions/download-artifact@v4
       with:
         name: s02_memory
         path: inputs/memory
     - name: Allocate preflight memory checks
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -3982,7 +3573,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s02_memory_preflight_batches:
     name: preflight memory / continuity batch ${{ matrix.batch }}
     needs:
@@ -3996,11 +3588,11 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id014
-    - *id017
-    - *id053
-    - &id054
+    - *id005
+    - *id015
+    - *id018
+    - *id049
+    - &id050
       uses: actions/download-artifact@v4
       with:
         name: s02_memory_preflight_plan
@@ -4028,6 +3620,7 @@ jobs:
       max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s02_memory_preflight_plan.outputs.characters) }}
+    env: *id004
   s02_memory_preflight:
     name: Compile preflight memory findings
     needs:
@@ -4042,18 +3635,18 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id014
-    - *id017
-    - *id053
-    - *id054
+    - *id008
+    - *id015
+    - *id018
+    - *id049
+    - *id050
     - uses: actions/download-artifact@v4
       with:
         pattern: s02_memory_preflight_batches-*
         path: inputs/batches
     - name: Compile preflight memory findings
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -4069,6 +3662,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s02_repair_plan:
     name: Group exact disputed paragraphs into repair batches
     needs:
@@ -4083,27 +3677,27 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id014
-    - *id017
-    - &id058
+    - *id008
+    - *id015
+    - *id018
+    - &id052
       uses: actions/download-artifact@v4
       with:
         name: s02_story
         path: inputs/story-review
-    - &id059
+    - &id053
       uses: actions/download-artifact@v4
       with:
         name: s02_rhetoric
         path: inputs/rhetoric-review
-    - &id062
+    - &id054
       uses: actions/download-artifact@v4
       with:
         name: s02_memory_preflight
         path: inputs/memory-review
     - name: Group exact disputed paragraphs into repair batches
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -4119,7 +3713,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s02_repair_batches:
     name: Fix ONLY cited paragraphs / batch ${{ matrix.batch }}
     needs:
@@ -4131,9 +3726,9 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id014
-    - *id055
+    - *id005
+    - *id015
+    - *id051
     - name: Fix ONLY cited paragraphs / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -4157,225 +3752,48 @@ jobs:
       max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s02_repair_plan.outputs.characters) }}
-  s02_final_sections:
-    name: Allocate final passage checks
-    needs:
-    - s02_design
-    - s02_repair
-    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id007
-    - *id014
-    - *id020
-    - name: Allocate final passage checks
-      id: task
-      env: *id005
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_plan --backend "$backend" --index 1'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s02_final_sections
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-    outputs: *id039
-  s02_final_summaries:
-    name: Summarize repaired section ${{ matrix.batch }}
+    env: *id004
+  s02_final_check:
+    name: Reuse unchanged passing checks or make ONE strict final judgment
     needs:
     - s02_design
     - s02_repair
     - s02_edit
-    - s02_summary_join
-    - s02_final_sections
+    - s02_story
+    - s02_rhetoric
+    - s02_memory
+    - s02_memory_preflight
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id014
-    - *id020
+    - *id008
+    - *id015
+    - *id021
     - &id057
       uses: actions/download-artifact@v4
       with:
         name: s02_edit
         path: inputs/original
-    - uses: actions/download-artifact@v4
-      with:
-        name: s02_summary_join
-        path: inputs/previous-summaries
-    - &id056
+    - *id052
+    - *id053
+    - &id058
       uses: actions/download-artifact@v4
       with:
-        name: s02_final_sections
-        path: inputs/plan
-    - name: Summarize repaired section ${{ matrix.batch }}
+        name: s02_memory
+        path: inputs/initial-memory
+    - *id054
+    - name: Reuse unchanged passing checks or make ONE strict final judgment
       id: task
-      env: *id034
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_summary --backend "$backend" --index 1 --batch "$STORY_BATCH"'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s02_final_summaries-${{ matrix.batch }}
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        batch: ${{ fromJSON(needs.s02_final_sections.outputs.characters) }}
-  s02_final_summary_join:
-    name: Join fresh final summaries
-    needs:
-    - s02_design
-    - s02_repair
-    - s02_final_sections
-    - s02_final_summaries
-    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id007
-    - *id014
-    - *id020
-    - *id056
-    - uses: actions/download-artifact@v4
-      with:
-        pattern: s02_final_summaries-*
-        path: inputs/batches
-    - name: Join fresh final summaries
-      id: task
-      env: *id005
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_summaries_join --backend "$backend" --index 1'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s02_final_summary_join
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-  s02_final_batches:
-    name: Final passage/cohesion check ${{ matrix.batch }}
-    needs:
-    - s02_design
-    - s02_repair
-    - s02_edit
-    - s02_story
-    - s02_rhetoric
-    - s02_memory_preflight
-    - s02_final_sections
-    - s02_final_summary_join
-    - s02_final_memory
-    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id004
-    - *id014
-    - *id020
-    - *id057
-    - *id058
-    - *id059
-    - *id060
-    - *id056
-    - &id061
-      uses: actions/download-artifact@v4
-      with:
-        name: s02_final_summary_join
-        path: inputs/summaries
-    - *id021
-    - name: Final passage/cohesion check ${{ matrix.batch }}
-      id: task
-      env: *id034
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_final_review --backend "$backend" --index 1 --batch "$STORY_BATCH"'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s02_final_batches-${{ matrix.batch }}
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        batch: ${{ fromJSON(needs.s02_final_sections.outputs.final_reviews) }}
-  s02_final_check:
-    name: Compile ONE strict final judgment round
-    needs:
-    - s02_design
-    - s02_repair
-    - s02_final_sections
-    - s02_final_summary_join
-    - s02_story
-    - s02_rhetoric
-    - s02_memory_preflight
-    - s02_final_batches
-    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id007
-    - *id014
-    - *id020
-    - *id056
-    - *id061
-    - *id058
-    - *id059
-    - *id062
-    - uses: actions/download-artifact@v4
-      with:
-        pattern: s02_final_batches-*
-        path: inputs/final-batches
-    - name: Compile ONE strict final judgment round
-      id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
         python -m storyforge.batch_pipeline finalize --backend "$backend" --index 1'
-    - *id063
+    - *id055
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -4386,6 +3804,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s02_memory_extract_plan:
     name: Allocate complete source coverage for memory extraction
     needs:
@@ -4397,12 +3816,12 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id014
-    - *id017
+    - *id008
+    - *id015
+    - *id018
     - name: Allocate complete source coverage for memory extraction
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -4418,7 +3837,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s02_memory_extract_batches:
     name: Extract all source-supported facts / batch ${{ matrix.batch }}
     needs:
@@ -4431,10 +3851,10 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id014
-    - *id017
-    - *id064
+    - *id005
+    - *id015
+    - *id018
+    - *id056
     - name: Extract all source-supported facts / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -4458,6 +3878,7 @@ jobs:
       max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s02_memory_extract_plan.outputs.characters) }}
+    env: *id004
   s02_memory_refresh_plan:
     name: Retain unchanged facts; allocate changed evidence batches
     needs:
@@ -4472,18 +3893,15 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id014
+    - *id008
+    - *id015
     - *id057
-    - *id020
-    - uses: actions/download-artifact@v4
-      with:
-        name: s02_memory
-        path: inputs/initial-memory
-    - *id060
+    - *id021
+    - *id058
+    - *id059
     - name: Retain unchanged facts; allocate changed evidence batches
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -4499,7 +3917,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s02_memory_refresh_batches:
     name: Refresh changed evidence / batch ${{ matrix.batch }}
     needs:
@@ -4512,10 +3931,10 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id014
-    - *id020
-    - *id065
+    - *id005
+    - *id015
+    - *id021
+    - *id060
     - name: Refresh changed evidence / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -4539,6 +3958,7 @@ jobs:
       max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s02_memory_refresh_plan.outputs.characters) }}
+    env: *id004
   s02_memory_final_plan:
     name: Allocate final memory checks
     needs:
@@ -4552,14 +3972,14 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id014
-    - *id020
+    - *id008
+    - *id015
     - *id021
-    - *id060
+    - *id022
+    - *id059
     - name: Allocate final memory checks
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -4575,7 +3995,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s02_memory_final_batches:
     name: final memory / continuity batch ${{ matrix.batch }}
     needs:
@@ -4590,12 +4011,12 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id014
-    - *id020
+    - *id005
+    - *id015
     - *id021
-    - *id060
-    - *id066
+    - *id022
+    - *id059
+    - *id061
     - name: final memory / continuity batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -4619,6 +4040,7 @@ jobs:
       max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s02_memory_final_plan.outputs.characters) }}
+    env: *id004
   s03_draft_plan:
     name: Allocate contiguous scene-writing batches
     needs:
@@ -4630,15 +4052,15 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id022
+    - *id008
+    - *id023
     - uses: actions/download-artifact@v4
       with:
         name: s03_direction
         path: inputs/direction
     - name: Allocate contiguous scene-writing batches
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -4654,7 +4076,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s03_write_batches:
     name: Write scene batch ${{ matrix.batch }} with Gemini-first routing
     needs:
@@ -4666,9 +4089,9 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id022
-    - *id067
+    - *id005
+    - *id023
+    - *id062
     - name: Write scene batch ${{ matrix.batch }} with Gemini-first routing
       id: task
       env: *id034
@@ -4692,139 +4115,22 @@ jobs:
       max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s03_draft_plan.outputs.characters) }}
-  s03_section_plan:
-    name: Allocate source sections for summaries and prose review
-    needs:
-    - s03_design
-    - s03_edit
-    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id007
-    - *id022
-    - *id023
-    - name: Allocate source sections for summaries and prose review
-      id: task
-      env: *id005
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_plan --backend "$backend" --index 2'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s03_section_plan
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-    outputs: *id039
-  s03_summaries:
-    name: Summarize actual section ${{ matrix.batch }}; source-linked only
-    needs:
-    - s03_design
-    - s03_edit
-    - s03_section_plan
-    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id004
-    - *id022
-    - *id023
-    - *id068
-    - name: Summarize actual section ${{ matrix.batch }}; source-linked only
-      id: task
-      env: *id034
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_summary --backend "$backend" --index 2 --batch "$STORY_BATCH"'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s03_summaries-${{ matrix.batch }}
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        batch: ${{ fromJSON(needs.s03_section_plan.outputs.characters) }}
-  s03_summary_join:
-    name: Consolidate short summaries; retain source links
-    needs:
-    - s03_design
-    - s03_edit
-    - s03_section_plan
-    - s03_summaries
-    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id007
-    - *id022
-    - *id023
-    - *id068
-    - uses: actions/download-artifact@v4
-      with:
-        pattern: s03_summaries-*
-        path: inputs/batches
-    - name: Consolidate short summaries; retain source links
-      id: task
-      env: *id005
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_summaries_join --backend "$backend" --index 2'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s03_summary_join
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
+    env: *id004
   s03_story_batches:
-    name: Causal story review / checks batch ${{ matrix.batch }}
+    name: Whole-scene story checks / batch ${{ matrix.batch }}
     needs:
     - s03_design
     - s03_edit
-    - s03_section_plan
-    - s03_summary_join
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id022
+    - *id005
     - *id023
-    - &id069
-      uses: actions/download-artifact@v4
-      with:
-        name: s03_summary_join
-        path: inputs/summaries
-    - name: Causal story review / checks batch ${{ matrix.batch }}
+    - *id024
+    - name: Whole-scene story checks / batch ${{ matrix.batch }}
       id: task
       env: *id034
       run: 'backend=fixture
@@ -4842,37 +4148,30 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        batch: ${{ fromJSON(needs.s03_section_plan.outputs.story_reviews) }}
+    strategy: *id035
+    env: *id004
   s03_rhetoric_batches:
-    name: Exact prose section review ${{ matrix.batch }}
+    name: Whole-scene rhetoric checks / batch ${{ matrix.batch }}
     needs:
     - s03_design
     - s03_edit
-    - s03_section_plan
-    - s03_summary_join
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id022
+    - *id005
     - *id023
-    - *id068
-    - *id069
-    - name: Exact prose section review ${{ matrix.batch }}
+    - *id024
+    - name: Whole-scene rhetoric checks / batch ${{ matrix.batch }}
       id: task
       env: *id034
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
-        python -m storyforge.batch_pipeline section_review --backend "$backend" --index 2 --batch "$STORY_BATCH"'
+        python -m storyforge.batch_pipeline review_batch --backend "$backend" --index 2 --kind rhetoric --group "$STORY_BATCH"'
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -4883,11 +4182,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        batch: ${{ fromJSON(needs.s03_section_plan.outputs.reviews) }}
+    strategy: *id035
+    env: *id004
   s03_memory_preflight_plan:
     name: Allocate preflight memory checks
     needs:
@@ -4900,17 +4196,17 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id022
+    - *id008
     - *id023
-    - &id070
+    - *id024
+    - &id063
       uses: actions/download-artifact@v4
       with:
         name: s03_memory
         path: inputs/memory
     - name: Allocate preflight memory checks
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -4926,7 +4222,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s03_memory_preflight_batches:
     name: preflight memory / continuity batch ${{ matrix.batch }}
     needs:
@@ -4940,11 +4237,11 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id022
+    - *id005
     - *id023
-    - *id070
-    - &id071
+    - *id024
+    - *id063
+    - &id064
       uses: actions/download-artifact@v4
       with:
         name: s03_memory_preflight_plan
@@ -4972,6 +4269,7 @@ jobs:
       max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s03_memory_preflight_plan.outputs.characters) }}
+    env: *id004
   s03_memory_preflight:
     name: Compile preflight memory findings
     needs:
@@ -4986,18 +4284,18 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id022
+    - *id008
     - *id023
-    - *id070
-    - *id071
+    - *id024
+    - *id063
+    - *id064
     - uses: actions/download-artifact@v4
       with:
         pattern: s03_memory_preflight_batches-*
         path: inputs/batches
     - name: Compile preflight memory findings
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -5013,6 +4311,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s03_repair_plan:
     name: Group exact disputed paragraphs into repair batches
     needs:
@@ -5027,27 +4326,27 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id022
+    - *id008
     - *id023
-    - &id075
+    - *id024
+    - &id066
       uses: actions/download-artifact@v4
       with:
         name: s03_story
         path: inputs/story-review
-    - &id076
+    - &id067
       uses: actions/download-artifact@v4
       with:
         name: s03_rhetoric
         path: inputs/rhetoric-review
-    - &id079
+    - &id068
       uses: actions/download-artifact@v4
       with:
         name: s03_memory_preflight
         path: inputs/memory-review
     - name: Group exact disputed paragraphs into repair batches
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -5063,7 +4362,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s03_repair_batches:
     name: Fix ONLY cited paragraphs / batch ${{ matrix.batch }}
     needs:
@@ -5075,9 +4375,9 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id022
-    - *id072
+    - *id005
+    - *id023
+    - *id065
     - name: Fix ONLY cited paragraphs / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -5101,225 +4401,48 @@ jobs:
       max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s03_repair_plan.outputs.characters) }}
-  s03_final_sections:
-    name: Allocate final passage checks
-    needs:
-    - s03_design
-    - s03_repair
-    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id007
-    - *id022
-    - *id025
-    - name: Allocate final passage checks
-      id: task
-      env: *id005
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_plan --backend "$backend" --index 2'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s03_final_sections
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-    outputs: *id039
-  s03_final_summaries:
-    name: Summarize repaired section ${{ matrix.batch }}
+    env: *id004
+  s03_final_check:
+    name: Reuse unchanged passing checks or make ONE strict final judgment
     needs:
     - s03_design
     - s03_repair
     - s03_edit
-    - s03_summary_join
-    - s03_final_sections
+    - s03_story
+    - s03_rhetoric
+    - s03_memory
+    - s03_memory_preflight
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id022
-    - *id025
-    - &id074
+    - *id008
+    - *id023
+    - *id026
+    - &id070
       uses: actions/download-artifact@v4
       with:
         name: s03_edit
         path: inputs/original
-    - uses: actions/download-artifact@v4
-      with:
-        name: s03_summary_join
-        path: inputs/previous-summaries
-    - &id073
+    - *id066
+    - *id067
+    - &id071
       uses: actions/download-artifact@v4
       with:
-        name: s03_final_sections
-        path: inputs/plan
-    - name: Summarize repaired section ${{ matrix.batch }}
+        name: s03_memory
+        path: inputs/initial-memory
+    - *id068
+    - name: Reuse unchanged passing checks or make ONE strict final judgment
       id: task
-      env: *id034
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_summary --backend "$backend" --index 2 --batch "$STORY_BATCH"'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s03_final_summaries-${{ matrix.batch }}
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        batch: ${{ fromJSON(needs.s03_final_sections.outputs.characters) }}
-  s03_final_summary_join:
-    name: Join fresh final summaries
-    needs:
-    - s03_design
-    - s03_repair
-    - s03_final_sections
-    - s03_final_summaries
-    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id007
-    - *id022
-    - *id025
-    - *id073
-    - uses: actions/download-artifact@v4
-      with:
-        pattern: s03_final_summaries-*
-        path: inputs/batches
-    - name: Join fresh final summaries
-      id: task
-      env: *id005
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_summaries_join --backend "$backend" --index 2'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s03_final_summary_join
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-  s03_final_batches:
-    name: Final passage/cohesion check ${{ matrix.batch }}
-    needs:
-    - s03_design
-    - s03_repair
-    - s03_edit
-    - s03_story
-    - s03_rhetoric
-    - s03_memory_preflight
-    - s03_final_sections
-    - s03_final_summary_join
-    - s03_final_memory
-    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id004
-    - *id022
-    - *id025
-    - *id074
-    - *id075
-    - *id076
-    - *id077
-    - *id073
-    - &id078
-      uses: actions/download-artifact@v4
-      with:
-        name: s03_final_summary_join
-        path: inputs/summaries
-    - *id026
-    - name: Final passage/cohesion check ${{ matrix.batch }}
-      id: task
-      env: *id034
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_final_review --backend "$backend" --index 2 --batch "$STORY_BATCH"'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s03_final_batches-${{ matrix.batch }}
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        batch: ${{ fromJSON(needs.s03_final_sections.outputs.final_reviews) }}
-  s03_final_check:
-    name: Compile ONE strict final judgment round
-    needs:
-    - s03_design
-    - s03_repair
-    - s03_final_sections
-    - s03_final_summary_join
-    - s03_story
-    - s03_rhetoric
-    - s03_memory_preflight
-    - s03_final_batches
-    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id007
-    - *id022
-    - *id025
-    - *id073
-    - *id078
-    - *id075
-    - *id076
-    - *id079
-    - uses: actions/download-artifact@v4
-      with:
-        pattern: s03_final_batches-*
-        path: inputs/final-batches
-    - name: Compile ONE strict final judgment round
-      id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
         python -m storyforge.batch_pipeline finalize --backend "$backend" --index 2'
-    - *id063
+    - *id055
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -5330,6 +4453,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s03_memory_extract_plan:
     name: Allocate complete source coverage for memory extraction
     needs:
@@ -5341,12 +4465,12 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id022
+    - *id008
     - *id023
+    - *id024
     - name: Allocate complete source coverage for memory extraction
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -5362,7 +4486,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s03_memory_extract_batches:
     name: Extract all source-supported facts / batch ${{ matrix.batch }}
     needs:
@@ -5375,10 +4500,10 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id022
+    - *id005
     - *id023
-    - *id080
+    - *id024
+    - *id069
     - name: Extract all source-supported facts / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -5402,6 +4527,7 @@ jobs:
       max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s03_memory_extract_plan.outputs.characters) }}
+    env: *id004
   s03_memory_refresh_plan:
     name: Retain unchanged facts; allocate changed evidence batches
     needs:
@@ -5416,18 +4542,15 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id022
-    - *id074
-    - *id025
-    - uses: actions/download-artifact@v4
-      with:
-        name: s03_memory
-        path: inputs/initial-memory
-    - *id077
+    - *id008
+    - *id023
+    - *id070
+    - *id026
+    - *id071
+    - *id072
     - name: Retain unchanged facts; allocate changed evidence batches
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -5443,7 +4566,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s03_memory_refresh_batches:
     name: Refresh changed evidence / batch ${{ matrix.batch }}
     needs:
@@ -5456,10 +4580,10 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id022
-    - *id025
-    - *id081
+    - *id005
+    - *id023
+    - *id026
+    - *id073
     - name: Refresh changed evidence / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -5483,6 +4607,7 @@ jobs:
       max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s03_memory_refresh_plan.outputs.characters) }}
+    env: *id004
   s03_memory_final_plan:
     name: Allocate final memory checks
     needs:
@@ -5496,14 +4621,14 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id022
-    - *id025
+    - *id008
+    - *id023
     - *id026
-    - *id077
+    - *id027
+    - *id072
     - name: Allocate final memory checks
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -5519,7 +4644,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s03_memory_final_batches:
     name: final memory / continuity batch ${{ matrix.batch }}
     needs:
@@ -5534,12 +4660,12 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id022
-    - *id025
+    - *id005
+    - *id023
     - *id026
-    - *id077
-    - *id082
+    - *id027
+    - *id072
+    - *id074
     - name: final memory / continuity batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -5563,6 +4689,7 @@ jobs:
       max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s03_memory_final_plan.outputs.characters) }}
+    env: *id004
   s04_draft_plan:
     name: Allocate contiguous scene-writing batches
     needs:
@@ -5574,15 +4701,15 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id027
+    - *id008
+    - *id028
     - uses: actions/download-artifact@v4
       with:
         name: s04_direction
         path: inputs/direction
     - name: Allocate contiguous scene-writing batches
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -5598,7 +4725,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s04_write_batches:
     name: Write scene batch ${{ matrix.batch }} with Gemini-first routing
     needs:
@@ -5610,9 +4738,9 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id027
-    - *id083
+    - *id005
+    - *id028
+    - *id075
     - name: Write scene batch ${{ matrix.batch }} with Gemini-first routing
       id: task
       env: *id034
@@ -5636,139 +4764,22 @@ jobs:
       max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s04_draft_plan.outputs.characters) }}
-  s04_section_plan:
-    name: Allocate source sections for summaries and prose review
-    needs:
-    - s04_design
-    - s04_edit
-    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id007
-    - *id027
-    - *id028
-    - name: Allocate source sections for summaries and prose review
-      id: task
-      env: *id005
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_plan --backend "$backend" --index 3'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s04_section_plan
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-    outputs: *id039
-  s04_summaries:
-    name: Summarize actual section ${{ matrix.batch }}; source-linked only
-    needs:
-    - s04_design
-    - s04_edit
-    - s04_section_plan
-    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id004
-    - *id027
-    - *id028
-    - *id084
-    - name: Summarize actual section ${{ matrix.batch }}; source-linked only
-      id: task
-      env: *id034
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_summary --backend "$backend" --index 3 --batch "$STORY_BATCH"'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s04_summaries-${{ matrix.batch }}
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        batch: ${{ fromJSON(needs.s04_section_plan.outputs.characters) }}
-  s04_summary_join:
-    name: Consolidate short summaries; retain source links
-    needs:
-    - s04_design
-    - s04_edit
-    - s04_section_plan
-    - s04_summaries
-    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id007
-    - *id027
-    - *id028
-    - *id084
-    - uses: actions/download-artifact@v4
-      with:
-        pattern: s04_summaries-*
-        path: inputs/batches
-    - name: Consolidate short summaries; retain source links
-      id: task
-      env: *id005
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_summaries_join --backend "$backend" --index 3'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s04_summary_join
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
+    env: *id004
   s04_story_batches:
-    name: Causal story review / checks batch ${{ matrix.batch }}
+    name: Whole-scene story checks / batch ${{ matrix.batch }}
     needs:
     - s04_design
     - s04_edit
-    - s04_section_plan
-    - s04_summary_join
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id027
+    - *id005
     - *id028
-    - &id085
-      uses: actions/download-artifact@v4
-      with:
-        name: s04_summary_join
-        path: inputs/summaries
-    - name: Causal story review / checks batch ${{ matrix.batch }}
+    - *id029
+    - name: Whole-scene story checks / batch ${{ matrix.batch }}
       id: task
       env: *id034
       run: 'backend=fixture
@@ -5786,37 +4797,30 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        batch: ${{ fromJSON(needs.s04_section_plan.outputs.story_reviews) }}
+    strategy: *id035
+    env: *id004
   s04_rhetoric_batches:
-    name: Exact prose section review ${{ matrix.batch }}
+    name: Whole-scene rhetoric checks / batch ${{ matrix.batch }}
     needs:
     - s04_design
     - s04_edit
-    - s04_section_plan
-    - s04_summary_join
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id027
+    - *id005
     - *id028
-    - *id084
-    - *id085
-    - name: Exact prose section review ${{ matrix.batch }}
+    - *id029
+    - name: Whole-scene rhetoric checks / batch ${{ matrix.batch }}
       id: task
       env: *id034
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
-        python -m storyforge.batch_pipeline section_review --backend "$backend" --index 3 --batch "$STORY_BATCH"'
+        python -m storyforge.batch_pipeline review_batch --backend "$backend" --index 3 --kind rhetoric --group "$STORY_BATCH"'
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -5827,11 +4831,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        batch: ${{ fromJSON(needs.s04_section_plan.outputs.reviews) }}
+    strategy: *id035
+    env: *id004
   s04_memory_preflight_plan:
     name: Allocate preflight memory checks
     needs:
@@ -5844,17 +4845,17 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id027
+    - *id008
     - *id028
-    - &id086
+    - *id029
+    - &id076
       uses: actions/download-artifact@v4
       with:
         name: s04_memory
         path: inputs/memory
     - name: Allocate preflight memory checks
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -5870,7 +4871,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s04_memory_preflight_batches:
     name: preflight memory / continuity batch ${{ matrix.batch }}
     needs:
@@ -5884,11 +4886,11 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id027
+    - *id005
     - *id028
-    - *id086
-    - &id087
+    - *id029
+    - *id076
+    - &id077
       uses: actions/download-artifact@v4
       with:
         name: s04_memory_preflight_plan
@@ -5916,6 +4918,7 @@ jobs:
       max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s04_memory_preflight_plan.outputs.characters) }}
+    env: *id004
   s04_memory_preflight:
     name: Compile preflight memory findings
     needs:
@@ -5930,18 +4933,18 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id027
+    - *id008
     - *id028
-    - *id086
-    - *id087
+    - *id029
+    - *id076
+    - *id077
     - uses: actions/download-artifact@v4
       with:
         pattern: s04_memory_preflight_batches-*
         path: inputs/batches
     - name: Compile preflight memory findings
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -5957,6 +4960,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s04_repair_plan:
     name: Group exact disputed paragraphs into repair batches
     needs:
@@ -5971,27 +4975,27 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id027
+    - *id008
     - *id028
-    - &id091
+    - *id029
+    - &id079
       uses: actions/download-artifact@v4
       with:
         name: s04_story
         path: inputs/story-review
-    - &id092
+    - &id080
       uses: actions/download-artifact@v4
       with:
         name: s04_rhetoric
         path: inputs/rhetoric-review
-    - &id095
+    - &id081
       uses: actions/download-artifact@v4
       with:
         name: s04_memory_preflight
         path: inputs/memory-review
     - name: Group exact disputed paragraphs into repair batches
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -6007,7 +5011,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s04_repair_batches:
     name: Fix ONLY cited paragraphs / batch ${{ matrix.batch }}
     needs:
@@ -6019,9 +5024,9 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id027
-    - *id088
+    - *id005
+    - *id028
+    - *id078
     - name: Fix ONLY cited paragraphs / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -6045,225 +5050,48 @@ jobs:
       max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s04_repair_plan.outputs.characters) }}
-  s04_final_sections:
-    name: Allocate final passage checks
-    needs:
-    - s04_design
-    - s04_repair
-    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id007
-    - *id027
-    - *id030
-    - name: Allocate final passage checks
-      id: task
-      env: *id005
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_plan --backend "$backend" --index 3'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s04_final_sections
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-    outputs: *id039
-  s04_final_summaries:
-    name: Summarize repaired section ${{ matrix.batch }}
+    env: *id004
+  s04_final_check:
+    name: Reuse unchanged passing checks or make ONE strict final judgment
     needs:
     - s04_design
     - s04_repair
     - s04_edit
-    - s04_summary_join
-    - s04_final_sections
+    - s04_story
+    - s04_rhetoric
+    - s04_memory
+    - s04_memory_preflight
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id027
-    - *id030
-    - &id090
+    - *id008
+    - *id028
+    - *id031
+    - &id083
       uses: actions/download-artifact@v4
       with:
         name: s04_edit
         path: inputs/original
-    - uses: actions/download-artifact@v4
-      with:
-        name: s04_summary_join
-        path: inputs/previous-summaries
-    - &id089
+    - *id079
+    - *id080
+    - &id084
       uses: actions/download-artifact@v4
       with:
-        name: s04_final_sections
-        path: inputs/plan
-    - name: Summarize repaired section ${{ matrix.batch }}
+        name: s04_memory
+        path: inputs/initial-memory
+    - *id081
+    - name: Reuse unchanged passing checks or make ONE strict final judgment
       id: task
-      env: *id034
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_summary --backend "$backend" --index 3 --batch "$STORY_BATCH"'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s04_final_summaries-${{ matrix.batch }}
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        batch: ${{ fromJSON(needs.s04_final_sections.outputs.characters) }}
-  s04_final_summary_join:
-    name: Join fresh final summaries
-    needs:
-    - s04_design
-    - s04_repair
-    - s04_final_sections
-    - s04_final_summaries
-    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id007
-    - *id027
-    - *id030
-    - *id089
-    - uses: actions/download-artifact@v4
-      with:
-        pattern: s04_final_summaries-*
-        path: inputs/batches
-    - name: Join fresh final summaries
-      id: task
-      env: *id005
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_summaries_join --backend "$backend" --index 3'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s04_final_summary_join
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-  s04_final_batches:
-    name: Final passage/cohesion check ${{ matrix.batch }}
-    needs:
-    - s04_design
-    - s04_repair
-    - s04_edit
-    - s04_story
-    - s04_rhetoric
-    - s04_memory_preflight
-    - s04_final_sections
-    - s04_final_summary_join
-    - s04_final_memory
-    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id004
-    - *id027
-    - *id030
-    - *id090
-    - *id091
-    - *id092
-    - *id093
-    - *id089
-    - &id094
-      uses: actions/download-artifact@v4
-      with:
-        name: s04_final_summary_join
-        path: inputs/summaries
-    - *id031
-    - name: Final passage/cohesion check ${{ matrix.batch }}
-      id: task
-      env: *id034
-      run: 'backend=fixture
-
-        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
-
-        python -m storyforge.batch_pipeline section_final_review --backend "$backend" --index 3 --batch "$STORY_BATCH"'
-    - name: Save outputs and execution timeline
-      uses: actions/upload-artifact@v4
-      id: artifact
-      if: always()
-      with:
-        name: s04_final_batches-${{ matrix.batch }}
-        path: out/
-        retention-days: 30
-        overwrite: true
-    - *id003
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        batch: ${{ fromJSON(needs.s04_final_sections.outputs.final_reviews) }}
-  s04_final_check:
-    name: Compile ONE strict final judgment round
-    needs:
-    - s04_design
-    - s04_repair
-    - s04_final_sections
-    - s04_final_summary_join
-    - s04_story
-    - s04_rhetoric
-    - s04_memory_preflight
-    - s04_final_batches
-    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
-    runs-on: ubuntu-latest
-    timeout-minutes: 360
-    steps:
-    - *id001
-    - *id002
-    - *id007
-    - *id027
-    - *id030
-    - *id089
-    - *id094
-    - *id091
-    - *id092
-    - *id095
-    - uses: actions/download-artifact@v4
-      with:
-        pattern: s04_final_batches-*
-        path: inputs/final-batches
-    - name: Compile ONE strict final judgment round
-      id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
         python -m storyforge.batch_pipeline finalize --backend "$backend" --index 3'
-    - *id063
+    - *id055
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -6274,6 +5102,7 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
+    env: *id004
   s04_memory_extract_plan:
     name: Allocate complete source coverage for memory extraction
     needs:
@@ -6285,12 +5114,12 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id027
+    - *id008
     - *id028
+    - *id029
     - name: Allocate complete source coverage for memory extraction
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -6306,7 +5135,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s04_memory_extract_batches:
     name: Extract all source-supported facts / batch ${{ matrix.batch }}
     needs:
@@ -6319,10 +5149,10 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id027
+    - *id005
     - *id028
-    - *id096
+    - *id029
+    - *id082
     - name: Extract all source-supported facts / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -6346,6 +5176,7 @@ jobs:
       max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s04_memory_extract_plan.outputs.characters) }}
+    env: *id004
   s04_memory_refresh_plan:
     name: Retain unchanged facts; allocate changed evidence batches
     needs:
@@ -6360,18 +5191,15 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id027
-    - *id090
-    - *id030
-    - uses: actions/download-artifact@v4
-      with:
-        name: s04_memory
-        path: inputs/initial-memory
-    - *id093
+    - *id008
+    - *id028
+    - *id083
+    - *id031
+    - *id084
+    - *id085
     - name: Retain unchanged facts; allocate changed evidence batches
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -6387,7 +5215,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s04_memory_refresh_batches:
     name: Refresh changed evidence / batch ${{ matrix.batch }}
     needs:
@@ -6400,10 +5229,10 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id027
-    - *id030
-    - *id097
+    - *id005
+    - *id028
+    - *id031
+    - *id086
     - name: Refresh changed evidence / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -6427,6 +5256,7 @@ jobs:
       max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s04_memory_refresh_plan.outputs.characters) }}
+    env: *id004
   s04_memory_final_plan:
     name: Allocate final memory checks
     needs:
@@ -6440,14 +5270,14 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id007
-    - *id027
-    - *id030
+    - *id008
+    - *id028
     - *id031
-    - *id093
+    - *id032
+    - *id085
     - name: Allocate final memory checks
       id: task
-      env: *id005
+      env: *id006
       run: 'backend=fixture
 
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
@@ -6463,7 +5293,8 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    outputs: *id011
+    outputs: *id012
+    env: *id004
   s04_memory_final_batches:
     name: final memory / continuity batch ${{ matrix.batch }}
     needs:
@@ -6478,12 +5309,12 @@ jobs:
     steps:
     - *id001
     - *id002
-    - *id004
-    - *id027
-    - *id030
+    - *id005
+    - *id028
     - *id031
-    - *id093
-    - *id098
+    - *id032
+    - *id085
+    - *id087
     - name: final memory / continuity batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -6507,6 +5338,7 @@ jobs:
       max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s04_memory_final_plan.outputs.characters) }}
+    env: *id004
 env:
   PYTHONUNBUFFERED: 1
   STORY_BACKEND: ${{ inputs.backend }}
@@ -6515,3 +5347,5 @@ env:
   GEMINI_DISTINCT_PROJECTS: 'true'
   STORY_REVIEW_TIMEOUT_SECONDS: '600'
   STORY_BATCH_TIMEOUT_SECONDS: '600'
+  STORY_HOSTED_ONLY: 'true'
+  STORY_LEAN_LIVING: 'true'

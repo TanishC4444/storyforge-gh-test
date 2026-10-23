@@ -160,8 +160,12 @@ class GoogleHosted:
         start=((int(hashlib.sha256(phase.encode()).hexdigest()[:8],16)+int(batch)) if batch.isdigit() else int(hashlib.sha256(seed.encode()).hexdigest()[:8],16))%len(self.project_children)
         start=(start+policy.get('project_offset',0))%len(self.project_children)
         last=None;started=time.monotonic();budget=min(360 if role=='chapter_quality' else 240,policy.get('route_budget',360))
-        for offset in range(min(len(self.project_children),policy.get('max_project_attempts',len(self.project_children)))):
-            slot=(start+offset)%len(self.project_children);child=self.project_children[slot]
+        order=[(start+offset)%len(self.project_children) for offset in range(len(self.project_children))]
+        # Reading local health is not a provider attempt. Do not spend a bounded
+        # selection on a project already known to be unavailable for this model.
+        available=[slot for slot in order if kind not in self.project_children[slot].disabled and not self.project_children[slot].circuit(kind)]
+        for slot in available[:policy.get('max_project_attempts',len(self.project_children))]:
+            child=self.project_children[slot]
             from .runtime import worker_timeout_seconds
             remaining=min(budget-(time.monotonic()-started),worker_timeout_seconds())
             if remaining<1:break

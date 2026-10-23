@@ -156,6 +156,7 @@ def join_reviews(state,source,out,kind):
     else:
         reviews=[v['review'] for v in sorted(values,key=lambda v:v['group'])]
         verdict=editorial_review({'pass':all(v['pass'] for v in reviews),'checks':[c for v in reviews for c in v['checks']],'issues':[i for v in reviews for i in v['issues']]},prose,required)
+    verdict.update(state_sha256=bind_state(state),source_sha256=digest(prose))
     save(Path(out)/'review.json',verdict);return verdict
 
 def plan_repairs(state,source,out):
@@ -253,6 +254,12 @@ def finalize(state,card,source,out,backend):
     if (Path(source)/'final-batches').exists():
         from .section_reviews import final_join
         batch_verdict=final_join(state,source)
+    elif state['request'].get('performance',{}).get('lean_living_checks'):
+        original=Path(source)/'original/prose.txt';facts=Path(source)/'initial-memory/memory.json'
+        proof=reviews[2] if len(reviews)>2 else {}
+        if original.exists() and original.read_text()==prose and facts.exists() and proof.get('pass') and not proof.get('unverified') and proof.get('source_sha256')==digest(prose) and proof.get('state_sha256')==bind_state(state) and proof.get('memory_sha256')==bind_state(load(facts)) and all(r.get('pass') and not r.get('unverified') and r.get('source_sha256')==digest(prose) and r.get('state_sha256')==bind_state(state) for r in reviews[:2]):
+            batch_verdict=editorial_review({'pass':True,'checks':[c for r in reviews[:2] for c in r['checks']],'issues':[i for r in reviews[:2] for i in r['issues']]},prose,STORY_CHECKS+RHETORIC_CHECKS)
+            batch_verdict.update(batch_count=0,reused_unchanged_passing_checks=True)
     final=decide(state['request'],state,card,prose,reviews,out,backend,batch_verdict=batch_verdict)
     summaries=Path(source)/'summaries/summaries.json'
     if summaries.exists():
