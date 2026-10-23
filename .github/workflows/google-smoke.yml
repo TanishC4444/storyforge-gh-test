@@ -16,5 +16,6 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+          GEMINI_DISTINCT_PROJECTS: 'true'
           PYTHONUNBUFFERED: '1'
         run: python -m scripts.google_smoke
