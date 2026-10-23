@@ -28,7 +28,7 @@ def plan(state,source,out,phase):
               'fact_indices':list(range(i*4,min(len(facts),(i+1)*4)))} for i in range(count)]
     if state['request'].get('performance',{}).get('memory_pair_batches'):
         from .canon import cards
-        prior=memory_canon(state);prior_size=20 if adaptive(state['request']) else 8;fact_size=8 if adaptive(state['request']) else 2
+        prior=memory_canon(state);prior_size=32 if state['request'].get('performance',{}).get('pipelined_living') else 20 if adaptive(state['request']) else 8;fact_size=8 if adaptive(state['request']) else 2
         prior_groups=[list(range(i,min(i+prior_size,len(prior)))) for i in range(0,len(prior),prior_size)] or [[]]
         candidates=[{'task':'facts','owned_passages':[],'fact_indices':list(range(i,min(i+fact_size,len(facts))))} for i in range(0,len(facts),fact_size)]
         groups=windows(catalog,450) if adaptive(state['request']) else [catalog[i:i+2] for i in range(0,len(catalog),2)]

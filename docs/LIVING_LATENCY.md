@@ -38,3 +38,45 @@ including real artifact handoffs, all editorial dimensions, memory checks and
 canon acceptance. It also checks that changed text receives one strict judgment.
 Fixture completion proves wiring, not live speed or prose quality. End-to-end live
 time must be measured from a new run.
+
+## Larger-episode pipeline
+
+`living-universe-pipeline.yml` keeps separate character, writer, reviewer, editor,
+source extraction, factual checking, final judgment and acceptance runners. It
+fuses only deterministic plans/joins/copies into their adjacent role stages. The
+stable `living-universe.yml` remains available as the measured one-scene baseline.
+The next writer still waits for the prior acceptance and source-verified factual
+handoff; future plans never count as memory.
+
+The scale practice uses two 900-word scenes, twelve named characters (four active
+participants per scene), 24 world rules and 96 distinct starting facts. Its
+memory matrix retains all prior history and crosses every new-fact partition and
+source window with every history partition. Larger 32-record history partitions
+and six bounded concurrent memory runners reduce scheduling overhead; no history
+is discarded. POV facts can reference IDs in the complete author ledger to avoid
+copying identical records twice without granting access to private facts.
+
+The larger cast is indexed by ID/name in scene design; detailed profiles are sent
+for the current participants. Complete character definitions remain in the author
+request, and all their memories remain in the factual audit. Explicit resource,
+belief and thread types on initial facts now survive preparation instead of being
+silently relabeled as events.
+
+Reported narration is permitted when the author's specific rules permit it;
+reviewers must not invent a prohibition on indirect speech-reporting verbs. Real
+repetitive bargaining remains reviewable. Targeted patch output budgets accommodate
+actual paragraph replacements instead of truncating them behind reasoning tokens.
+
+An additional final episode audit requires actual literary approvals, committed
+canon, exact source/state/fact proof bindings and preservation of every initial
+fact. A green generation job alone does not pass this audit. Live runtime and prose
+quality still need to be measured from the newly generated run; fixture tests are
+not speed or quality claims.
+
+Hosted pipeline calls transport the full response grammar through the provider's
+native schema rather than also echoing that grammar into the prompt. Application
+validators are unchanged. Final reviewers receive the failed/disputed earlier
+checks and all issues, while independently reassessing all 17 dimensions; repeated
+passing explanations are omitted. A measured stress packet with the previous
+900-word output fell from over the 48,000-character limit to 41,085 characters,
+with all 96 initial facts retained. This measures packet size, not live quality.

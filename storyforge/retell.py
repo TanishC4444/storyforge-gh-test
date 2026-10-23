@@ -40,7 +40,7 @@ def run(folder,source,backend='worker',final_candidate=None):
     save(folder/'retrieval-provenance.json',{'mode':'replay_selected_classical_analysis','source':'run_artifact' if Path(source).exists() else 'committed_literary_cache','source_request_hash':seed.get('request_hash')})
     state_path=folder/'state.json'
     fingerprint=hashlib.sha256(json.dumps(req,sort_keys=True).encode()).hexdigest()
-    state=load(state_path) if state_path.exists() else {'request_hash':fingerprint,'accepted':[],'memories':[dict(x,kind='event',source='user_input') for x in req['initial_facts']]}
+    state=load(state_path) if state_path.exists() else {'request_hash':fingerprint,'accepted':[],'memories':[dict(x,kind=x.get('kind','event'),source='user_input') for x in req['initial_facts']]}
     contracts.require(state['request_hash']==fingerprint,'Run brief changed; choose a new output directory')
     executor=Executor(req,folder,backend)
     skill_path=ROOT/'skills/distinct_writing.md'

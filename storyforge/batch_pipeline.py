@@ -40,6 +40,7 @@ def scene_context(state,card,role='writer'):
         'pov_known_facts':bridge(state,card['pov']),
         'prior_story_context':[{'id':s['id'],'quality_status':s.get('quality_status','reviewed'),'canon_committed':s.get('canon_committed',True),'intended_change_is_plan_only':s.get('intended_change')} for s in (state.get('universe_history',[])+state['accepted'])[-2:]],
         'participants':[{k:c.get(k) for k in ['id','name','goal','fear','contradiction']} for c in req['characters'] if c['id'] in card['participants']],
+        'prior_scene_exit':state['accepted'][-1]['prose'][-1200:] if state['accepted'] else '',
         'author_policy':'Plans and author continuity are not automatically shared character knowledge.'}
 
 def review_context(state,card):
@@ -198,7 +199,7 @@ def repair_batch(state,card,source,out,backend,bid):
         try:
             from .editorial_transport import patches
             empowered=req.get('performance',{}).get('empowered_editors')
-            options={'tokens':min(2800,700*max(1,len(batch['owned']))),'response_schema':patch_schema(batch),'validator':lambda v:patches(v,batch)}
+            options={'tokens':min(4200,1400*max(1,len(batch['owned']))),'response_schema':patch_schema(batch),'validator':lambda v:patches(v,batch)}
             if empowered:options.update(response_schema=False,output_format='text')
             data={**review_context(state,card),'batch':batch,'immutable_world_rules':req['world_rules']}
             instruction='Check allegations against the original author prompt and actual canon. Repair ONLY owned passages. Neighbors are read-only. Dismiss criticism that conflicts with the brief. Preserve required events, knowledge and voice. '

@@ -250,6 +250,7 @@ class ConfigurationRecoveryTests(unittest.TestCase):
                 safe=request.call_args.args[1]['generationConfig']
                 self.assertEqual(safe['responseMimeType'],'application/json')
                 self.assertNotIn('responseJsonSchema',safe)
+                self.assertIn('{"type":"object"}',request.call_args.args[1]['systemInstruction']['parts'][-1]['text'])
                 self.assertNotIn('thinkingConfig',safe)
                 self.assertNotIn('flash',h.disabled)
                 self.assertEqual(json.loads(Path(d,'quota.json').read_text())['flash']['calls'],2)

@@ -37,7 +37,7 @@ def decide(req,state,card,prose,reviews,out,backend,*,batch_verdict=None):
           'reference_applications':application_packet(req,state['retrieval'],'story_quality',card['id']) if state.get('retrieval') else req.get('references',[]),
           'prior_scenes_in_current_chapter':[{'id':s['id'],'prose':s['prose'],'quality_status':s.get('quality_status','reviewed')} for s in state['accepted'] if s['chapter']==card['chapter']],
           'disputed_assessments':[{'pass':r.get('pass'),'unverified':r.get('unverified',False),
-              'checks':[{k:c.get(k) for k in ['id','verdict','reason','evidence_ids']} for c in r.get('checks',[])],
+              'checks':[{k:c.get(k) for k in ['id','verdict','reason','evidence_ids']} for c in r.get('checks',[]) if not req.get('performance',{}).get('pipelined_living') or c.get('verdict')=='fail'],
               'issues':[{k:i.get(k) for k in ['severity','category','problem','fix','evidence_ids','quote'] if k in i and (k!='quote' or not i.get('evidence_ids'))} for i in r.get('issues',[])]} for r in reviews],
           'decision_policy':'This is the one final substantive judgment. Prior reviewers and editors have no authority over the author brief. Never approve merely to finish.'}
     schema=editorial_schema(data)
