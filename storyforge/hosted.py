@@ -164,12 +164,13 @@ class GoogleHosted:
         # Reading local health is not a provider attempt. Do not spend a bounded
         # selection on a project already known to be unavailable for this model.
         available=[slot for slot in order if kind not in self.project_children[slot].disabled and not self.project_children[slot].circuit(kind)]
-        for slot in available[:policy.get('max_project_attempts',len(self.project_children))]:
+        attempts=available[:policy.get('max_project_attempts',len(self.project_children))]
+        for position,slot in enumerate(attempts):
             child=self.project_children[slot]
             from .runtime import worker_timeout_seconds
             remaining=min(budget-(time.monotonic()-started),worker_timeout_seconds())
             if remaining<1:break
-            route_policy={**policy,'timeout':min(policy['timeout'],remaining)}
+            route_policy={**policy,'timeout':min(policy['timeout'],remaining/max(1,len(attempts)-position))}
             try:
                 output,meta=child.complete(kind,system,prompt,tokens,structured,response_schema,role,route_policy)
                 from .tracking import event

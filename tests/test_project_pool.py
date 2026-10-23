@@ -82,3 +82,17 @@ class IndependentProjectTests(unittest.TestCase):
             calls.clear()
             with self.assertRaises(HostedError):h.complete('flash','s','p',100,role='writer_beat',policy={'timeout':10,'max_project_attempts':2})
             self.assertEqual(calls,[])
+
+    def test_timeout_reserves_time_for_second_project_without_extra_attempts(self):
+        with self.env(),tempfile.TemporaryDirectory() as d:
+            h=GoogleHosted(d);clock=[0.0];timeouts=[]
+            def responder(*args,**kwargs):
+                policy=args[-1];timeouts.append(policy['timeout'])
+                if len(timeouts)==1:
+                    clock[0]+=policy['timeout']
+                    raise HostedError('Request timed out')
+                return 'text',{'model':'test'}
+            for child in h.project_children:child.complete=responder
+            with patch('storyforge.hosted.time.monotonic',side_effect=lambda:clock[0]):
+                result,_=h.complete('flash','s','p',100,role='character',policy={'timeout':40,'route_budget':40,'max_project_attempts':2})
+            self.assertEqual(result,'text');self.assertEqual(timeouts,[20,20])

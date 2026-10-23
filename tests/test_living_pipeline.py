@@ -143,3 +143,30 @@ class LivingPipelineTests(unittest.TestCase):
             with patch.object(b,'write_batch',side_effect=no_text),patch.object(sys,'argv',['batch_pipeline','write_batch','--source',str(root/'source'),'--out',str(root/'out'),'--backend','worker','--batch','0']):
                 with self.assertRaises(SystemExit):b.main()
             self.assertTrue((root/'out/draft-batch.json').exists());self.assertEqual(load(root/'out/status.json')['status'],'failure')
+
+    def test_pipeline_character_context_preserves_knowledge_without_inference(self):
+        from storyforge.dag import actor_packet
+        from storyforge.canon import bridge
+        with tempfile.TemporaryDirectory() as d,patch.dict(os.environ,{'STORY_LEAN_LIVING':'true','STORY_LIVING_PIPELINE':'true'}),redirect_stdout(io.StringIO()):
+            root=Path(d)
+            stage('prepare',root/'none',root/'base',request_file='living-scale-practice',backend='fixture')
+            state=prepare(root/'base/snapshot.json',root/'quick',backend='fixture')
+            card=state['plan']['scenes'][0];cid=card['participants'][0]
+            expected=actor_packet(state['request'],state,card,cid)
+            save(root/'inputs/state/snapshot.json',state)
+            with patch('storyforge.dag.Executor.call',side_effect=AssertionError('Optional actor inference was called')):
+                stage('character',root/'inputs',root/'actor',character=cid,backend='fixture')
+            proposal=load(root/'actor/proposal.json')
+            self.assertEqual(proposal['state_version'],state['version'])
+            self.assertEqual(proposal['character_profile'],expected['character'])
+            self.assertEqual(proposal['method'],'source_bound_character_context_no_inference')
+            author={m['id']:m for m in bridge(state)['facts']}
+            resolved=[author[m['fact_id']] if 'fact_id' in m else m for m in proposal['known_facts']]
+            self.assertEqual(resolved,expected['known_facts'])
+            self.assertLess(len(resolved),len(state['memories']))
+            save(root/'direction-input/state/snapshot.json',state)
+            for actor in card['participants']:
+                stale={**proposal,'character':actor,'state_version':state['version']-1}
+                save(root/'direction-input/characters'/actor/'proposal.json',stale)
+            with self.assertRaisesRegex(Exception,'Stale character proposal'):
+                stage('director',root/'direction-input',root/'direction',backend='fixture')
