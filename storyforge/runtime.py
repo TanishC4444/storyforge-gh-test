@@ -49,6 +49,9 @@ def scoped_call_budget(fn):
         if role not in budgets or self.backend=='fixture':return fn(self,role,*args,**kwargs)
         seconds=budgets[role]
         if type(seconds) is not int or not 30<=seconds<=1800:raise ValueError('Invalid total call budget')
+        from .provider_recovery import configuration
+        recovery=configuration(self.req)
+        seconds+=recovery.get('buffer_seconds',0)
         previous=os.getenv('STORY_JOB_DEADLINE');deadline=time.time()+seconds
         if previous:deadline=min(deadline,float(previous))
         os.environ['STORY_JOB_DEADLINE']=str(deadline)
