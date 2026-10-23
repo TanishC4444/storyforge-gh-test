@@ -11,17 +11,20 @@ def build():
     graph['env']['STORY_LIVING_PIPELINE']='true'
     def add(key,template,title,task,needs,files,index,*,module='living_stages',matrix=None,outputs=(),condition=None):
         job=copy.deepcopy(old[template]);job['name']=title;job['needs']=list(dict.fromkeys(needs));job.pop('strategy',None);job.pop('outputs',None)
-        job['if']=condition or '${{ '+str(index)+' < fromJSON(inputs.scene_limit) }}'
+        job['if']=condition or '${{ always() && !cancelled() && '+str(index)+' < fromJSON(inputs.scene_limit)'+''.join(' && needs.'+name+".result == 'success'" for name in job['needs'])+' }}'
+        if condition and 'always()' not in condition:
+            body=condition[4:-3]
+            job['if']='${{ always() && !cancelled() && ('+body+')'+''.join(' && needs.'+name+".result == 'success'" for name in job['needs'])+' }}'
         if matrix is not None:job['strategy']={'fail-fast':False,'max-parallel':6 if 'memory' in key else 4 if key.endswith('_characters') else 2,'matrix':{'character' if key.endswith('_characters') else 'batch':matrix}}
         if outputs:job['outputs']={name:'${{ steps.task.outputs.'+name+' }}' for name in outputs}
         steps=[]
         for step in job['steps']:
             if step.get('uses')=='actions/download-artifact@v4' or step.get('name')=='Show generated prose before final acceptance':continue
             if step.get('id')=='task':
-                for spec in files:
-                    name,path,*extra=spec;pattern=bool(extra and extra[0]);download={'uses':'actions/download-artifact@v4','with':{'pattern' if pattern else 'name':name,'path':'inputs/'+path}}
-                    if len(extra)>1:download['if']=extra[1]
-                    steps.append(download)
+                manifest=[{'name':spec[0],'path':spec[1],'pattern':bool(len(spec)>2 and spec[2]),'condition':spec[3].replace('${{','').replace('}}','').strip() if len(spec)>3 else None} for spec in files]
+                patterns=list(dict.fromkeys(spec[0] for spec in files))
+                steps.append({'name':'Fetch upstream artifacts in one parallel transfer','uses':'actions/download-artifact@v4','with':{'pattern':patterns[0] if len(patterns)==1 else '{'+','.join(patterns)+'}','path':'incoming'}})
+                steps.append({'name':'Bind downloaded artifacts to explicit source aliases','env':{'STORY_ARTIFACT_MANIFEST':json.dumps(manifest,separators=(',',':')),'STORY_UPSTREAM_NEEDS':'${{ toJSON(needs) }}'},'run':'python -m storyforge.living_stages arrange'})
                 step['name']=title;env=step['env'];env.pop('STORY_BATCH',None);env.pop('STORY_CHARACTER',None)
                 command='python -m storyforge.'+module+' '+task+' --backend "$backend" --index '+str(index)
                 if matrix is not None:

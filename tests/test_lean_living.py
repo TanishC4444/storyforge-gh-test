@@ -70,7 +70,7 @@ class LeanLivingTests(unittest.TestCase):
         setup=Path('.github/actions/setup-worker/action.yml').read_text()
         self.assertIn("default: 'false'",setup)
         self.assertIn("inputs.hosted-only != 'true'",setup)
-        self.assertIn('Install lightweight hosted application',setup)
+        self.assertIn('Check dependency-free hosted application',setup)
     def test_changed_prose_gets_one_strict_judgment_instead_of_reusing_passes(self):
         from storyforge.editorial import STORY_CHECKS,RHETORIC_CHECKS
         with tempfile.TemporaryDirectory() as d,patch.dict(os.environ,{'STORY_LEAN_LIVING':'true'}),redirect_stdout(io.StringIO()):

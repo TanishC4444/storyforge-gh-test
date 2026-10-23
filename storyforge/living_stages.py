@@ -1,6 +1,6 @@
 """Runner-scoped Living stages. Only artifact bookkeeping is fused; role calls stay separate."""
 from __future__ import annotations
-import argparse,shutil,time
+import argparse,shutil,time,os,json,re,fnmatch
 from pathlib import Path
 from .storage import load,save
 from .contracts import require,delta
@@ -10,6 +10,22 @@ from .dag import stage
 
 def copy_file(source,dest):
     dest=Path(dest);dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(source,dest)
+
+
+def arrange(incoming='incoming',source='inputs',manifest=None,needs=None):
+    manifest=manifest if manifest is not None else json.loads(os.environ['STORY_ARTIFACT_MANIFEST'])
+    needs=needs if needs is not None else json.loads(os.environ['STORY_UPSTREAM_NEEDS'])
+    incoming=Path(incoming);source=Path(source)
+    for spec in manifest:
+        if spec.get('condition'):
+            match=re.search(r"needs\.([a-zA-Z0-9_]+)\.outputs\.([a-zA-Z0-9_]+)",spec['condition'])
+            require(match is not None,'Unsupported artifact condition')
+            if needs.get(match[1],{}).get('outputs',{}).get(match[2])!='true':continue
+        names=[p for p in incoming.iterdir() if p.is_dir() and fnmatch.fnmatch(p.name,spec['name'])]
+        require(bool(names),'Missing required upstream artifact: '+spec['name'])
+        for folder in names:
+            target=source/spec['path']/(folder.name if spec['pattern'] else '')
+            shutil.copytree(folder,target,dirs_exist_ok=True)
 
 
 def execute(task,source,out,index=0,backend='fixture'):
@@ -74,6 +90,7 @@ def execute(task,source,out,index=0,backend='fixture'):
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('task');p.add_argument('--source',default='inputs');p.add_argument('--out',default='out');p.add_argument('--index',type=int,default=0);p.add_argument('--backend',choices=['fixture','worker'],default='fixture');args=p.parse_args()
+    if args.task=='arrange':arrange();return
     started=time.monotonic();execute(args.task,args.source,args.out,args.index,args.backend)
     status=Path(args.out)/'status.json'
     if not status.exists():save(status,{'task':args.task,'status':'success','elapsed_seconds':round(time.monotonic()-started,3),'fixture':args.backend=='fixture'})

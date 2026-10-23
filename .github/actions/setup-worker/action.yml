@@ -31,7 +31,7 @@ runs:
       run: |
         .venv/bin/pip install 'gh-inference @ https://files.pythonhosted.org/packages/57/db/ba16b4158729255973217f74424f613615859ebe1c1cbfa43018bcda735f/gh_inference-0.6.1-py3-none-any.whl#sha256=5d4bfd21b4559bd7dcb43cc8d10add889d782679b35d024f5aff6ffac8876a90' -e . -q
         echo "$GITHUB_WORKSPACE/.venv/bin" >> "$GITHUB_PATH"
-    - name: Install lightweight hosted application
+    - name: Check dependency-free hosted application
       if: inputs.backend == 'live' && inputs.hosted-only == 'true'
       shell: bash
-      run: python -m pip install -e . -q
+      run: python -c "import storyforge; from storyforge.hosted import GoogleHosted"
