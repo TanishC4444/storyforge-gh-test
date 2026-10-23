@@ -1,5 +1,7 @@
 # Universe runner graphs
 
+Generated YAML shares common nonsecret environment values and reuses exact step/config mappings through YAML anchors and aliases. Secret values stay on task steps. This reduces parser configuration size while preserving every job and dependency.
+
 The cinematic and Living universe workflows retain visible character, writing, review, repair and canon jobs in one Actions graph. Their ancestry includes Actions run 39552359292; that historical completion is not a guarantee of literary quality.
 
 ## Modes and planning
