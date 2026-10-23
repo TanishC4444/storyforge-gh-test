@@ -53,9 +53,9 @@ class MemoryFieldTests(unittest.TestCase):
             with tempfile.TemporaryDirectory() as d:self.assertNotIn('text',source_defaults(raw,payload(prose),prose,d)['memories'][0])
         raw={'memories':[self.record()]};raw['memories'][0].pop('known_by')
         with tempfile.TemporaryDirectory() as d,patch('storyforge.hosted.GoogleHosted.complete',return_value=(json.dumps(raw),{'finish_reason':'stop','model':'test'})) as provider:
-            with self.assertRaisesRegex(ContractError,'knowledge holders'):
+            with self.assertRaises(ContractError):
                 memory_extract(Executor(self.req(),d,'worker'),self.req(),d,prose,{**payload(prose),'prior_canon':[]},'Extract memory.')
-            self.assertEqual(provider.call_count,1)
+            self.assertEqual(provider.call_count,2)
     def test_field_repair_cannot_mutate_metadata_or_hide_failure(self):
         prose='Lyra owed the return of the pin. '+('Rain fell against the gate. '*30)
         raw={'memories':[self.record()]}

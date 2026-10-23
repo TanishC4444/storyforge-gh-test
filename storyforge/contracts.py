@@ -91,14 +91,17 @@ def delta(value, prose, ids):
     require(all(isinstance(m, dict) for m in value['memories']), 'Memory entries must be objects')
     value = {**value, 'memories': [dict(m) for m in value['memories']]}
     for index, m in enumerate(value['memories']):
-        require(m.get('kind') in {'event', 'belief', 'claim', 'resource', 'relationship', 'thread'}, 'Invalid memory kind')
+        require(isinstance(m.get('kind'),str) and m['kind'] in {'event', 'belief', 'claim', 'resource', 'relationship', 'thread'}, 'Invalid memory kind')
         require(isinstance(m.get('text'), str) and bool(m['text'].strip()) and len(m['text']) <= 600, f'Invalid memory text at record {index + 1}: text is required, nonempty, and at most 600 characters')
         try:
             m = bind(m, prose)
             value['memories'][index] = m
         except EvidenceError as exc:
             raise ContractError(f'Memory {index + 1} evidence is unsupported: {exc}') from exc
-        require(isinstance(m.get('known_by'), list) and set(m['known_by']) <= set(ids) | {'public'}, 'Invalid memory knowledge holders')
+        require(isinstance(m.get('known_by'), list) and all(isinstance(cid,str) for cid in m['known_by']) and set(m['known_by']) <= set(ids) | {'public'}, 'Invalid memory knowledge holders')
+        if 'supersedes' in m:
+            links=m['supersedes']
+            require(isinstance(links,list) and len(links)<=3 and all(isinstance(x,str) for x in links) and len(links)==len(set(links)),'Invalid supersedes links')
         if 'life_state' in m or 'subject' in m:
             require(m.get('kind')=='event' and m.get('subject') in ids and m.get('life_state') in {'alive','dead','missing','unknown'},'Invalid lifecycle memory')
             require(m.get('fact_key')=='life:'+m['subject'],'Lifecycle memory needs stable life:<id> fact key')
@@ -106,7 +109,7 @@ def delta(value, prose, ids):
             require(m.get('kind')=='thread' and isinstance(m.get('thread_id'),str) and bool(re.fullmatch(r'[a-zA-Z0-9_-]{1,64}',m['thread_id'])) and m.get('thread_state') in {'seeded','escalating','payoff','closed'},'Invalid plot thread memory')
             require(m.get('fact_key')=='thread:'+m['thread_id'],'Thread needs stable thread:<id> fact key')
         if m['kind'] == 'belief':
-            require(m.get('holder') in ids and m['holder'] in m['known_by'], 'Belief needs holder')
+            require(isinstance(m.get('holder'),str) and m['holder'] in ids and m['holder'] in m['known_by'], 'Belief needs holder')
     return value
 
 

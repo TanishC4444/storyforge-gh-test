@@ -84,7 +84,14 @@ def execute(task,source,out,index=0,backend='fixture'):
     elif task=='accept':
         if state['request'].get('performance',{}).get('strict_draft_handoff'):
             from .craft import validate_prose
-            validate_prose((source/'edited/prose.txt').read_text(),state['request'],check_length=backend!='fixture')
+            prose=(source/'edited/prose.txt').read_text()
+            validate_prose(prose,state['request'],check_length=backend!='fixture')
+            proof=load(source/'memory-review/review.json')
+            if not proof.get('pass') or proof.get('unverified'):
+                save(out/'prose.txt',prose)
+                save(out/'blocked-handoff.json',{'scene':card['id'],'reason':'memory_unverified','memory_review':proof,'canon_committed':False})
+                detail=proof.get('batch_errors') or proof.get('issues') or proof.get('error','Missing factual approval')
+                require(False,'Memory handoff blocked before acceptance; draft retained: '+str(detail))
         final=load(source/'edited/repair.json')['editorial_adjudication']
         save(source/'story-review/review.json',final['story']);save(source/'rhetoric-review/review.json',final['rhetoric'])
         stage('accept',source,out,index=index,backend=backend)

@@ -8,6 +8,7 @@ from .storage import save
 
 def source_defaults(raw,packet,prose,out):
     result=copy.deepcopy(raw);changes=[]
+    if isinstance(result,list):result={'memories':result}
     if not isinstance(result,dict) or not isinstance(result.get('memories'),list):return result
     allowed={p['id'] for p in packet.get('evidence_passages',[])}
     for i,item in enumerate(result['memories']):

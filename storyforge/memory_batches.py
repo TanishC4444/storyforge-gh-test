@@ -162,7 +162,10 @@ def extract_batch(state,card,source,out,backend,bid):
             result=memory_extract(Executor(req,folder,backend),req,folder,prose,packet,instruction);break
         except Exception as exc:
             last=str(exc);raw=[]
-            if 'Memory field-only recovery failed' in last:break
+            if 'Memory field-only recovery failed' in last:
+                partial=folder/'memory-partial.json'
+                if partial.exists():result=load(partial)
+                break
             for path in folder.glob('calls/memory-*.json'):raw.append(load(path).get('output'))
             if not raw:break
             packet={**packet,'rejected_memory_output':raw[-1],'specific_validation_error':last}
