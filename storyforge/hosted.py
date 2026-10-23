@@ -45,6 +45,8 @@ class GoogleHosted:
     def _request(self,path,body,timeout=300,credential=None):
         if not self.key:raise HostedError('Google API key unavailable')
         req=urllib.request.Request(BASE+path,data=json.dumps(body).encode(),headers={'x-goog-api-key':credential or self.key,'Content-Type':'application/json'})
+        from .runtime import worker_timeout_seconds
+        timeout=min(timeout,worker_timeout_seconds())
         started=time.monotonic()
         try:
             with urllib.request.urlopen(req,timeout=timeout) as response:result=json.load(response)
@@ -76,6 +78,8 @@ class GoogleHosted:
         if tokens>tpm:raise HostedError('Input exceeds conservative hosted per-minute allowance')
         path=self.folder/'quota.json'
         while True:
+            from .runtime import worker_timeout_seconds
+            worker_timeout_seconds()
             with (self.folder/'quota.lock').open('a') as lock:
                 fcntl.flock(lock,fcntl.LOCK_EX)
                 state=json.loads(path.read_text()) if path.exists() else {}
@@ -150,10 +154,11 @@ class GoogleHosted:
         batch=os.getenv('STORY_BATCH','')
         phase=os.getenv('GITHUB_JOB','')+str(role)
         start=((int(hashlib.sha256(phase.encode()).hexdigest()[:8],16)+int(batch)) if batch.isdigit() else int(hashlib.sha256(seed.encode()).hexdigest()[:8],16))%len(self.project_children)
-        last=None;started=time.monotonic();budget=360 if role=='chapter_quality' else 240
+        last=None;started=time.monotonic();budget=min(360 if role=='chapter_quality' else 240,policy.get('route_budget',360))
         for offset in range(len(self.project_children)):
             slot=(start+offset)%len(self.project_children);child=self.project_children[slot]
-            remaining=budget-(time.monotonic()-started)
+            from .runtime import worker_timeout_seconds
+            remaining=min(budget-(time.monotonic()-started),worker_timeout_seconds())
             if remaining<1:break
             route_policy={**policy,'timeout':min(policy['timeout'],remaining)}
             try:

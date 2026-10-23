@@ -10,7 +10,7 @@ from storyforge.contracts import ContractError
 class MemoryBatchTests(unittest.TestCase):
     def scene(self,p):
         stage('prepare',p/'none',p/'base',request_file='classic-universe-practice',profile='fast',backend='fixture')
-        s=prepare(p/'base/snapshot.json',p/'prepared');return s,s['plan']['scenes'][0]
+        s=prepare(p/'base/snapshot.json',p/'prepared');s['request']['performance']['memory_pair_batches']=False;return s,s['plan']['scenes'][0]
     def make_inputs(self,p,s,phase='preflight'):
         prose='\n\n'.join(['Paragraph '+str(i)+' records an action.' for i in range(1,8)])
         save(p/'edited/prose.txt',prose);save(p/'memory/memory.json',{'memories':[]})

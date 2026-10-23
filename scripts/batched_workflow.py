@@ -8,8 +8,9 @@ def enable(x,total):
         j=copy.deepcopy(template);j['name']=title;j['needs']=needs
         j.pop('strategy',None);j.pop('outputs',None)
         if matrix:
-            j['strategy']={'fail-fast':False,'max-parallel':6,'matrix':{'batch':matrix}}
-        if task in {'draft_plan','repair_plan','memory_check_plan'}:j['outputs']={'characters':'${{ steps.task.outputs.characters }}'}
+            j['strategy']={'fail-fast':False,'max-parallel':12 if task in {'memory_check_batch','memory_extract_batch'} else 6,'matrix':{'batch':matrix}}
+        if task in {'draft_plan','repair_plan','memory_check_plan','section_plan','memory_extract_plan','memory_refresh_plan'}:j['outputs']={'characters':'${{ steps.task.outputs.characters }}'}
+        if task=='section_plan':j['outputs']['reviews']='${{ steps.task.outputs.reviews }}'
         kept=[]
         for s in j['steps']:
             if s.get('uses')=='actions/download-artifact@v4':continue
@@ -41,9 +42,13 @@ def enable(x,total):
         make(old['draft'],p+'_write_batches','Write scene batch ${{ matrix.batch }} with Gemini-first routing','write_batch',[p+'_design',p+'_draft_plan'],state+[(p+'_draft_plan','plan')],i,True,'${{ fromJSON(needs.'+p+'_draft_plan.outputs.characters) }}')
         make(old['draft'],p+'_draft','Compile writing batches without rewriting','merge_draft',[p+'_design',p+'_draft_plan',p+'_write_batches'],state+[(p+'_draft_plan','plan'),(p+'_write_batches-*','batches',True)],i,False)
         make(old['edit'],p+'_edit','Forward prose unchanged for source-bound reviews','forward',[p+'_design',p+'_draft'],state+[(p+'_draft','draft')],i,False)
-        for kind in ['story','rhetoric']:
-            make(old[kind],p+'_'+kind+'_batches',kind+' review checks batch ${{ matrix.batch }}','review_batch',[p+'_design',p+'_edit'],state+[(p+'_edit','edited')],i,True,[0,1,2],kind)
-            make(old[kind],p+'_'+kind,'Compile '+kind+' review findings','join_reviews',[p+'_design',p+'_edit',p+'_'+kind+'_batches'],state+[(p+'_edit','edited'),(p+'_'+kind+'_batches-*','batches',True)],i,False,kind=kind)
+        make(old['story'],p+'_section_plan','Allocate source sections for summaries and prose review','section_plan',[p+'_design',p+'_edit'],state+[(p+'_edit','edited')],i,False)
+        make(old['story'],p+'_summaries','Summarize actual section ${{ matrix.batch }}; source-linked only','section_summary',[p+'_design',p+'_edit',p+'_section_plan'],state+[(p+'_edit','edited'),(p+'_section_plan','plan')],i,True,'${{ fromJSON(needs.'+p+'_section_plan.outputs.characters) }}')
+        make(old['story'],p+'_summary_join','Consolidate short summaries; retain source links','section_summaries_join',[p+'_design',p+'_edit',p+'_section_plan',p+'_summaries'],state+[(p+'_edit','edited'),(p+'_section_plan','plan'),(p+'_summaries-*','batches',True)],i,False)
+        make(old['story'],p+'_story_batches','Causal story review / checks batch ${{ matrix.batch }}','review_batch',[p+'_design',p+'_edit',p+'_summary_join'],state+[(p+'_edit','edited'),(p+'_summary_join','summaries')],i,True,[0,1,2],'story')
+        make(old['story'],p+'_story','Compile causal findings; preserve partial results','join_reviews',[p+'_design',p+'_edit',p+'_story_batches'],state+[(p+'_edit','edited'),(p+'_story_batches-*','batches',True)],i,False,kind='story')
+        make(old['rhetoric'],p+'_rhetoric_batches','Exact prose section review ${{ matrix.batch }}','section_review',[p+'_design',p+'_edit',p+'_section_plan',p+'_summary_join'],state+[(p+'_edit','edited'),(p+'_section_plan','plan'),(p+'_summary_join','summaries')],i,True,'${{ fromJSON(needs.'+p+'_section_plan.outputs.reviews) }}')
+        make(old['rhetoric'],p+'_rhetoric','Compile prose findings; preserve partial results','section_reviews_join',[p+'_design',p+'_edit',p+'_section_plan',p+'_rhetoric_batches'],state+[(p+'_edit','edited'),(p+'_section_plan','plan'),(p+'_rhetoric_batches-*','batches',True)],i,False)
         def memory_graph(prefix,edited,memory,phase,joined):
             files=state+[(edited,'edited'),(memory,'memory')]
             make(old['memory_review'],prefix+'_plan','Allocate '+phase+' memory checks','memory_check_plan',[p+'_design',edited,memory],files,i,False,phase=phase)
@@ -54,11 +59,16 @@ def enable(x,total):
         make(old['repair'],p+'_repair_plan','Group exact disputed paragraphs into repair batches','repair_plan',[p+'_design',p+'_edit',p+'_story',p+'_rhetoric',p+'_memory_preflight'],findings,i,False)
         make(old['repair'],p+'_repair_batches','Fix ONLY cited paragraphs / batch ${{ matrix.batch }}','repair_batch',[p+'_design',p+'_repair_plan'],state+[(p+'_repair_plan','plan')],i,True,'${{ fromJSON(needs.'+p+'_repair_plan.outputs.characters) }}')
         make(old['repair'],p+'_repair','Merge targeted fixes; preserve untouched paragraphs','merge_repairs',[p+'_design',p+'_edit',p+'_repair_plan',p+'_repair_batches'],state+[(p+'_edit','edited'),(p+'_repair_plan','plan'),(p+'_repair_batches-*','batches',True)],i,False)
-        make(old['repair'],p+'_final_check','ONE final strict prompt check; no rewrite loop','finalize',[p+'_design',p+'_repair',p+'_story',p+'_rhetoric',p+'_memory_preflight'],state+[(p+'_repair','edited'),(p+'_story','story-review'),(p+'_rhetoric','rhetoric-review'),(p+'_memory_preflight','memory-review')],i,True)
+        make(old['repair'],p+'_final_batches','Final judgment round / dimensions ${{ matrix.batch }}','section_final_review',[p+'_design',p+'_repair'],state+[(p+'_repair','edited')],i,True,list(range(6)))
+        make(old['repair'],p+'_final_check','Compile ONE final strict judgment round; no rewrite loop','finalize',[p+'_design',p+'_repair',p+'_story',p+'_rhetoric',p+'_memory_preflight',p+'_final_batches'],state+[(p+'_repair','edited'),(p+'_story','story-review'),(p+'_rhetoric','rhetoric-review'),(p+'_memory_preflight','memory-review'),(p+'_final_batches-*','final-batches',True)],i,False)
         make(old['verify'],p+'_verify','Reuse final story verdict','verdict_view',[p+'_design',p+'_final_check'],state+[(p+'_final_check','edited')],i,False,kind='story')
         make(old['verify_rhetoric'],p+'_verify_rhetoric','Reuse final rhetoric verdict','verdict_view',[p+'_design',p+'_final_check'],state+[(p+'_final_check','edited')],i,False,kind='rhetoric')
-        make(old['memory'],p+'_memory','Extract evidence-bound initial facts','extract_initial',[p+'_design',p+'_edit'],state+[(p+'_edit','edited')],i)
-        make(old['final_memory'],p+'_final_memory','Refresh facts ONLY where prose changed','refresh_memory',[p+'_design',p+'_edit',p+'_final_check',p+'_memory'],state+[(p+'_edit','original'),(p+'_final_check','edited'),(p+'_memory','initial-memory')],i)
+        make(old['memory'],p+'_memory_extract_plan','Allocate complete source coverage for memory extraction','memory_extract_plan',[p+'_design',p+'_edit'],state+[(p+'_edit','edited')],i,False)
+        make(old['memory'],p+'_memory_extract_batches','Extract all source-supported facts / batch ${{ matrix.batch }}','memory_extract_batch',[p+'_design',p+'_edit',p+'_memory_extract_plan'],state+[(p+'_edit','edited'),(p+'_memory_extract_plan','plan')],i,True,'${{ fromJSON(needs.'+p+'_memory_extract_plan.outputs.characters) }}')
+        make(old['memory'],p+'_memory','Compile complete source-bound memory; no summary substitution','memory_extract_join',[p+'_design',p+'_edit',p+'_memory_extract_plan',p+'_memory_extract_batches'],state+[(p+'_edit','edited'),(p+'_memory_extract_plan','plan'),(p+'_memory_extract_batches-*','batches',True)],i,False)
+        make(old['final_memory'],p+'_memory_refresh_plan','Retain unchanged facts; allocate changed evidence batches','memory_refresh_plan',[p+'_design',p+'_edit',p+'_final_check',p+'_memory',p+'_memory_preflight'],state+[(p+'_edit','original'),(p+'_final_check','edited'),(p+'_memory','initial-memory'),(p+'_memory_preflight','preflight-memory')],i,False)
+        make(old['final_memory'],p+'_memory_refresh_batches','Refresh changed evidence / batch ${{ matrix.batch }}','memory_extract_batch',[p+'_design',p+'_final_check',p+'_memory_refresh_plan'],state+[(p+'_final_check','edited'),(p+'_memory_refresh_plan','plan')],i,True,'${{ fromJSON(needs.'+p+'_memory_refresh_plan.outputs.characters) }}')
+        make(old['final_memory'],p+'_final_memory','Compile retained and refreshed facts without omission','memory_extract_join',[p+'_design',p+'_final_check',p+'_memory_refresh_plan',p+'_memory_refresh_batches'],state+[(p+'_final_check','edited'),(p+'_memory_refresh_plan','plan'),(p+'_memory_refresh_batches-*','batches',True)],i,False)
         memory_graph(p+'_memory_final',p+'_final_check',p+'_final_memory','final',p+'_memory_review')
         # Acceptance stays on the existing gate, consuming the one final judgment.
         accept=jobs[p+'_accept']

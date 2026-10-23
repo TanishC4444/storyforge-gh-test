@@ -65,6 +65,7 @@ class BatchPipelineTests(unittest.TestCase):
             plan=b.plan_repairs(s,p/'findings',p/'plan');self.assertEqual(plan['batches'][0]['owned'],['p002'])
             save(p/'batch/plan/repair-plan.json',plan)
             def editor(executor,role,packet,instruction,**kw):
+                if 'candidate_patch' in packet:return {'pass':True,'reason':'The changed passage restores the correct household identity.'}
                 self.assertEqual(executor.req['max_stage_retries'],0);self.assertEqual(packet['batch']['owned'],['p002'])
                 return kw['validator']({'replacements':{'p002':'The smith lost passage.'}})
             with patch('storyforge.inference.Executor.call',autospec=True,side_effect=editor):b.repair_batch(s,c,p/'batch',p/'merge/batches/0','worker','0')

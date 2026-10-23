@@ -6,7 +6,7 @@ from .evidence import payload
 from .editorial import STORY_CHECKS,RHETORIC_CHECKS,editorial_review
 from .output_schema import editorial_schema
 from .inference import Executor
-from .canon import working
+from .canon import working,cards
 from .contracts import require
 from .craft import validate_prose
 from .flow_common import fingerprint
@@ -24,7 +24,7 @@ def split(verdict,required):
     checks=[c for c in verdict['checks'] if c['id'] in required]
     return {'pass':verdict['pass'] and all(c['verdict']!='fail' for c in checks) and not any(i['severity']=='blocking' for i in issues),'checks':checks,'issues':issues}
 
-def decide(req,state,card,prose,reviews,out,backend):
+def decide(req,state,card,prose,reviews,out,backend,*,batch_verdict=None):
     """Exactly one scoped model judgment, cached by immutable source + contract."""
     out=Path(out);chapter=chapter_text(state,card,prose)
     key=fingerprint([prose,chapter,req['premise'],contract(req),req.get('references'),req.get('adaptation'),state['memories'],card])
@@ -32,7 +32,7 @@ def decide(req,state,card,prose,reviews,out,backend):
     if path.exists():
         old=load(path);require(old['decision_key']==key,'Cannot reuse final adjudication after source/contract changes');return old
     data={**payload(prose),'required_checks':CHECKS,'scene':card,'original_prompt':req['premise'],
-          'prior_canon':working(state,query=str(card),budget=6500),
+          'prior_canon':(cards(state['memories']) if req.get('performance',{}).get('memory_pair_batches') else working(state,query=str(card),budget=6500)),
           'reference_applications':application_packet(req,state['retrieval'],'story_quality',card['id']) if state.get('retrieval') else req.get('references',[]),
           'prior_scenes_in_current_chapter':[{'id':s['id'],'prose':s['prose'],'quality_status':s.get('quality_status','reviewed')} for s in state['accepted'] if s['chapter']==card['chapter']],
           'disputed_assessments':[{'pass':r.get('pass'),'unverified':r.get('unverified',False),
@@ -46,7 +46,8 @@ def decide(req,state,card,prose,reviews,out,backend):
     # transport failover is not another editorial iteration.
     executor=Executor(scoped,out/'final-check',backend)
     try:
-        verdict=executor.call('chapter_quality',data,instruction,tokens=3200,validator=lambda v:editorial_review(v,prose,CHECKS),response_schema=schema)
+        from .editorial_transport import call_editorial
+        verdict=batch_verdict if batch_verdict is not None else call_editorial(executor,'chapter_quality',data,instruction,prose,CHECKS,3200)
         if verdict.get('unverified'):raise ValueError('Final adjudication unavailable')
         mechanical_override=None
         try:validate_prose(prose,req,check_length=backend!='fixture')
@@ -57,8 +58,8 @@ def decide(req,state,card,prose,reviews,out,backend):
                 if check['id']=='style_fidelity':check.update(verdict='fail',reason='The deterministic author-constraint check found: '+str(exc),evidence_ids=[data['evidence_passages'][0]['id']])
             verdict['issues'].append({'severity':'blocking','category':'style_fidelity','evidence_ids':[data['evidence_passages'][0]['id']],'problem':'Deterministic author-constraint violation: '+str(exc),'fix':'Restore the explicit author form and required length before treating this draft as reviewed.','replacement':''})
             verdict=editorial_review(verdict,prose,CHECKS)
-        result={'mechanical_override':mechanical_override,'decision_key':key,'prose_sha256':digest(prose),'chapter_sha256':digest(chapter),'judgment_calls':1,'verdict':verdict,'story':split(verdict,STORY_CHECKS),'rhetoric':split(verdict,RHETORIC_CHECKS),'unverified':False}
+        result={'mechanical_override':mechanical_override,'decision_key':key,'prose_sha256':digest(prose),'chapter_sha256':digest(chapter),'judgment_calls':6 if batch_verdict is not None else 1,'judgment_rounds':1,'verdict':verdict,'story':split(verdict,STORY_CHECKS),'rhetoric':split(verdict,RHETORIC_CHECKS),'unverified':False}
     except Exception as exc:
         failed={'pass':False,'checks':[],'issues':[],'unverified':True,'error':str(exc)}
-        result={'decision_key':key,'prose_sha256':digest(prose),'chapter_sha256':digest(chapter),'judgment_calls':1,'verdict':failed,'story':failed,'rhetoric':failed,'unverified':True}
+        result={'decision_key':key,'prose_sha256':digest(prose),'chapter_sha256':digest(chapter),'judgment_calls':6 if batch_verdict is not None else 1,'judgment_rounds':1,'verdict':failed,'story':failed,'rhetoric':failed,'unverified':True}
     save(path,result);return result

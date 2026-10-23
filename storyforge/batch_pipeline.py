@@ -5,7 +5,7 @@ from .contracts import require,delta
 from .storage import load,save
 from .inference import Executor,ROOT
 from .evidence import payload,passages
-from .canon import working,recording_context
+from .canon import working,recording_context,cards
 from .coordinator import packet,MEMORY_INSTRUCTION
 from .craft import validate_prose
 from .fast_edit import validate as validate_patch,schema as patch_schema
@@ -39,6 +39,16 @@ def scene_context(state,card,role='writer'):
         'prior_story_context':[{'id':s['id'],'quality_status':s.get('quality_status','reviewed'),'prose_excerpt':s['prose'][-2200:]} for s in (state.get('universe_history',[])+state['accepted'])[-2:]],
         'participants':[{k:c.get(k) for k in ['id','name','goal','fear','contradiction']} for c in req['characters'] if c['id'] in card['participants']],
         'author_policy':'Plans and author continuity are not automatically shared character knowledge.'}
+
+def review_context(state,card):
+    # No duplicate style/world/contract copies; review_policy injects the exact
+    # immutable author contract once. Summaries never become canonical facts.
+    req=state['request']
+    return {'original_prompt':req['premise'],'scene':card,
+            'scene_contract':next((c for c in req['scene_designs'] if c['id']==card['id']),{}),
+            'prior_canon':cards(state['memories']),
+            'reference_applications':application_packet(req,state['retrieval'],'story_quality',card['id'])}
+
 
 def plan_draft(state,card,source,out,backend):
     req=state['request'];count=max(1,min(6,math.ceil(req['words_per_scene']/320)))
@@ -104,11 +114,23 @@ def merge_draft(state,source,out):
 def review_batch(state,card,source,out,backend,kind,group):
     prose=(Path(source)/'edited/prose.txt').read_text();all_checks=STORY_CHECKS if kind=='story' else RHETORIC_CHECKS
     checks=all_checks[group*3:(group+1)*3];require(bool(checks),'Unknown review group')
-    req=scoped(state['request']);req['execution_policy'].setdefault('cpu_models',{})[kind+'_quality']='qwen3b'
+    req=scoped(state['request']);req['execution_policy'].setdefault('cpu_models',{})[kind+'_quality']='qwen7b'
     data={**payload(prose),**scene_context(state,card,kind+'_quality'),'required_checks':checks,'prior_scene':state['accepted'][-1]['prose'][-1800:] if state['accepted'] else None}
+    summary_path=Path(source)/'summaries/summaries.json'
+    if kind=='story' and req.get('performance',{}).get('summary_reviews') and summary_path.exists():
+        summaries=load(summary_path);require(summaries['source_sha256']==digest(prose),'Stale story summaries')
+        if summaries.get('unverified'):
+            result={'kind':kind,'group':group,'state_sha256':bind_state(state),'source_sha256':digest(prose),
+                    'review':{'pass':False,'checks':[],'issues':[],'unverified':True,'error':'Incomplete summary coverage'}}
+            save(Path(out)/'review-batch.json',result);return result
+        data={**review_context(state,card),'required_checks':checks,
+              'section_summaries':[{'source_ids':v['ids'],'summary':v['summary']} for v in summaries['sections']],
+              'evidence_passages':[{'id':pid,'text':'See source-linked section '+v['id']+' summary.'} for v in summaries['sections'] for pid in v['ids']],
+              'summary_policy':'These are provisional source-linked summaries. Judge causal progression, not sentence quality. Never infer author compliance from a summary; exact prose is separately reviewed and read by the final adjudicator.'}
     try:
-        verdict=Executor(req,out,backend).call(kind+'_quality',data,
-            'Assess ONLY the requested dimensions against the actual source and author brief. Cite the exact affected paragraph IDs for every issue; do not request a whole-scene rewrite. Do not invent a preceding scene. Suggestions that contradict the author POV or no-dialogue form are invalid. Give a concrete correction and keep reasons concise.',tokens=1200,response_schema=editorial_schema(data),validator=lambda v:editorial_review(v,prose,checks))
+        from .editorial_transport import call_editorial
+        verdict=call_editorial(Executor(req,out,backend),kind+'_quality',data,
+            'Assess ONLY the requested dimensions against the actual source and author brief. Cite the exact affected paragraph IDs for every issue; do not request a whole-scene rewrite. Do not invent a preceding scene. Suggestions that contradict the author POV or no-dialogue form are invalid. Give a concrete correction and keep reasons concise.',prose,checks,1200)
     except Exception as exc:verdict={'pass':False,'checks':[],'issues':[],'unverified':True,'error':str(exc)}
     result={'kind':kind,'group':group,'state_sha256':bind_state(state),'source_sha256':digest(prose),'review':verdict}
     save(Path(out)/'review-batch.json',result);return result
@@ -118,7 +140,7 @@ def join_reviews(state,source,out,kind):
     values=[load(p) for p in (Path(source)/'batches').rglob('review-batch.json')];expected=set(range(math.ceil(len(required)/3)))
     require(len({v['group'] for v in values})==len(values),'Duplicate review batch')
     require(all(v['kind']==kind and v['state_sha256']==bind_state(state) and v['source_sha256']==digest(prose) for v in values),'Stale or foreign review batch')
-    if {v['group'] for v in values}!=expected or any(v['review'].get('unverified') for v in values):verdict={'pass':False,'checks':[],'issues':[],'unverified':True,'error':'Missing or unverified review group'}
+    if {v['group'] for v in values}!=expected or any(v['review'].get('unverified') for v in values):verdict={'pass':False,'checks':[c for v in values if not v['review'].get('unverified') for c in v['review'].get('checks',[])],'issues':[i for v in values if not v['review'].get('unverified') for i in v['review'].get('issues',[])],'unverified':True,'error':'Missing or unverified review group; valid findings preserved'}
     else:
         reviews=[v['review'] for v in sorted(values,key=lambda v:v['group'])]
         verdict=editorial_review({'pass':all(v['pass'] for v in reviews),'checks':[c for v in reviews for c in v['checks']],'issues':[i for v in reviews for i in v['issues']]},prose,required)
@@ -132,10 +154,26 @@ def plan_repairs(state,source,out):
         require(memory_review['source_sha256']==digest(prose),'Stale preflight memory review')
         reviews.append({'issues':[i for i in memory_review['issues'] if i.get('target')=='prose']})
     selected,_=targets(prose,reviews);catalog=passages(prose);ids=[p['id'] for p in catalog if p['id'] in selected];batches=[]
-    for offset in range(0,len(ids),2):
-        own=ids[offset:offset+2];positions=[i for i,p in enumerate(catalog) if p['id'] in own]
+    groups=[[pid] for pid in ids]
+    if state['request'].get('performance',{}).get('empowered_editors'):
+        # Relational findings own every linked passage together; independent
+        # corrections stay in small parallel batches.
+        for review in reviews:
+            for issue in review.get('issues',[]):
+                if issue.get('category') not in {'rhythm_repetition','redundant_explanation','continuity_clock'}:continue
+                linked=set(issue.get('evidence_ids',[]))&set(ids)
+                related=[g for g in groups if set(g)&linked]
+                if len(related)>1:
+                    combined=[pid for pid in ids if any(pid in g for g in related)]
+                    groups=[g for g in groups if g not in related]+[combined]
+        groups.sort(key=lambda g:ids.index(g[0]))
+    else:groups=[ids[i:i+2] for i in range(0,len(ids),2)]
+    for own in groups:
+        positions=[i for i,p in enumerate(catalog) if p['id'] in own]
         context=[{'id':p['id'],'text':p['text']} for i,p in enumerate(catalog) if any(abs(i-j)<=1 for j in positions)]
-        batches.append({'id':str(len(batches)),'source_sha256':digest(prose),'owned':own,'passages':context,'findings':{pid:selected[pid]['issues'] for pid in own}})
+        batches.append({'id':str(len(batches)),'source_sha256':digest(prose),'owned':own,'passages':context,
+                        'allow_deletions':bool(state['request'].get('performance',{}).get('empowered_editors')),
+                        'findings':{pid:selected[pid]['issues'] for pid in own}})
     if not batches:batches=[{'id':'noop','source_sha256':digest(prose),'owned':[],'passages':[],'findings':{}}]
     plan={'state_sha256':bind_state(state),'source_sha256':digest(prose),'batches':batches};save(Path(out)/'repair-plan.json',plan);save(Path(out)/'prose.txt',prose);output('characters',[b['id'] for b in batches]);return plan
 
@@ -145,9 +183,27 @@ def repair_batch(state,card,source,out,backend,bid):
     req=scoped(state['request']);result={'replacements':{}};error=None
     if batch['owned'] and backend!='fixture':
         try:
-            result=Executor(req,out,backend).call('repair',{**scene_context(state,card,'humanizer'),'batch':batch,'style':req['style']},
-                'Check every allegation strictly against the original author brief and actual supplied passages. Repair ONLY owned paragraphs that have demonstrated faults. Neighboring paragraphs are read-only. Dismiss unfounded or brief-conflicting criticism with no replacement. Never apply a reviewer replacement blindly. Preserve unaffected events, voice, private knowledge and approximate paragraph length. Return replacements keyed only by owned IDs; empty replacements are allowed. No whole-scene rewrite.',
-                tokens=1800,response_schema=patch_schema(batch),validator=lambda v:validate_patch(v,batch))
+            from .editorial_transport import patches
+            empowered=req.get('performance',{}).get('empowered_editors')
+            options={'tokens':min(2800,700*max(1,len(batch['owned']))),'response_schema':patch_schema(batch),'validator':lambda v:patches(v,batch)}
+            if empowered:options.update(response_schema=False,output_format='text')
+            data={**review_context(state,card),'batch':batch,'immutable_world_rules':req['world_rules']}
+            instruction='Check allegations against the original author prompt and actual canon. Repair ONLY owned passages. Neighbors are read-only. Dismiss criticism that conflicts with the brief. Preserve required events, knowledge and voice. '
+            instruction+=('You may delete redundant passages, combine owned passages, restructure, shorten or replace them. Keep each necessary event once. For a merge put the complete combined text under one owned ID and delete the redundant owned IDs. Never move events into unowned passages. Return plain blocks: REPLACE p001 followed by the replacement on new lines, then END_REPLACE. Use DELETE p002 for deletion, or NO_CHANGES. No JSON or commentary.' if empowered else 'Return JSON replacements keyed only by owned IDs. No whole-scene rewrite.')
+            result=Executor(req,out,backend).call('repair',data,instruction,**options)
+            if empowered and result['replacements']:
+                original={x['id']:x['text'] for x in batch['passages'] if x['id'] in batch['owned']}
+                candidate={pid:result['replacements'].get(pid,text) for pid,text in original.items()}
+                def assess(value):
+                    if isinstance(value,dict):require(type(value.get('pass')) is bool,'Missing edit assessment');return value
+                    require(isinstance(value,str) and value.strip().split('|',1)[0].strip() in {'PASS','FAIL'},'Missing edit assessment')
+                    return {'pass':value.strip().startswith('PASS'),'reason':value.strip()}
+                assessment=Executor(req,Path(out)/'candidate-check',backend).call('story_quality',
+                    {**review_context(state,card),'original_passages':original,'candidate_patch':candidate,'findings':batch['findings']},
+                    'Compare the original with this proposed edit against the actual author prompt and canon. Check that the specific faults are resolved and no new repetition, contradictions, missing necessary action, forbidden form or knowledge leaks are introduced. Deletion and consolidation are allowed. Do not demand dialogue against a no-dialogue brief. Return PASS or FAIL | one concrete reason. No JSON; do not rewrite.',
+                    tokens=250,response_schema=False,output_format='text',skill='Independently judge whether the proposed edit is an improvement grounded in the author brief and actual facts.',validator=assess)
+                require(assessment['pass'],'Candidate edit rejected: '+assessment.get('reason','Unresolved editorial faults'))
+                save(Path(out)/'candidate-assessment.json',assessment)
         except Exception as exc:error=str(exc)
     save(Path(out)/'repair-batch.json',{'id':bid,'source_sha256':plan['source_sha256'],'replacements':result['replacements'],'unverified':error is not None,'error':error});return result
 
@@ -165,8 +221,11 @@ def merge_repairs(state,source,out):
         require(v['source_sha256']==digest(prose),'Stale repair result');validate_patch(v,b)
         require(not set(edits)&set(v['replacements']),'Conflicting edit ownership')
         if not v.get('unverified'):edits.update(v['replacements'])
-    revised=apply(prose,edits,digest(prose));save(Path(out)/'prose.txt',revised)
-    save(Path(out)/'repair.json',{'changed':prose!=revised,'reviewed_sha256':digest(prose),'candidate_sha256':digest(revised),'batched_repair':True,'changed_paragraphs':list(edits),'missing_batches':missing,'unverified_batches':[v['id'] for v in values if v.get('unverified')]})
+    merge_error=None
+    try:revised=apply(prose,edits,digest(prose))
+    except ValueError as exc:revised=prose;edits={};merge_error=str(exc)
+    save(Path(out)/'prose.txt',revised)
+    save(Path(out)/'repair.json',{'changed':prose!=revised,'reviewed_sha256':digest(prose),'candidate_sha256':digest(revised),'batched_repair':True,'merge_error':merge_error,'changed_paragraphs':list(edits),'missing_batches':missing,'unverified_batches':[v['id'] for v in values if v.get('unverified')]})
     preview(out,'Compiled targeted repairs - unreviewed');return revised
 
 def finalize(state,card,source,out,backend):
@@ -174,7 +233,11 @@ def finalize(state,card,source,out,backend):
     reviews=[load(Path(source)/k/'review.json') for k in ['story-review','rhetoric-review']]
     memory_path=Path(source)/'memory-review/review.json'
     if memory_path.exists():reviews.append(load(memory_path))
-    final=decide(state['request'],state,card,prose,reviews,out,backend)
+    batch_verdict=None
+    if (Path(source)/'final-batches').exists():
+        from .section_reviews import final_join
+        batch_verdict=final_join(state,source)
+    final=decide(state['request'],state,card,prose,reviews,out,backend,batch_verdict=batch_verdict)
     save(Path(out)/'prose.txt',prose);save(Path(out)/'repair.json',{**info,'editorial_adjudication':final,'further_editorial_iteration':False});preview(out,'Final checked text - see verification status');return final
 
 def refresh_memory(state,card,source,out,backend):
@@ -184,7 +247,7 @@ def refresh_memory(state,card,source,out,backend):
     req=scoped(state['request']);data=payload(prose);data['evidence_passages']=[p for p in data['evidence_passages'] if p['id'] in changed]
     additions={'memories':[]}
     if data['evidence_passages']:
-        try:additions=memory_extract(Executor(req,out,backend),req,out,prose,{**data,'characters':[c['id'] for c in req['characters']],**recording_context(state,card)},MEMORY_INSTRUCTION+' Extract ONLY changed passages; unchanged facts are retained separately.')
+        try:additions=memory_extract(Executor(req,out,backend),req,out,prose,{**data,'characters':[c['id'] for c in req['characters']],'prior_canon':cards(state['memories'])},MEMORY_INSTRUCTION+' Extract ONLY changed passages; unchanged facts are retained separately.')
         except Exception as exc:additions={'memories':[],'unverified':True,'error':str(exc)}
     result=delta({'memories':retained+additions['memories']},prose,[c['id'] for c in req['characters']])
     if additions.get('unverified') or initial.get('unverified'):result.update(unverified=True,error=additions.get('error',initial.get('error','Unverified original facts remain')))
@@ -193,7 +256,7 @@ def refresh_memory(state,card,source,out,backend):
 def extract_initial(state,card,source,out,backend):
     prose=(Path(source)/'edited/prose.txt').read_text();req=scoped(state['request'])
     try:
-        result=memory_extract(Executor(req,out,backend),req,out,prose,{**payload(prose),'characters':[c['id'] for c in req['characters']],**recording_context(state,card)},MEMORY_INSTRUCTION)
+        result=memory_extract(Executor(req,out,backend),req,out,prose,{**payload(prose),'characters':[c['id'] for c in req['characters']],'prior_canon':cards(state['memories'])},MEMORY_INSTRUCTION)
     except Exception as exc:result={'memories':[],'unverified':True,'error':str(exc)}
     save(Path(out)/'memory.json',result);return result
 
@@ -217,7 +280,25 @@ def main():
     p=argparse.ArgumentParser();p.add_argument('task');p.add_argument('--source',default='inputs');p.add_argument('--out',default='out');p.add_argument('--backend',choices=['fixture','worker'],default='fixture');p.add_argument('--index',type=int,default=0);p.add_argument('--batch');p.add_argument('--kind',choices=['story','rhetoric']);p.add_argument('--group',type=int);p.add_argument('--phase',choices=['preflight','final'],default='preflight');a=p.parse_args()
     started=time.monotonic()
     source=Path(a.source);out=Path(a.out);state=load(source/'state/snapshot.json');card=state['plan']['scenes'][a.index]
-    if a.task.startswith('memory_check_'):
+    if a.task.startswith('section_'):
+        from . import section_reviews
+        if a.task=='section_plan':section_reviews.plan(state,source,out)
+        elif a.task=='section_summary':section_reviews.summarize(state,card,source,out,a.backend,a.batch)
+        elif a.task=='section_summaries_join':section_reviews.join_summaries(state,source,out)
+        elif a.task=='section_review':section_reviews.review_section(state,card,source,out,a.backend,a.batch)
+        elif a.task=='section_reviews_join':section_reviews.join_reviews(state,source,out)
+        elif a.task=='section_final_review':section_reviews.final_review(state,card,source,out,a.backend,a.batch)
+        else:raise ValueError('Unknown section task')
+    elif a.task=='memory_refresh_plan':
+        from . import memory_batches
+        memory_batches.refresh_plan(state,source,out)
+    elif a.task.startswith('memory_extract_'):
+        from . import memory_batches
+        if a.task=='memory_extract_plan':memory_batches.extract_plan(state,source,out)
+        elif a.task=='memory_extract_batch':memory_batches.extract_batch(state,card,source,out,a.backend,a.batch)
+        elif a.task=='memory_extract_join':memory_batches.extract_join(state,source,out)
+        else:raise ValueError('Unknown memory extraction task')
+    elif a.task.startswith('memory_check_'):
         from . import memory_batches
         if a.task=='memory_check_plan':memory_batches.plan(state,source,out,a.phase)
         elif a.task=='memory_check_batch':memory_batches.check(state,card,source,out,a.backend,a.batch)
@@ -243,7 +324,7 @@ def main():
         path=out/filename
         if path.exists():
             value=load(path)
-            if value.get('unverified') or value.get('errors') or value.get('missing') or value.get('missing_batches') or value.get('unverified_batches') or value.get('review',{}).get('unverified'):
+            if value.get('unverified') or value.get('merge_error') or value.get('errors') or value.get('missing') or value.get('missing_batches') or value.get('unverified_batches') or value.get('review',{}).get('unverified'):
                 warnings.append(filename)
     save(out/'status.json',{'task':a.task,'status':'success','phase':'complete_with_warnings' if warnings else 'success','elapsed_seconds':round(time.monotonic()-started,3),'warning_artifacts':warnings,'fixture':a.backend=='fixture'})
 

@@ -42,6 +42,9 @@ def judgment_signature(text):
             'issues':[{k:i.get(k) for k in ['severity','category','problem','fix']} for i in value.get('issues',[]) if isinstance(i,dict)]}
 
 
+from .runtime import scoped_call_budget
+
+
 class Executor:
     def __init__(self, req, folder, backend):
         self.req, self.folder, self.backend = req, Path(folder), backend
@@ -52,6 +55,7 @@ class Executor:
             if req.get('performance',{}).get('inherit_provider_budget') and not os.getenv('STORY_QUOTA_DIR'):
                 self.hosted.inherit((self.folder.parent/'inputs').rglob('quota.json') if self.hosted.project_children else (self.folder.parent/'inputs').rglob('provider-budget/quota.json'))
 
+    @scoped_call_budget
     def call(self, role, packet, instruction, *, tokens=1200, validator=None, skill='', response_schema=None, output_format='json', allow_cpu_fallback=True):
         from .worker_policy import enabled as experimental, policy, permit
         stage_policy=policy(self.req,role,tokens) if experimental(self.req) else None
@@ -62,7 +66,7 @@ class Executor:
         if self.req.get('performance',{}).get('compact_packets'):
             from .working_context import concise_packet
             packet=concise_packet(packet,self.req)
-        response_schema=response_schema or (refinement_schema() if role=='refiner' else plan_schema(self.req) if role=='architect' else scene_schema(self.req,packet) if role=='scene_designer' else memory_review_schema() if role=='memory_quality' and 'current_prose' in packet else editorial_schema(packet))
+        response_schema=None if response_schema is False else response_schema or (refinement_schema() if role=='refiner' else plan_schema(self.req) if role=='architect' else scene_schema(self.req,packet) if role=='scene_designer' else memory_review_schema() if role=='memory_quality' and 'current_prose' in packet else editorial_schema(packet))
         if role=='refiner' and self.req.get('performance',{}).get('application_prompt_binding'):
             response_schema=dict(response_schema,properties={k:v for k,v in response_schema['properties'].items() if k!='original_prompt'},required=[k for k in response_schema['required'] if k!='original_prompt'])
             instruction+=' The application binds original_prompt to the immutable request premise. Do not reproduce original_prompt in the response. Keep array entries concise and distinct.'
@@ -139,11 +143,15 @@ class Executor:
                                 routes={'flash':['flash','flash36','gemma'],'flash36':['flash36','flash','gemma'],'gemma':['gemma','flash36','flash']}.get(kind,routes)
                             if self.req.get('execution_policy',{}).get('gemini_batches'):
                                 routes={'flash':['flash','flash36'],'flash36':['flash36','flash'],'lite':['lite','flash36']}.get(kind,[kind])
+                                if role=='memory_quality' and self.req.get('performance',{}).get('memory_pair_batches'):routes.append('lite')
                             for route in dict.fromkeys(routes):
                                 if route=='flash' and kind!='flash' and not (stage_policy and stage_policy.get('quality_routing')) and not self.hosted.can_rescue():continue
                                 try:
                                     with permit(self.req), heartbeat('Hosted '+route+' / '+role+'; shared quota pacing applies'):
-                                        hosted_result=self.hosted.complete(route,system,prompt,tokens,structured=bool(validator) and output_format=='json',response_schema=response_schema,role=role,policy=stage_policy)
+                                        route_policy=stage_policy
+                                        if self.req.get('execution_policy',{}).get('hosted_route_seconds'):
+                                            route_policy={**(stage_policy or {'timeout':120 if role=='chapter_quality' else 90,'thinking':'low','quality_routing':True,'literary_quality':True}),'route_budget':self.req['execution_policy']['hosted_route_seconds']}
+                                        hosted_result=self.hosted.complete(route,system,prompt,tokens,structured=bool(validator) and output_format=='json',response_schema=response_schema,role=role,policy=route_policy)
                                     break
                                 except Exception as exc:
                                     warning(self.folder,'api_fallback',str(exc))
