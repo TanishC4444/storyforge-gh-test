@@ -39,8 +39,14 @@ def salvage_memory(raw,prose,ids):
 def memory_extract(executor,req,out,prose,packet,instruction,allow_public=True):
     ids=[c['id'] for c in req['characters']]
     from .output_schema import memory_schema
+    last_raw=None
     def validate(raw):
-        result=salvage_memory(raw,prose,ids) if enabled(req) else contracts.delta(raw,prose,ids)
+        nonlocal last_raw
+        if req.get('performance',{}).get('pipelined_living'):
+            from .memory_fields import source_defaults
+            raw=source_defaults(raw,packet,prose,out)
+        last_raw=copy.deepcopy(raw)
+        result=salvage_memory(raw,prose,ids) if enabled(req) and not req.get('performance',{}).get('pipelined_living') else contracts.delta(raw,prose,ids)
         if not allow_public:
             retained=[]
             for item in result['memories']:
@@ -60,6 +66,7 @@ def memory_extract(executor,req,out,prose,packet,instruction,allow_public=True):
     if req.get('performance',{}).get('canon_index'):
         prior=packet.get('prior_canon',[])
         instruction+=' For a changed resource, relationship or obligation, copy the exact fact_key and kind of the same prior fact when using its ID in supersedes. Prior facts without fact_key are immutable and cannot appear in supersedes. New events, consequences, and discoveries use a new fact_key and supersedes=[]; they do not replace the prior character or world premise. Never infer an update or erase history. Include unresolved callbacks and obligations, not only recent motion.'
+    instruction+=' Every memory, including each thread update, MUST include a nonempty text description of at most 600 characters, evidence_ids and explicit known_by. Thread IDs and states supplement text; they never replace it. Never guess missing witnesses, outcomes or source evidence.'
     from .adaptive import enabled as adaptive
     schema=memory_schema(packet,ids,allow_public=allow_public,prior_memories=prior)
     if adaptive(req):
@@ -70,6 +77,15 @@ def memory_extract(executor,req,out,prose,packet,instruction,allow_public=True):
         if result.get('quarantined'):warning(out,'memory_quarantine','Unsupported memory entries quarantined; source prose retained.')
         return result
     except Exception as exc:
+        if req.get('performance',{}).get('pipelined_living') and last_raw is not None:
+            from .memory_fields import repair_texts
+            save(Path(out)/'memory-rejected-records.json',last_raw)
+            save(Path(out)/'memory-source.txt',prose)
+            try:
+                fixed=repair_texts(executor,req,out,prose,packet,last_raw)
+                if fixed is not None:return validate(fixed)
+            except Exception as repair_error:
+                raise contracts.ContractError('Memory field-only recovery failed; source and records retained: '+str(repair_error)) from repair_error
         if not enabled(req):raise
         warning(out,'memory_unavailable',exc)
         # The source scene is retained verbatim. No guessed facts or knowledge holders.
