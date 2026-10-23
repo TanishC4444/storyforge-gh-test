@@ -1,8 +1,21 @@
 """Reuse the classic runner DAG with fast preparation and parallel passage editors."""
 from pathlib import Path
-import copy,yaml
+import copy,json,yaml
 from scripts.build_workflow import build
 ROOT=Path(__file__).resolve().parents[1]
+
+def dump_workflow(value):
+    """Reuse exact step/config mappings via supported YAML aliases, never merge keys."""
+    pool={}
+    def intern(item):
+        if isinstance(item,dict):
+            key=json.dumps(item,sort_keys=True,separators=(',',':'))
+            if key in pool:return pool[key]
+            result={k:intern(v) for k,v in item.items()};pool[key]=result;return result
+        if isinstance(item,list):return [intern(v) for v in item]
+        return item
+    return yaml.safe_dump(intern(value),sort_keys=False,width=120)
+
 
 def build_expansion(total=9,per_chapter=3):
     # Quote the YAML on key while preserving real numeric/boolean workflow values.
@@ -61,12 +74,13 @@ def build_expansion(total=9,per_chapter=3):
     results['steps'].insert(4,{'uses':'actions/upload-artifact@v4','if':'always()','with':{'name':'universe-canon','path':'reading/canon/','retention-days':30,'if-no-files-found':'ignore'}})
     from scripts.batched_workflow import enable
     x=enable(x,total)
-    return yaml.safe_dump(x,sort_keys=False,width=120)
+    return dump_workflow(x)
 
 
 
 def build_living():
-    x=yaml.safe_load(build_expansion(total=4,per_chapter=1))
+    # De-alias before customizing; changing quickstart must not alter other steps.
+    x=json.loads(json.dumps(yaml.safe_load(build_expansion(total=4,per_chapter=1))))
     x['name']='Living universe / Gemini-first / batched runner graph'
     x['concurrency']['group']='living-universe'
     inputs=x['on']['workflow_dispatch']['inputs'];inputs['request_file']['default']='local-universe-massive';inputs['profile']['default']='fast'
@@ -83,7 +97,7 @@ def build_living():
             if key=='quickstart' and s.get('uses')=='actions/download-artifact@v4' and s['with'].get('name')=='universe-canon':
                 s['if']="${{ inputs.resume_run != '' }}";s['with']['run-id']='${{ inputs.resume_run }}';s['with']['name']='${{ inputs.checkpoint_artifact }}'
         if key=='quickstart':job['name']='Compile universe beginning or bounded episode layout'
-    return yaml.safe_dump(x,sort_keys=False,width=120)
+    return dump_workflow(x)
 
 
 if __name__=='__main__':

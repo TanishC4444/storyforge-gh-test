@@ -78,9 +78,13 @@ def enable(x,total):
         accept['needs']=[p+'_design',p+'_final_check',p+'_verify',p+'_verify_rhetoric',p+'_final_memory',p+'_memory_review']
         for s in accept['steps']:
             if s.get('uses')=='actions/download-artifact@v4' and s.get('with',{}).get('name')==p+'_repair':s['with']['name']=p+'_final_check'
+    shared={'PYTHONUNBUFFERED':1,'STORY_BACKEND':'${{ inputs.backend }}','STORY_PROFILE':'${{ inputs.profile }}','STORY_REQUEST':'${{ inputs.request_file }}','GEMINI_DISTINCT_PROJECTS':'true'}
+    x['env']={**shared,'STORY_REVIEW_TIMEOUT_SECONDS':'600','STORY_BATCH_TIMEOUT_SECONDS':'600'}
     for key,j in jobs.items():
-        j['env']={'STORY_REVIEW_TIMEOUT_SECONDS':'600','STORY_BATCH_TIMEOUT_SECONDS':'600'}
+        j.pop('env',None)
         for s in j.get('steps',[]):
-            if s.get('id')=='task':s.setdefault('env',{}).update(GEMINI_DISTINCT_PROJECTS='true',GEMINI_API_KEY='${{ secrets.GEMINI_API_KEY }}',GEMINI_API_KEYS='${{ secrets.GEMINI_API_KEYS }}')
+            if s.get('id')=='task':
+                env=s.setdefault('env',{});env.update(GEMINI_API_KEY='${{ secrets.GEMINI_API_KEY }}',GEMINI_API_KEYS='${{ secrets.GEMINI_API_KEYS }}')
+                for name in shared:env.pop(name,None)
     result_job['needs']=[key for key in jobs if key!='results']
     return x

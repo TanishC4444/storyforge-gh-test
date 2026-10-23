@@ -83,6 +83,13 @@ class HybridUniverseTests(unittest.TestCase):
                 for dep in jobs[key].get('needs',[]):visit(dep)
                 visiting.remove(key);done.add(key)
             for key in jobs:visit(key)
+            # Expanded shape stays below the failure threshold; aliases shrink the serialized parser input further.
+            def nodes(v):
+                if isinstance(v,dict):return 1+sum(1+nodes(x) for x in v.values())
+                if isinstance(v,list):return 1+sum(nodes(x) for x in v)
+                return 1
+            self.assertLess(nodes(graph),40000)
+            self.assertIn('env',graph);self.assertNotIn('GEMINI_API_KEY',graph['env'])
             self.assertIn('2',graph['on']['workflow_dispatch']['inputs']['scene_limit']['options'])
             self.assertIn('s01_repair',jobs['s01_memory_refresh_plan']['needs']);self.assertNotIn('s01_final_check',jobs['s01_memory_refresh_plan']['needs'])
             self.assertIn('s01_final_memory',jobs['s01_final_batches']['needs']);self.assertIn('final_reviews',jobs['s01_final_sections']['outputs'])
