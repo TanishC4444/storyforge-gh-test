@@ -14,7 +14,7 @@ PLAN_INSTRUCTION = '''Return only JSON with keys threads (array of strings), sce
 Create exactly the requested chapter and scene counts, in reading order. Scenes have keys id (ch01-sc01, etc.), chapter (integer), pov (character ID), participants (character IDs), location, time, goal, obstacle, intended_change.
 Honor requested length: each chapter is built from its scene word budgets. Follow PLAN mode, but this JSON contract overrides the attached brief's kickoff questions and free-form output rules. Intended changes are plans, not accepted events. Use only supplied character IDs. Build the requested local resolution by the final chapter while preserving explicitly requested unresolved larger-story threads. Each scene must introduce a distinct consequential action, changed option, commitment, cost, or interpretation. Do not spend multiple scenes proving what is already established. Include the choice and consequence in intended_change. Treat scene word counts as guidance unless the user requires strict counts. Apply scoped references as mechanisms, not transplanted plots. No prose chapter yet.'''
 MEMORY_INSTRUCTION = '''Return only JSON {"memories": [{"kind": "event"|"belief"|"claim"|"resource"|"relationship"|"thread", "text": string, "evidence_ids": ["p001"], "known_by": [character IDs or "public"], "holder": character ID for beliefs, "claim_source": character ID for claims}]}.
-The ordered evidence_passages contain the complete CURRENT scene. Select 1–3 existing passage IDs per memory; do not copy or reconstruct quotations. The application resolves evidence directly from the source text. Extract at most 6 consequential updates. Distinguish facts, claims, and beliefs. Identify who actually makes a claim; another character quoting or challenging them is not the same speaker. Knowledge acquisition must be supported, not inferred from presence. Use public only for an in-world public disclosure. No plans, hypotheticals, rejected drafts, or inferred offstage facts. Preserve uncertainty.'''
+The ordered evidence_passages contain the complete CURRENT scene. Select 1–3 existing passage IDs per memory; do not copy or reconstruct quotations. The application resolves evidence directly from the source text. Extract at most 6 consequential updates. Distinguish facts, claims, and beliefs. Identify who actually makes a claim; another character quoting or challenging them is not the same speaker. Knowledge acquisition must be supported, not inferred from presence. Use public only for an in-world public disclosure. No plans, hypotheticals, rejected drafts, or inferred offstage facts. Preserve uncertainty. For explicit life-state changes use kind=event, subject=character ID, life_state=alive/dead/missing/unknown, fact_key=life:<id>, supersedes=prior current lifecycle ID when present. A threat or apparent death is not confirmed dead. Track foreshadowing and unresolved promises as kind=thread, thread_id=stable identifier, thread_state=seeded/escalating/payoff/closed, fact_key=thread:<id>; preserve the same identity through updates. These optional fields require exact supporting evidence; never infer a death or payoff from the plan.'''
 
 
 def planning_packet(req, refinement, retrieval):
@@ -65,8 +65,11 @@ def packet(req, state, card):
     }
     if req.get('performance',{}).get('canon_index'):
         from .canon import working
-        result['author_continuity']['current_state']=working(state,query=json.dumps(card),budget=req.get('performance',{}).get('working_memory_chars',6500))
-        result['pov_visible_memory']=working(state,card['pov'],query=json.dumps(card),budget=req.get('performance',{}).get('working_memory_chars',6500))['facts']
+        result['author_continuity']['current_state']=working(state,query=json.dumps(card),budget=None if req.get('performance',{}).get('classic_expansion') else req.get('performance',{}).get('working_memory_chars',6500))
+        result['pov_visible_memory']=working(state,card['pov'],query=json.dumps(card),budget=None if req.get('performance',{}).get('classic_expansion') else req.get('performance',{}).get('working_memory_chars',6500))['facts']
+    if req.get('performance',{}).get('classic_expansion'):
+        result['recent_ending']=''
+        result['author_continuity']['recent_scenes']=[{k:s.get(k) for k in ['id','pov','quality_status','canon_committed']} for s in (state.get('universe_history',[])+state['accepted'])[-2:]]
     return result
 
 

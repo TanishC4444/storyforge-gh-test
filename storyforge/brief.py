@@ -7,10 +7,8 @@ CATEGORIES = ['medium_length','themes_tensions','scene_design','world_rules','ch
 
 
 def validate(req, require):
-    req.setdefault('medium','short_story')
-    aliases={'prose':'short_story','prose fiction':'short_story','book':'book','shortstory':'short_story','short story':'short_story'}
-    req['medium']=aliases.get(req['medium'],req['medium'])
-    require(req['medium'] in {'book','short_story'},'Medium must be book or short_story')
+    from .media import choose
+    choose(req,require)
     req.setdefault('brief_version',1)
     require(req['brief_version'] in {1,2},'Unknown creative brief version')
     req.setdefault('keywords',[{'term':x,'kind':'theme','priority':2} for x in req.get('theme_keywords',[])])
@@ -37,7 +35,7 @@ def validate(req, require):
     for character in req['characters']:
         for key in ['goal','voice']:
             require(isinstance(character.get(key),str) and bool(character[key].strip()),f'Character needs {key}')
-        if req['brief_version']==2:
+        if req['brief_version']==2 and character.get('profile_origin')!='scene_director':
             for key in ['value','fear','habitual_strategy','limits']:
                 require(isinstance(character.get(key),str) and bool(character[key].strip()),f'Deep character needs {key}')
             for key in ['arc','contradiction','emotional_behavior','voice_design']:

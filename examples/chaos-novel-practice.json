@@ -1,0 +1,224 @@
+{
+  "brief_version": 1,
+  "medium": "auto",
+  "chapters": 2,
+  "scenes_per_chapter": 1,
+  "words_per_scene": 500,
+  "context_chars": 48000,
+  "n_ctx": 16384,
+  "profile": "fast",
+  "retrieval_mode": "keyword",
+  "auto_approve_plan": true,
+  "max_repairs": 1,
+  "max_stage_retries": 0,
+  "min_words_ratio": 0.7,
+  "max_words_ratio": 1.4,
+  "length_policy": {
+    "scene_words": "guidance",
+    "chapter_words": "target",
+    "allow_compression": false
+  },
+  "references": [],
+  "adaptation": {
+    "strength": 0.3,
+    "mode": "mechanisms",
+    "max_active_sources_per_scene": 1,
+    "preserve_user_choices": true
+  },
+  "creative_freedom": {
+    "enabled": true,
+    "intensity": 0.95,
+    "new_characters": true,
+    "character_deaths": true,
+    "resurrection": false,
+    "protected_characters": [],
+    "max_new_per_scene": 1,
+    "cast_limit": 32,
+    "flexible_pov": true
+  },
+  "execution_policy": {
+    "experimental": false,
+    "literary_quality": true,
+    "continue_with_warnings": false,
+    "cpu_models": {
+      "humanizer": "qwen7b",
+      "repair": "qwen7b",
+      "story_quality": "qwen7b",
+      "rhetoric_quality": "qwen7b",
+      "memory": "qwen7b",
+      "memory_quality": "qwen7b",
+      "chapter_quality": "qwen7b",
+      "director": "qwen7b",
+      "scene_designer": "qwen7b",
+      "character": "qwen7b",
+      "writer": "qwen7b",
+      "writer_beat": "qwen7b"
+    },
+    "editorial_disagreement": "one_strict_check",
+    "gemini_batches": true,
+    "total_call_seconds": {
+      "humanizer": 300,
+      "repair": 300,
+      "story_quality": 300,
+      "rhetoric_quality": 300,
+      "memory": 300,
+      "memory_quality": 300,
+      "chapter_quality": 420,
+      "director": 180,
+      "scene_designer": 180,
+      "character": 180,
+      "writer": 600,
+      "writer_beat": 600
+    },
+    "hosted_route_seconds": 60
+  },
+  "performance": {
+    "compact_packets": true,
+    "application_prompt_binding": true,
+    "hosted_failover": false,
+    "batch_development": true,
+    "canon_index": true,
+    "inherit_provider_budget": false,
+    "application_plan_binding": true,
+    "development_batch_size": 6,
+    "api_batch_probes": false,
+    "combine_direction": true,
+    "classic_expansion": true,
+    "validate_scene_prose": true,
+    "batched_prose": true,
+    "batched_repairs": true,
+    "living_universe": true,
+    "readable_editorial": true,
+    "summary_reviews": true,
+    "memory_pair_batches": true,
+    "empowered_editors": true,
+    "living_bounded": true
+  },
+  "api_roles": {
+    "writer_beat": "flash",
+    "writer": "flash",
+    "repair": "flash36",
+    "humanizer": "flash36",
+    "story_quality": "flash36",
+    "rhetoric_quality": "flash36",
+    "memory": "lite",
+    "memory_quality": "flash36",
+    "chapter_quality": "flash36",
+    "scene_designer": "lite",
+    "director": "lite",
+    "character": "lite"
+  },
+  "project_id": "memory-chaos-novel-practice",
+  "title": "The City That Owed Tomorrow",
+  "premise": "Write the opening two chapters of a science-fiction novel. On a floating city that sells its future hours, debt investigator Iona discovers that the evacuation siren has rung in a recording dated tomorrow. A rescue should uncover betrayal or a catastrophic hidden cost. Develop an unsettling planted clue in chapter one and an earned reinterpretation in chapter two. Let a connected shock change what the characters can do next. Avoid recapping completed actions. Each chapter continues actual prior consequences, not its original plan.",
+  "genre": "Science-fiction political thriller",
+  "pov": "Close third-person past tense, one focal character per scene; no head hopping. Dialogue is allowed. Change the focal character only if death makes it necessary.",
+  "tone_mood": "Tense, strange, emotionally grounded; dangerous decisions with dark wit rather than generic spectacle.",
+  "reader_experience": "Escalating curiosity and dread, with vivid human costs.",
+  "style": {
+    "register": "Precise, vivid contemporary prose. Varied rhythm; let concrete choices carry emotion.",
+    "dialogue": "Distinct tactical voices with subtext.",
+    "interiority": "Selective close viewpoint tied to present action.",
+    "explanation": "Trust legible actions; no explanatory moral or recap.",
+    "figurative_language": {
+      "density": "moderate",
+      "devices": [
+        "motif",
+        "metaphor"
+      ],
+      "image_domains": [
+        "tides",
+        "clocks",
+        "debt"
+      ]
+    }
+  },
+  "characters": [
+    {
+      "id": "iona",
+      "name": "Iona",
+      "goal": "Find who sold the evacuation hours before her district floods.",
+      "voice": "Exact questions, sardonic understatement.",
+      "fear": "Discovering her own signature on the sale."
+    },
+    {
+      "id": "val",
+      "name": "Val",
+      "goal": "Keep the ferry running without exposing an illegal passenger.",
+      "voice": "Practical, clipped promises; answers a question with a price."
+    },
+    {
+      "id": "sen",
+      "name": "Sen",
+      "goal": "Preserve the city archive while hiding a missing record.",
+      "voice": "Courteous corrections that evade responsibility."
+    }
+  ],
+  "world_rules": [
+    "Future recordings can show only one possible future; they are not omniscient prophecies.",
+    "Time sales cannot resurrect the dead or reverse events already witnessed.",
+    "Travel, injuries, custody, debt and individual knowledge persist; secrets require a source.",
+    "The ferry has exactly two emergency battery cells at opening; expenditure must be tracked."
+  ],
+  "initial_facts": [
+    {
+      "text": "The ferry has two unused emergency battery cells.",
+      "known_by": [
+        "iona",
+        "val"
+      ],
+      "fact_key": "ferry-cells"
+    },
+    {
+      "text": "Iona has heard an evacuation siren in a recording dated tomorrow; Val and Sen have not.",
+      "known_by": [
+        "iona"
+      ]
+    }
+  ],
+  "plot_design": {
+    "central_question": "Who profits when a city mortgages the hours needed to escape?",
+    "causal_dependencies": [
+      "The recording prompts a specific investigation.",
+      "A practical rescue exposes a conflicting obligation.",
+      "An earlier clue acquires a new meaning through evidence, not omniscience."
+    ],
+    "subplots": []
+  },
+  "world_design": {
+    "setting": "A floating city of causeways, tide engines, ferries and a guarded municipal time archive."
+  },
+  "scene_designs": [
+    {
+      "id": "ch01-sc01",
+      "pov": "iona",
+      "participants": [
+        "iona",
+        "val"
+      ],
+      "location": "Emergency ferry berth",
+      "setting": "A floodlit floating berth at rising tide",
+      "time": "Before the evacuation alarm",
+      "dramatic_function": "Make an urgent rescue choice that costs a tracked resource.",
+      "development": "Plant a concrete anomalous clue while exposing a competing duty.",
+      "restrictions": "Do not solve the entire conspiracy or replay the opening recording.",
+      "choice_and_consequence": "Plant a concrete anomalous clue while exposing a competing duty. A material choice changes available options and imposes a cost."
+    },
+    {
+      "id": "ch02-sc01",
+      "pov": "iona",
+      "participants": [
+        "iona",
+        "val",
+        "sen"
+      ],
+      "location": "Municipal archive ferry checkpoint",
+      "setting": "A checkpoint reachable from the berth with real elapsed travel time",
+      "time": "After the rescue attempt",
+      "dramatic_function": "Continue the actual rescue consequences into a costly confrontation.",
+      "development": "Reinterpret a planted clue and expose one causal betrayal or catastrophic hidden cost.",
+      "restrictions": "Carry actual inventory, injuries, knowledge and unresolved obligations from chapter one; no reset.",
+      "choice_and_consequence": "Reinterpret a planted clue and expose one causal betrayal or catastrophic hidden cost. A material choice changes available options and imposes a cost."
+    }
+  ]
+}

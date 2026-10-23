@@ -58,8 +58,8 @@ def decide(req,state,card,prose,reviews,out,backend,*,batch_verdict=None):
                 if check['id']=='style_fidelity':check.update(verdict='fail',reason='The deterministic author-constraint check found: '+str(exc),evidence_ids=[data['evidence_passages'][0]['id']])
             verdict['issues'].append({'severity':'blocking','category':'style_fidelity','evidence_ids':[data['evidence_passages'][0]['id']],'problem':'Deterministic author-constraint violation: '+str(exc),'fix':'Restore the explicit author form and required length before treating this draft as reviewed.','replacement':''})
             verdict=editorial_review(verdict,prose,CHECKS)
-        result={'mechanical_override':mechanical_override,'decision_key':key,'prose_sha256':digest(prose),'chapter_sha256':digest(chapter),'judgment_calls':6 if batch_verdict is not None else 1,'judgment_rounds':1,'verdict':verdict,'story':split(verdict,STORY_CHECKS),'rhetoric':split(verdict,RHETORIC_CHECKS),'unverified':False}
+        result={'mechanical_override':mechanical_override,'decision_key':key,'prose_sha256':digest(prose),'chapter_sha256':digest(chapter),'judgment_calls':batch_verdict.get('batch_count',6) if batch_verdict is not None else 1,'judgment_rounds':1,'verdict':verdict,'story':split(verdict,STORY_CHECKS),'rhetoric':split(verdict,RHETORIC_CHECKS),'unverified':False}
     except Exception as exc:
         failed={'pass':False,'checks':[],'issues':[],'unverified':True,'error':str(exc)}
-        result={'decision_key':key,'prose_sha256':digest(prose),'chapter_sha256':digest(chapter),'judgment_calls':6 if batch_verdict is not None else 1,'judgment_rounds':1,'verdict':failed,'story':failed,'rhetoric':failed,'unverified':True}
+        result={'decision_key':key,'prose_sha256':digest(prose),'chapter_sha256':digest(chapter),'judgment_calls':batch_verdict.get('batch_count',6) if batch_verdict is not None else 1,'judgment_rounds':1,'verdict':failed,'story':failed,'rhetoric':failed,'unverified':True}
     save(path,result);return result

@@ -5,7 +5,7 @@ from .contracts import require,delta
 from .storage import load,save
 from .inference import Executor,ROOT
 from .evidence import payload,passages
-from .canon import working,recording_context,cards
+from .canon import working,recording_context,cards,bridge
 from .coordinator import packet,MEMORY_INSTRUCTION
 from .craft import validate_prose
 from .fast_edit import validate as validate_patch,schema as patch_schema
@@ -34,9 +34,9 @@ def scene_context(state,card,role='writer'):
         'author_contract':contract(req),
         'scene_contract':next((c for c in req['scene_designs'] if c['id']==card['id']),{}),
         'literary_application':application_packet(req,state['retrieval'],role,card['id']),
-        'prior_canon':working(state,query=str(card),budget=4000),
-        'pov_known_facts':working(state,character=card['pov'],query=str(card),budget=2500),
-        'prior_story_context':[{'id':s['id'],'quality_status':s.get('quality_status','reviewed'),'prose_excerpt':s['prose'][-2200:]} for s in (state.get('universe_history',[])+state['accepted'])[-2:]],
+        'prior_canon':bridge(state),
+        'pov_known_facts':bridge(state,card['pov']),
+        'prior_story_context':[{'id':s['id'],'quality_status':s.get('quality_status','reviewed'),'canon_committed':s.get('canon_committed',True),'intended_change_is_plan_only':s.get('intended_change')} for s in (state.get('universe_history',[])+state['accepted'])[-2:]],
         'participants':[{k:c.get(k) for k in ['id','name','goal','fear','contradiction']} for c in req['characters'] if c['id'] in card['participants']],
         'author_policy':'Plans and author continuity are not automatically shared character knowledge.'}
 
@@ -47,6 +47,7 @@ def review_context(state,card):
     return {'original_prompt':req['premise'],'scene':card,
             'scene_contract':next((c for c in req['scene_designs'] if c['id']==card['id']),{}),
             'prior_canon':cards(state['memories']),
+            'prior_scene_summaries':[{'id':s['id'],'quality_status':s.get('quality_status'),'canon_committed':s.get('canon_committed',True),'source_summary':s['source_summary']} for s in state.get('universe_history',[])+state['accepted'] if s.get('source_summary') and s['source_summary'].get('source_sha256')==digest(s['prose'])],
             'reference_applications':application_packet(req,state['retrieval'],'story_quality',card['id'])}
 
 
@@ -62,6 +63,10 @@ def plan_draft(state,card,source,out,backend):
             'entry':'Actual initial scene conditions.' if i==0 else 'Continue the preceding planned beat without repeating its setup.',
             'exit':card['intended_change'] if i==count-1 else 'Hand off causally to the next planned beat; its later outcome must not happen early.',
             'target_words':req['words_per_scene']//count+(1 if i<req['words_per_scene']%count else 0)})
+    concrete=card.get('writing_beats',[])
+    if concrete:
+        require(len(concrete)==count,'Scene writing contract has wrong beat count')
+        for beat,defined in zip(beats,concrete):beat.update(purpose=defined['action'],entry=defined['entry_state'],exit=defined['exit_state'])
     plan={'scene_id':card['id'],'state_sha256':bind_state(state),'beats':beats,'direction':(Path(source)/'direction/direction.txt').read_text()}
     plan['plan_sha256']=digest(json.dumps(plan,sort_keys=True));save(Path(out)/'draft-plan.json',plan);output('characters',[b['id'] for b in beats]);return plan
 
@@ -87,7 +92,7 @@ def write_batch(state,card,source,out,backend,bid):
         folder=out/str(attempt);executor=Executor(req,folder,backend)
         try:
             text=executor.call(role,{**data,'rejected_batch':text or None,'specific_errors':errors},
-                'Return prose for ONLY this assigned beat near its target_words. Preserve the shared chronology, POV, voice and author form. No headings, quoted dialogue against a no-dialogue brief, summaries or neighboring beats. If correcting a rejected batch, fix only that batch, never the whole scene.',
+                'Return ONLY this assigned beat near its target_words, in the application-owned medium. Preserve the shared chronology, POV, voice and author form. Use a scene heading only in the first batch if the medium requires it. No quoted dialogue against a no-dialogue brief, plot-summary substitutes or neighboring beats. If correcting a rejected batch, fix only that batch, never the whole scene.',
                 tokens=min(1500,int(beat['target_words']*2.4)+200),output_format='text',validator=lambda t:validate_prose(t,local,check_length=backend!='fixture'))
             errors=[];break
         except Exception as exc:
@@ -238,6 +243,10 @@ def finalize(state,card,source,out,backend):
         from .section_reviews import final_join
         batch_verdict=final_join(state,source)
     final=decide(state['request'],state,card,prose,reviews,out,backend,batch_verdict=batch_verdict)
+    summaries=Path(source)/'summaries/summaries.json'
+    if summaries.exists():
+        summary=load(summaries);require(summary['source_sha256']==digest(prose),'Stale summary handoff')
+        save(Path(out)/'scene-summary.json',summary)
     save(Path(out)/'prose.txt',prose);save(Path(out)/'repair.json',{**info,'editorial_adjudication':final,'further_editorial_iteration':False});preview(out,'Final checked text - see verification status');return final
 
 def refresh_memory(state,card,source,out,backend):
@@ -268,7 +277,7 @@ def verify_memory(state,card,source,out,backend):
         verdict={'pass':False,'issues':[],'unverified':True,'error':memory.get('error','Extraction unverified')}
     else:
         req=scoped(state['request'])
-        facts=[{k:v for k,v in m.items() if k in {'kind','text','known_by','holder','claim_source','fact_key','supersedes','evidence_ids'}} for m in memory['memories']]
+        facts=[{k:v for k,v in m.items() if k in {'kind','text','known_by','holder','claim_source','subject','life_state','thread_id','thread_state','fact_key','supersedes','evidence_ids'}} for m in memory['memories']]
         try:
             verdict=Executor(req,out,backend).call('memory_quality',{'current_prose':prose,'proposed_memory':{'memories':facts},'prior_canon':working(state,query=str(card),budget=3500)},
                 'Verify every extracted fact and knowledge holder against current_prose and prior canon. Do not treat a prose problem as a memory extraction error. Unsupported facts must fail. Return pass and source-quoted issues with target memory or prose.',tokens=1000,validator=lambda v:memory_review(v,prose))

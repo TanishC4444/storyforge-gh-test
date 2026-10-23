@@ -8,20 +8,23 @@ from storyforge.living_prepare import prepare
 from storyforge import batch_pipeline as b,memory_batches as m,section_reviews as sr
 
 class BoundedLivingTests(unittest.TestCase):
-    def test_four_chapter_fixture_carries_canon_and_random_state_through_acceptance(self):
+    def exercise(self,request_file,chapters,per_chapter=1,living=True):
         with tempfile.TemporaryDirectory() as d:
-            p=Path(d);stage('prepare',p/'none',p/'base',request_file='iliad-2526-living-practice',profile='fast',backend='fixture')
+            p=Path(d);stage('prepare',p/'none',p/'base',request_file=request_file,profile='fast',backend='fixture')
             with patch('storyforge.inference.Executor.call',side_effect=AssertionError('No initial refinement inference')):
-                state=prepare(p/'base/snapshot.json',p/'quick',backend='fixture')
-            self.assertEqual(len(state['plan']['scenes']),4);self.assertEqual(state['universe_attempts'],0)
-            self.assertEqual(state['plan']['scenes'][3]['chapter'],4)
-            rng=state['universe_rng_state']
-            for i in range(4):
+                if living:state=prepare(p/'base/snapshot.json',p/'quick',backend='fixture')
+                else:
+                    from storyforge.expansion import prepare as expansion_prepare
+                    state=expansion_prepare(p/'base/snapshot.json',p/'quick')
+            self.assertEqual(len(state['plan']['scenes']),chapters*per_chapter)
+            rng=state.get('universe_rng_state')
+            for i in range(chapters*per_chapter):
                 root=p/str(i);save(root/'design/state/snapshot.json',state)
                 stage('scene_design',root/'design',root/'designed',index=i,backend='fixture')
                 state=load(root/'designed/snapshot.json');card=state['plan']['scenes'][i]
-                self.assertEqual(state['universe_attempts'],i+1);self.assertNotEqual(state['universe_rng_state'],rng)
-                self.assertEqual(len(state['accepted']),i);rng=state['universe_rng_state']
+                if living:
+                    self.assertEqual(state['universe_attempts'],i+1);self.assertNotEqual(state['universe_rng_state'],rng)
+                self.assertEqual(len(state['accepted']),i);rng=state.get('universe_rng_state')
                 save(root/'source/direction/direction.txt','FIXTURE direction')
                 plan=b.plan_draft(state,card,root/'source',root/'plan','fixture')
                 save(root/'write/plan/draft-plan.json',plan)
@@ -54,9 +57,12 @@ class BoundedLivingTests(unittest.TestCase):
                 save(root/'rm/plan/repair-plan.json',rp);save(root/'rm/edited/prose.txt',prose);b.merge_repairs(state,root/'rm',root/'repaired')
                 for kind in ['story-review','rhetoric-review','memory-review']:shutil.copytree(root/'findings'/kind,root/'final-input'/kind)
                 shutil.copytree(root/'repaired',root/'final-input/edited')
-                for group in range(6):sr.final_review(state,card,root/'final-input',root/'final-input/final-batches'/str(group),'fixture',str(group))
+                final_sections=sr.plan(state,root/'final-input',root/'final-input/plan')
+                for sec in final_sections['sections']:sr.summarize(state,card,root/'final-input',root/'final-input/batches'/sec['id'],'fixture',sec['id'])
+                sr.join_summaries(state,root/'final-input',root/'final-input/summaries')
+                for bid in sr.final_ids(final_sections):sr.final_review(state,card,root/'final-input',root/'final-input/final-batches'/bid,'fixture',bid)
                 final=b.finalize(state,card,root/'final-input',root/'final','fixture')
-                self.assertTrue(final['verdict']['pass']);self.assertEqual(final['judgment_calls'],6);self.assertEqual(final['judgment_rounds'],1)
+                self.assertTrue(final['verdict']['pass']);self.assertEqual(final['judgment_calls'],len(sr.final_ids(final_sections)));self.assertEqual(final['judgment_rounds'],1)
                 save(root/'refresh/edited/prose.txt',prose);save(root/'refresh/original/prose.txt',prose);shutil.copytree(root/'initial',root/'refresh/initial-memory')
                 shutil.copytree(root/'findings/memory-review',root/'refresh/preflight-memory')
                 refreshed=m.refresh_plan(state,root/'refresh',root/'refresh/plan')
@@ -70,6 +76,12 @@ class BoundedLivingTests(unittest.TestCase):
                 self.assertTrue(state['accepted'][i]['canon_committed']);self.assertEqual(len(state['accepted']),i+1)
             self.assertTrue(state['complete']);self.assertEqual(state['completion_status'],'complete')
             self.assertTrue((root/'accepted/story.txt').exists())
+    def test_four_chapter_fixture_carries_canon_and_random_state_through_acceptance(self):
+        self.exercise('iliad-2526-living-practice',4)
+    def test_novel_two_chapter_hybrid_memory_handoff(self):
+        self.exercise('chaos-novel-practice',2)
+    def test_stage_play_two_scene_hybrid_memory_handoff(self):
+        self.exercise('stage-play-practice',1,2,living=False)
     def test_living_workflow_supports_four_chapters_with_sequential_canon_handoff(self):
         text=Path('.github/workflows/living-universe.yml').read_text()
         self.assertIn('  s04_accept:',text);self.assertIn('  s04_memory_preflight_batches:',text)

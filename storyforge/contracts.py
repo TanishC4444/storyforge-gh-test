@@ -19,7 +19,10 @@ def request(value):
         value.setdefault(name, default)
         require(type(value[name]) is int and low <= value[name] <= high, f'Invalid {name}')
     chars = value.get('characters', [])
-    require(isinstance(chars, list) and 1 <= len(chars) <= 8, 'Supply 1–8 characters')
+    from .universe_events import freedom,validate_config
+    validate_config(value)
+    cast_limit=freedom(value).get('cast_limit',8) if freedom(value)['enabled'] else 8
+    require(isinstance(chars, list) and 1 <= len(chars) <= cast_limit, 'Character cast exceeds configured limit')
     ids = [c.get('id') for c in chars if isinstance(c, dict)]
     require(len(ids) == len(chars) and all(isinstance(x, str) and re.fullmatch(r'[a-zA-Z0-9_-]{1,40}', x) for x in ids) and len(ids) == len(set(ids)), 'Character IDs must be unique and safe')
     for field in ['world_rules', 'must_avoid']:
@@ -92,6 +95,12 @@ def delta(value, prose, ids):
         except EvidenceError as exc:
             raise ContractError(f'Memory {index + 1} evidence is unsupported: {exc}') from exc
         require(isinstance(m.get('known_by'), list) and set(m['known_by']) <= set(ids) | {'public'}, 'Invalid memory knowledge holders')
+        if 'life_state' in m or 'subject' in m:
+            require(m.get('kind')=='event' and m.get('subject') in ids and m.get('life_state') in {'alive','dead','missing','unknown'},'Invalid lifecycle memory')
+            require(m.get('fact_key')=='life:'+m['subject'],'Lifecycle memory needs stable life:<id> fact key')
+        if 'thread_id' in m or 'thread_state' in m:
+            require(m.get('kind')=='thread' and isinstance(m.get('thread_id'),str) and bool(re.fullmatch(r'[a-zA-Z0-9_-]{1,64}',m['thread_id'])) and m.get('thread_state') in {'seeded','escalating','payoff','closed'},'Invalid plot thread memory')
+            require(m.get('fact_key')=='thread:'+m['thread_id'],'Thread needs stable thread:<id> fact key')
         if m['kind'] == 'belief':
             require(m.get('holder') in ids and m['holder'] in m['known_by'], 'Belief needs holder')
     return value

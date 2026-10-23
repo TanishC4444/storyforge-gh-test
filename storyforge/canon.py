@@ -21,6 +21,8 @@ def index(memories):
 
 
 def append(state,updates,scene_id):
+    from .universe_events import validate_lifecycle
+    validate_lifecycle(state,updates)
     existing=index(state['memories'])['history']
     new=[]
     for item in updates:
@@ -39,7 +41,12 @@ def working(state,character=None,query='',budget=6500):
     import json,re
     records=index(state['memories'])['history']
     if character is not None:
-        records=visible(records,character,{s['id']:s['participants'] for s in state['accepted']})
+        audiences={}
+        for s in state.get('universe_history',[])+state['accepted']:
+            audiences[s['id']]=s['participants']
+            episode=s.get('universe_episode',state.get('universe_episode'))
+            if episode:audiences[f'episode-{episode:06}/'+s['id']]=s['participants']
+        records=visible(records,character,audiences)
     visible_ids={m['id'] for m in records}
     hidden={old for m in records for old in m.get('supersedes',[]) if old in visible_ids}
     active=[m for m in records if m['id'] not in hidden]
@@ -51,7 +58,7 @@ def working(state,character=None,query='',budget=6500):
     for _,memory in ranked:
         compact={k:v for k,v in memory.items() if k not in {'evidence','evidence_spans','evidence_match'}}
         size=len(json.dumps(compact,ensure_ascii=False))
-        if used+size<=budget:selected.append(compact);used+=size
+        if budget is None or used+size<=budget:selected.append(compact);used+=size
     ids={m['id'] for m in selected}
     return {'facts':selected,'omitted_ids':[m['id'] for m in active if m['id'] not in ids],
             'history_count':len(records),'policy':'Current supported facts only; superseded history remains in canon.json. Author knowledge is not actor knowledge.'}
@@ -60,10 +67,18 @@ def working(state,character=None,query='',budget=6500):
 def cards(memories):
     """Prompt projections retain identity/provenance; full evidence stays in history."""
     keys={'id','kind','text','known_by','holder','claim_source','source','state_version',
-          'fact_key','supersedes','evidence_prose_sha256'}
+          'subject','life_state','thread_id','thread_state','fact_key','supersedes','evidence_prose_sha256'}
     return [{k:v for k,v in m.items() if k in keys} for m in index(memories)['current']]
 
 
 def recording_context(state,card):
     view=working(state,query=str(card),budget=8000)
     return {'prior_canon':view['facts'],'omitted_prior_ids':view['omitted_ids']}
+
+
+def bridge(state,character=None):
+    """All current facts; projection respects actor visibility and never drops facts."""
+    view=working(state,character=character,budget=None)
+    view['policy']='Full current memory connects scenes. Superseded evidence remains in append-only history. Author knowledge never becomes actor knowledge by proximity. Provisional prose has no authority over these facts.'
+    view['provisional_scenes']=[s['id'] for s in state.get('accepted',[]) if not s.get('canon_committed',True)]
+    return view

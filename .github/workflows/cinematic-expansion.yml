@@ -25,7 +25,9 @@ name: Cinematic universe expansion / classic runners
         type: choice
         options:
         - '1'
+        - '2'
         - '3'
+        - '4'
         - '9'
         default: '1'
       canon_run:
@@ -820,7 +822,7 @@ jobs:
     name: Compile retained and refreshed facts without omission
     needs:
     - s01_design
-    - s01_final_check
+    - s01_repair
     - s01_memory_refresh_plan
     - s01_memory_refresh_batches
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
@@ -839,7 +841,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s01_final_check
+        name: s01_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -886,7 +888,7 @@ jobs:
     name: Compile final memory findings
     needs:
     - s01_design
-    - s01_final_check
+    - s01_repair
     - s01_final_memory
     - s01_memory_final_plan
     - s01_memory_final_batches
@@ -906,7 +908,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s01_final_check
+        name: s01_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -1710,7 +1712,7 @@ jobs:
     name: Compile retained and refreshed facts without omission
     needs:
     - s02_design
-    - s02_final_check
+    - s02_repair
     - s02_memory_refresh_plan
     - s02_memory_refresh_batches
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
@@ -1729,7 +1731,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s02_final_check
+        name: s02_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -1776,7 +1778,7 @@ jobs:
     name: Compile final memory findings
     needs:
     - s02_design
-    - s02_final_check
+    - s02_repair
     - s02_final_memory
     - s02_memory_final_plan
     - s02_memory_final_batches
@@ -1796,7 +1798,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s02_final_check
+        name: s02_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -2600,7 +2602,7 @@ jobs:
     name: Compile retained and refreshed facts without omission
     needs:
     - s03_design
-    - s03_final_check
+    - s03_repair
     - s03_memory_refresh_plan
     - s03_memory_refresh_batches
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
@@ -2619,7 +2621,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s03_final_check
+        name: s03_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -2666,7 +2668,7 @@ jobs:
     name: Compile final memory findings
     needs:
     - s03_design
-    - s03_final_check
+    - s03_repair
     - s03_final_memory
     - s03_memory_final_plan
     - s03_memory_final_batches
@@ -2686,7 +2688,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s03_final_check
+        name: s03_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -3490,7 +3492,7 @@ jobs:
     name: Compile retained and refreshed facts without omission
     needs:
     - s04_design
-    - s04_final_check
+    - s04_repair
     - s04_memory_refresh_plan
     - s04_memory_refresh_batches
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
@@ -3509,7 +3511,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s04_final_check
+        name: s04_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -3556,7 +3558,7 @@ jobs:
     name: Compile final memory findings
     needs:
     - s04_design
-    - s04_final_check
+    - s04_repair
     - s04_final_memory
     - s04_memory_final_plan
     - s04_memory_final_batches
@@ -3576,7 +3578,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s04_final_check
+        name: s04_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -4380,7 +4382,7 @@ jobs:
     name: Compile retained and refreshed facts without omission
     needs:
     - s05_design
-    - s05_final_check
+    - s05_repair
     - s05_memory_refresh_plan
     - s05_memory_refresh_batches
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
@@ -4399,7 +4401,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s05_final_check
+        name: s05_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -4446,7 +4448,7 @@ jobs:
     name: Compile final memory findings
     needs:
     - s05_design
-    - s05_final_check
+    - s05_repair
     - s05_final_memory
     - s05_memory_final_plan
     - s05_memory_final_batches
@@ -4466,7 +4468,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s05_final_check
+        name: s05_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -5270,7 +5272,7 @@ jobs:
     name: Compile retained and refreshed facts without omission
     needs:
     - s06_design
-    - s06_final_check
+    - s06_repair
     - s06_memory_refresh_plan
     - s06_memory_refresh_batches
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
@@ -5289,7 +5291,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s06_final_check
+        name: s06_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -5336,7 +5338,7 @@ jobs:
     name: Compile final memory findings
     needs:
     - s06_design
-    - s06_final_check
+    - s06_repair
     - s06_final_memory
     - s06_memory_final_plan
     - s06_memory_final_batches
@@ -5356,7 +5358,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s06_final_check
+        name: s06_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -6160,7 +6162,7 @@ jobs:
     name: Compile retained and refreshed facts without omission
     needs:
     - s07_design
-    - s07_final_check
+    - s07_repair
     - s07_memory_refresh_plan
     - s07_memory_refresh_batches
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
@@ -6179,7 +6181,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s07_final_check
+        name: s07_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -6226,7 +6228,7 @@ jobs:
     name: Compile final memory findings
     needs:
     - s07_design
-    - s07_final_check
+    - s07_repair
     - s07_final_memory
     - s07_memory_final_plan
     - s07_memory_final_batches
@@ -6246,7 +6248,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s07_final_check
+        name: s07_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -7050,7 +7052,7 @@ jobs:
     name: Compile retained and refreshed facts without omission
     needs:
     - s08_design
-    - s08_final_check
+    - s08_repair
     - s08_memory_refresh_plan
     - s08_memory_refresh_batches
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
@@ -7069,7 +7071,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s08_final_check
+        name: s08_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -7116,7 +7118,7 @@ jobs:
     name: Compile final memory findings
     needs:
     - s08_design
-    - s08_final_check
+    - s08_repair
     - s08_final_memory
     - s08_memory_final_plan
     - s08_memory_final_batches
@@ -7136,7 +7138,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s08_final_check
+        name: s08_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -7940,7 +7942,7 @@ jobs:
     name: Compile retained and refreshed facts without omission
     needs:
     - s09_design
-    - s09_final_check
+    - s09_repair
     - s09_memory_refresh_plan
     - s09_memory_refresh_batches
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
@@ -7959,7 +7961,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s09_final_check
+        name: s09_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -8006,7 +8008,7 @@ jobs:
     name: Compile final memory findings
     needs:
     - s09_design
-    - s09_final_check
+    - s09_repair
     - s09_final_memory
     - s09_memory_final_plan
     - s09_memory_final_batches
@@ -8026,7 +8028,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s09_final_check
+        name: s09_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -8299,6 +8301,9 @@ jobs:
     - s01_memory_preflight
     - s01_repair_plan
     - s01_repair_batches
+    - s01_final_sections
+    - s01_final_summaries
+    - s01_final_summary_join
     - s01_final_batches
     - s01_final_check
     - s01_memory_extract_plan
@@ -8319,6 +8324,9 @@ jobs:
     - s02_memory_preflight
     - s02_repair_plan
     - s02_repair_batches
+    - s02_final_sections
+    - s02_final_summaries
+    - s02_final_summary_join
     - s02_final_batches
     - s02_final_check
     - s02_memory_extract_plan
@@ -8339,6 +8347,9 @@ jobs:
     - s03_memory_preflight
     - s03_repair_plan
     - s03_repair_batches
+    - s03_final_sections
+    - s03_final_summaries
+    - s03_final_summary_join
     - s03_final_batches
     - s03_final_check
     - s03_memory_extract_plan
@@ -8359,6 +8370,9 @@ jobs:
     - s04_memory_preflight
     - s04_repair_plan
     - s04_repair_batches
+    - s04_final_sections
+    - s04_final_summaries
+    - s04_final_summary_join
     - s04_final_batches
     - s04_final_check
     - s04_memory_extract_plan
@@ -8379,6 +8393,9 @@ jobs:
     - s05_memory_preflight
     - s05_repair_plan
     - s05_repair_batches
+    - s05_final_sections
+    - s05_final_summaries
+    - s05_final_summary_join
     - s05_final_batches
     - s05_final_check
     - s05_memory_extract_plan
@@ -8399,6 +8416,9 @@ jobs:
     - s06_memory_preflight
     - s06_repair_plan
     - s06_repair_batches
+    - s06_final_sections
+    - s06_final_summaries
+    - s06_final_summary_join
     - s06_final_batches
     - s06_final_check
     - s06_memory_extract_plan
@@ -8419,6 +8439,9 @@ jobs:
     - s07_memory_preflight
     - s07_repair_plan
     - s07_repair_batches
+    - s07_final_sections
+    - s07_final_summaries
+    - s07_final_summary_join
     - s07_final_batches
     - s07_final_check
     - s07_memory_extract_plan
@@ -8439,6 +8462,9 @@ jobs:
     - s08_memory_preflight
     - s08_repair_plan
     - s08_repair_batches
+    - s08_final_sections
+    - s08_final_summaries
+    - s08_final_summary_join
     - s08_final_batches
     - s08_final_check
     - s08_memory_extract_plan
@@ -8459,6 +8485,9 @@ jobs:
     - s09_memory_preflight
     - s09_repair_plan
     - s09_repair_batches
+    - s09_final_sections
+    - s09_final_summaries
+    - s09_final_summary_join
     - s09_final_batches
     - s09_final_check
     - s09_memory_extract_plan
@@ -8703,6 +8732,7 @@ jobs:
     outputs:
       characters: ${{ steps.task.outputs.characters }}
       reviews: ${{ steps.task.outputs.reviews }}
+      final_reviews: ${{ steps.task.outputs.final_reviews }}
   s01_summaries:
     name: Summarize actual section ${{ matrix.batch }}; source-linked only
     needs:
@@ -9319,11 +9349,74 @@ jobs:
       max-parallel: 6
       matrix:
         batch: ${{ fromJSON(needs.s01_repair_plan.outputs.characters) }}
-  s01_final_batches:
-    name: Final judgment round / dimensions ${{ matrix.batch }}
+  s01_final_sections:
+    name: Allocate final passage checks
     needs:
     - s01_design
     - s01_repair
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_repair
+        path: inputs/edited
+    - name: Allocate final passage checks
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_plan --backend "$backend" --index 0'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_final_sections
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+      reviews: ${{ steps.task.outputs.reviews }}
+      final_reviews: ${{ steps.task.outputs.final_reviews }}
+  s01_final_summaries:
+    name: Summarize repaired section ${{ matrix.batch }}
+    needs:
+    - s01_design
+    - s01_repair
+    - s01_edit
+    - s01_summary_join
+    - s01_final_sections
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -9342,7 +9435,167 @@ jobs:
       with:
         name: s01_repair
         path: inputs/edited
-    - name: Final judgment round / dimensions ${{ matrix.batch }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_summary_join
+        path: inputs/previous-summaries
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_final_sections
+        path: inputs/plan
+    - name: Summarize repaired section ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_summary --backend "$backend" --index 0 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_final_summaries-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s01_final_sections.outputs.characters) }}
+  s01_final_summary_join:
+    name: Join fresh final summaries
+    needs:
+    - s01_design
+    - s01_repair
+    - s01_final_sections
+    - s01_final_summaries
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s01_final_summaries-*
+        path: inputs/batches
+    - name: Join fresh final summaries
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_summaries_join --backend "$backend" --index 0'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_final_summary_join
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s01_final_batches:
+    name: Final passage/cohesion check ${{ matrix.batch }}
+    needs:
+    - s01_design
+    - s01_repair
+    - s01_edit
+    - s01_final_sections
+    - s01_final_summary_join
+    - s01_final_memory
+    if: ${{ 0 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_final_summary_join
+        path: inputs/summaries
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_final_memory
+        path: inputs/memory
+    - name: Final passage/cohesion check ${{ matrix.batch }}
       id: task
       env:
         PYTHONUNBUFFERED: 1
@@ -9380,18 +9633,14 @@ jobs:
       fail-fast: false
       max-parallel: 6
       matrix:
-        batch:
-        - 0
-        - 1
-        - 2
-        - 3
-        - 4
-        - 5
+        batch: ${{ fromJSON(needs.s01_final_sections.outputs.final_reviews) }}
   s01_final_check:
-    name: Compile ONE final strict judgment round; no rewrite loop
+    name: Compile ONE strict final judgment round
     needs:
     - s01_design
     - s01_repair
+    - s01_final_sections
+    - s01_final_summary_join
     - s01_story
     - s01_rhetoric
     - s01_memory_preflight
@@ -9416,6 +9665,14 @@ jobs:
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
+        name: s01_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        name: s01_final_summary_join
+        path: inputs/summaries
+    - uses: actions/download-artifact@v4
+      with:
         name: s01_story
         path: inputs/story-review
     - uses: actions/download-artifact@v4
@@ -9430,7 +9687,7 @@ jobs:
       with:
         pattern: s01_final_batches-*
         path: inputs/final-batches
-    - name: Compile ONE final strict judgment round; no rewrite loop
+    - name: Compile ONE strict final judgment round
       id: task
       env:
         PYTHONUNBUFFERED: 1
@@ -9447,8 +9704,7 @@ jobs:
         python -m storyforge.batch_pipeline finalize --backend "$backend" --index 0'
     - name: Show generated prose before final acceptance
       if: always()
-      run: python -m storyforge.expansion preview --source out --label "Compile ONE final strict judgment round; no rewrite
-        loop"
+      run: python -m storyforge.expansion preview --source out --label "Compile ONE strict final judgment round"
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -9597,7 +9853,7 @@ jobs:
     needs:
     - s01_design
     - s01_edit
-    - s01_final_check
+    - s01_repair
     - s01_memory
     - s01_memory_preflight
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
@@ -9620,7 +9876,7 @@ jobs:
         path: inputs/original
     - uses: actions/download-artifact@v4
       with:
-        name: s01_final_check
+        name: s01_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -9669,7 +9925,7 @@ jobs:
     name: Refresh changed evidence / batch ${{ matrix.batch }}
     needs:
     - s01_design
-    - s01_final_check
+    - s01_repair
     - s01_memory_refresh_plan
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -9687,7 +9943,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s01_final_check
+        name: s01_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -9736,7 +9992,7 @@ jobs:
     name: Allocate final memory checks
     needs:
     - s01_design
-    - s01_final_check
+    - s01_repair
     - s01_final_memory
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -9754,7 +10010,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s01_final_check
+        name: s01_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -9799,7 +10055,7 @@ jobs:
     name: final memory / continuity batch ${{ matrix.batch }}
     needs:
     - s01_design
-    - s01_final_check
+    - s01_repair
     - s01_final_memory
     - s01_memory_final_plan
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
@@ -9818,7 +10074,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s01_final_check
+        name: s01_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -10046,6 +10302,7 @@ jobs:
     outputs:
       characters: ${{ steps.task.outputs.characters }}
       reviews: ${{ steps.task.outputs.reviews }}
+      final_reviews: ${{ steps.task.outputs.final_reviews }}
   s02_summaries:
     name: Summarize actual section ${{ matrix.batch }}; source-linked only
     needs:
@@ -10662,11 +10919,74 @@ jobs:
       max-parallel: 6
       matrix:
         batch: ${{ fromJSON(needs.s02_repair_plan.outputs.characters) }}
-  s02_final_batches:
-    name: Final judgment round / dimensions ${{ matrix.batch }}
+  s02_final_sections:
+    name: Allocate final passage checks
     needs:
     - s02_design
     - s02_repair
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_repair
+        path: inputs/edited
+    - name: Allocate final passage checks
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_plan --backend "$backend" --index 1'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_final_sections
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+      reviews: ${{ steps.task.outputs.reviews }}
+      final_reviews: ${{ steps.task.outputs.final_reviews }}
+  s02_final_summaries:
+    name: Summarize repaired section ${{ matrix.batch }}
+    needs:
+    - s02_design
+    - s02_repair
+    - s02_edit
+    - s02_summary_join
+    - s02_final_sections
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -10685,7 +11005,167 @@ jobs:
       with:
         name: s02_repair
         path: inputs/edited
-    - name: Final judgment round / dimensions ${{ matrix.batch }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_summary_join
+        path: inputs/previous-summaries
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_final_sections
+        path: inputs/plan
+    - name: Summarize repaired section ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_summary --backend "$backend" --index 1 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_final_summaries-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s02_final_sections.outputs.characters) }}
+  s02_final_summary_join:
+    name: Join fresh final summaries
+    needs:
+    - s02_design
+    - s02_repair
+    - s02_final_sections
+    - s02_final_summaries
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s02_final_summaries-*
+        path: inputs/batches
+    - name: Join fresh final summaries
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_summaries_join --backend "$backend" --index 1'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_final_summary_join
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s02_final_batches:
+    name: Final passage/cohesion check ${{ matrix.batch }}
+    needs:
+    - s02_design
+    - s02_repair
+    - s02_edit
+    - s02_final_sections
+    - s02_final_summary_join
+    - s02_final_memory
+    if: ${{ 1 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_final_summary_join
+        path: inputs/summaries
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_final_memory
+        path: inputs/memory
+    - name: Final passage/cohesion check ${{ matrix.batch }}
       id: task
       env:
         PYTHONUNBUFFERED: 1
@@ -10723,18 +11203,14 @@ jobs:
       fail-fast: false
       max-parallel: 6
       matrix:
-        batch:
-        - 0
-        - 1
-        - 2
-        - 3
-        - 4
-        - 5
+        batch: ${{ fromJSON(needs.s02_final_sections.outputs.final_reviews) }}
   s02_final_check:
-    name: Compile ONE final strict judgment round; no rewrite loop
+    name: Compile ONE strict final judgment round
     needs:
     - s02_design
     - s02_repair
+    - s02_final_sections
+    - s02_final_summary_join
     - s02_story
     - s02_rhetoric
     - s02_memory_preflight
@@ -10759,6 +11235,14 @@ jobs:
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
+        name: s02_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        name: s02_final_summary_join
+        path: inputs/summaries
+    - uses: actions/download-artifact@v4
+      with:
         name: s02_story
         path: inputs/story-review
     - uses: actions/download-artifact@v4
@@ -10773,7 +11257,7 @@ jobs:
       with:
         pattern: s02_final_batches-*
         path: inputs/final-batches
-    - name: Compile ONE final strict judgment round; no rewrite loop
+    - name: Compile ONE strict final judgment round
       id: task
       env:
         PYTHONUNBUFFERED: 1
@@ -10790,8 +11274,7 @@ jobs:
         python -m storyforge.batch_pipeline finalize --backend "$backend" --index 1'
     - name: Show generated prose before final acceptance
       if: always()
-      run: python -m storyforge.expansion preview --source out --label "Compile ONE final strict judgment round; no rewrite
-        loop"
+      run: python -m storyforge.expansion preview --source out --label "Compile ONE strict final judgment round"
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -10940,7 +11423,7 @@ jobs:
     needs:
     - s02_design
     - s02_edit
-    - s02_final_check
+    - s02_repair
     - s02_memory
     - s02_memory_preflight
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
@@ -10963,7 +11446,7 @@ jobs:
         path: inputs/original
     - uses: actions/download-artifact@v4
       with:
-        name: s02_final_check
+        name: s02_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -11012,7 +11495,7 @@ jobs:
     name: Refresh changed evidence / batch ${{ matrix.batch }}
     needs:
     - s02_design
-    - s02_final_check
+    - s02_repair
     - s02_memory_refresh_plan
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -11030,7 +11513,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s02_final_check
+        name: s02_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -11079,7 +11562,7 @@ jobs:
     name: Allocate final memory checks
     needs:
     - s02_design
-    - s02_final_check
+    - s02_repair
     - s02_final_memory
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -11097,7 +11580,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s02_final_check
+        name: s02_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -11142,7 +11625,7 @@ jobs:
     name: final memory / continuity batch ${{ matrix.batch }}
     needs:
     - s02_design
-    - s02_final_check
+    - s02_repair
     - s02_final_memory
     - s02_memory_final_plan
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
@@ -11161,7 +11644,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s02_final_check
+        name: s02_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -11389,6 +11872,7 @@ jobs:
     outputs:
       characters: ${{ steps.task.outputs.characters }}
       reviews: ${{ steps.task.outputs.reviews }}
+      final_reviews: ${{ steps.task.outputs.final_reviews }}
   s03_summaries:
     name: Summarize actual section ${{ matrix.batch }}; source-linked only
     needs:
@@ -12005,11 +12489,74 @@ jobs:
       max-parallel: 6
       matrix:
         batch: ${{ fromJSON(needs.s03_repair_plan.outputs.characters) }}
-  s03_final_batches:
-    name: Final judgment round / dimensions ${{ matrix.batch }}
+  s03_final_sections:
+    name: Allocate final passage checks
     needs:
     - s03_design
     - s03_repair
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_repair
+        path: inputs/edited
+    - name: Allocate final passage checks
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_plan --backend "$backend" --index 2'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_final_sections
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+      reviews: ${{ steps.task.outputs.reviews }}
+      final_reviews: ${{ steps.task.outputs.final_reviews }}
+  s03_final_summaries:
+    name: Summarize repaired section ${{ matrix.batch }}
+    needs:
+    - s03_design
+    - s03_repair
+    - s03_edit
+    - s03_summary_join
+    - s03_final_sections
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -12028,7 +12575,167 @@ jobs:
       with:
         name: s03_repair
         path: inputs/edited
-    - name: Final judgment round / dimensions ${{ matrix.batch }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_summary_join
+        path: inputs/previous-summaries
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_final_sections
+        path: inputs/plan
+    - name: Summarize repaired section ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_summary --backend "$backend" --index 2 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_final_summaries-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s03_final_sections.outputs.characters) }}
+  s03_final_summary_join:
+    name: Join fresh final summaries
+    needs:
+    - s03_design
+    - s03_repair
+    - s03_final_sections
+    - s03_final_summaries
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s03_final_summaries-*
+        path: inputs/batches
+    - name: Join fresh final summaries
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_summaries_join --backend "$backend" --index 2'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_final_summary_join
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s03_final_batches:
+    name: Final passage/cohesion check ${{ matrix.batch }}
+    needs:
+    - s03_design
+    - s03_repair
+    - s03_edit
+    - s03_final_sections
+    - s03_final_summary_join
+    - s03_final_memory
+    if: ${{ 2 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_final_summary_join
+        path: inputs/summaries
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_final_memory
+        path: inputs/memory
+    - name: Final passage/cohesion check ${{ matrix.batch }}
       id: task
       env:
         PYTHONUNBUFFERED: 1
@@ -12066,18 +12773,14 @@ jobs:
       fail-fast: false
       max-parallel: 6
       matrix:
-        batch:
-        - 0
-        - 1
-        - 2
-        - 3
-        - 4
-        - 5
+        batch: ${{ fromJSON(needs.s03_final_sections.outputs.final_reviews) }}
   s03_final_check:
-    name: Compile ONE final strict judgment round; no rewrite loop
+    name: Compile ONE strict final judgment round
     needs:
     - s03_design
     - s03_repair
+    - s03_final_sections
+    - s03_final_summary_join
     - s03_story
     - s03_rhetoric
     - s03_memory_preflight
@@ -12102,6 +12805,14 @@ jobs:
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
+        name: s03_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        name: s03_final_summary_join
+        path: inputs/summaries
+    - uses: actions/download-artifact@v4
+      with:
         name: s03_story
         path: inputs/story-review
     - uses: actions/download-artifact@v4
@@ -12116,7 +12827,7 @@ jobs:
       with:
         pattern: s03_final_batches-*
         path: inputs/final-batches
-    - name: Compile ONE final strict judgment round; no rewrite loop
+    - name: Compile ONE strict final judgment round
       id: task
       env:
         PYTHONUNBUFFERED: 1
@@ -12133,8 +12844,7 @@ jobs:
         python -m storyforge.batch_pipeline finalize --backend "$backend" --index 2'
     - name: Show generated prose before final acceptance
       if: always()
-      run: python -m storyforge.expansion preview --source out --label "Compile ONE final strict judgment round; no rewrite
-        loop"
+      run: python -m storyforge.expansion preview --source out --label "Compile ONE strict final judgment round"
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -12283,7 +12993,7 @@ jobs:
     needs:
     - s03_design
     - s03_edit
-    - s03_final_check
+    - s03_repair
     - s03_memory
     - s03_memory_preflight
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
@@ -12306,7 +13016,7 @@ jobs:
         path: inputs/original
     - uses: actions/download-artifact@v4
       with:
-        name: s03_final_check
+        name: s03_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -12355,7 +13065,7 @@ jobs:
     name: Refresh changed evidence / batch ${{ matrix.batch }}
     needs:
     - s03_design
-    - s03_final_check
+    - s03_repair
     - s03_memory_refresh_plan
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -12373,7 +13083,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s03_final_check
+        name: s03_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -12422,7 +13132,7 @@ jobs:
     name: Allocate final memory checks
     needs:
     - s03_design
-    - s03_final_check
+    - s03_repair
     - s03_final_memory
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -12440,7 +13150,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s03_final_check
+        name: s03_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -12485,7 +13195,7 @@ jobs:
     name: final memory / continuity batch ${{ matrix.batch }}
     needs:
     - s03_design
-    - s03_final_check
+    - s03_repair
     - s03_final_memory
     - s03_memory_final_plan
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
@@ -12504,7 +13214,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s03_final_check
+        name: s03_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -12732,6 +13442,7 @@ jobs:
     outputs:
       characters: ${{ steps.task.outputs.characters }}
       reviews: ${{ steps.task.outputs.reviews }}
+      final_reviews: ${{ steps.task.outputs.final_reviews }}
   s04_summaries:
     name: Summarize actual section ${{ matrix.batch }}; source-linked only
     needs:
@@ -13348,11 +14059,74 @@ jobs:
       max-parallel: 6
       matrix:
         batch: ${{ fromJSON(needs.s04_repair_plan.outputs.characters) }}
-  s04_final_batches:
-    name: Final judgment round / dimensions ${{ matrix.batch }}
+  s04_final_sections:
+    name: Allocate final passage checks
     needs:
     - s04_design
     - s04_repair
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_repair
+        path: inputs/edited
+    - name: Allocate final passage checks
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_plan --backend "$backend" --index 3'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_final_sections
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+      reviews: ${{ steps.task.outputs.reviews }}
+      final_reviews: ${{ steps.task.outputs.final_reviews }}
+  s04_final_summaries:
+    name: Summarize repaired section ${{ matrix.batch }}
+    needs:
+    - s04_design
+    - s04_repair
+    - s04_edit
+    - s04_summary_join
+    - s04_final_sections
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -13371,7 +14145,167 @@ jobs:
       with:
         name: s04_repair
         path: inputs/edited
-    - name: Final judgment round / dimensions ${{ matrix.batch }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_summary_join
+        path: inputs/previous-summaries
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_final_sections
+        path: inputs/plan
+    - name: Summarize repaired section ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_summary --backend "$backend" --index 3 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_final_summaries-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s04_final_sections.outputs.characters) }}
+  s04_final_summary_join:
+    name: Join fresh final summaries
+    needs:
+    - s04_design
+    - s04_repair
+    - s04_final_sections
+    - s04_final_summaries
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s04_final_summaries-*
+        path: inputs/batches
+    - name: Join fresh final summaries
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_summaries_join --backend "$backend" --index 3'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_final_summary_join
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s04_final_batches:
+    name: Final passage/cohesion check ${{ matrix.batch }}
+    needs:
+    - s04_design
+    - s04_repair
+    - s04_edit
+    - s04_final_sections
+    - s04_final_summary_join
+    - s04_final_memory
+    if: ${{ 3 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_final_summary_join
+        path: inputs/summaries
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_final_memory
+        path: inputs/memory
+    - name: Final passage/cohesion check ${{ matrix.batch }}
       id: task
       env:
         PYTHONUNBUFFERED: 1
@@ -13409,18 +14343,14 @@ jobs:
       fail-fast: false
       max-parallel: 6
       matrix:
-        batch:
-        - 0
-        - 1
-        - 2
-        - 3
-        - 4
-        - 5
+        batch: ${{ fromJSON(needs.s04_final_sections.outputs.final_reviews) }}
   s04_final_check:
-    name: Compile ONE final strict judgment round; no rewrite loop
+    name: Compile ONE strict final judgment round
     needs:
     - s04_design
     - s04_repair
+    - s04_final_sections
+    - s04_final_summary_join
     - s04_story
     - s04_rhetoric
     - s04_memory_preflight
@@ -13445,6 +14375,14 @@ jobs:
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
+        name: s04_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        name: s04_final_summary_join
+        path: inputs/summaries
+    - uses: actions/download-artifact@v4
+      with:
         name: s04_story
         path: inputs/story-review
     - uses: actions/download-artifact@v4
@@ -13459,7 +14397,7 @@ jobs:
       with:
         pattern: s04_final_batches-*
         path: inputs/final-batches
-    - name: Compile ONE final strict judgment round; no rewrite loop
+    - name: Compile ONE strict final judgment round
       id: task
       env:
         PYTHONUNBUFFERED: 1
@@ -13476,8 +14414,7 @@ jobs:
         python -m storyforge.batch_pipeline finalize --backend "$backend" --index 3'
     - name: Show generated prose before final acceptance
       if: always()
-      run: python -m storyforge.expansion preview --source out --label "Compile ONE final strict judgment round; no rewrite
-        loop"
+      run: python -m storyforge.expansion preview --source out --label "Compile ONE strict final judgment round"
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -13626,7 +14563,7 @@ jobs:
     needs:
     - s04_design
     - s04_edit
-    - s04_final_check
+    - s04_repair
     - s04_memory
     - s04_memory_preflight
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
@@ -13649,7 +14586,7 @@ jobs:
         path: inputs/original
     - uses: actions/download-artifact@v4
       with:
-        name: s04_final_check
+        name: s04_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -13698,7 +14635,7 @@ jobs:
     name: Refresh changed evidence / batch ${{ matrix.batch }}
     needs:
     - s04_design
-    - s04_final_check
+    - s04_repair
     - s04_memory_refresh_plan
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -13716,7 +14653,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s04_final_check
+        name: s04_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -13765,7 +14702,7 @@ jobs:
     name: Allocate final memory checks
     needs:
     - s04_design
-    - s04_final_check
+    - s04_repair
     - s04_final_memory
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -13783,7 +14720,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s04_final_check
+        name: s04_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -13828,7 +14765,7 @@ jobs:
     name: final memory / continuity batch ${{ matrix.batch }}
     needs:
     - s04_design
-    - s04_final_check
+    - s04_repair
     - s04_final_memory
     - s04_memory_final_plan
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
@@ -13847,7 +14784,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s04_final_check
+        name: s04_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -14075,6 +15012,7 @@ jobs:
     outputs:
       characters: ${{ steps.task.outputs.characters }}
       reviews: ${{ steps.task.outputs.reviews }}
+      final_reviews: ${{ steps.task.outputs.final_reviews }}
   s05_summaries:
     name: Summarize actual section ${{ matrix.batch }}; source-linked only
     needs:
@@ -14691,11 +15629,74 @@ jobs:
       max-parallel: 6
       matrix:
         batch: ${{ fromJSON(needs.s05_repair_plan.outputs.characters) }}
-  s05_final_batches:
-    name: Final judgment round / dimensions ${{ matrix.batch }}
+  s05_final_sections:
+    name: Allocate final passage checks
     needs:
     - s05_design
     - s05_repair
+    if: ${{ 4 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s05_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s05_repair
+        path: inputs/edited
+    - name: Allocate final passage checks
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_plan --backend "$backend" --index 4'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s05_final_sections
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+      reviews: ${{ steps.task.outputs.reviews }}
+      final_reviews: ${{ steps.task.outputs.final_reviews }}
+  s05_final_summaries:
+    name: Summarize repaired section ${{ matrix.batch }}
+    needs:
+    - s05_design
+    - s05_repair
+    - s05_edit
+    - s05_summary_join
+    - s05_final_sections
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -14714,7 +15715,167 @@ jobs:
       with:
         name: s05_repair
         path: inputs/edited
-    - name: Final judgment round / dimensions ${{ matrix.batch }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s05_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s05_summary_join
+        path: inputs/previous-summaries
+    - uses: actions/download-artifact@v4
+      with:
+        name: s05_final_sections
+        path: inputs/plan
+    - name: Summarize repaired section ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_summary --backend "$backend" --index 4 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s05_final_summaries-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s05_final_sections.outputs.characters) }}
+  s05_final_summary_join:
+    name: Join fresh final summaries
+    needs:
+    - s05_design
+    - s05_repair
+    - s05_final_sections
+    - s05_final_summaries
+    if: ${{ 4 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s05_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s05_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s05_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s05_final_summaries-*
+        path: inputs/batches
+    - name: Join fresh final summaries
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_summaries_join --backend "$backend" --index 4'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s05_final_summary_join
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s05_final_batches:
+    name: Final passage/cohesion check ${{ matrix.batch }}
+    needs:
+    - s05_design
+    - s05_repair
+    - s05_edit
+    - s05_final_sections
+    - s05_final_summary_join
+    - s05_final_memory
+    if: ${{ 4 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s05_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s05_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s05_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s05_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        name: s05_final_summary_join
+        path: inputs/summaries
+    - uses: actions/download-artifact@v4
+      with:
+        name: s05_final_memory
+        path: inputs/memory
+    - name: Final passage/cohesion check ${{ matrix.batch }}
       id: task
       env:
         PYTHONUNBUFFERED: 1
@@ -14752,18 +15913,14 @@ jobs:
       fail-fast: false
       max-parallel: 6
       matrix:
-        batch:
-        - 0
-        - 1
-        - 2
-        - 3
-        - 4
-        - 5
+        batch: ${{ fromJSON(needs.s05_final_sections.outputs.final_reviews) }}
   s05_final_check:
-    name: Compile ONE final strict judgment round; no rewrite loop
+    name: Compile ONE strict final judgment round
     needs:
     - s05_design
     - s05_repair
+    - s05_final_sections
+    - s05_final_summary_join
     - s05_story
     - s05_rhetoric
     - s05_memory_preflight
@@ -14788,6 +15945,14 @@ jobs:
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
+        name: s05_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        name: s05_final_summary_join
+        path: inputs/summaries
+    - uses: actions/download-artifact@v4
+      with:
         name: s05_story
         path: inputs/story-review
     - uses: actions/download-artifact@v4
@@ -14802,7 +15967,7 @@ jobs:
       with:
         pattern: s05_final_batches-*
         path: inputs/final-batches
-    - name: Compile ONE final strict judgment round; no rewrite loop
+    - name: Compile ONE strict final judgment round
       id: task
       env:
         PYTHONUNBUFFERED: 1
@@ -14819,8 +15984,7 @@ jobs:
         python -m storyforge.batch_pipeline finalize --backend "$backend" --index 4'
     - name: Show generated prose before final acceptance
       if: always()
-      run: python -m storyforge.expansion preview --source out --label "Compile ONE final strict judgment round; no rewrite
-        loop"
+      run: python -m storyforge.expansion preview --source out --label "Compile ONE strict final judgment round"
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -14969,7 +16133,7 @@ jobs:
     needs:
     - s05_design
     - s05_edit
-    - s05_final_check
+    - s05_repair
     - s05_memory
     - s05_memory_preflight
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
@@ -14992,7 +16156,7 @@ jobs:
         path: inputs/original
     - uses: actions/download-artifact@v4
       with:
-        name: s05_final_check
+        name: s05_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -15041,7 +16205,7 @@ jobs:
     name: Refresh changed evidence / batch ${{ matrix.batch }}
     needs:
     - s05_design
-    - s05_final_check
+    - s05_repair
     - s05_memory_refresh_plan
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -15059,7 +16223,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s05_final_check
+        name: s05_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -15108,7 +16272,7 @@ jobs:
     name: Allocate final memory checks
     needs:
     - s05_design
-    - s05_final_check
+    - s05_repair
     - s05_final_memory
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -15126,7 +16290,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s05_final_check
+        name: s05_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -15171,7 +16335,7 @@ jobs:
     name: final memory / continuity batch ${{ matrix.batch }}
     needs:
     - s05_design
-    - s05_final_check
+    - s05_repair
     - s05_final_memory
     - s05_memory_final_plan
     if: ${{ 4 < fromJSON(inputs.scene_limit) }}
@@ -15190,7 +16354,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s05_final_check
+        name: s05_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -15418,6 +16582,7 @@ jobs:
     outputs:
       characters: ${{ steps.task.outputs.characters }}
       reviews: ${{ steps.task.outputs.reviews }}
+      final_reviews: ${{ steps.task.outputs.final_reviews }}
   s06_summaries:
     name: Summarize actual section ${{ matrix.batch }}; source-linked only
     needs:
@@ -16034,11 +17199,74 @@ jobs:
       max-parallel: 6
       matrix:
         batch: ${{ fromJSON(needs.s06_repair_plan.outputs.characters) }}
-  s06_final_batches:
-    name: Final judgment round / dimensions ${{ matrix.batch }}
+  s06_final_sections:
+    name: Allocate final passage checks
     needs:
     - s06_design
     - s06_repair
+    if: ${{ 5 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s06_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s06_repair
+        path: inputs/edited
+    - name: Allocate final passage checks
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_plan --backend "$backend" --index 5'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s06_final_sections
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+      reviews: ${{ steps.task.outputs.reviews }}
+      final_reviews: ${{ steps.task.outputs.final_reviews }}
+  s06_final_summaries:
+    name: Summarize repaired section ${{ matrix.batch }}
+    needs:
+    - s06_design
+    - s06_repair
+    - s06_edit
+    - s06_summary_join
+    - s06_final_sections
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -16057,7 +17285,167 @@ jobs:
       with:
         name: s06_repair
         path: inputs/edited
-    - name: Final judgment round / dimensions ${{ matrix.batch }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s06_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s06_summary_join
+        path: inputs/previous-summaries
+    - uses: actions/download-artifact@v4
+      with:
+        name: s06_final_sections
+        path: inputs/plan
+    - name: Summarize repaired section ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_summary --backend "$backend" --index 5 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s06_final_summaries-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s06_final_sections.outputs.characters) }}
+  s06_final_summary_join:
+    name: Join fresh final summaries
+    needs:
+    - s06_design
+    - s06_repair
+    - s06_final_sections
+    - s06_final_summaries
+    if: ${{ 5 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s06_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s06_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s06_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s06_final_summaries-*
+        path: inputs/batches
+    - name: Join fresh final summaries
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_summaries_join --backend "$backend" --index 5'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s06_final_summary_join
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s06_final_batches:
+    name: Final passage/cohesion check ${{ matrix.batch }}
+    needs:
+    - s06_design
+    - s06_repair
+    - s06_edit
+    - s06_final_sections
+    - s06_final_summary_join
+    - s06_final_memory
+    if: ${{ 5 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s06_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s06_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s06_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s06_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        name: s06_final_summary_join
+        path: inputs/summaries
+    - uses: actions/download-artifact@v4
+      with:
+        name: s06_final_memory
+        path: inputs/memory
+    - name: Final passage/cohesion check ${{ matrix.batch }}
       id: task
       env:
         PYTHONUNBUFFERED: 1
@@ -16095,18 +17483,14 @@ jobs:
       fail-fast: false
       max-parallel: 6
       matrix:
-        batch:
-        - 0
-        - 1
-        - 2
-        - 3
-        - 4
-        - 5
+        batch: ${{ fromJSON(needs.s06_final_sections.outputs.final_reviews) }}
   s06_final_check:
-    name: Compile ONE final strict judgment round; no rewrite loop
+    name: Compile ONE strict final judgment round
     needs:
     - s06_design
     - s06_repair
+    - s06_final_sections
+    - s06_final_summary_join
     - s06_story
     - s06_rhetoric
     - s06_memory_preflight
@@ -16131,6 +17515,14 @@ jobs:
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
+        name: s06_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        name: s06_final_summary_join
+        path: inputs/summaries
+    - uses: actions/download-artifact@v4
+      with:
         name: s06_story
         path: inputs/story-review
     - uses: actions/download-artifact@v4
@@ -16145,7 +17537,7 @@ jobs:
       with:
         pattern: s06_final_batches-*
         path: inputs/final-batches
-    - name: Compile ONE final strict judgment round; no rewrite loop
+    - name: Compile ONE strict final judgment round
       id: task
       env:
         PYTHONUNBUFFERED: 1
@@ -16162,8 +17554,7 @@ jobs:
         python -m storyforge.batch_pipeline finalize --backend "$backend" --index 5'
     - name: Show generated prose before final acceptance
       if: always()
-      run: python -m storyforge.expansion preview --source out --label "Compile ONE final strict judgment round; no rewrite
-        loop"
+      run: python -m storyforge.expansion preview --source out --label "Compile ONE strict final judgment round"
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -16312,7 +17703,7 @@ jobs:
     needs:
     - s06_design
     - s06_edit
-    - s06_final_check
+    - s06_repair
     - s06_memory
     - s06_memory_preflight
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
@@ -16335,7 +17726,7 @@ jobs:
         path: inputs/original
     - uses: actions/download-artifact@v4
       with:
-        name: s06_final_check
+        name: s06_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -16384,7 +17775,7 @@ jobs:
     name: Refresh changed evidence / batch ${{ matrix.batch }}
     needs:
     - s06_design
-    - s06_final_check
+    - s06_repair
     - s06_memory_refresh_plan
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -16402,7 +17793,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s06_final_check
+        name: s06_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -16451,7 +17842,7 @@ jobs:
     name: Allocate final memory checks
     needs:
     - s06_design
-    - s06_final_check
+    - s06_repair
     - s06_final_memory
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -16469,7 +17860,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s06_final_check
+        name: s06_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -16514,7 +17905,7 @@ jobs:
     name: final memory / continuity batch ${{ matrix.batch }}
     needs:
     - s06_design
-    - s06_final_check
+    - s06_repair
     - s06_final_memory
     - s06_memory_final_plan
     if: ${{ 5 < fromJSON(inputs.scene_limit) }}
@@ -16533,7 +17924,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s06_final_check
+        name: s06_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -16761,6 +18152,7 @@ jobs:
     outputs:
       characters: ${{ steps.task.outputs.characters }}
       reviews: ${{ steps.task.outputs.reviews }}
+      final_reviews: ${{ steps.task.outputs.final_reviews }}
   s07_summaries:
     name: Summarize actual section ${{ matrix.batch }}; source-linked only
     needs:
@@ -17377,11 +18769,74 @@ jobs:
       max-parallel: 6
       matrix:
         batch: ${{ fromJSON(needs.s07_repair_plan.outputs.characters) }}
-  s07_final_batches:
-    name: Final judgment round / dimensions ${{ matrix.batch }}
+  s07_final_sections:
+    name: Allocate final passage checks
     needs:
     - s07_design
     - s07_repair
+    if: ${{ 6 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s07_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s07_repair
+        path: inputs/edited
+    - name: Allocate final passage checks
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_plan --backend "$backend" --index 6'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s07_final_sections
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+      reviews: ${{ steps.task.outputs.reviews }}
+      final_reviews: ${{ steps.task.outputs.final_reviews }}
+  s07_final_summaries:
+    name: Summarize repaired section ${{ matrix.batch }}
+    needs:
+    - s07_design
+    - s07_repair
+    - s07_edit
+    - s07_summary_join
+    - s07_final_sections
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -17400,7 +18855,167 @@ jobs:
       with:
         name: s07_repair
         path: inputs/edited
-    - name: Final judgment round / dimensions ${{ matrix.batch }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s07_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s07_summary_join
+        path: inputs/previous-summaries
+    - uses: actions/download-artifact@v4
+      with:
+        name: s07_final_sections
+        path: inputs/plan
+    - name: Summarize repaired section ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_summary --backend "$backend" --index 6 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s07_final_summaries-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s07_final_sections.outputs.characters) }}
+  s07_final_summary_join:
+    name: Join fresh final summaries
+    needs:
+    - s07_design
+    - s07_repair
+    - s07_final_sections
+    - s07_final_summaries
+    if: ${{ 6 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s07_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s07_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s07_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s07_final_summaries-*
+        path: inputs/batches
+    - name: Join fresh final summaries
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_summaries_join --backend "$backend" --index 6'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s07_final_summary_join
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s07_final_batches:
+    name: Final passage/cohesion check ${{ matrix.batch }}
+    needs:
+    - s07_design
+    - s07_repair
+    - s07_edit
+    - s07_final_sections
+    - s07_final_summary_join
+    - s07_final_memory
+    if: ${{ 6 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s07_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s07_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s07_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s07_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        name: s07_final_summary_join
+        path: inputs/summaries
+    - uses: actions/download-artifact@v4
+      with:
+        name: s07_final_memory
+        path: inputs/memory
+    - name: Final passage/cohesion check ${{ matrix.batch }}
       id: task
       env:
         PYTHONUNBUFFERED: 1
@@ -17438,18 +19053,14 @@ jobs:
       fail-fast: false
       max-parallel: 6
       matrix:
-        batch:
-        - 0
-        - 1
-        - 2
-        - 3
-        - 4
-        - 5
+        batch: ${{ fromJSON(needs.s07_final_sections.outputs.final_reviews) }}
   s07_final_check:
-    name: Compile ONE final strict judgment round; no rewrite loop
+    name: Compile ONE strict final judgment round
     needs:
     - s07_design
     - s07_repair
+    - s07_final_sections
+    - s07_final_summary_join
     - s07_story
     - s07_rhetoric
     - s07_memory_preflight
@@ -17474,6 +19085,14 @@ jobs:
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
+        name: s07_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        name: s07_final_summary_join
+        path: inputs/summaries
+    - uses: actions/download-artifact@v4
+      with:
         name: s07_story
         path: inputs/story-review
     - uses: actions/download-artifact@v4
@@ -17488,7 +19107,7 @@ jobs:
       with:
         pattern: s07_final_batches-*
         path: inputs/final-batches
-    - name: Compile ONE final strict judgment round; no rewrite loop
+    - name: Compile ONE strict final judgment round
       id: task
       env:
         PYTHONUNBUFFERED: 1
@@ -17505,8 +19124,7 @@ jobs:
         python -m storyforge.batch_pipeline finalize --backend "$backend" --index 6'
     - name: Show generated prose before final acceptance
       if: always()
-      run: python -m storyforge.expansion preview --source out --label "Compile ONE final strict judgment round; no rewrite
-        loop"
+      run: python -m storyforge.expansion preview --source out --label "Compile ONE strict final judgment round"
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -17655,7 +19273,7 @@ jobs:
     needs:
     - s07_design
     - s07_edit
-    - s07_final_check
+    - s07_repair
     - s07_memory
     - s07_memory_preflight
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
@@ -17678,7 +19296,7 @@ jobs:
         path: inputs/original
     - uses: actions/download-artifact@v4
       with:
-        name: s07_final_check
+        name: s07_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -17727,7 +19345,7 @@ jobs:
     name: Refresh changed evidence / batch ${{ matrix.batch }}
     needs:
     - s07_design
-    - s07_final_check
+    - s07_repair
     - s07_memory_refresh_plan
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -17745,7 +19363,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s07_final_check
+        name: s07_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -17794,7 +19412,7 @@ jobs:
     name: Allocate final memory checks
     needs:
     - s07_design
-    - s07_final_check
+    - s07_repair
     - s07_final_memory
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -17812,7 +19430,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s07_final_check
+        name: s07_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -17857,7 +19475,7 @@ jobs:
     name: final memory / continuity batch ${{ matrix.batch }}
     needs:
     - s07_design
-    - s07_final_check
+    - s07_repair
     - s07_final_memory
     - s07_memory_final_plan
     if: ${{ 6 < fromJSON(inputs.scene_limit) }}
@@ -17876,7 +19494,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s07_final_check
+        name: s07_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -18104,6 +19722,7 @@ jobs:
     outputs:
       characters: ${{ steps.task.outputs.characters }}
       reviews: ${{ steps.task.outputs.reviews }}
+      final_reviews: ${{ steps.task.outputs.final_reviews }}
   s08_summaries:
     name: Summarize actual section ${{ matrix.batch }}; source-linked only
     needs:
@@ -18720,11 +20339,74 @@ jobs:
       max-parallel: 6
       matrix:
         batch: ${{ fromJSON(needs.s08_repair_plan.outputs.characters) }}
-  s08_final_batches:
-    name: Final judgment round / dimensions ${{ matrix.batch }}
+  s08_final_sections:
+    name: Allocate final passage checks
     needs:
     - s08_design
     - s08_repair
+    if: ${{ 7 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s08_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s08_repair
+        path: inputs/edited
+    - name: Allocate final passage checks
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_plan --backend "$backend" --index 7'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s08_final_sections
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+      reviews: ${{ steps.task.outputs.reviews }}
+      final_reviews: ${{ steps.task.outputs.final_reviews }}
+  s08_final_summaries:
+    name: Summarize repaired section ${{ matrix.batch }}
+    needs:
+    - s08_design
+    - s08_repair
+    - s08_edit
+    - s08_summary_join
+    - s08_final_sections
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -18743,7 +20425,167 @@ jobs:
       with:
         name: s08_repair
         path: inputs/edited
-    - name: Final judgment round / dimensions ${{ matrix.batch }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s08_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s08_summary_join
+        path: inputs/previous-summaries
+    - uses: actions/download-artifact@v4
+      with:
+        name: s08_final_sections
+        path: inputs/plan
+    - name: Summarize repaired section ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_summary --backend "$backend" --index 7 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s08_final_summaries-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s08_final_sections.outputs.characters) }}
+  s08_final_summary_join:
+    name: Join fresh final summaries
+    needs:
+    - s08_design
+    - s08_repair
+    - s08_final_sections
+    - s08_final_summaries
+    if: ${{ 7 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s08_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s08_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s08_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s08_final_summaries-*
+        path: inputs/batches
+    - name: Join fresh final summaries
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_summaries_join --backend "$backend" --index 7'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s08_final_summary_join
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s08_final_batches:
+    name: Final passage/cohesion check ${{ matrix.batch }}
+    needs:
+    - s08_design
+    - s08_repair
+    - s08_edit
+    - s08_final_sections
+    - s08_final_summary_join
+    - s08_final_memory
+    if: ${{ 7 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s08_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s08_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s08_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s08_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        name: s08_final_summary_join
+        path: inputs/summaries
+    - uses: actions/download-artifact@v4
+      with:
+        name: s08_final_memory
+        path: inputs/memory
+    - name: Final passage/cohesion check ${{ matrix.batch }}
       id: task
       env:
         PYTHONUNBUFFERED: 1
@@ -18781,18 +20623,14 @@ jobs:
       fail-fast: false
       max-parallel: 6
       matrix:
-        batch:
-        - 0
-        - 1
-        - 2
-        - 3
-        - 4
-        - 5
+        batch: ${{ fromJSON(needs.s08_final_sections.outputs.final_reviews) }}
   s08_final_check:
-    name: Compile ONE final strict judgment round; no rewrite loop
+    name: Compile ONE strict final judgment round
     needs:
     - s08_design
     - s08_repair
+    - s08_final_sections
+    - s08_final_summary_join
     - s08_story
     - s08_rhetoric
     - s08_memory_preflight
@@ -18817,6 +20655,14 @@ jobs:
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
+        name: s08_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        name: s08_final_summary_join
+        path: inputs/summaries
+    - uses: actions/download-artifact@v4
+      with:
         name: s08_story
         path: inputs/story-review
     - uses: actions/download-artifact@v4
@@ -18831,7 +20677,7 @@ jobs:
       with:
         pattern: s08_final_batches-*
         path: inputs/final-batches
-    - name: Compile ONE final strict judgment round; no rewrite loop
+    - name: Compile ONE strict final judgment round
       id: task
       env:
         PYTHONUNBUFFERED: 1
@@ -18848,8 +20694,7 @@ jobs:
         python -m storyforge.batch_pipeline finalize --backend "$backend" --index 7'
     - name: Show generated prose before final acceptance
       if: always()
-      run: python -m storyforge.expansion preview --source out --label "Compile ONE final strict judgment round; no rewrite
-        loop"
+      run: python -m storyforge.expansion preview --source out --label "Compile ONE strict final judgment round"
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -18998,7 +20843,7 @@ jobs:
     needs:
     - s08_design
     - s08_edit
-    - s08_final_check
+    - s08_repair
     - s08_memory
     - s08_memory_preflight
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
@@ -19021,7 +20866,7 @@ jobs:
         path: inputs/original
     - uses: actions/download-artifact@v4
       with:
-        name: s08_final_check
+        name: s08_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -19070,7 +20915,7 @@ jobs:
     name: Refresh changed evidence / batch ${{ matrix.batch }}
     needs:
     - s08_design
-    - s08_final_check
+    - s08_repair
     - s08_memory_refresh_plan
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -19088,7 +20933,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s08_final_check
+        name: s08_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -19137,7 +20982,7 @@ jobs:
     name: Allocate final memory checks
     needs:
     - s08_design
-    - s08_final_check
+    - s08_repair
     - s08_final_memory
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -19155,7 +21000,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s08_final_check
+        name: s08_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -19200,7 +21045,7 @@ jobs:
     name: final memory / continuity batch ${{ matrix.batch }}
     needs:
     - s08_design
-    - s08_final_check
+    - s08_repair
     - s08_final_memory
     - s08_memory_final_plan
     if: ${{ 7 < fromJSON(inputs.scene_limit) }}
@@ -19219,7 +21064,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s08_final_check
+        name: s08_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -19447,6 +21292,7 @@ jobs:
     outputs:
       characters: ${{ steps.task.outputs.characters }}
       reviews: ${{ steps.task.outputs.reviews }}
+      final_reviews: ${{ steps.task.outputs.final_reviews }}
   s09_summaries:
     name: Summarize actual section ${{ matrix.batch }}; source-linked only
     needs:
@@ -20063,11 +21909,74 @@ jobs:
       max-parallel: 6
       matrix:
         batch: ${{ fromJSON(needs.s09_repair_plan.outputs.characters) }}
-  s09_final_batches:
-    name: Final judgment round / dimensions ${{ matrix.batch }}
+  s09_final_sections:
+    name: Allocate final passage checks
     needs:
     - s09_design
     - s09_repair
+    if: ${{ 8 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s09_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s09_repair
+        path: inputs/edited
+    - name: Allocate final passage checks
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_plan --backend "$backend" --index 8'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s09_final_sections
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    outputs:
+      characters: ${{ steps.task.outputs.characters }}
+      reviews: ${{ steps.task.outputs.reviews }}
+      final_reviews: ${{ steps.task.outputs.final_reviews }}
+  s09_final_summaries:
+    name: Summarize repaired section ${{ matrix.batch }}
+    needs:
+    - s09_design
+    - s09_repair
+    - s09_edit
+    - s09_summary_join
+    - s09_final_sections
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -20086,7 +21995,167 @@ jobs:
       with:
         name: s09_repair
         path: inputs/edited
-    - name: Final judgment round / dimensions ${{ matrix.batch }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s09_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s09_summary_join
+        path: inputs/previous-summaries
+    - uses: actions/download-artifact@v4
+      with:
+        name: s09_final_sections
+        path: inputs/plan
+    - name: Summarize repaired section ${{ matrix.batch }}
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+        STORY_BATCH: ${{ matrix.batch }}
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_summary --backend "$backend" --index 8 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s09_final_summaries-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s09_final_sections.outputs.characters) }}
+  s09_final_summary_join:
+    name: Join fresh final summaries
+    needs:
+    - s09_design
+    - s09_repair
+    - s09_final_sections
+    - s09_final_summaries
+    if: ${{ 8 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: fixture
+    - uses: actions/download-artifact@v4
+      with:
+        name: s09_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s09_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s09_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: s09_final_summaries-*
+        path: inputs/batches
+    - name: Join fresh final summaries
+      id: task
+      env:
+        PYTHONUNBUFFERED: 1
+        STORY_BACKEND: ${{ inputs.backend }}
+        STORY_PROFILE: ${{ inputs.profile }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        GEMINI_DISTINCT_PROJECTS: 'true'
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline section_summaries_join --backend "$backend" --index 8'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s09_final_summary_join
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - name: Job status and artifact link
+      if: always()
+      env:
+        STORY_ARTIFACT_URL: ${{ steps.artifact.outputs.artifact-url }}
+        TASK_RESULT: ${{ job.status }}
+      run: python -m storyforge.tracking report --out out
+    env:
+      STORY_REVIEW_TIMEOUT_SECONDS: '600'
+      STORY_BATCH_TIMEOUT_SECONDS: '600'
+  s09_final_batches:
+    name: Final passage/cohesion check ${{ matrix.batch }}
+    needs:
+    - s09_design
+    - s09_repair
+    - s09_edit
+    - s09_final_sections
+    - s09_final_summary_join
+    - s09_final_memory
+    if: ${{ 8 < fromJSON(inputs.scene_limit) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - name: Start shared job time budget
+      run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+    - uses: actions/download-artifact@v4
+      with:
+        name: s09_design
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: s09_repair
+        path: inputs/edited
+    - uses: actions/download-artifact@v4
+      with:
+        name: s09_edit
+        path: inputs/original
+    - uses: actions/download-artifact@v4
+      with:
+        name: s09_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        name: s09_final_summary_join
+        path: inputs/summaries
+    - uses: actions/download-artifact@v4
+      with:
+        name: s09_final_memory
+        path: inputs/memory
+    - name: Final passage/cohesion check ${{ matrix.batch }}
       id: task
       env:
         PYTHONUNBUFFERED: 1
@@ -20124,18 +22193,14 @@ jobs:
       fail-fast: false
       max-parallel: 6
       matrix:
-        batch:
-        - 0
-        - 1
-        - 2
-        - 3
-        - 4
-        - 5
+        batch: ${{ fromJSON(needs.s09_final_sections.outputs.final_reviews) }}
   s09_final_check:
-    name: Compile ONE final strict judgment round; no rewrite loop
+    name: Compile ONE strict final judgment round
     needs:
     - s09_design
     - s09_repair
+    - s09_final_sections
+    - s09_final_summary_join
     - s09_story
     - s09_rhetoric
     - s09_memory_preflight
@@ -20160,6 +22225,14 @@ jobs:
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
+        name: s09_final_sections
+        path: inputs/plan
+    - uses: actions/download-artifact@v4
+      with:
+        name: s09_final_summary_join
+        path: inputs/summaries
+    - uses: actions/download-artifact@v4
+      with:
         name: s09_story
         path: inputs/story-review
     - uses: actions/download-artifact@v4
@@ -20174,7 +22247,7 @@ jobs:
       with:
         pattern: s09_final_batches-*
         path: inputs/final-batches
-    - name: Compile ONE final strict judgment round; no rewrite loop
+    - name: Compile ONE strict final judgment round
       id: task
       env:
         PYTHONUNBUFFERED: 1
@@ -20191,8 +22264,7 @@ jobs:
         python -m storyforge.batch_pipeline finalize --backend "$backend" --index 8'
     - name: Show generated prose before final acceptance
       if: always()
-      run: python -m storyforge.expansion preview --source out --label "Compile ONE final strict judgment round; no rewrite
-        loop"
+      run: python -m storyforge.expansion preview --source out --label "Compile ONE strict final judgment round"
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -20341,7 +22413,7 @@ jobs:
     needs:
     - s09_design
     - s09_edit
-    - s09_final_check
+    - s09_repair
     - s09_memory
     - s09_memory_preflight
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
@@ -20364,7 +22436,7 @@ jobs:
         path: inputs/original
     - uses: actions/download-artifact@v4
       with:
-        name: s09_final_check
+        name: s09_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -20413,7 +22485,7 @@ jobs:
     name: Refresh changed evidence / batch ${{ matrix.batch }}
     needs:
     - s09_design
-    - s09_final_check
+    - s09_repair
     - s09_memory_refresh_plan
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -20431,7 +22503,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s09_final_check
+        name: s09_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -20480,7 +22552,7 @@ jobs:
     name: Allocate final memory checks
     needs:
     - s09_design
-    - s09_final_check
+    - s09_repair
     - s09_final_memory
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -20498,7 +22570,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s09_final_check
+        name: s09_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:
@@ -20543,7 +22615,7 @@ jobs:
     name: final memory / continuity batch ${{ matrix.batch }}
     needs:
     - s09_design
-    - s09_final_check
+    - s09_repair
     - s09_final_memory
     - s09_memory_final_plan
     if: ${{ 8 < fromJSON(inputs.scene_limit) }}
@@ -20562,7 +22634,7 @@ jobs:
         path: inputs/state
     - uses: actions/download-artifact@v4
       with:
-        name: s09_final_check
+        name: s09_repair
         path: inputs/edited
     - uses: actions/download-artifact@v4
       with:

@@ -6,7 +6,7 @@ The cinematic and Living universe workflows retain visible character, writing, r
 
 Cinematic expansion compiles an explicit author episode layout without initial refinement calls. It supports up to nine sequential scenes, with writing beats generated in parallel within each scene. It is separate from the parallel-complete-scenes experiment.
 
-Living universe supports one manually resumed event or an explicitly bounded four-chapter episode. The bounded request sets `performance.living_bounded=true` and supplies its arc. Each chapter reconciles a saved random proposal against actual prior prose and canon; the authored arc governs random complications. Chapters inherit previous acceptance in order. No schedule is installed.
+Living universe supports one manually resumed event or an explicitly bounded two- or four-chapter episode. The bounded request sets `performance.living_bounded=true` and supplies its arc. Each chapter reconciles a saved random proposal against the full current memory bridge; the authored arc governs random complications. Chapters inherit previous acceptance in order. No schedule is installed.
 
 `iliad-2526-living-practice` requests four approximately 700-word chapters of the Iliad opening reimagined in 2526 CE. Fixed ships, distinct captives, custody, elapsed days and a twelve-to-eight cartridge count are continuity probes.
 
@@ -24,13 +24,25 @@ After editing, unchanged extracted facts are rebound to unchanged source evidenc
 
 Two-paragraph sections receive short model-written summaries carrying source IDs and hashes. Causal story reviewers compare consolidated summaries against the original prompt, author scene contract, current canon and reference applications. Missing summaries cannot approve the review.
 
-Prose reviewers read original passages and their neighbors in smaller sections, with four dimensions per batch. They also assess the corresponding summary's fidelity. Summaries are navigation aids: sentence quality and form are not inferred from a summary. One strict final judgment round checks small dimension groups in parallel against the actual compiled candidate, full current canon, prompt and chapter context. Its six assessments are combined without another model debate. Valid findings survive failures in other review groups.
+Prose reviewers read original passages and their neighbors in smaller sections, with four dimensions per batch. They also assess the corresponding summary's fidelity. Summaries are navigation aids: sentence quality and form are not inferred from a summary. One strict final judgment round checks small dimension groups in parallel against the actual compiled candidate, full current canon, prompt and chapter context. Final passage checks read owned text plus adjacent context; three global cohesion batches compare fresh consolidated summaries, canon, proposed memory changes and exact changed/boundary evidence. Their assessments are combined without another model debate. Unchanged source sections can reuse byte-identical summaries; edited source gets fresh summaries. Source-bound summaries travel with accepted scenes for later story review, while memory remains authoritative. Valid findings survive failures in other review groups.
 
 ## Editor authority
 
 Independent faults can be edited in separate small batches. Connected repetition and continuity findings assign linked passages to the same editor, including distant passages. Editors may replace, shorten, restructure, delete or combine owned passages; unaffected source remains untouched. A merge places the combined text under one owned passage and deletes redundant owned passages.
 
 A separate model compares each nonempty proposed edit against the original, findings, original prompt and canon before it is merged. Unavailable or failed assessments retain original text and report uncertainty. Source hashes, disjoint ownership and preservation of readable source are integrity guarantees, not substitutes for literary judgment.
+
+## Medium and creative freedom
+
+The application selects `book` (novel), `short_story`, `stage_play`, `screenplay`, `audio_drama`, or `comic_script` without inference. An explicit medium overrides automatic prompt detection. The same format contract reaches writers, editors and reviewers: scripts retain speaker cues, performable directions and appropriate scene/panel headings. Only the first writing batch opens the scene. The scene designer supplies concrete per-batch entry/action/exit contracts within its existing call; parallel writers share the complete proposed handoff rather than guessing at neighboring outcomes.
+
+Scene designers, writers and character workers use full current canonical facts, with separate visibility-filtered actor memory. Current universe graphs connect scenes through this memory rather than rereading prior story excerpts as their main bridge. All evidence and superseded history remain in checkpoints and exhaustive partitioned checks. An oversized context or matrix is an explicit capacity failure, never silent memory truncation.
+
+Opt-in `creative_freedom` config controls intensity, new cast, character deaths, resurrection, protected identities, per-scene additions and a maximum cast of 32. Seeded shock proposals include betrayals, catastrophic success, faction splits, conspiracies and apparently conflicting evidence. The director chooses connected complications, plants clues before payoffs, and carries fallout into subsequent scenes. Intensity is not a death quota or a promise of literary quality. Author rules and established consequences govern random draws.
+
+Generated character profiles remain proposals until their scene is accepted, preserve immutable IDs and resume with the universe. Evidence-bound lifecycle records distinguish alive, dead, missing and unknown; a confirmed death cannot silently become alive/unknown/missing. Thread records preserve seeded, escalating, payoff and closed states under stable identities. Models must extract the actual events and knowledge holders; a random draw or planned death cannot enter canon by itself. A protected-character death is not accepted. A permitted POV replacement after death requires `flexible_pov=true`; otherwise the explicit author POV remains binding.
+
+Two short live practice briefs exercise different formats and graphs: `chaos-novel-practice` runs two Living chapters, while `stage-play-practice` runs two cinematic scenes. Both target approximately 1,000 total words. Transport fixtures exercise their full review/repair/memory/acceptance paths; live results remain a separate quality and latency measurement.
 
 ## Models, output and time
 

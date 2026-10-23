@@ -38,7 +38,7 @@ def actor_packet(req, state, card, cid):
     facts=compact(visible(state['memories'],cid,{s['id']:s['participants'] for s in state['accepted']}))
     if req.get('performance',{}).get('canon_index'):
         from .canon import working
-        facts=working(state,cid,query=json.dumps(card))['facts']
+        facts=working(state,cid,query=json.dumps(card),budget=None)['facts']
     return {'character': next(c for c in req['characters'] if c['id'] == cid),
             'situation': {'location': card['location'], 'time': card['time']},
             'known_facts': facts, 'knowledge_policy':'Use only supported known facts; author world rules and future scene outcomes are not character knowledge.'}
@@ -171,11 +171,20 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         if req.get('performance',{}).get('living_bounded'):
             from .living_prepare import chapter_proposal
             living_proposal=chapter_proposal(state,out)
-        designed=executor.call('scene_designer',{'living_proposal':living_proposal,'request_controls':controls(req),'world':req['world_design'],'plot':req['plot_design'],'characters':req['characters'],'proposed_scene':old,'accepted_memory':compact(state['memories'],36),'previous_scene':{'id':state['accepted'][-1]['id'],'prose_excerpt':state['accepted'][-1]['prose'][-4500:]} if state['accepted'] else None,'user_scene_design':[s for s in req['scene_designs'] if s['id']==old['id']],'inspiration':application_packet(req,state['retrieval'],'scene_designer',old['id'])},
-            'Reconcile the proposed scene with what ACTUALLY happened. Do not rediscover an established fact. Preserve IDs, chapter, valid participant IDs, world rules, and user choices. Return one JSON scene card with id, chapter, pov, participants, location, time, goal, obstacle, intended_change, choice, consequence, new_development, and reference_uses (array of {record_id,application}). Explain development through a new tactic, cost, commitment, leverage, or interpretation, not stronger adjectives. No new events become canon here.',
-            tokens=1600,validator=lambda x:validate_scene(x,req,index))
+        from .universe_events import DIRECTOR_POLICY,extended_request,current_life
+        from .canon import bridge
+        import math
+        beat_count=max(1,min(6,math.ceil(req['words_per_scene']/320)))
+        designed=executor.call('scene_designer',{'living_proposal':living_proposal,'request_controls':controls(req),'world':req['world_design'],'plot':req['plot_design'],'characters':req['characters'],'proposed_scene':old,'writing_batch_count':beat_count,'creative_freedom':req.get('creative_freedom',{}),'character_life_state':current_life(state['memories']),'accepted_memory':bridge(state),'previous_scene':{'id':state['accepted'][-1]['id'],'quality_status':state['accepted'][-1].get('quality_status'),'canon_committed':state['accepted'][-1].get('canon_committed',True)} if state['accepted'] else None,'user_scene_design':[s for s in req['scene_designs'] if s['id']==old['id']],'inspiration':application_packet(req,state['retrieval'],'scene_designer',old['id'])},
+            DIRECTOR_POLICY+' Supply writing_beats with exactly writing_batch_count entries. Each has action, entry_state and exit_state: concrete nonoverlapping proposed events, resource/custody/knowledge handoffs and a clear last exit. Allocate a revelation or action to ONE beat only; later beats cannot repeat it. The writers work in parallel against this shared contract. Reconcile the proposed scene with what ACTUALLY happened. Do not rediscover an established fact. Preserve IDs, chapter, valid participant IDs, world rules, and user choices. Return one JSON scene card with id, chapter, pov, participants, location, time, goal, obstacle, intended_change, choice, consequence, new_development, and reference_uses (array of {record_id,application}). Explain development through a new tactic, cost, commitment, leverage, or interpretation, not stronger adjectives. No new events become canon here.',
+            tokens=1600,validator=lambda x:validate_scene(x,req,index,dead={cid for cid,status in current_life(state['memories']).items() if status=='dead'}))
         allowed={r['id'] for r in application_packet(req,state['retrieval'],'scene_designer',old['id'])['references']}
         contracts.require(all(isinstance(r,dict) and r.get('record_id') in allowed for r in designed['reference_uses']),'Scene reference outside applicable source packet')
+        dead={cid for cid,status in current_life(state['memories']).items() if status=='dead'}
+        contracts.require(not dead & set(designed['participants']),'Scene attempts to revive a canonically dead participant')
+        expanded=extended_request(req,designed)
+        req['characters']=expanded['characters']
+        state['request_hash']=hashlib.sha256(json.dumps(req,sort_keys=True).encode()).hexdigest()
         state['plan']['scenes'][index]=designed
         if req.get('execution_policy',{}).get('experimental'):
             from .experimental import memory_hash
@@ -212,7 +221,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         scene_packet['direction'] = (source / 'direction/direction.txt').read_text()
         from .craft import validate_prose
         check=(lambda text:validate_prose(text,req,check_length=backend!='fixture')) if req.get('performance',{}).get('validate_scene_prose') else None
-        result = executor.call('writer', scene_packet, 'Write complete scene prose at target_words. No summary, heading, commentary, or canon delta. Respect POV, knowledge, rules, and voices. Develop attempted action, resistance, a costly choice and its aftermath in specific detail.', tokens=budget,skill=(ROOT/'skills/distinct_writing.md').read_text(),validator=check,output_format='text')
+        result = executor.call('writer', scene_packet, 'Write complete scene prose at target_words. Use the selected medium format; no summary, commentary, or canon delta. Respect POV, knowledge, rules, and voices. Develop attempted action, resistance, a costly choice and its aftermath in specific detail.', tokens=budget,skill=(ROOT/'skills/distinct_writing.md').read_text(),validator=check,output_format='text')
         save(out / 'draft.txt', result)
         return
     if task == 'edit_plan':
@@ -310,7 +319,7 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
                     save(out / 'memory.json', contracts.delta(load(source / 'initial-memory/memory.json'), prose, [c['id'] for c in req['characters']]))
                 return
         if task in {'story_review', 'verify'}:
-            verdict=executor.call('story_quality',{**evidence_payload(prose),'required_checks':STORY_CHECKS,'scene':card,'creative_controls':{k:v for k,v in controls(req).items() if k!='style'},'world':req['world_design'],'plot':req['plot_design'],'characters':[c for c in req['characters'] if c['id'] in card['participants']],'world_rules':req['world_rules'],'initial_facts':req['initial_facts'],'accepted_memories':compact(state['memories'],36),'previous_scene':{'id':state['accepted'][-1]['id'],'prose_excerpt':state['accepted'][-1]['prose'][-4500:]} if state['accepted'] else None,'craft':application_packet(req,state['retrieval'],'story_quality',card['id'])},
+            verdict=executor.call('story_quality',{**evidence_payload(prose),'required_checks':STORY_CHECKS,'scene':card,'creative_controls':{k:v for k,v in controls(req).items() if k!='style'},'world':req['world_design'],'plot':req['plot_design'],'characters':[c for c in req['characters'] if c['id'] in card['participants']],'world_rules':req['world_rules'],'initial_facts':req['initial_facts'],'accepted_memories':compact(state['memories'],36),'previous_scene':{'id':state['accepted'][-1]['id'],'quality_status':state['accepted'][-1].get('quality_status'),'canon_committed':state['accepted'][-1].get('canon_committed',True)} if state['accepted'] else None,'craft':application_packet(req,state['retrieval'],'story_quality',card['id'])},
                 'Assess the complete scene in evidence_passages against accepted knowledge and the user brief. Return the required editorial JSON.',tokens=1600,validator=lambda x:editorial_review(x,prose,STORY_CHECKS),skill=quality_skill)
             words = len(prose.split())
             if backend != 'fixture' and req['length_policy']['scene_words']=='strict' and not req['words_per_scene'] * req['min_words_ratio'] <= words <= req['words_per_scene'] * req['max_words_ratio']:
@@ -395,6 +404,11 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         result = copy.deepcopy(state)
         result['version'] += 1
         result['accepted'].append({'id': card['id'], 'chapter': card['chapter'], 'pov': card['pov'], 'participants': card['participants'], 'prose': prose, 'review': review, 'rhetoric_review':rhetoric_review, 'memory_review': memory_review, 'reference_uses':card.get('reference_uses',[]), 'state_version': result['version'],'quality_status':'needs_review' if unresolved else 'reviewed','memory_extraction':memory_status,'canon_committed':canon_allowed})
+        summary_path=source/'edited/scene-summary.json'
+        if summary_path.exists():
+            summary=load(summary_path)
+            contracts.require(summary['source_sha256']==source_digest(prose),'Stale accepted scene summary')
+            result['accepted'][-1]['source_summary']=summary
         if req.get('performance',{}).get('canon_index'):
             from .canon import append,index as canon_index
             result.setdefault('canon',canon_index(result['memories']))
@@ -404,8 +418,12 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         else:result['memories'].extend(dict(m, source=card['id']) for m in memory['memories'])
         result['complete'] = len(result['accepted']) == len(result['plan']['scenes'])
         result['completion_status']='complete_with_warnings' if result['complete'] and any(s.get('quality_status')=='needs_review' for s in result['accepted']) else ('complete' if result['complete'] else 'in_progress')
+        if canon_allowed:
+            for c in result['request']['characters']:
+                if c.get('cast_status')=='proposed' and c['id'] in card['participants']:c['cast_status']='introduced'
+        result['request_hash']=hashlib.sha256(json.dumps(result['request'],sort_keys=True).encode()).hexdigest()
         save(out / 'snapshot.json', result)
-        export(out, result, req)
+        export(out, result, result['request'])
         event('draft_retained' if not canon_allowed and settle_once(req) else 'canon_committed','Scene checkpoint saved'+(' — provisional draft' if unresolved else ' — reviewed'),scene=card['id'],quality_status='needs_review' if unresolved else 'reviewed',words=len(prose.split()),accepted_scenes=len(result['accepted']),state_version=result['version'])
         output('characters', result['plan']['scenes'][index + 1]['participants'] if not result['complete'] else [])
         return result
