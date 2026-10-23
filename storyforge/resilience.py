@@ -60,8 +60,13 @@ def memory_extract(executor,req,out,prose,packet,instruction,allow_public=True):
     if req.get('performance',{}).get('canon_index'):
         prior=packet.get('prior_canon',[])
         instruction+=' For a changed resource, relationship or obligation, copy the exact fact_key and kind of the same prior fact when using its ID in supersedes. Prior facts without fact_key are immutable and cannot appear in supersedes. New events, consequences, and discoveries use a new fact_key and supersedes=[]; they do not replace the prior character or world premise. Never infer an update or erase history. Include unresolved callbacks and obligations, not only recent motion.'
+    from .adaptive import enabled as adaptive
+    schema=memory_schema(packet,ids,allow_public=allow_public,prior_memories=prior)
+    if adaptive(req):
+        instruction=instruction.replace('Extract at most 6 consequential updates.','Extract all material supported changes in your assigned source; do not impose a six-fact summary quota.')
+        schema['properties']['memories']['maxItems']=24
     try:
-        result=executor.call('memory',packet,instruction,tokens=1400 if prior is not None else 1000,validator=validate,response_schema=memory_schema(packet,ids,allow_public=allow_public,prior_memories=prior))
+        result=executor.call('memory',packet,instruction,tokens=2300 if adaptive(req) else 1400 if prior is not None else 1000,validator=validate,response_schema=schema)
         if result.get('quarantined'):warning(out,'memory_quarantine','Unsupported memory entries quarantined; source prose retained.')
         return result
     except Exception as exc:

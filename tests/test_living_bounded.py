@@ -8,7 +8,7 @@ from storyforge.living_prepare import prepare
 from storyforge import batch_pipeline as b,memory_batches as m,section_reviews as sr
 
 class BoundedLivingTests(unittest.TestCase):
-    def exercise(self,request_file,chapters,per_chapter=1,living=True):
+    def exercise(self,request_file,chapters,per_chapter=1,living=True,provisional_first=False):
         with tempfile.TemporaryDirectory() as d:
             p=Path(d);stage('prepare',p/'none',p/'base',request_file=request_file,profile='fast',backend='fixture')
             with patch('storyforge.inference.Executor.call',side_effect=AssertionError('No initial refinement inference')):
@@ -34,11 +34,11 @@ class BoundedLivingTests(unittest.TestCase):
                 sections=sr.plan(state,root/'review',root/'review/plan')
                 for section in sections['sections']:sr.summarize(state,card,root/'review',root/'review/batches'/section['id'],'fixture',section['id'])
                 sr.join_summaries(state,root/'review',root/'review/summaries')
-                for group in range(3):b.review_batch(state,card,root/'review',root/'story/batches'/str(group),'fixture','story',group)
+                for group in range(1 if sections.get('adaptive') else 3):b.review_batch(state,card,root/'review',root/'story/batches'/str(group),'fixture','story',group)
                 save(root/'story/edited/prose.txt',prose);b.join_reviews(state,root/'story',root/'findings/story-review','story')
                 save(root/'rhetoric/edited/prose.txt',prose);shutil.copytree(root/'review/plan',root/'rhetoric/plan');shutil.copytree(root/'review/summaries',root/'rhetoric/summaries')
                 for section in sections['sections']:
-                    for group in range(2):
+                    for group in range(1 if sections.get('adaptive') else 2):
                         bid=section['id']+'-'+str(group);sr.review_section(state,card,root/'rhetoric',root/'rhetoric/batches'/bid,'fixture',bid)
                 sr.join_reviews(state,root/'rhetoric',root/'findings/rhetoric-review')
                 save(root/'findings/edited/prose.txt',prose)
@@ -71,15 +71,28 @@ class BoundedLivingTests(unittest.TestCase):
                 self.assertTrue(memory_round(root/'fm',root/'memory','final',root/'accept/memory-review')['pass'])
                 save(root/'accept/state/snapshot.json',state);shutil.copytree(root/'final',root/'accept/edited');shutil.copytree(root/'memory',root/'accept/memory')
                 save(root/'accept/story-review/review.json',final['story']);save(root/'accept/rhetoric-review/review.json',final['rhetoric'])
+                if provisional_first and i==0:
+                    decision=load(root/'accept/edited/repair.json')
+                    failed={'pass':False,'checks':[],'issues':[],'unverified':True,'error':'Simulated literary provider outage'}
+                    decision['editorial_adjudication'].update(story=failed,rhetoric=failed,verdict=failed,unverified=True)
+                    save(root/'accept/edited/repair.json',decision)
+                    save(root/'accept/story-review/review.json',failed);save(root/'accept/rhetoric-review/review.json',failed)
                 stage('accept',root/'accept',root/'accepted',index=i,backend='fixture')
                 state=load(root/'accepted/snapshot.json')
-                self.assertTrue(state['accepted'][i]['canon_committed']);self.assertEqual(len(state['accepted']),i+1)
-            self.assertTrue(state['complete']);self.assertEqual(state['completion_status'],'complete')
+                if provisional_first:
+                    self.assertFalse(state['accepted'][i]['canon_committed']);self.assertTrue(state['draft_memories'])
+                    self.assertEqual(state['draft_continuity_receipts'][-1]['scene'],card['id'])
+                    self.assertTrue(all(m.get('source')=='user_input' for m in state['memories']))
+                else:self.assertTrue(state['accepted'][i]['canon_committed'])
+                self.assertEqual(len(state['accepted']),i+1)
+            self.assertTrue(state['complete']);self.assertEqual(state['completion_status'],'complete_with_warnings' if provisional_first else 'complete')
             self.assertTrue((root/'accepted/story.txt').exists())
     def test_four_chapter_fixture_carries_canon_and_random_state_through_acceptance(self):
         self.exercise('iliad-2526-living-practice',4)
     def test_novel_two_chapter_hybrid_memory_handoff(self):
         self.exercise('chaos-novel-practice',2)
+    def test_verified_draft_memory_survives_a_literary_outage_into_next_scene(self):
+        self.exercise('chaos-novel-practice',2,provisional_first=True)
     def test_stage_play_two_scene_hybrid_memory_handoff(self):
         self.exercise('stage-play-practice',1,2,living=False)
     def test_living_workflow_supports_four_chapters_with_sequential_canon_handoff(self):

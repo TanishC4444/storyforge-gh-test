@@ -44,6 +44,10 @@ class GoogleHosted:
 
     def _request(self,path,body,timeout=300,credential=None):
         if not self.key:raise HostedError('Google API key unavailable')
+        budget=getattr(self,'request_budget',None)
+        if budget is not None:
+            if budget['remaining']<=0:raise HostedError('Provider request attempt budget exhausted; no further HTTP calls')
+            budget['remaining']-=1
         req=urllib.request.Request(BASE+path,data=json.dumps(body).encode(),headers={'x-goog-api-key':credential or self.key,'Content-Type':'application/json'})
         from .runtime import worker_timeout_seconds
         timeout=min(timeout,worker_timeout_seconds())
@@ -154,8 +158,9 @@ class GoogleHosted:
         batch=os.getenv('STORY_BATCH','')
         phase=os.getenv('GITHUB_JOB','')+str(role)
         start=((int(hashlib.sha256(phase.encode()).hexdigest()[:8],16)+int(batch)) if batch.isdigit() else int(hashlib.sha256(seed.encode()).hexdigest()[:8],16))%len(self.project_children)
+        start=(start+policy.get('project_offset',0))%len(self.project_children)
         last=None;started=time.monotonic();budget=min(360 if role=='chapter_quality' else 240,policy.get('route_budget',360))
-        for offset in range(len(self.project_children)):
+        for offset in range(min(len(self.project_children),policy.get('max_project_attempts',len(self.project_children)))):
             slot=(start+offset)%len(self.project_children);child=self.project_children[slot]
             from .runtime import worker_timeout_seconds
             remaining=min(budget-(time.monotonic()-started),worker_timeout_seconds())
@@ -183,7 +188,7 @@ class GoogleHosted:
         contents=[{'role':'user','parts':[{'text':prompt}]}]
         body={'systemInstruction':{'parts':[{'text':system}]},'contents':contents}
         size=len((system+prompt).encode())
-        if policy and policy.get('estimate_small_calls') and size<=4000:
+        if policy and policy.get('estimate_small_calls') and size<=policy.get('estimate_max_bytes',4000):
             # One token per UTF-8 byte is conservative; larger calls still count.
             count=size
         else:
@@ -206,7 +211,7 @@ class GoogleHosted:
             config['responseMimeType']='application/json'
             if response_schema is not None:config['responseJsonSchema']=response_schema
         started=time.monotonic()
-        attempts=1 if policy and policy.get('literary_quality') else 2
+        attempts=1 if policy and (policy.get('literary_quality') or policy.get('request_attempt_limit')) else 2
         compatibility_retry=False
         for attempt in range(attempts):
             from .usage import record

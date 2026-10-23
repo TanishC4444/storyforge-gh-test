@@ -57,6 +57,7 @@ class Executor:
 
     @scoped_call_budget
     def call(self, role, packet, instruction, *, tokens=1200, validator=None, skill='', response_schema=None, output_format='json', allow_cpu_fallback=True):
+        if role in self.req.get('execution_policy',{}).get('hosted_required_roles',[]):allow_cpu_fallback=False
         from .worker_policy import enabled as experimental, policy, permit
         stage_policy=policy(self.req,role,tokens) if experimental(self.req) else None
         if stage_policy:
@@ -84,6 +85,11 @@ class Executor:
         packet,skill,review_instructions=prepare_review(self.req,role,packet,skill,ROOT)
         from .writing_policy import instructions as writing_instructions
         prose_instructions=writing_instructions(self.req,role)
+        attempt_limit=self.req.get('execution_policy',{}).get('max_hosted_requests')
+        if self.hosted and attempt_limit is not None:
+            if type(attempt_limit) is not int or not 1<=attempt_limit<=6:raise ContractError('Invalid hosted request cap')
+            budget={'remaining':attempt_limit};self.hosted.request_budget=budget
+            for child in self.hosted.project_children:child.request_budget=budget
         last_error = ''
         semantic_retry=False
         repair_output = None
@@ -124,7 +130,7 @@ class Executor:
                 if cached is None:
                     started = time.monotonic()
                     preferred=self.req.get('api_roles',{}).get(role) if self.hosted else None
-                    print(f'{role}: '+(('Google '+preferred+'; CPU fallback '+model) if preferred else model)+f' / fresh context ({self.backend})',flush=True)
+                    print(f'{role}: '+(('Google '+preferred+('; CPU fallback '+model if allow_cpu_fallback else '; hosted quality required')) if preferred else model)+f' / fresh context ({self.backend})',flush=True)
                     if self.backend == 'fixture':
                         from .fixture import respond
                         output = respond(role, packet, self.req)
@@ -144,13 +150,17 @@ class Executor:
                             if self.req.get('execution_policy',{}).get('gemini_batches'):
                                 routes={'flash':['flash','flash36'],'flash36':['flash36','flash'],'lite':['lite','flash36']}.get(kind,[kind])
                                 if role=='memory_quality' and self.req.get('performance',{}).get('memory_pair_batches'):routes.append('lite')
-                            for route in dict.fromkeys(routes):
+                            configured=self.req.get('execution_policy',{}).get('hosted_routes',{}).get(role)
+                            if configured is not None:routes=configured
+                            for route_index,route in enumerate(dict.fromkeys(routes)):
                                 if route=='flash' and kind!='flash' and not (stage_policy and stage_policy.get('quality_routing')) and not self.hosted.can_rescue():continue
                                 try:
                                     with permit(self.req), heartbeat('Hosted '+route+' / '+role+'; shared quota pacing applies'):
                                         route_policy=stage_policy
                                         if self.req.get('execution_policy',{}).get('hosted_route_seconds'):
                                             route_policy={**(stage_policy or {'timeout':120 if role=='chapter_quality' else 90,'thinking':'low','quality_routing':True,'literary_quality':True}),'route_budget':self.req['execution_policy']['hosted_route_seconds']}
+                                        if attempt_limit is not None:
+                                            route_policy={**(route_policy or {'timeout':40,'thinking':'low','quality_routing':True,'literary_quality':True}),'estimate_small_calls':True,'estimate_max_bytes':48000,'request_attempt_limit':attempt_limit,'max_project_attempts':2 if len(set(routes))==1 else 1,'project_offset':route_index}
                                         hosted_result=self.hosted.complete(route,system,prompt,tokens,structured=bool(validator) and output_format=='json',response_schema=response_schema,role=role,policy=route_policy)
                                     break
                                 except Exception as exc:
@@ -161,7 +171,7 @@ class Executor:
                             output,diagnostic=hosted_result
                         else:
                             if not allow_cpu_fallback:
-                                raise ContractError('Hosted editing unavailable; CPU fallback disabled for this optional edit')
+                                raise ContractError('Hosted '+role+' unavailable; quality-preserving policy disabled CPU fallback. Keep the source and retry when provider capacity is available.')
                             from .local_worker import execute
                             with heartbeat('Existing CPU fallback / '+role):
                                 output, diagnostic = execute(model, system, prompt, tokens, n_ctx, role, response_schema=response_schema)

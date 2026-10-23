@@ -330,20 +330,72 @@
     "editorial_disagreement": "one_strict_check",
     "gemini_batches": true,
     "total_call_seconds": {
-      "humanizer": 300,
-      "repair": 300,
-      "story_quality": 300,
-      "rhetoric_quality": 300,
-      "memory": 300,
-      "memory_quality": 300,
-      "chapter_quality": 420,
-      "director": 180,
-      "scene_designer": 180,
-      "character": 180,
-      "writer": 600,
-      "writer_beat": 600
+      "humanizer": 180,
+      "repair": 180,
+      "story_quality": 120,
+      "rhetoric_quality": 120,
+      "memory": 180,
+      "memory_quality": 120,
+      "chapter_quality": 120,
+      "director": 120,
+      "scene_designer": 120,
+      "character": 120,
+      "writer": 180,
+      "writer_beat": 180
     },
-    "hosted_route_seconds": 60
+    "hosted_route_seconds": 40,
+    "hosted_required_roles": [
+      "writer",
+      "writer_beat",
+      "repair",
+      "humanizer",
+      "story_quality",
+      "rhetoric_quality",
+      "chapter_quality"
+    ],
+    "hosted_routes": {
+      "story_quality": [
+        "flash36"
+      ],
+      "rhetoric_quality": [
+        "flash36"
+      ],
+      "chapter_quality": [
+        "flash36"
+      ],
+      "writer": [
+        "flash",
+        "flash36"
+      ],
+      "writer_beat": [
+        "flash",
+        "flash36"
+      ],
+      "repair": [
+        "flash",
+        "flash36"
+      ],
+      "humanizer": [
+        "flash",
+        "flash36"
+      ],
+      "memory": [
+        "lite"
+      ],
+      "memory_quality": [
+        "lite"
+      ],
+      "director": [
+        "lite"
+      ],
+      "scene_designer": [
+        "lite"
+      ],
+      "character": [
+        "lite"
+      ]
+    },
+    "max_hosted_requests": 2
   },
   "performance": {
     "compact_packets": true,
@@ -365,7 +417,9 @@
     "readable_editorial": true,
     "summary_reviews": true,
     "memory_pair_batches": true,
-    "empowered_editors": true
+    "empowered_editors": true,
+    "adaptive_batches": true,
+    "verified_draft_continuity": true
   },
   "api_roles": {
     "writer_beat": "flash",
@@ -375,7 +429,7 @@
     "story_quality": "flash36",
     "rhetoric_quality": "flash36",
     "memory": "lite",
-    "memory_quality": "flash36",
+    "memory_quality": "lite",
     "chapter_quality": "flash36",
     "scene_designer": "lite",
     "director": "lite",

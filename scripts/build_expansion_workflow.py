@@ -21,7 +21,7 @@ def build_expansion(total=9,per_chapter=3):
     # Quote the YAML on key while preserving real numeric/boolean workflow values.
     x=yaml.safe_load(build(total=total,per_chapter=per_chapter,troy=True,full_api=True,resident=False).replace('\non:\n',"\n'on':\n"))
     x['name']='Cinematic universe expansion / classic runners'
-    x['concurrency']={'group':'classic-universe-expansion','cancel-in-progress':False}
+    x['concurrency']={'group':'story-universe-provider-budget','cancel-in-progress':False}
     inputs=x['on']['workflow_dispatch']['inputs'];inputs['request_file']={'type':'string','default':'classic-universe-practice','description':'Author universe bible and explicit next-scene layout in examples/'}
     inputs['profile']['default']='fast';inputs['scene_limit']={'type':'choice','options':['1'] if total==1 else ['1','2','3','4','9'],'default':'1'}
     inputs.pop('refinement_seed_run',None)
@@ -82,7 +82,7 @@ def build_living():
     # De-alias before customizing; changing quickstart must not alter other steps.
     x=json.loads(json.dumps(yaml.safe_load(build_expansion(total=4,per_chapter=1))))
     x['name']='Living universe / Gemini-first / batched runner graph'
-    x['concurrency']['group']='living-universe'
+    x['concurrency']['group']='story-universe-provider-budget'
     inputs=x['on']['workflow_dispatch']['inputs'];inputs['request_file']['default']='local-universe-massive';inputs['profile']['default']='fast'
     inputs['scene_limit']={'type':'choice','options':['1','2','4'],'default':'1','description':'One growing-world event or a two/four-chapter bounded episode'}
     inputs['resume_run']=inputs.pop('canon_run');inputs['resume_run']['description']='Prior accepted universe-canon run; empty starts a world'

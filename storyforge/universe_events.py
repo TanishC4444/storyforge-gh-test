@@ -46,7 +46,8 @@ def current_life(memories):
 
 
 def validate_lifecycle(state,updates):
-    f=freedom(state.get('request',{}));life=current_life(state['memories'])
+    from .continuation import history
+    f=freedom(state.get('request',{}));life=current_life(history(state))
     for m in updates:
         if not m.get('life_state'):continue
         subject=m['subject'];previous=life.get(subject)

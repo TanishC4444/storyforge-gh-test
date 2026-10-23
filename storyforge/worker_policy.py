@@ -61,6 +61,11 @@ def validate(req):
     from .contracts import require
     knobs=req['execution_policy']
     require(knobs.get('editorial_disagreement') in {None,'one_strict_check'},'Invalid editorial disagreement policy')
+    hosted=knobs.get('hosted_routes',{})
+    require(isinstance(hosted,dict) and all(k in STAGES and isinstance(v,list) and 1<=len(v)<=2 and all(t in {'flash','flash36','lite','gemma'} for t in v) for k,v in hosted.items()),'Invalid hosted routing policy')
+    required=knobs.get('hosted_required_roles',[])
+    require(isinstance(required,list) and all(r in STAGES for r in required),'Invalid hosted quality floor')
+    require(type(knobs.get('max_hosted_requests',2)) is int and 1<=knobs.get('max_hosted_requests',2)<=6,'Invalid provider request cap')
     models=knobs.get('cpu_models',{})
     require(isinstance(models,dict) and all(k in STAGES and v in {'qwen3b','qwen7b','gemma-4-12b','glitter-12b'} for k,v in models.items()),'Invalid local role model map')
     require(type(knobs.get('literary_quality',False)) is bool,'Invalid literary quality policy')

@@ -44,7 +44,7 @@ permissions:
   contents: read
   actions: read
 concurrency:
-  group: living-universe
+  group: story-universe-provider-budget
   cancel-in-progress: false
 jobs:
   prepare:
@@ -448,7 +448,7 @@ jobs:
     - *id007
     - *id006
     - *id008
-    - &id046
+    - &id047
       uses: actions/download-artifact@v4
       with:
         name: s01_memory_extract_plan
@@ -610,7 +610,7 @@ jobs:
       with:
         name: s01_repair
         path: inputs/edited
-    - &id047
+    - &id048
       uses: actions/download-artifact@v4
       with:
         name: s01_memory_refresh_plan
@@ -645,6 +645,7 @@ jobs:
     - s01_final_memory
     - s01_memory_final_plan
     - s01_memory_final_batches
+    - s01_memory_preflight
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -659,7 +660,12 @@ jobs:
       with:
         name: s01_final_memory
         path: inputs/memory
-    - &id048
+    - &id044
+      uses: actions/download-artifact@v4
+      with:
+        name: s01_memory_preflight
+        path: inputs/preflight-memory
+    - &id049
       uses: actions/download-artifact@v4
       with:
         name: s01_memory_final_plan
@@ -870,7 +876,7 @@ jobs:
     - *id002
     - *id007
     - *id014
-    - &id049
+    - &id050
       uses: actions/download-artifact@v4
       with:
         name: s02_draft_plan
@@ -991,7 +997,7 @@ jobs:
     - *id007
     - *id014
     - *id017
-    - &id050
+    - &id051
       uses: actions/download-artifact@v4
       with:
         name: s02_section_plan
@@ -1034,7 +1040,7 @@ jobs:
     - *id007
     - *id014
     - *id017
-    - &id063
+    - &id064
       uses: actions/download-artifact@v4
       with:
         name: s02_memory_extract_plan
@@ -1193,7 +1199,7 @@ jobs:
       with:
         name: s02_repair
         path: inputs/edited
-    - &id064
+    - &id065
       uses: actions/download-artifact@v4
       with:
         name: s02_memory_refresh_plan
@@ -1228,6 +1234,7 @@ jobs:
     - s02_final_memory
     - s02_memory_final_plan
     - s02_memory_final_batches
+    - s02_memory_preflight
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -1242,7 +1249,12 @@ jobs:
       with:
         name: s02_final_memory
         path: inputs/memory
-    - &id065
+    - &id060
+      uses: actions/download-artifact@v4
+      with:
+        name: s02_memory_preflight
+        path: inputs/preflight-memory
+    - &id066
       uses: actions/download-artifact@v4
       with:
         name: s02_memory_final_plan
@@ -1453,7 +1465,7 @@ jobs:
     - *id002
     - *id007
     - *id022
-    - &id066
+    - &id067
       uses: actions/download-artifact@v4
       with:
         name: s03_draft_plan
@@ -1574,7 +1586,7 @@ jobs:
     - *id007
     - *id022
     - *id023
-    - &id067
+    - &id068
       uses: actions/download-artifact@v4
       with:
         name: s03_section_plan
@@ -1617,7 +1629,7 @@ jobs:
     - *id007
     - *id022
     - *id023
-    - &id078
+    - &id080
       uses: actions/download-artifact@v4
       with:
         name: s03_memory_extract_plan
@@ -1660,7 +1672,7 @@ jobs:
     - *id007
     - *id022
     - *id023
-    - &id071
+    - &id072
       uses: actions/download-artifact@v4
       with:
         name: s03_repair_plan
@@ -1776,7 +1788,7 @@ jobs:
       with:
         name: s03_repair
         path: inputs/edited
-    - &id079
+    - &id081
       uses: actions/download-artifact@v4
       with:
         name: s03_memory_refresh_plan
@@ -1811,6 +1823,7 @@ jobs:
     - s03_final_memory
     - s03_memory_final_plan
     - s03_memory_final_batches
+    - s03_memory_preflight
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -1825,7 +1838,12 @@ jobs:
       with:
         name: s03_final_memory
         path: inputs/memory
-    - &id080
+    - &id077
+      uses: actions/download-artifact@v4
+      with:
+        name: s03_memory_preflight
+        path: inputs/preflight-memory
+    - &id082
       uses: actions/download-artifact@v4
       with:
         name: s03_memory_final_plan
@@ -2036,7 +2054,7 @@ jobs:
     - *id002
     - *id007
     - *id027
-    - &id081
+    - &id083
       uses: actions/download-artifact@v4
       with:
         name: s04_draft_plan
@@ -2157,7 +2175,7 @@ jobs:
     - *id007
     - *id027
     - *id028
-    - &id082
+    - &id084
       uses: actions/download-artifact@v4
       with:
         name: s04_section_plan
@@ -2200,7 +2218,7 @@ jobs:
     - *id007
     - *id027
     - *id028
-    - &id093
+    - &id096
       uses: actions/download-artifact@v4
       with:
         name: s04_memory_extract_plan
@@ -2243,7 +2261,7 @@ jobs:
     - *id007
     - *id027
     - *id028
-    - &id086
+    - &id088
       uses: actions/download-artifact@v4
       with:
         name: s04_repair_plan
@@ -2359,7 +2377,7 @@ jobs:
       with:
         name: s04_repair
         path: inputs/edited
-    - &id094
+    - &id097
       uses: actions/download-artifact@v4
       with:
         name: s04_memory_refresh_plan
@@ -2394,6 +2412,7 @@ jobs:
     - s04_final_memory
     - s04_memory_final_plan
     - s04_memory_final_batches
+    - s04_memory_preflight
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -2408,7 +2427,12 @@ jobs:
       with:
         name: s04_final_memory
         path: inputs/memory
-    - &id095
+    - &id093
+      uses: actions/download-artifact@v4
+      with:
+        name: s04_memory_preflight
+        path: inputs/preflight-memory
+    - &id098
       uses: actions/download-artifact@v4
       with:
         name: s04_memory_final_plan
@@ -2770,7 +2794,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s01_draft_plan.outputs.characters) }}
   s01_section_plan:
@@ -2809,6 +2833,7 @@ jobs:
       characters: ${{ steps.task.outputs.characters }}
       reviews: ${{ steps.task.outputs.reviews }}
       final_reviews: ${{ steps.task.outputs.final_reviews }}
+      story_reviews: ${{ steps.task.outputs.story_reviews }}
   s01_summaries:
     name: Summarize actual section ${{ matrix.batch }}; source-linked only
     needs:
@@ -2845,7 +2870,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s01_section_plan.outputs.characters) }}
   s01_summary_join:
@@ -2892,6 +2917,7 @@ jobs:
     needs:
     - s01_design
     - s01_edit
+    - s01_section_plan
     - s01_summary_join
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -2925,14 +2951,11 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    strategy: &id051
+    strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
-        batch:
-        - 0
-        - 1
-        - 2
+        batch: ${{ fromJSON(needs.s01_section_plan.outputs.story_reviews) }}
   s01_rhetoric_batches:
     name: Exact prose section review ${{ matrix.batch }}
     needs:
@@ -2971,7 +2994,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s01_section_plan.outputs.reviews) }}
   s01_memory_preflight_plan:
@@ -3055,7 +3078,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s01_memory_preflight_plan.outputs.characters) }}
   s01_memory_preflight:
@@ -3116,17 +3139,17 @@ jobs:
     - *id007
     - *id006
     - *id008
-    - &id043
+    - &id042
       uses: actions/download-artifact@v4
       with:
         name: s01_story
         path: inputs/story-review
-    - &id044
+    - &id043
       uses: actions/download-artifact@v4
       with:
         name: s01_rhetoric
         path: inputs/rhetoric-review
-    - &id045
+    - &id046
       uses: actions/download-artifact@v4
       with:
         name: s01_memory_preflight
@@ -3184,7 +3207,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s01_repair_plan.outputs.characters) }}
   s01_final_sections:
@@ -3271,7 +3294,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s01_final_sections.outputs.characters) }}
   s01_final_summary_join:
@@ -3319,6 +3342,9 @@ jobs:
     - s01_design
     - s01_repair
     - s01_edit
+    - s01_story
+    - s01_rhetoric
+    - s01_memory_preflight
     - s01_final_sections
     - s01_final_summary_join
     - s01_final_memory
@@ -3332,8 +3358,11 @@ jobs:
     - *id006
     - *id010
     - *id041
+    - *id042
+    - *id043
+    - *id044
     - *id040
-    - &id042
+    - &id045
       uses: actions/download-artifact@v4
       with:
         name: s01_final_summary_join
@@ -3359,7 +3388,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s01_final_sections.outputs.final_reviews) }}
   s01_final_check:
@@ -3383,10 +3412,10 @@ jobs:
     - *id006
     - *id010
     - *id040
+    - *id045
     - *id042
     - *id043
-    - *id044
-    - *id045
+    - *id046
     - uses: actions/download-artifact@v4
       with:
         pattern: s01_final_batches-*
@@ -3399,7 +3428,7 @@ jobs:
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
         python -m storyforge.batch_pipeline finalize --backend "$backend" --index 0'
-    - &id062
+    - &id063
       name: Show generated prose before final acceptance
       if: always()
       run: python -m storyforge.expansion preview --source out --label "Compile ONE strict final judgment round"
@@ -3461,7 +3490,7 @@ jobs:
     - *id004
     - *id006
     - *id008
-    - *id046
+    - *id047
     - name: Extract all source-supported facts / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -3482,7 +3511,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s01_memory_extract_plan.outputs.characters) }}
   s01_memory_refresh_plan:
@@ -3507,10 +3536,7 @@ jobs:
       with:
         name: s01_memory
         path: inputs/initial-memory
-    - uses: actions/download-artifact@v4
-      with:
-        name: s01_memory_preflight
-        path: inputs/preflight-memory
+    - *id044
     - name: Retain unchanged facts; allocate changed evidence batches
       id: task
       env: *id005
@@ -3545,7 +3571,7 @@ jobs:
     - *id004
     - *id006
     - *id010
-    - *id047
+    - *id048
     - name: Refresh changed evidence / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -3566,7 +3592,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s01_memory_refresh_plan.outputs.characters) }}
   s01_memory_final_plan:
@@ -3575,6 +3601,7 @@ jobs:
     - s01_design
     - s01_repair
     - s01_final_memory
+    - s01_memory_preflight
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -3585,6 +3612,7 @@ jobs:
     - *id006
     - *id010
     - *id012
+    - *id044
     - name: Allocate final memory checks
       id: task
       env: *id005
@@ -3611,6 +3639,7 @@ jobs:
     - s01_repair
     - s01_final_memory
     - s01_memory_final_plan
+    - s01_memory_preflight
     if: ${{ 0 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -3621,7 +3650,8 @@ jobs:
     - *id006
     - *id010
     - *id012
-    - *id048
+    - *id044
+    - *id049
     - name: final memory / continuity batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -3642,7 +3672,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s01_memory_final_plan.outputs.characters) }}
   s02_draft_plan:
@@ -3694,7 +3724,7 @@ jobs:
     - *id002
     - *id004
     - *id014
-    - *id049
+    - *id050
     - name: Write scene batch ${{ matrix.batch }} with Gemini-first routing
       id: task
       env: *id034
@@ -3715,7 +3745,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s02_draft_plan.outputs.characters) }}
   s02_section_plan:
@@ -3766,7 +3796,7 @@ jobs:
     - *id004
     - *id014
     - *id017
-    - *id050
+    - *id051
     - name: Summarize actual section ${{ matrix.batch }}; source-linked only
       id: task
       env: *id034
@@ -3787,7 +3817,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s02_section_plan.outputs.characters) }}
   s02_summary_join:
@@ -3806,7 +3836,7 @@ jobs:
     - *id007
     - *id014
     - *id017
-    - *id050
+    - *id051
     - uses: actions/download-artifact@v4
       with:
         pattern: s02_summaries-*
@@ -3834,6 +3864,7 @@ jobs:
     needs:
     - s02_design
     - s02_edit
+    - s02_section_plan
     - s02_summary_join
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -3867,7 +3898,11 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    strategy: *id051
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        batch: ${{ fromJSON(needs.s02_section_plan.outputs.story_reviews) }}
   s02_rhetoric_batches:
     name: Exact prose section review ${{ matrix.batch }}
     needs:
@@ -3884,7 +3919,7 @@ jobs:
     - *id004
     - *id014
     - *id017
-    - *id050
+    - *id051
     - *id052
     - name: Exact prose section review ${{ matrix.batch }}
       id: task
@@ -3906,7 +3941,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s02_section_plan.outputs.reviews) }}
   s02_memory_preflight_plan:
@@ -3990,7 +4025,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s02_memory_preflight_plan.outputs.characters) }}
   s02_memory_preflight:
@@ -4051,17 +4086,17 @@ jobs:
     - *id007
     - *id014
     - *id017
-    - &id059
+    - &id058
       uses: actions/download-artifact@v4
       with:
         name: s02_story
         path: inputs/story-review
-    - &id060
+    - &id059
       uses: actions/download-artifact@v4
       with:
         name: s02_rhetoric
         path: inputs/rhetoric-review
-    - &id061
+    - &id062
       uses: actions/download-artifact@v4
       with:
         name: s02_memory_preflight
@@ -4119,7 +4154,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s02_repair_plan.outputs.characters) }}
   s02_final_sections:
@@ -4206,7 +4241,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s02_final_sections.outputs.characters) }}
   s02_final_summary_join:
@@ -4254,6 +4289,9 @@ jobs:
     - s02_design
     - s02_repair
     - s02_edit
+    - s02_story
+    - s02_rhetoric
+    - s02_memory_preflight
     - s02_final_sections
     - s02_final_summary_join
     - s02_final_memory
@@ -4267,8 +4305,11 @@ jobs:
     - *id014
     - *id020
     - *id057
+    - *id058
+    - *id059
+    - *id060
     - *id056
-    - &id058
+    - &id061
       uses: actions/download-artifact@v4
       with:
         name: s02_final_summary_join
@@ -4294,7 +4335,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s02_final_sections.outputs.final_reviews) }}
   s02_final_check:
@@ -4318,10 +4359,10 @@ jobs:
     - *id014
     - *id020
     - *id056
+    - *id061
     - *id058
     - *id059
-    - *id060
-    - *id061
+    - *id062
     - uses: actions/download-artifact@v4
       with:
         pattern: s02_final_batches-*
@@ -4334,7 +4375,7 @@ jobs:
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
         python -m storyforge.batch_pipeline finalize --backend "$backend" --index 1'
-    - *id062
+    - *id063
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -4393,7 +4434,7 @@ jobs:
     - *id004
     - *id014
     - *id017
-    - *id063
+    - *id064
     - name: Extract all source-supported facts / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -4414,7 +4455,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s02_memory_extract_plan.outputs.characters) }}
   s02_memory_refresh_plan:
@@ -4439,10 +4480,7 @@ jobs:
       with:
         name: s02_memory
         path: inputs/initial-memory
-    - uses: actions/download-artifact@v4
-      with:
-        name: s02_memory_preflight
-        path: inputs/preflight-memory
+    - *id060
     - name: Retain unchanged facts; allocate changed evidence batches
       id: task
       env: *id005
@@ -4477,7 +4515,7 @@ jobs:
     - *id004
     - *id014
     - *id020
-    - *id064
+    - *id065
     - name: Refresh changed evidence / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -4498,7 +4536,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s02_memory_refresh_plan.outputs.characters) }}
   s02_memory_final_plan:
@@ -4507,6 +4545,7 @@ jobs:
     - s02_design
     - s02_repair
     - s02_final_memory
+    - s02_memory_preflight
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -4517,6 +4556,7 @@ jobs:
     - *id014
     - *id020
     - *id021
+    - *id060
     - name: Allocate final memory checks
       id: task
       env: *id005
@@ -4543,6 +4583,7 @@ jobs:
     - s02_repair
     - s02_final_memory
     - s02_memory_final_plan
+    - s02_memory_preflight
     if: ${{ 1 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -4553,7 +4594,8 @@ jobs:
     - *id014
     - *id020
     - *id021
-    - *id065
+    - *id060
+    - *id066
     - name: final memory / continuity batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -4574,7 +4616,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s02_memory_final_plan.outputs.characters) }}
   s03_draft_plan:
@@ -4626,7 +4668,7 @@ jobs:
     - *id002
     - *id004
     - *id022
-    - *id066
+    - *id067
     - name: Write scene batch ${{ matrix.batch }} with Gemini-first routing
       id: task
       env: *id034
@@ -4647,7 +4689,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s03_draft_plan.outputs.characters) }}
   s03_section_plan:
@@ -4698,7 +4740,7 @@ jobs:
     - *id004
     - *id022
     - *id023
-    - *id067
+    - *id068
     - name: Summarize actual section ${{ matrix.batch }}; source-linked only
       id: task
       env: *id034
@@ -4719,7 +4761,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s03_section_plan.outputs.characters) }}
   s03_summary_join:
@@ -4738,7 +4780,7 @@ jobs:
     - *id007
     - *id022
     - *id023
-    - *id067
+    - *id068
     - uses: actions/download-artifact@v4
       with:
         pattern: s03_summaries-*
@@ -4766,6 +4808,7 @@ jobs:
     needs:
     - s03_design
     - s03_edit
+    - s03_section_plan
     - s03_summary_join
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -4776,7 +4819,7 @@ jobs:
     - *id004
     - *id022
     - *id023
-    - &id068
+    - &id069
       uses: actions/download-artifact@v4
       with:
         name: s03_summary_join
@@ -4799,7 +4842,11 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    strategy: *id051
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        batch: ${{ fromJSON(needs.s03_section_plan.outputs.story_reviews) }}
   s03_rhetoric_batches:
     name: Exact prose section review ${{ matrix.batch }}
     needs:
@@ -4816,8 +4863,8 @@ jobs:
     - *id004
     - *id022
     - *id023
-    - *id067
     - *id068
+    - *id069
     - name: Exact prose section review ${{ matrix.batch }}
       id: task
       env: *id034
@@ -4838,7 +4885,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s03_section_plan.outputs.reviews) }}
   s03_memory_preflight_plan:
@@ -4856,7 +4903,7 @@ jobs:
     - *id007
     - *id022
     - *id023
-    - &id069
+    - &id070
       uses: actions/download-artifact@v4
       with:
         name: s03_memory
@@ -4896,8 +4943,8 @@ jobs:
     - *id004
     - *id022
     - *id023
-    - *id069
-    - &id070
+    - *id070
+    - &id071
       uses: actions/download-artifact@v4
       with:
         name: s03_memory_preflight_plan
@@ -4922,7 +4969,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s03_memory_preflight_plan.outputs.characters) }}
   s03_memory_preflight:
@@ -4942,8 +4989,8 @@ jobs:
     - *id007
     - *id022
     - *id023
-    - *id069
     - *id070
+    - *id071
     - uses: actions/download-artifact@v4
       with:
         pattern: s03_memory_preflight_batches-*
@@ -4993,7 +5040,7 @@ jobs:
       with:
         name: s03_rhetoric
         path: inputs/rhetoric-review
-    - &id077
+    - &id079
       uses: actions/download-artifact@v4
       with:
         name: s03_memory_preflight
@@ -5030,7 +5077,7 @@ jobs:
     - *id002
     - *id004
     - *id022
-    - *id071
+    - *id072
     - name: Fix ONLY cited paragraphs / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -5051,7 +5098,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s03_repair_plan.outputs.characters) }}
   s03_final_sections:
@@ -5104,7 +5151,7 @@ jobs:
     - *id004
     - *id022
     - *id025
-    - &id073
+    - &id074
       uses: actions/download-artifact@v4
       with:
         name: s03_edit
@@ -5113,7 +5160,7 @@ jobs:
       with:
         name: s03_summary_join
         path: inputs/previous-summaries
-    - &id072
+    - &id073
       uses: actions/download-artifact@v4
       with:
         name: s03_final_sections
@@ -5138,7 +5185,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s03_final_sections.outputs.characters) }}
   s03_final_summary_join:
@@ -5157,7 +5204,7 @@ jobs:
     - *id007
     - *id022
     - *id025
-    - *id072
+    - *id073
     - uses: actions/download-artifact@v4
       with:
         pattern: s03_final_summaries-*
@@ -5186,6 +5233,9 @@ jobs:
     - s03_design
     - s03_repair
     - s03_edit
+    - s03_story
+    - s03_rhetoric
+    - s03_memory_preflight
     - s03_final_sections
     - s03_final_summary_join
     - s03_final_memory
@@ -5198,9 +5248,12 @@ jobs:
     - *id004
     - *id022
     - *id025
+    - *id074
+    - *id075
+    - *id076
+    - *id077
     - *id073
-    - *id072
-    - &id074
+    - &id078
       uses: actions/download-artifact@v4
       with:
         name: s03_final_summary_join
@@ -5226,7 +5279,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s03_final_sections.outputs.final_reviews) }}
   s03_final_check:
@@ -5249,11 +5302,11 @@ jobs:
     - *id007
     - *id022
     - *id025
-    - *id072
-    - *id074
+    - *id073
+    - *id078
     - *id075
     - *id076
-    - *id077
+    - *id079
     - uses: actions/download-artifact@v4
       with:
         pattern: s03_final_batches-*
@@ -5266,7 +5319,7 @@ jobs:
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
         python -m storyforge.batch_pipeline finalize --backend "$backend" --index 2'
-    - *id062
+    - *id063
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -5325,7 +5378,7 @@ jobs:
     - *id004
     - *id022
     - *id023
-    - *id078
+    - *id080
     - name: Extract all source-supported facts / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -5346,7 +5399,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s03_memory_extract_plan.outputs.characters) }}
   s03_memory_refresh_plan:
@@ -5365,16 +5418,13 @@ jobs:
     - *id002
     - *id007
     - *id022
-    - *id073
+    - *id074
     - *id025
     - uses: actions/download-artifact@v4
       with:
         name: s03_memory
         path: inputs/initial-memory
-    - uses: actions/download-artifact@v4
-      with:
-        name: s03_memory_preflight
-        path: inputs/preflight-memory
+    - *id077
     - name: Retain unchanged facts; allocate changed evidence batches
       id: task
       env: *id005
@@ -5409,7 +5459,7 @@ jobs:
     - *id004
     - *id022
     - *id025
-    - *id079
+    - *id081
     - name: Refresh changed evidence / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -5430,7 +5480,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s03_memory_refresh_plan.outputs.characters) }}
   s03_memory_final_plan:
@@ -5439,6 +5489,7 @@ jobs:
     - s03_design
     - s03_repair
     - s03_final_memory
+    - s03_memory_preflight
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -5449,6 +5500,7 @@ jobs:
     - *id022
     - *id025
     - *id026
+    - *id077
     - name: Allocate final memory checks
       id: task
       env: *id005
@@ -5475,6 +5527,7 @@ jobs:
     - s03_repair
     - s03_final_memory
     - s03_memory_final_plan
+    - s03_memory_preflight
     if: ${{ 2 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -5485,7 +5538,8 @@ jobs:
     - *id022
     - *id025
     - *id026
-    - *id080
+    - *id077
+    - *id082
     - name: final memory / continuity batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -5506,7 +5560,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s03_memory_final_plan.outputs.characters) }}
   s04_draft_plan:
@@ -5558,7 +5612,7 @@ jobs:
     - *id002
     - *id004
     - *id027
-    - *id081
+    - *id083
     - name: Write scene batch ${{ matrix.batch }} with Gemini-first routing
       id: task
       env: *id034
@@ -5579,7 +5633,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s04_draft_plan.outputs.characters) }}
   s04_section_plan:
@@ -5630,7 +5684,7 @@ jobs:
     - *id004
     - *id027
     - *id028
-    - *id082
+    - *id084
     - name: Summarize actual section ${{ matrix.batch }}; source-linked only
       id: task
       env: *id034
@@ -5651,7 +5705,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s04_section_plan.outputs.characters) }}
   s04_summary_join:
@@ -5670,7 +5724,7 @@ jobs:
     - *id007
     - *id027
     - *id028
-    - *id082
+    - *id084
     - uses: actions/download-artifact@v4
       with:
         pattern: s04_summaries-*
@@ -5698,6 +5752,7 @@ jobs:
     needs:
     - s04_design
     - s04_edit
+    - s04_section_plan
     - s04_summary_join
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
@@ -5708,7 +5763,7 @@ jobs:
     - *id004
     - *id027
     - *id028
-    - &id083
+    - &id085
       uses: actions/download-artifact@v4
       with:
         name: s04_summary_join
@@ -5731,7 +5786,11 @@ jobs:
         retention-days: 30
         overwrite: true
     - *id003
-    strategy: *id051
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        batch: ${{ fromJSON(needs.s04_section_plan.outputs.story_reviews) }}
   s04_rhetoric_batches:
     name: Exact prose section review ${{ matrix.batch }}
     needs:
@@ -5748,8 +5807,8 @@ jobs:
     - *id004
     - *id027
     - *id028
-    - *id082
-    - *id083
+    - *id084
+    - *id085
     - name: Exact prose section review ${{ matrix.batch }}
       id: task
       env: *id034
@@ -5770,7 +5829,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s04_section_plan.outputs.reviews) }}
   s04_memory_preflight_plan:
@@ -5788,7 +5847,7 @@ jobs:
     - *id007
     - *id027
     - *id028
-    - &id084
+    - &id086
       uses: actions/download-artifact@v4
       with:
         name: s04_memory
@@ -5828,8 +5887,8 @@ jobs:
     - *id004
     - *id027
     - *id028
-    - *id084
-    - &id085
+    - *id086
+    - &id087
       uses: actions/download-artifact@v4
       with:
         name: s04_memory_preflight_plan
@@ -5854,7 +5913,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s04_memory_preflight_plan.outputs.characters) }}
   s04_memory_preflight:
@@ -5874,8 +5933,8 @@ jobs:
     - *id007
     - *id027
     - *id028
-    - *id084
-    - *id085
+    - *id086
+    - *id087
     - uses: actions/download-artifact@v4
       with:
         pattern: s04_memory_preflight_batches-*
@@ -5915,17 +5974,17 @@ jobs:
     - *id007
     - *id027
     - *id028
-    - &id090
+    - &id091
       uses: actions/download-artifact@v4
       with:
         name: s04_story
         path: inputs/story-review
-    - &id091
+    - &id092
       uses: actions/download-artifact@v4
       with:
         name: s04_rhetoric
         path: inputs/rhetoric-review
-    - &id092
+    - &id095
       uses: actions/download-artifact@v4
       with:
         name: s04_memory_preflight
@@ -5962,7 +6021,7 @@ jobs:
     - *id002
     - *id004
     - *id027
-    - *id086
+    - *id088
     - name: Fix ONLY cited paragraphs / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -5983,7 +6042,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s04_repair_plan.outputs.characters) }}
   s04_final_sections:
@@ -6036,7 +6095,7 @@ jobs:
     - *id004
     - *id027
     - *id030
-    - &id088
+    - &id090
       uses: actions/download-artifact@v4
       with:
         name: s04_edit
@@ -6045,7 +6104,7 @@ jobs:
       with:
         name: s04_summary_join
         path: inputs/previous-summaries
-    - &id087
+    - &id089
       uses: actions/download-artifact@v4
       with:
         name: s04_final_sections
@@ -6070,7 +6129,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s04_final_sections.outputs.characters) }}
   s04_final_summary_join:
@@ -6089,7 +6148,7 @@ jobs:
     - *id007
     - *id027
     - *id030
-    - *id087
+    - *id089
     - uses: actions/download-artifact@v4
       with:
         pattern: s04_final_summaries-*
@@ -6118,6 +6177,9 @@ jobs:
     - s04_design
     - s04_repair
     - s04_edit
+    - s04_story
+    - s04_rhetoric
+    - s04_memory_preflight
     - s04_final_sections
     - s04_final_summary_join
     - s04_final_memory
@@ -6130,9 +6192,12 @@ jobs:
     - *id004
     - *id027
     - *id030
-    - *id088
-    - *id087
-    - &id089
+    - *id090
+    - *id091
+    - *id092
+    - *id093
+    - *id089
+    - &id094
       uses: actions/download-artifact@v4
       with:
         name: s04_final_summary_join
@@ -6158,7 +6223,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 6
+      max-parallel: 2
       matrix:
         batch: ${{ fromJSON(needs.s04_final_sections.outputs.final_reviews) }}
   s04_final_check:
@@ -6181,11 +6246,11 @@ jobs:
     - *id007
     - *id027
     - *id030
-    - *id087
     - *id089
-    - *id090
+    - *id094
     - *id091
     - *id092
+    - *id095
     - uses: actions/download-artifact@v4
       with:
         pattern: s04_final_batches-*
@@ -6198,7 +6263,7 @@ jobs:
         if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
 
         python -m storyforge.batch_pipeline finalize --backend "$backend" --index 3'
-    - *id062
+    - *id063
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
@@ -6257,7 +6322,7 @@ jobs:
     - *id004
     - *id027
     - *id028
-    - *id093
+    - *id096
     - name: Extract all source-supported facts / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -6278,7 +6343,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s04_memory_extract_plan.outputs.characters) }}
   s04_memory_refresh_plan:
@@ -6297,16 +6362,13 @@ jobs:
     - *id002
     - *id007
     - *id027
-    - *id088
+    - *id090
     - *id030
     - uses: actions/download-artifact@v4
       with:
         name: s04_memory
         path: inputs/initial-memory
-    - uses: actions/download-artifact@v4
-      with:
-        name: s04_memory_preflight
-        path: inputs/preflight-memory
+    - *id093
     - name: Retain unchanged facts; allocate changed evidence batches
       id: task
       env: *id005
@@ -6341,7 +6403,7 @@ jobs:
     - *id004
     - *id027
     - *id030
-    - *id094
+    - *id097
     - name: Refresh changed evidence / batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -6362,7 +6424,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s04_memory_refresh_plan.outputs.characters) }}
   s04_memory_final_plan:
@@ -6371,6 +6433,7 @@ jobs:
     - s04_design
     - s04_repair
     - s04_final_memory
+    - s04_memory_preflight
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -6381,6 +6444,7 @@ jobs:
     - *id027
     - *id030
     - *id031
+    - *id093
     - name: Allocate final memory checks
       id: task
       env: *id005
@@ -6407,6 +6471,7 @@ jobs:
     - s04_repair
     - s04_final_memory
     - s04_memory_final_plan
+    - s04_memory_preflight
     if: ${{ 3 < fromJSON(inputs.scene_limit) }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
@@ -6417,7 +6482,8 @@ jobs:
     - *id027
     - *id030
     - *id031
-    - *id095
+    - *id093
+    - *id098
     - name: final memory / continuity batch ${{ matrix.batch }}
       id: task
       env: *id034
@@ -6438,7 +6504,7 @@ jobs:
     - *id003
     strategy:
       fail-fast: false
-      max-parallel: 12
+      max-parallel: 3
       matrix:
         batch: ${{ fromJSON(needs.s04_memory_final_plan.outputs.characters) }}
 env:

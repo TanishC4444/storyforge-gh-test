@@ -162,6 +162,11 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         if task=='plan_gate':output('characters',result['plan']['scenes'][0]['participants'])
         return result
     if task=='scene_design':
+        if index>0 and req.get('performance',{}).get('verified_draft_continuity'):
+            previous=state['accepted'][-1]
+            if not previous.get('canon_committed',True):
+                receipts=state.get('draft_continuity_receipts',[])
+                contracts.require(any(r['scene']==previous['id'] and r.get('memory_verified') and r['source_sha256']==hashlib.sha256(previous['prose'].encode()).hexdigest() for r in receipts),'Previous scene has no verified memory handoff. Preserve its draft and resolve memory verification before writing the next scene; do not reset to initial facts.')
         old=state['plan']['scenes'][index]
         if req.get('performance',{}).get('single_editorial_pass'):
             save(out/'scene-design.json',old);save(out/'snapshot.json',state);output('characters',old['participants']);event('design','Using approved scene card; writer reconciles with latest accepted canon');return state
@@ -173,14 +178,15 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
             living_proposal=chapter_proposal(state,out)
         from .universe_events import DIRECTOR_POLICY,extended_request,current_life
         from .canon import bridge
-        import math
-        beat_count=max(1,min(6,math.ceil(req['words_per_scene']/320)))
-        designed=executor.call('scene_designer',{'living_proposal':living_proposal,'request_controls':controls(req),'world':req['world_design'],'plot':req['plot_design'],'characters':req['characters'],'proposed_scene':old,'writing_batch_count':beat_count,'creative_freedom':req.get('creative_freedom',{}),'character_life_state':current_life(state['memories']),'accepted_memory':bridge(state),'previous_scene':{'id':state['accepted'][-1]['id'],'quality_status':state['accepted'][-1].get('quality_status'),'canon_committed':state['accepted'][-1].get('canon_committed',True)} if state['accepted'] else None,'user_scene_design':[s for s in req['scene_designs'] if s['id']==old['id']],'inspiration':application_packet(req,state['retrieval'],'scene_designer',old['id'])},
+        from .adaptive import writing_count
+        from .continuation import history as continuity_history
+        beat_count=writing_count(req)
+        designed=executor.call('scene_designer',{'living_proposal':living_proposal,'request_controls':controls(req),'world':req['world_design'],'plot':req['plot_design'],'characters':req['characters'],'proposed_scene':old,'writing_batch_count':beat_count,'creative_freedom':req.get('creative_freedom',{}),'character_life_state':current_life(continuity_history(state)),'accepted_memory':bridge(state),'previous_scene':{'id':state['accepted'][-1]['id'],'quality_status':state['accepted'][-1].get('quality_status'),'canon_committed':state['accepted'][-1].get('canon_committed',True)} if state['accepted'] else None,'user_scene_design':[s for s in req['scene_designs'] if s['id']==old['id']],'inspiration':application_packet(req,state['retrieval'],'scene_designer',old['id'])},
             DIRECTOR_POLICY+' Supply writing_beats with exactly writing_batch_count entries. Each has action, entry_state and exit_state: concrete nonoverlapping proposed events, resource/custody/knowledge handoffs and a clear last exit. Allocate a revelation or action to ONE beat only; later beats cannot repeat it. The writers work in parallel against this shared contract. Reconcile the proposed scene with what ACTUALLY happened. Do not rediscover an established fact. Preserve IDs, chapter, valid participant IDs, world rules, and user choices. Return one JSON scene card with id, chapter, pov, participants, location, time, goal, obstacle, intended_change, choice, consequence, new_development, and reference_uses (array of {record_id,application}). Explain development through a new tactic, cost, commitment, leverage, or interpretation, not stronger adjectives. No new events become canon here.',
-            tokens=1600,validator=lambda x:validate_scene(x,req,index,dead={cid for cid,status in current_life(state['memories']).items() if status=='dead'}))
+            tokens=1600,validator=lambda x:validate_scene(x,req,index,dead={cid for cid,status in current_life(continuity_history(state)).items() if status=='dead'}))
         allowed={r['id'] for r in application_packet(req,state['retrieval'],'scene_designer',old['id'])['references']}
         contracts.require(all(isinstance(r,dict) and r.get('record_id') in allowed for r in designed['reference_uses']),'Scene reference outside applicable source packet')
-        dead={cid for cid,status in current_life(state['memories']).items() if status=='dead'}
+        dead={cid for cid,status in current_life(continuity_history(state)).items() if status=='dead'}
         contracts.require(not dead & set(designed['participants']),'Scene attempts to revive a canonically dead participant')
         expanded=extended_request(req,designed)
         req['characters']=expanded['characters']
@@ -416,6 +422,13 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
                 append(result,memory['memories'],f'episode-{state["universe_episode"]:06}/'+card['id'] if state.get('universe_episode') else card['id'])
             save(out/'canon.json',result['canon'])
         else:result['memories'].extend(dict(m, source=card['id']) for m in memory['memories'])
+        if not canon_allowed and req.get('performance',{}).get('verified_draft_continuity') and memory_review.get('pass') and not memory_review.get('unverified') and memory_review.get('source_sha256')==source_digest(prose) and memory_review.get('memory_sha256') and not memory.get('unverified'):
+            from .continuation import append_verified_branch
+            from .batch_pipeline import bind_state as continuity_binding
+            branch_memory=load(source/'memory/memory.json')
+            if not branch_memory.get('unverified'):
+                append_verified_branch(result,branch_memory,card['id'],prose,memory_review,expected_state_sha256=continuity_binding(state))
+                save(out/'draft-continuity.json',{'scope':'draft_branch','memory_verified':True,'literary_approved':False,'facts':result['draft_memories']})
         result['complete'] = len(result['accepted']) == len(result['plan']['scenes'])
         result['completion_status']='complete_with_warnings' if result['complete'] and any(s.get('quality_status')=='needs_review' for s in result['accepted']) else ('complete' if result['complete'] else 'in_progress')
         if canon_allowed:

@@ -35,6 +35,7 @@ def editorial_review(value,prose,required):
             check['source_spans']=bound['evidence_spans']
     checks(value['checks'],required,resolve)
     for issue in value['issues']:
+        require(issue.get('category') in required,'Issue category must be a requested editorial dimension')
         if 'evidence_ids' in issue:
             try:
                 issue['quote']=bind(issue,prose)['evidence']

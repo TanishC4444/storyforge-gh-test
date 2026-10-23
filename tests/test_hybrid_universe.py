@@ -13,7 +13,7 @@ from storyforge.expansion import prepare
 class HybridUniverseTests(unittest.TestCase):
     def scene(self,p):
         stage('prepare',p/'none',p/'base',request_file='stage-play-practice',profile='fast',backend='fixture')
-        s=prepare(p/'base/snapshot.json',p/'prepared');return s,s['plan']['scenes'][0]
+        s=prepare(p/'base/snapshot.json',p/'prepared');s['request']['performance']['adaptive_batches']=False;return s,s['plan']['scenes'][0]
     def test_medium_decider_obeys_explicit_choice_and_detects_formats_without_inference(self):
         for prompt,expected in [('Write a novel','book'),('A theater play','stage_play'),('A screenplay','screenplay'),('An audio drama','audio_drama'),('A comic script','comic_script'),('A short story','short_story')]:
             r={'premise':prompt};media.choose(r,lambda ok,msg:self.assertTrue(ok,msg));self.assertEqual(r['medium'],expected);self.assertEqual(r['medium_decision']['model_calls'],0)
