@@ -168,3 +168,26 @@ provider-recovery status remain available when the buffer is exhausted; no missi
 story or factual verification becomes approved. The checkpoint supports retrying
 the failed job after capacity returns. This is bounded recovery, not an assurance
 that an indefinitely unavailable external API can finish a GitHub runner job.
+
+Pipeline memory recovery partitions an invalid extraction into validated sibling
+records and invalid records. One bounded repair call patches only the identified
+fields of the invalid records: descriptions, knowledge holders, evidence IDs,
+belief holders, typed thread/lifecycle metadata, and invalid supersession links.
+Multiple structural faults in one record are diagnosed together. Every valid
+sibling and unrelated field stays unchanged; the complete result must pass the
+original source/cast/type/identity validators and independent factual review.
+An event cannot overwrite a resource under a different kind or fact key. A new
+source-supported event can instead remain append-only, leaving the prior history
+intact; no invented resource balance or witness list is used as a default.
+
+Failed repair preserves the exact source, rejected records and individually
+validated partial facts, marked unverified. Partial facts cannot publish canon or
+unlock the next scene. Outer-list normalization is lossless, nested malformed
+knowledge/link values report validation errors, and malformed wrappers retain the
+bounded source re-extraction path. Four saved failing Iron Man outputs replayed
+successfully with mocked transport; this is regression evidence, not live approval.
+
+Strict acceptance now blocks unverified memory at the actual handoff gate and
+saves prose plus a blocked-handoff report. It cannot report acceptance success and
+then fail misleadingly in the following scene’s designer. Literary judgments are
+still separate from this factual gate; unverified facts never become canon.

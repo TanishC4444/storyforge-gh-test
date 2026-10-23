@@ -40,17 +40,18 @@ def memory_extract(executor,req,out,prose,packet,instruction,allow_public=True):
     ids=[c['id'] for c in req['characters']]
     from .output_schema import memory_schema
     last_raw=None
-    def validate(raw):
+    def validate(raw,capture=True):
         nonlocal last_raw
         if req.get('performance',{}).get('pipelined_living'):
             from .memory_fields import source_defaults
             raw=source_defaults(raw,packet,prose,out)
-        last_raw=copy.deepcopy(raw)
+        if capture:last_raw=copy.deepcopy(raw)
         result=salvage_memory(raw,prose,ids) if enabled(req) and not req.get('performance',{}).get('pipelined_living') else contracts.delta(raw,prose,ids)
         if not allow_public:
             retained=[]
             for item in result['memories']:
                 if 'public' in item['known_by']:
+                    contracts.require(not req.get('performance',{}).get('pipelined_living'),'Invalid memory knowledge holders: explicit witnesses required, not public')
                     result.setdefault('quarantined',[]).append({'error':'Public scope is not allowed; explicit witnesses required','raw':item})
                 else:retained.append(item)
             result['memories']=retained
@@ -77,14 +78,27 @@ def memory_extract(executor,req,out,prose,packet,instruction,allow_public=True):
         if result.get('quarantined'):warning(out,'memory_quarantine','Unsupported memory entries quarantined; source prose retained.')
         return result
     except Exception as exc:
-        if req.get('performance',{}).get('pipelined_living') and last_raw is not None:
+        if req.get('performance',{}).get('pipelined_living') and isinstance(last_raw,dict) and isinstance(last_raw.get('memories'),list):
             from .memory_fields import repair_texts
             save(Path(out)/'memory-rejected-records.json',last_raw)
             save(Path(out)/'memory-source.txt',prose)
             try:
-                fixed=repair_texts(executor,req,out,prose,packet,last_raw)
+                from .memory_records import partition,repair as repair_records
+                rejected=copy.deepcopy(last_raw)
+                validate_record=lambda value:validate(value,capture=False)
+                valid_indices,problems=partition(rejected,validate_record,req,packet)
+                last_raw=rejected
+                if problems and all(p['editable_fields']==['text'] for p in problems):
+                    fixed=repair_texts(executor,req,out,prose,packet,rejected)
+                else:fixed=repair_records(executor,req,out,prose,packet,rejected,validate_record)
                 if fixed is not None:return validate(fixed)
             except Exception as repair_error:
+                if isinstance(last_raw,dict) and isinstance(last_raw.get('memories'),list):
+                    retained=[]
+                    for record in last_raw['memories']:
+                        try:retained.extend(validate({'memories':[record]},capture=False)['memories'])
+                        except (ValueError,TypeError,KeyError):pass
+                    save(Path(out)/'memory-partial.json',{'memories':retained,'unverified':True,'error':str(repair_error)})
                 raise contracts.ContractError('Memory field-only recovery failed; source and records retained: '+str(repair_error)) from repair_error
         if not enabled(req):raise
         warning(out,'memory_unavailable',exc)
