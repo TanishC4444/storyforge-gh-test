@@ -1,0 +1,38 @@
+name: Continuity demos / matched plain LLM comparison
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: story-universe-provider-budget
+  cancel-in-progress: false
+jobs:
+  compare:
+    name: Compare ${{ matrix.case }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        case: [secret, resource, consequence]
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+      GEMINI_DISTINCT_PROJECTS: 'true'
+      PYTHONUNBUFFERED: '1'
+      STORY_BATCH: ${{ matrix.case }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Compare three chapters with the same writing model
+        run: python -m scripts.continuity_demo --case '${{ matrix.case }}' --out 'out/${{ matrix.case }}'
+      - name: Save every draft, memory receipt, verdict and usage record
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: continuity-demo-${{ matrix.case }}
+          path: out/
+          retention-days: 30
