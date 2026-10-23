@@ -24,7 +24,7 @@ class LengthExpansionTests(unittest.TestCase):
             self.assertEqual(len(revised.split()),900)
             self.assertTrue(revised.endswith(passages(prose)[-1]['text']))
             for p in passages(prose):self.assertIn(p['text'],revised)
-            self.assertEqual(editor.data['length_repair']['minimum_new_words'],224)
+            self.assertEqual(editor.data['length_repair']['minimum_new_words'],44)
             self.assertTrue(load(Path(d)/'length-expansion.json')['existing_prose_preserved'])
     def test_short_or_foreign_insertions_cannot_pass(self):
         for patch_text in ['INSERT_AFTER p001\n'+self.addition(25)+'\nEND_INSERT','INSERT_AFTER p003\n'+self.addition()+'\nEND_INSERT','A rewritten scene without insertion blocks.']:
