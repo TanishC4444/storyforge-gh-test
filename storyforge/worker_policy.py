@@ -62,7 +62,9 @@ def validate(req):
     knobs=req['execution_policy']
     require(knobs.get('editorial_disagreement') in {None,'one_strict_check'},'Invalid editorial disagreement policy')
     hosted=knobs.get('hosted_routes',{})
-    require(isinstance(hosted,dict) and all(k in STAGES and isinstance(v,list) and 1<=len(v)<=2 and all(t in {'flash','flash36','lite','gemma'} for t in v) for k,v in hosted.items()),'Invalid hosted routing policy')
+    require(isinstance(hosted,dict) and all(k in STAGES and isinstance(v,list) and 1<=len(v)<=3 and all(t in {'flash','flash36','lite','gemma'} for t in v) for k,v in hosted.items()),'Invalid hosted routing policy')
+    role_seconds=knobs.get('hosted_role_seconds',{})
+    require(isinstance(role_seconds,dict) and all(k in STAGES and type(v) is int and 10<=v<=300 for k,v in role_seconds.items()),'Invalid hosted role timeout')
     required=knobs.get('hosted_required_roles',[])
     require(isinstance(required,list) and all(r in STAGES for r in required),'Invalid hosted quality floor')
     require(type(knobs.get('max_hosted_requests',2)) is int and 1<=knobs.get('max_hosted_requests',2)<=6,'Invalid provider request cap')

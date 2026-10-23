@@ -170,3 +170,43 @@ class LivingPipelineTests(unittest.TestCase):
                 save(root/'direction-input/characters'/actor/'proposal.json',stale)
             with self.assertRaisesRegex(Exception,'Stale character proposal'):
                 stage('director',root/'direction-input',root/'direction',backend='fixture')
+
+    def test_capacity_fallback_uses_third_model_with_unchanged_http_cap(self):
+        import urllib.error
+        from storyforge.contracts import request
+        from storyforge.inference import Executor
+        from storyforge.worker_policy import validate
+        req=request(load(Path('examples/living-scale-practice.json')))
+        req['profile']='fast';req['max_stage_retries']=0
+        validate(req)
+        calls=[]
+        result={'candidates':[{'finishReason':'STOP','content':{'parts':[{'text':'A candidate scene awaiting the normal quality gates.'}]}}]}
+        def serve(http_request,timeout):
+            calls.append((http_request.full_url,timeout))
+            if len(calls)==1:
+                raise urllib.error.HTTPError('https://example.invalid',503,'Unavailable',{},io.BytesIO(b'{"error":{"status":"UNAVAILABLE"}}'))
+            if len(calls)==2:raise TimeoutError('capacity timeout')
+            return io.BytesIO(json.dumps(result).encode())
+        with tempfile.TemporaryDirectory() as d,patch.dict(os.environ,{'GEMINI_API_KEY':'placeholder','GEMINI_API_KEYS':'["placeholder-backup"]','GEMINI_DISTINCT_PROJECTS':'true'}),patch('urllib.request.urlopen',side_effect=serve),patch('storyforge.local_worker.execute',side_effect=AssertionError('No CPU quality downgrade')):
+            text=Executor(req,d,'worker').call('writer_beat',{},'Write the candidate scene.',output_format='text',tokens=200)
+            self.assertIn('candidate scene',text)
+            self.assertEqual(len(calls),3)
+            self.assertIn('gemini-3.6-flash:generateContent',calls[0][0])
+            self.assertIn('gemini-3.8-flash:generateContent',calls[1][0])
+            self.assertIn('gemini-3.5-flash-lite:generateContent',calls[2][0])
+            self.assertGreater(calls[0][1],40)
+            self.assertLessEqual(calls[0][1],60)
+            self.assertLessEqual(max(t for _,t in calls),90)
+
+    def test_capacity_fallback_never_accepts_truncated_or_unavailable_generation(self):
+        from storyforge.contracts import request,ContractError
+        from storyforge.inference import Executor
+        req=request(load(Path('examples/living-scale-practice.json')))
+        req['profile']='fast';req['max_stage_retries']=0
+        calls=[]
+        def serve(http_request,timeout):
+            calls.append(1)
+            return io.BytesIO(json.dumps({'candidates':[{'finishReason':'MAX_TOKENS','content':{'parts':[{'text':'Incomplete prose'}]}}]}).encode())
+        with tempfile.TemporaryDirectory() as d,patch.dict(os.environ,{'GEMINI_API_KEY':'placeholder','GEMINI_API_KEYS':'[]','GEMINI_DISTINCT_PROJECTS':'true'}),patch('urllib.request.urlopen',side_effect=serve),patch('storyforge.local_worker.execute',side_effect=AssertionError('No CPU fallback')):
+            with self.assertRaises(ContractError):Executor(req,d,'worker').call('writer_beat',{},'Write.',output_format='text',tokens=200)
+            self.assertEqual(len(calls),3)

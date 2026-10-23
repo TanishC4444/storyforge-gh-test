@@ -155,13 +155,21 @@ class Executor:
                                 if role=='memory_quality' and self.req.get('performance',{}).get('memory_pair_batches'):routes.append('lite')
                             configured=self.req.get('execution_policy',{}).get('hosted_routes',{}).get(role)
                             if configured is not None:routes=configured
-                            for route_index,route in enumerate(dict.fromkeys(routes)):
+                            routes=list(dict.fromkeys(routes))
+                            for route_index,route in enumerate(routes):
                                 if route=='flash' and kind!='flash' and not (stage_policy and stage_policy.get('quality_routing')) and not self.hosted.can_rescue():continue
                                 try:
                                     with permit(self.req), heartbeat('Hosted '+route+' / '+role+'; shared quota pacing applies'):
                                         route_policy=stage_policy
                                         if self.req.get('execution_policy',{}).get('hosted_route_seconds'):
                                             route_policy={**(stage_policy or {'timeout':120 if role=='chapter_quality' else 90,'thinking':'low','quality_routing':True,'literary_quality':True}),'route_budget':self.req['execution_policy']['hosted_route_seconds']}
+                                        role_seconds=self.req.get('execution_policy',{}).get('hosted_role_seconds',{}).get(role)
+                                        if role_seconds is not None:
+                                            from .runtime import worker_timeout_seconds
+                                            # Reserve elapsed time for every remaining model route.
+                                            # All routes still share the scoped call and HTTP budgets.
+                                            route_seconds=min(role_seconds,worker_timeout_seconds()/max(1,len(routes)-route_index))
+                                            route_policy={**(route_policy or {'thinking':'low','quality_routing':True,'literary_quality':True}),'timeout':route_seconds,'route_budget':route_seconds}
                                         if attempt_limit is not None:
                                             route_policy={**(route_policy or {'timeout':40,'thinking':'low','quality_routing':True,'literary_quality':True}),'estimate_small_calls':True,'estimate_max_bytes':131072 if self.req.get('performance',{}).get('pipelined_living') else 48000,'request_attempt_limit':attempt_limit,'max_project_attempts':2 if len(set(routes))==1 else 1,'project_offset':route_index}
                                         hosted_result=self.hosted.complete(route,system,prompt,tokens,structured=bool(validator) and output_format=='json',response_schema=response_schema,role=role,policy=route_policy)
