@@ -62,7 +62,11 @@ jobs:
       with:
         backend: fixture
     - name: Check inference contracts before benchmark
-      run: python -m unittest discover -s tests -q
+      run: 'python -m pip install -e ''.[test]'' -q
+
+        python -m unittest discover -s tests -q
+
+        '
     - name: Execute Prepare request and literary retrieval
       id: task
       env: &id005

@@ -8,6 +8,7 @@ description = "File-based, fresh-runner fiction orchestration testbed"
 requires-python = ">=3.11"
 dependencies = []
 [project.optional-dependencies]
+test = ["PyYAML==6.0.2"]
 rag = ["sentence-transformers>=5,<6", "numpy>=2,<3", "python-dotenv>=1,<2"]
 docx = ["python-docx>=1.1,<2"]
 [project.scripts]

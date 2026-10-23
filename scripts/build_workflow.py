@@ -76,7 +76,7 @@ def build(total=9, per_chapter=3, troy=False, continuation=False, full_api=False
         if continuation and task in {'resume','scene_design','director','edit_plan','edit_merge'}: setup_backend='fixture'
         lines += ['    steps:', '      - name: Start shared job time budget', '        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + '+str(WORKER_TIMEOUT_SECONDS)+' ))" >> "$GITHUB_ENV"', '      - uses: actions/checkout@v4', '      - uses: ./.github/actions/setup-worker', '        with:', '          backend: ' + setup_backend]
         if full_api and task=='prepare':
-            lines += ['      - name: Check inference contracts before benchmark', '        run: python -m unittest discover -s tests -q']
+            lines += ['      - name: Check inference contracts before benchmark', '        run: |', "          python -m pip install -e '.[test]' -q", '          python -m unittest discover -s tests -q']
         if task == 'prepare':
             lines += ['      - name: Install local RAG encoder when requested', '        env:', '          STORY_REQUEST: ${{ inputs.request_file }}', '        run: |', "          python - <<'PY'", '          import json, os, subprocess, sys', '          from pathlib import Path', "          request=json.loads(Path('examples',os.environ['STORY_REQUEST']+'.json').read_text())", "          if request.get('retrieval_mode')=='hybrid' and not request.get('execution_policy',{}).get('resume_seed'):", "              subprocess.run([sys.executable,'-m','pip','install','-e','.[rag]'],check=True)", '          PY']
         if task == 'refine':
@@ -229,7 +229,9 @@ jobs:
         with:
           backend: live
       - name: Check contracts, isolation, transitions and full workflow
-        run: python -m unittest discover -s tests -q
+        run: |
+          python -m pip install -e '.[test]' -q
+          python -m unittest discover -s tests -q
       - name: Install hybrid literary retrieval
         run: python -m pip install -e '.[rag]' -q
       - name: Full fresh prompt-to-story process
@@ -283,7 +285,7 @@ def build_experimental(total=12,practice=False):
         if matrix:lines+=['    strategy:','      fail-fast: false','      max-parallel: 3','      matrix:',f'        character: ${{{{ fromJSON(needs.{matrix}.outputs.characters) }}}}']
         lines+=['    steps:','      - name: Start shared job budget','        run: echo "STORY_JOB_DEADLINE=$(( $(date +%s) + 21300 ))" >> "$GITHUB_ENV"','      - uses: actions/checkout@v4','      - uses: ./.github/actions/setup-worker','        with:','          backend: '+('fixture' if task=='prepare' else '${{ inputs.backend }}')]
         if task=='prepare':
-            lines+=['      - name: Check contracts and fixture paths','        run: python -m unittest discover -s tests -q','      - name: Install hybrid retrieval','        run: python -m pip install -e \'.[rag]\' -q']
+            lines+=['      - name: Check contracts and fixture paths','        run: |', "          python -m pip install -e '.[test]' -q", '          python -m unittest discover -s tests -q','      - name: Install hybrid retrieval','        run: python -m pip install -e \'.[rag]\' -q']
         for entry in downloads:
             artifact,path,*gate=entry
             lines+=['      - uses: actions/download-artifact@v4']

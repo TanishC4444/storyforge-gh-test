@@ -11,7 +11,7 @@ def main():
             try:
                 text,meta=client.complete(kind,'Return only the requested JSON.','Return {"ok":true}.',512,
                     structured=True,response_schema={'type':'object','properties':{'ok':{'type':'boolean'}},'required':['ok'],'additionalProperties':False},
-                    role='provider_smoke',policy={'timeout':45,'thinking':'low','quality_routing':True,'estimate_small_calls':True})
+                    role='provider_smoke',policy={'timeout':45,'thinking':'low','quality_routing':True,'estimate_small_calls':True,'route_budget':45})
                 if json.loads(text)!={'ok':True}:raise SystemExit('Unexpected smoke result for '+MODELS[kind])
                 passed.append(meta['model'])
             except HostedError as exc:unavailable.append({'model':MODELS[kind],'reason':str(exc)})

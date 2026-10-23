@@ -7,7 +7,7 @@ from storyforge.worker_policy import policy
 class BackupTests(unittest.TestCase):
     def hosted(self,folder):
         with patch.dict(os.environ,{'GEMINI_API_KEYS':'["backup-one","backup-two","primary"]'}):
-            return GoogleHosted(folder,'primary')
+            return GoogleHosted(folder,'primary',distinct_projects=False)
 
     def test_deduplicated_pool_rotates_authentication_and_remembers_success(self):
         with tempfile.TemporaryDirectory() as d:
