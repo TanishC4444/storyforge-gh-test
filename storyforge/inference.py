@@ -111,7 +111,9 @@ class Executor:
             if prose_instructions:system+='\n'+prose_instructions
             if review_instructions:system+='\n'+review_instructions
             if response_schema is not None:
-                system+='\nRequired output JSON Schema: '+json.dumps(response_schema,separators=(',',':'))
+                if self.req.get('performance',{}).get('pipelined_living') and (self.hosted is not None or self.backend=='fixture'):
+                    system+='\nReturn JSON matching the supplied native response schema. Every required source check and evidence constraint remains mandatory.'
+                else:system+='\nRequired output JSON Schema: '+json.dumps(response_schema,separators=(',',':'))
             if len(system) + len(prompt) > self.req['context_chars']:
                 raise ContractError(f'{role} context exceeds character budget; reduce inputs or restart with a larger tested budget. No silent truncation.')
             model = PROFILES[self.req['profile']].get(role, PROFILES[self.req['profile']]['default'])

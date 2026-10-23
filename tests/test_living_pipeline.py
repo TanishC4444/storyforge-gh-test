@@ -110,3 +110,17 @@ class LivingPipelineTests(unittest.TestCase):
             ls.execute('final_memory_plan',dest,root/'final-memory',0,'fixture')
             final=load(root/'final-memory/memory-plan.json');self.assertFalse(final['reused_preflight'])
             self.assertFalse((root/'final-memory/review.json').exists())
+    def test_native_schema_transport_keeps_full_ledger_without_echoing_grammar(self):
+        from storyforge.inference import Executor
+        from storyforge.editorial import STORY_CHECKS,RHETORIC_CHECKS
+        from storyforge.canon import cards
+        from storyforge.evidence import payload
+        with tempfile.TemporaryDirectory() as d,redirect_stdout(io.StringIO()):
+            root=Path(d);stage('prepare',root/'none',root/'base',request_file='living-scale-practice',backend='fixture');state=prepare(root/'base/snapshot.json',root/'quick',backend='fixture')
+            data={**payload('Thestor waited at the closed gate.'),'prior_canon':cards(state['memories']),'required_checks':STORY_CHECKS+RHETORIC_CHECKS}
+            Executor(state['request'],root/'check','fixture').call('chapter_quality',data,'Check every required source dimension.',tokens=3200,validator=lambda x:x)
+            packet=load(next((root/'check/packets').glob('*.json')))
+            self.assertNotIn('Required output JSON Schema:',packet['system'])
+            self.assertIsNotNone(packet['response_schema'])
+            self.assertEqual(len(packet['input']['prior_canon']),96)
+            self.assertEqual(packet['input']['required_checks'],STORY_CHECKS+RHETORIC_CHECKS)

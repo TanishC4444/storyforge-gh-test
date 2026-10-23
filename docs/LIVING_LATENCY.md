@@ -72,3 +72,11 @@ canon, exact source/state/fact proof bindings and preservation of every initial
 fact. A green generation job alone does not pass this audit. Live runtime and prose
 quality still need to be measured from the newly generated run; fixture tests are
 not speed or quality claims.
+
+Hosted pipeline calls transport the full response grammar through the provider's
+native schema rather than also echoing that grammar into the prompt. Application
+validators are unchanged. Final reviewers receive the failed/disputed earlier
+checks and all issues, while independently reassessing all 17 dimensions; repeated
+passing explanations are omitted. A measured stress packet with the previous
+900-word output fell from over the 48,000-character limit to 41,085 characters,
+with all 96 initial facts retained. This measures packet size, not live quality.

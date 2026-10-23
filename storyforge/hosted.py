@@ -234,7 +234,10 @@ class GoogleHosted:
                     safe={k:v for k,v in config.items() if k not in {'responseJsonSchema','thinkingConfig'}}
                     self.reserve(kind,estimate+tokens)
                     event('api_compatibility_retry','Retrying rejected generation configuration with application validation',stage=role,model=model)
-                    result=self.request(model+':generateContent',{**body,'generationConfig':safe},timeout=policy['timeout'] if policy else 240)
+                    compatible=body
+                    if config.get('responseJsonSchema') is not None:
+                        compatible={**body,'systemInstruction':{'parts':[*body['systemInstruction']['parts'],{'text':'Return JSON matching this schema; source/evidence validation remains mandatory: '+json.dumps(config['responseJsonSchema'],separators=(',',':'))}]}}
+                    result=self.request(model+':generateContent',{**compatible,'generationConfig':safe},timeout=policy['timeout'] if policy else 240)
                 candidate=result.get('candidates',[{}])
                 record(self.folder,'google',model,role,result.get('usageMetadata'),attempt=attempt+1,seconds=round(time.monotonic()-request_started,3),status='returned',finish_reason=candidate[0].get('finishReason') if candidate else None,reserved_input_tokens=estimate)
                 break
