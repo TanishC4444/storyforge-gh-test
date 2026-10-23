@@ -45,3 +45,9 @@ the entire key pool. Writers and judges use the same strong model with no CPU or
 weaker-model fallback. Memory uses Lite with no CPU fallback. Provider failures
 remain visible. The full universe workflows and this demo share the provider
 concurrency group to avoid competing runs.
+
+If a run exposes an infrastructure error, supply its run ID as `resume_run`.
+The corrected run reuses returned original drafts only when saved writer inputs
+and model exactly match. It never regenerates a completed baseline to chase a
+more favorable comparison. Previous attempt usage and active time remain included
+in cumulative metrics; `active_attempt_seconds` identifies the new work alone.

@@ -1,11 +1,11 @@
 """Focused live comparison, not the full Actions universe workflow or a quality guarantee."""
 from __future__ import annotations
-import argparse,copy,hashlib,json,os,random,time
+import argparse,copy,hashlib,json,os,random,time,shutil
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from storyforge.hosted import GoogleHosted,HostedError,MODELS
 from storyforge.storage import load,save
-from storyforge.contracts import require
+from storyforge.contracts import require,request as validate_request
 from storyforge.canon import bridge
 from storyforge.continuation import append_verified_branch
 from storyforge.evidence import payload
@@ -29,7 +29,7 @@ def request(case):
     req['api_roles']={'memory':'lite','memory_quality':'lite'}
     req['characters']=[{'id':name.lower(),'name':name,'goal':'Act within the author brief.','voice':'Distinct, concrete speech.'} for name in ['Iona','Val','Sen']]
     req['plot_design']={};req['world_design']={}
-    return req
+    return validate_request(req)
 
 
 def state_for(case):
@@ -39,8 +39,8 @@ def state_for(case):
 
 
 def schema_review():
-    check={'type':'object','properties':{'id':{'type':'string','enum':CHECKS},'verdict':{'type':'string','enum':['pass','fail','not_applicable']},'evidence_ids':{'type':'array','items':{'type':'string'}},'reason':{'type':'string'}},'required':['id','verdict','evidence_ids','reason'],'additionalProperties':False}
-    issue={'type':'object','properties':{'severity':{'type':'string','enum':['blocking','advisory']},'category':{'type':'string','enum':CHECKS},'evidence_ids':{'type':'array','items':{'type':'string'}},'problem':{'type':'string'},'fix':{'type':'string'}},'required':['severity','category','evidence_ids','problem','fix'],'additionalProperties':False}
+    check={'type':'object','properties':{'id':{'type':'string','enum':CHECKS},'verdict':{'type':'string','enum':['pass','fail']},'evidence_ids':{'type':'array','minItems':1,'maxItems':3,'items':{'type':'string'}},'reason':{'type':'string','minLength':20}},'required':['id','verdict','evidence_ids','reason'],'additionalProperties':False}
+    issue={'type':'object','properties':{'severity':{'type':'string','enum':['blocking','advisory']},'category':{'type':'string','enum':CHECKS},'evidence_ids':{'type':'array','minItems':1,'maxItems':3,'items':{'type':'string'}},'problem':{'type':'string'},'fix':{'type':'string'}},'required':['severity','category','evidence_ids','problem','fix'],'additionalProperties':False}
     return {'type':'object','properties':{'pass':{'type':'boolean'},'checks':{'type':'array','items':check},'issues':{'type':'array','items':issue}},'required':['pass','checks','issues'],'additionalProperties':False}
 
 
@@ -73,7 +73,7 @@ def writer_packet(case,history,chapter):
 
 def review_scene(provider,case,history,prose,state):
     data={'author_brief':case['premise'],'world_rules':case['rules'],'chapter_history':history,'source_verified_memory':bridge(state),**payload(prose),'required_checks':CHECKS}
-    raw=provider.call('editorial',data,'Assess the current scene against its actual prior text, facts and author brief. Do not demand a future task early. Judge knowledge, resource custody, irreversible events, non-purposeful repetition and concrete prose craft. Do not invent faults. Assess every required check once. Any fail needs a matching source-supported ISSUE; use supplied passage IDs. Advisory style preferences must not become blocking facts.',2500,schema_review())
+    raw=provider.call('editorial',data,'Assess the current scene against its actual prior text, facts and author brief. Do not demand a future task early. Judge knowledge, resource custody, irreversible events, non-purposeful repetition and concrete prose craft. Do not invent faults. Assess every required check once with pass or fail; absence of a relevant change can pass with an evidence-supported explanation. Any fail needs a matching source-supported ISSUE; use one to three distinct supplied passage IDs per check and issue, including passing checks. Never return empty evidence. Advisory style preferences must not become blocking facts.',2500,schema_review())
     return editorial_review(raw,prose,CHECKS)
 
 
@@ -106,8 +106,12 @@ def retain_memory(state,card,prose,folder):
     save(folder/'state-after.json',state)
 
 
-def run_arm(case,arm,out):
+def run_arm(case,arm,out,resume=None):
     out=Path(out);provider=Provider(out);state=state_for(case);history=[];started=time.monotonic();reviews=[]
+    prior=Path(resume)/arm if resume else None
+    prior_result=load(prior/'result.json') if prior and (prior/'result.json').exists() else {}
+    if prior_result:shutil.copytree(prior,out/'previous-attempt')
+    resumed=0
     result={'arm':arm,'model':MODELS['flash36'],'complete':False,'chapters_written':0,'errors':[],'editorial':reviews}
     try:
         for i,task in enumerate(case['chapters']):
@@ -115,7 +119,15 @@ def run_arm(case,arm,out):
             packet=writer_packet(case,history,i)
             if arm=='storyforge':packet['source_verified_memory']=bridge(state)
             save(chapter/'writer-input.json',packet)
-            prose=provider.call('writer',packet,WRITER,1800);save(chapter/'original.txt',prose)
+            previous=prior/f'chapter-{i+1:02}' if prior else None
+            if previous and (previous/'original.txt').exists():
+                require(load(previous/'writer-input.json')==packet,'Resumed writer inputs differ; refusing silent regeneration')
+                metas=list(prior.glob('call-*-writer/metadata.json'))
+                require(metas and all(load(p)['model']==MODELS['flash36'] for p in metas),'Resumed writing model differs')
+                prose=(previous/'original.txt').read_text();resumed+=1
+                save(chapter/'resume.json',{'source':str(previous),'source_sha256':digest(prose),'identical_writer_input':True})
+            else:prose=provider.call('writer',packet,WRITER,1800)
+            save(chapter/'original.txt',prose)
             # Save every returned draft even if later editorial or memory work fails.
             save(chapter/'prose.txt',prose)
             if arm=='storyforge':
@@ -138,7 +150,7 @@ def run_arm(case,arm,out):
                 state['version']+=1
         result['complete']=True
     except Exception as exc:result['errors'].append(str(exc))
-    result.update(seconds=round(time.monotonic()-started,3),words=sum(len(x.split()) for x in history),provisional=any(not x.get('pass') or x.get('unverified') for x in reviews))
+    result.update(active_attempt_seconds=round(time.monotonic()-started,3),resumed_chapters=resumed,seconds=round(time.monotonic()-started+prior_result.get('seconds',0),3),words=sum(len(x.split()) for x in history),provisional=any(not x.get('pass') or x.get('unverified') for x in reviews))
     result['usage']=summarize(out,out/'usage')
     save(out/'result.json',result);save(out/'final-state.json',state)
     return result,history
@@ -150,7 +162,7 @@ def judge_pair(case,arms,out):
     labels=dict(zip(['A','B'],names));provider=Provider(Path(out)/'judge')
     packet={'brief':case['premise'],'rules':case['rules'],'chapter_tasks':case['chapters'],'criteria':case['criteria'],
             'manuscripts':{label:{f'chapter-{i+1}':payload(text) for i,text in enumerate(arms[name][1])} for label,name in labels.items()}}
-    row={'type':'object','properties':{'criterion':{'type':'integer'},'verdict':{'type':'string','enum':['pass','fail','uncertain']},'chapter':{'type':'integer'},'evidence_ids':{'type':'array','items':{'type':'string'}},'reason':{'type':'string'}},'required':['criterion','verdict','chapter','evidence_ids','reason'],'additionalProperties':False}
+    row={'type':'object','properties':{'criterion':{'type':'integer'},'verdict':{'type':'string','enum':['pass','fail','uncertain']},'chapter':{'type':'integer'},'evidence_ids':{'type':'array','minItems':1,'maxItems':3,'items':{'type':'string'}},'reason':{'type':'string'}},'required':['criterion','verdict','chapter','evidence_ids','reason'],'additionalProperties':False}
     entry={'type':'object','properties':{'label':{'type':'string','enum':['A','B']},'checks':{'type':'array','items':row},'prose_score':{'type':'integer','minimum':1,'maximum':5},'prose_reason':{'type':'string'}},'required':['label','checks','prose_score','prose_reason'],'additionalProperties':False}
     schema={'type':'object','properties':{'assessments':{'type':'array','items':entry}},'required':['assessments'],'additionalProperties':False}
     result=provider.call('blind_judge',packet,'Assess both anonymous manuscripts independently. Do not assume either is superior. Evaluate criteria numbered 1 to 5, exactly once each. Cite chapter number and exact supplied passage IDs for every conclusion. Absence-based failures may cite the relevant attempted scene. If source is insufficient, return uncertain. Distinguish purposeful motifs from redundant discovery. Rate prose craft 1–5 with reasons; these are model judgments, not human validation.',3500,schema)
@@ -168,10 +180,12 @@ def judge_pair(case,arms,out):
 
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--case',choices=['secret','resource','consequence'],required=True);parser.add_argument('--out',required=True);args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--case',choices=['secret','resource','consequence'],required=True);parser.add_argument('--out',required=True);parser.add_argument('--resume-root');args=parser.parse_args()
     case=load(ROOT/'demos/continuity-cases.json')[args.case];out=Path(args.out);save(out/'case.json',case)
+    resume=Path(args.resume_root)/args.case if args.resume_root else None
+    if resume and resume.exists():require(load(resume/'case.json')==case,'Resumed demo brief differs')
     arms={};order=['baseline','storyforge'];random.Random(args.case).shuffle(order)
-    for arm in order:arms[arm]=run_arm(case,arm,out/arm)
+    for arm in order:arms[arm]=run_arm(case,arm,out/arm,resume=resume)
     report={'case':args.case,'title':case['title'],'arms':{name:value[0] for name,value in arms.items()},'comparison':'incomplete','scope':'Focused production memory/patch components; not the full universe Actions graph. Baseline receives full text and identical initial brief; managed arm gets additional verification/editing calls. No forced context truncation or planted faulty baseline.'}
     if all(value[0]['complete'] for value in arms.values()):
         try:report['assessment']=judge_pair(case,arms,out);report['comparison']='assessed'
@@ -180,7 +194,7 @@ def main():
     save(out/'report.json',report)
     text=['# '+case['title'],'',report['scope'],'','| Arm | Chapters | Words | Seconds | Complete |','|---|---:|---:|---:|---|']
     for name,(r,_) in arms.items():text.append(f"| {name} | {r['chapters_written']} | {r['words']} | {r['seconds']} | {r['complete']} |")
-    text+=['','Comparison status: '+report['comparison'], '','Token counts are observed usage, not a dollar bill. No financial cost is estimated without a verified pricing source.','']
+    text+=['','Comparison status: '+report['comparison'], '','Resumed chapters are reused only with identical saved writer inputs and writing model. Timings and usage include previous attempts; active-attempt seconds are separate in result.json. Token counts are observed usage, not a dollar bill. No financial cost is estimated without a verified pricing source.','']
     if report.get('assessment'):
         text+=['| Arm | Criteria passed | Failed | Uncertain | Model prose score / 5 |','|---|---:|---:|---:|---:|']
         for entry in report['assessment']['assessments']:

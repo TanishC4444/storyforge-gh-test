@@ -1,8 +1,14 @@
 name: Continuity demos / matched plain LLM comparison
 on:
   workflow_dispatch:
+    inputs:
+      resume_run:
+        type: string
+        default: ""
+        description: Reuse matching drafts from this demo run; never regenerate completed baseline chapters
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: story-universe-provider-budget
   cancel-in-progress: false
@@ -27,8 +33,24 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Download prior matching demo drafts
+        if: inputs.resume_run != ''
+        uses: actions/download-artifact@v4
+        with:
+          pattern: continuity-demo-*
+          merge-multiple: true
+          path: resume
+          run-id: ${{ inputs.resume_run }}
+          github-token: ${{ github.token }}
       - name: Compare three chapters with the same writing model
-        run: python -m scripts.continuity_demo --case '${{ matrix.case }}' --out 'out/${{ matrix.case }}'
+        env:
+          RESUME_RUN: ${{ inputs.resume_run }}
+        run: |
+          if [ -n "$RESUME_RUN" ]; then
+            python -m scripts.continuity_demo --case '${{ matrix.case }}' --out 'out/${{ matrix.case }}' --resume-root resume
+          else
+            python -m scripts.continuity_demo --case '${{ matrix.case }}' --out 'out/${{ matrix.case }}'
+          fi
       - name: Save every draft, memory receipt, verdict and usage record
         if: always()
         uses: actions/upload-artifact@v4
