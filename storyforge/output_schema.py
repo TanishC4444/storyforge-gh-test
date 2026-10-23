@@ -16,7 +16,7 @@ def editorial_schema(packet):
 
 def memory_schema(packet,character_ids,allow_public=True,prior_memories=None):
     ids=[p['id'] for p in packet['evidence_passages']]
-    item={'type':'object','properties':{'kind':{'type':'string','enum':['event','belief','claim','resource','relationship','thread']},'text':{'type':'string'},'evidence_ids':{'type':'array','items':{'type':'string','enum':ids},'minItems':1,'maxItems':3},'known_by':{'type':'array','items':{'type':'string','enum':character_ids+(['public'] if allow_public else [])}},'holder':{'type':'string','enum':character_ids},'claim_source':{'type':'string','enum':character_ids}},'required':['kind','text','evidence_ids','known_by'],'additionalProperties':False}
+    item={'type':'object','properties':{'kind':{'type':'string','enum':['event','belief','claim','resource','relationship','thread']},'text':{'type':'string','minLength':1,'maxLength':600},'evidence_ids':{'type':'array','items':{'type':'string','enum':ids},'minItems':1,'maxItems':3},'known_by':{'type':'array','items':{'type':'string','enum':character_ids+(['public'] if allow_public else [])}},'holder':{'type':'string','enum':character_ids},'claim_source':{'type':'string','enum':character_ids}},'required':['kind','text','evidence_ids','known_by'],'additionalProperties':False}
     item['properties'].update(subject={'type':'string','enum':character_ids},life_state={'type':'string','enum':['alive','dead','missing','unknown']},thread_id={'type':'string'},thread_state={'type':'string','enum':['seeded','escalating','payoff','closed']})
     if prior_memories is not None:
         item['properties']['fact_key']={'type':'string'}

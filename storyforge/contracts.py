@@ -92,7 +92,7 @@ def delta(value, prose, ids):
     value = {**value, 'memories': [dict(m) for m in value['memories']]}
     for index, m in enumerate(value['memories']):
         require(m.get('kind') in {'event', 'belief', 'claim', 'resource', 'relationship', 'thread'}, 'Invalid memory kind')
-        require(isinstance(m.get('text'), str) and 0 < len(m['text']) <= 600, 'Invalid memory text')
+        require(isinstance(m.get('text'), str) and bool(m['text'].strip()) and len(m['text']) <= 600, f'Invalid memory text at record {index + 1}: text is required, nonempty, and at most 600 characters')
         try:
             m = bind(m, prose)
             value['memories'][index] = m

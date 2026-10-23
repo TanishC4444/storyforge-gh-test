@@ -127,3 +127,19 @@ All current facts, complete authored actor profiles, knowledge allowlists and
 historical beliefs remain. Replaying the failed scene-two packet with a 900-word
 rejected candidate yields about 51,500 input characters before the system prompt,
 within the existing 64,000-character budget. No memory cutoff was increased.
+
+Memory descriptions are required for every kind, including threads; the schema
+now requires 1–600 characters and application validation rejects whitespace.
+Pipeline extraction can fill a missing description by copying its complete bound
+source span only when that span fits. It never truncates evidence or defaults
+knowledge holders, outcomes or identity fields. Longer descriptions get one
+field-only repair using only the affected records, cited passages and exact
+superseded facts. Strong Flash routes precede Lite for that repair, within three
+HTTP attempts. All sibling records and non-text fields remain immutable, and the
+full evidence/identity validators plus independent factual review still apply.
+
+Failed field repair retains original records and the exact scene for recovery.
+Incomplete extraction schedules one explicitly blocked diagnostic check rather
+than a matrix of identical failures; no missing verification is treated as a pass.
+A replay of the failed live batch recovered all six records with original fields
+unchanged; this is a mocked transport regression, not a new live quality result.

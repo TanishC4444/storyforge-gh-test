@@ -41,6 +41,10 @@ def plan(state,source,out,phase):
         v=load(previous)
         if v.get('pass') and not v.get('unverified') and v.get('state_sha256')==bind_state(state) and v.get('source_sha256')==digest(prose) and v.get('memory_sha256')==bind_state(memory):
             reuse=v;batches=[{'id':'reuse','owned_passages':[],'fact_indices':[]}]
+    if memory.get('unverified'):
+        # No model can verify incomplete extraction. Preserve the full ledger and
+        # report one blocked check instead of launching identical failing workers.
+        reuse=None;batches=[{'id':'0','owned_passages':[],'fact_indices':[]}]
     require(len(batches)<=256,'Memory coverage exceeds one Actions matrix; split the episode or use continuation without dropping facts')
     value={'phase':phase,'state_sha256':bind_state(state),'source_sha256':digest(prose),
            'memory_sha256':bind_state(memory),'batches':batches,'reused_preflight':reuse}
@@ -78,7 +82,7 @@ def check(state,card,source,out,backend,bid):
     if p.get('reused_preflight'):
         verdict={'pass':True,'issues':p['reused_preflight']['issues'],'reused_unchanged_verified_memory':True}
     elif memory.get('unverified'):
-        verdict={'pass':False,'issues':[],'unverified':True,'error':'Memory extraction unavailable'}
+        verdict={'pass':False,'issues':[],'unverified':True,'error':memory.get('error','Memory extraction unavailable')}
     else:
         facts=[{'index':i,**{k:v for k,v in memory['memories'][i].items() if k in {'kind','text','known_by','holder','claim_source','continuity_scope','literary_status','subject','life_state','thread_id','thread_state','fact_key','supersedes','evidence_ids'}}} for i in batch['fact_indices']]
         mode=('Also check continuity ONLY in owned_passages: character arrival before action, acquired knowledge, custody, resources and causal joins. Quote the affected owned paragraph and target prose for a demonstrated continuity fault. '
@@ -158,6 +162,7 @@ def extract_batch(state,card,source,out,backend,bid):
             result=memory_extract(Executor(req,folder,backend),req,folder,prose,packet,instruction);break
         except Exception as exc:
             last=str(exc);raw=[]
+            if 'Memory field-only recovery failed' in last:break
             for path in folder.glob('calls/memory-*.json'):raw.append(load(path).get('output'))
             if not raw:break
             packet={**packet,'rejected_memory_output':raw[-1],'specific_validation_error':last}
