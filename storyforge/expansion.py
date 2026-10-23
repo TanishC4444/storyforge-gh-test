@@ -21,14 +21,15 @@ def prepare(source,out,checkpoint=None):
         prior=load(checkpoint)
         require(prior.get('backend')==state['backend'],'Cannot mix fixture and live universe canon')
         require(prior.get('universe_bible_hash')==foundation,'Universe bible differs; author a deliberate new universe instead')
-        old_cast={c['id']:c['name'] for c in prior['request']['characters']};new_cast={c['id']:c['name'] for c in req['characters']}
-        require(all(new_cast.get(cid)==name for cid,name in old_cast.items()),'Existing cast identities cannot be removed or reassigned')
+        from .universe_events import resume_cast
+        resume_cast(req,prior)
         require(prior.get('complete') and prior.get('accepted'),'Checkpoint must contain completed accepted scenes')
         require(all(s.get('quality_status')=='reviewed' and all(s.get(k,{}).get('pass') for k in ['review','rhetoric_review','memory_review']) for s in prior['accepted']),'Unreviewed prose cannot be imported as accepted universe canon')
         require(prior['request']['premise']!=req['premise'],'A resumed universe needs a new episode brief, not the same opening again')
         episode=prior['universe_episode']+1
         state['memories']=copy.deepcopy(prior['memories'])
         history=copy.deepcopy(prior.get('universe_history',[]))+[dict(s,universe_episode=prior['universe_episode']) for s in prior['accepted']]
+    state['request_hash']=fingerprint(req)
     state.update(universe_bible_hash=foundation,universe_episode=episode,universe_history=history)
     state['canon']=index(state['memories'])
     state['refinement']=compile_brief(req)

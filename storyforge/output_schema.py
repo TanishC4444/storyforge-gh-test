@@ -17,6 +17,7 @@ def editorial_schema(packet):
 def memory_schema(packet,character_ids,allow_public=True,prior_memories=None):
     ids=[p['id'] for p in packet['evidence_passages']]
     item={'type':'object','properties':{'kind':{'type':'string','enum':['event','belief','claim','resource','relationship','thread']},'text':{'type':'string'},'evidence_ids':{'type':'array','items':{'type':'string','enum':ids},'minItems':1,'maxItems':3},'known_by':{'type':'array','items':{'type':'string','enum':character_ids+(['public'] if allow_public else [])}},'holder':{'type':'string','enum':character_ids},'claim_source':{'type':'string','enum':character_ids}},'required':['kind','text','evidence_ids','known_by'],'additionalProperties':False}
+    item['properties'].update(subject={'type':'string','enum':character_ids},life_state={'type':'string','enum':['alive','dead','missing','unknown']},thread_id={'type':'string'},thread_state={'type':'string','enum':['seeded','escalating','payoff','closed']})
     if prior_memories is not None:
         item['properties']['fact_key']={'type':'string'}
         item['required']+=['fact_key','supersedes']
@@ -74,6 +75,20 @@ def scene_schema(req,packet):
     item={'type':'object','properties':{'record_id':{'type':'string','enum':[r['id'] for r in refs]} if refs else {'type':'string'},'application':{'type':'string'}},'required':['record_id','application'],'additionalProperties':False}
     scene['properties']['reference_uses']={'type':'array','items':item,'maxItems':len(refs)}
     scene['required']=list(scene['properties'])
+    count=packet.get('writing_batch_count')
+    if count:
+        fields={k:{'type':'string','minLength':1} for k in ['action','entry_state','exit_state']}
+        scene['properties']['writing_beats']={'type':'array','items':{'type':'object','properties':fields,'required':list(fields),'additionalProperties':False},'minItems':count,'maxItems':count}
+        scene['required'].append('writing_beats')
+    from .universe_events import freedom
+    f=freedom(req)
+    if f['enabled'] and f['new_characters']:
+        # IDs may refer to profiles declared in this same atomic scene proposal.
+        scene['properties']['participants']['maxItems']=min(8,len(req['characters'])+f['max_new_per_scene'])
+        scene['properties']['participants']['items']={'type':'string'}
+        scene['properties']['pov']={'type':'string'}
+        fields={k:{'type':'string'} for k in ['id','name','goal','voice','introduction_cause']}
+        scene['properties']['new_characters']={'type':'array','items':{'type':'object','properties':fields,'required':list(fields),'additionalProperties':False},'maxItems':f['max_new_per_scene']}
     return scene
 
 

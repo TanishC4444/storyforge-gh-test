@@ -1,0 +1,226 @@
+{
+  "brief_version": 1,
+  "medium": "auto",
+  "chapters": 1,
+  "scenes_per_chapter": 2,
+  "words_per_scene": 500,
+  "context_chars": 48000,
+  "n_ctx": 16384,
+  "profile": "fast",
+  "retrieval_mode": "keyword",
+  "auto_approve_plan": true,
+  "max_repairs": 1,
+  "max_stage_retries": 0,
+  "min_words_ratio": 0.7,
+  "max_words_ratio": 1.4,
+  "length_policy": {
+    "scene_words": "guidance",
+    "chapter_words": "target",
+    "allow_compression": false
+  },
+  "references": [],
+  "adaptation": {
+    "strength": 0.3,
+    "mode": "mechanisms",
+    "max_active_sources_per_scene": 1,
+    "preserve_user_choices": true
+  },
+  "creative_freedom": {
+    "enabled": true,
+    "intensity": 0.95,
+    "new_characters": true,
+    "character_deaths": true,
+    "resurrection": false,
+    "protected_characters": [],
+    "max_new_per_scene": 1,
+    "cast_limit": 32,
+    "flexible_pov": true
+  },
+  "execution_policy": {
+    "experimental": false,
+    "literary_quality": true,
+    "continue_with_warnings": false,
+    "cpu_models": {
+      "humanizer": "qwen7b",
+      "repair": "qwen7b",
+      "story_quality": "qwen7b",
+      "rhetoric_quality": "qwen7b",
+      "memory": "qwen7b",
+      "memory_quality": "qwen7b",
+      "chapter_quality": "qwen7b",
+      "director": "qwen7b",
+      "scene_designer": "qwen7b",
+      "character": "qwen7b",
+      "writer": "qwen7b",
+      "writer_beat": "qwen7b"
+    },
+    "editorial_disagreement": "one_strict_check",
+    "gemini_batches": true,
+    "total_call_seconds": {
+      "humanizer": 300,
+      "repair": 300,
+      "story_quality": 300,
+      "rhetoric_quality": 300,
+      "memory": 300,
+      "memory_quality": 300,
+      "chapter_quality": 420,
+      "director": 180,
+      "scene_designer": 180,
+      "character": 180,
+      "writer": 600,
+      "writer_beat": 600
+    },
+    "hosted_route_seconds": 60
+  },
+  "performance": {
+    "compact_packets": true,
+    "application_prompt_binding": true,
+    "hosted_failover": false,
+    "batch_development": true,
+    "canon_index": true,
+    "inherit_provider_budget": false,
+    "application_plan_binding": true,
+    "development_batch_size": 6,
+    "api_batch_probes": false,
+    "combine_direction": true,
+    "classic_expansion": true,
+    "validate_scene_prose": true,
+    "batched_prose": true,
+    "batched_repairs": true,
+    "living_universe": false,
+    "readable_editorial": true,
+    "summary_reviews": true,
+    "memory_pair_batches": true,
+    "empowered_editors": true,
+    "living_bounded": false
+  },
+  "api_roles": {
+    "writer_beat": "flash",
+    "writer": "flash",
+    "repair": "flash36",
+    "humanizer": "flash36",
+    "story_quality": "flash36",
+    "rhetoric_quality": "flash36",
+    "memory": "lite",
+    "memory_quality": "flash36",
+    "chapter_quality": "flash36",
+    "scene_designer": "lite",
+    "director": "lite",
+    "character": "lite"
+  },
+  "project_id": "medium-stage-play-practice",
+  "title": "The Last Seat",
+  "premise": "Write a two-scene theater play, a tense dark comedy in a flood-isolated council chamber. Three rivals discover that the emergency boat has one seat fewer than the public list promised. A signed allocation appears to implicate the person trying to organize the escape. Plant one visible clue in scene one and reinterpret it through a consequential choice in scene two. Connected betrayal, new arrivals or death may occur when earned, but do not force a shock quota. Keep the action performable. A few movable props, doors, lights and offstage sound must carry the production.",
+  "genre": "Political tragicomedy",
+  "pov": "Theatre presentation through playable dialogue, silence, stage action and entrances/exits. No prose narrator, no unspoken interior thoughts.",
+  "tone_mood": "Darkly funny, escalating dread, painfully human stakes.",
+  "reader_experience": "Subtext, tension and an earned reversal the audience can trace.",
+  "style": {
+    "register": "Performable contemporary stage dialogue with distinct tactics.",
+    "dialogue": "Primary dramatic vehicle: contested promises, interruptions and evasions.",
+    "interiority": "Shown through speech, action and silence only.",
+    "explanation": "No novel narration, explanatory recap, or repeated scene opening.",
+    "figurative_language": {
+      "density": "sparse",
+      "devices": [
+        "motif"
+      ],
+      "image_domains": [
+        "seats",
+        "water",
+        "paper"
+      ]
+    }
+  },
+  "characters": [
+    {
+      "id": "ada",
+      "name": "Ada",
+      "goal": "Get her district evacuated without exposing an altered allocation.",
+      "voice": "Polished public reassurance cracking into terse bargaining."
+    },
+    {
+      "id": "ben",
+      "name": "Ben",
+      "goal": "Secure passage for the people waiting outside.",
+      "voice": "Concrete questions; refuses euphemisms."
+    },
+    {
+      "id": "cyra",
+      "name": "Cyra",
+      "goal": "Preserve evidence of who changed the passenger list.",
+      "voice": "Dry literal corrections; silence when pressured."
+    }
+  ],
+  "world_rules": [
+    "The rescue boat has exactly three seats; the public list names four passengers.",
+    "There is no second boat arriving during these two scenes.",
+    "No magical solutions, erased deaths, instant travel or shared private knowledge.",
+    "All onstage events must be achievable with a desk, four chairs, two doors, papers, lighting and offstage sound."
+  ],
+  "initial_facts": [
+    {
+      "text": "The only rescue boat has three seats, while the public passenger list names four people.",
+      "known_by": [
+        "ada",
+        "ben",
+        "cyra"
+      ],
+      "fact_key": "boat-capacity"
+    },
+    {
+      "text": "Cyra holds the original allocation paper; Ada holds the public copy.",
+      "known_by": [
+        "ada",
+        "cyra"
+      ],
+      "fact_key": "allocation-custody"
+    }
+  ],
+  "plot_design": {
+    "central_question": "Who gets left behind when the people controlling the list must answer for it?",
+    "subplots": [],
+    "causal_dependencies": [
+      "The missing seat forces a public commitment.",
+      "A visible discrepancy changes the next negotiation.",
+      "A costly choice reinterprets the clue without resetting the capacity."
+    ]
+  },
+  "world_design": {
+    "setting": "One council chamber, evening; water is rising beyond the doors."
+  },
+  "scene_designs": [
+    {
+      "id": "ch01-sc01",
+      "pov": "ada",
+      "participants": [
+        "ada",
+        "ben",
+        "cyra"
+      ],
+      "location": "Council chamber",
+      "setting": "Desk, four chairs, two doors; rising water audible outside",
+      "time": "Evening, before departure",
+      "dramatic_function": "Force a commitment over the missing seat.",
+      "development": "Plant a visible discrepancy between the two papers.",
+      "restrictions": "One scene heading, speaker cues, concise playable stage directions; no prose narration.",
+      "choice_and_consequence": "Plant a visible discrepancy between the two papers. A material choice changes available options and imposes a cost."
+    },
+    {
+      "id": "ch01-sc02",
+      "pov": "ada",
+      "participants": [
+        "ada",
+        "ben",
+        "cyra"
+      ],
+      "location": "Council chamber",
+      "setting": "The same chamber with the consequences of scene one still visible",
+      "time": "A few minutes later",
+      "dramatic_function": "Force a costly allocation decision under immediate departure pressure.",
+      "development": "Reveal a causally earned reinterpretation of the planted clue.",
+      "restrictions": "Continue actual entrances, custody, seat count and commitments. Do not repeat scene one or add unstageable spectacle.",
+      "choice_and_consequence": "Reveal a causally earned reinterpretation of the planted clue. A material choice changes available options and imposes a cost."
+    }
+  ]
+}

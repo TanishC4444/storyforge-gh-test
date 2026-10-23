@@ -11,7 +11,7 @@ from .output_schema import memory_review_schema
 def memory_canon(state):
     from .canon import index
     view=index(state['memories']);current={m['id'] for m in view['current']}
-    keys={'id','kind','text','known_by','holder','claim_source','source','state_version','fact_key','supersedes','evidence_prose_sha256'}
+    keys={'id','kind','text','known_by','holder','claim_source','source','state_version','subject','life_state','thread_id','thread_state','fact_key','supersedes','evidence_prose_sha256'}
     return [{**{k:v for k,v in m.items() if k in keys},'canonical_status':'current' if m['id'] in current else 'historical_superseded'} for m in view['history']]
 
 
@@ -67,7 +67,7 @@ def check(state,card,source,out,backend,bid):
     if memory.get('unverified'):
         verdict={'pass':False,'issues':[],'unverified':True,'error':'Memory extraction unavailable'}
     else:
-        facts=[{'index':i,**{k:v for k,v in memory['memories'][i].items() if k in {'kind','text','known_by','holder','claim_source','fact_key','supersedes','evidence_ids'}}} for i in batch['fact_indices']]
+        facts=[{'index':i,**{k:v for k,v in memory['memories'][i].items() if k in {'kind','text','known_by','holder','claim_source','subject','life_state','thread_id','thread_state','fact_key','supersedes','evidence_ids'}}} for i in batch['fact_indices']]
         mode=('Also check continuity ONLY in owned_passages: character arrival before action, acquired knowledge, custody, resources and causal joins. Quote the affected owned paragraph and target prose for a demonstrated continuity fault. '
               if p['phase']=='preflight' else 'Assess ONLY the supplied extracted facts and knowledge holders. Do not report prose, entrances, style, similes or editorial preferences; those were assessed in the final editorial check. Issues must target memory. ')
         data={**scene_context(state,card,'memory_quality'),'current_prose':prose,'owned_passages':batch['owned_passages'],
@@ -79,7 +79,7 @@ def check(state,card,source,out,backend,bid):
             evidence=[x for i,x in enumerate(catalog) if x['id'] in ids or any(abs(i-j)<=1 for j in positions)]
             prior=memory_canon(state)
             if batch['task'] in {'continuity','coverage'}:
-                facts=[{'index':i,**{k:v for k,v in f.items() if k in {'kind','text','known_by','holder','claim_source','fact_key','supersedes','evidence_ids'}}} for i,f in enumerate(memory['memories']) if set(f.get('evidence_ids',[])) & set(batch['owned_passages'])]
+                facts=[{'index':i,**{k:v for k,v in f.items() if k in {'kind','text','known_by','holder','claim_source','subject','life_state','thread_id','thread_state','fact_key','supersedes','evidence_ids'}}} for i,f in enumerate(memory['memories']) if set(f.get('evidence_ids',[])) & set(batch['owned_passages'])]
             data={'original_prompt':state['request']['premise'],'scene_contract':next((c for c in state['request']['scene_designs'] if c['id']==card['id']),{}),
                   'current_prose':'\n\n'.join(x['text'] for x in evidence),'evidence_passages':[{'id':x['id'],'text':x['text']} for x in evidence],
                   'owned_passages':batch['owned_passages'],'proposed_memory':{'memories':facts},
@@ -166,6 +166,9 @@ def extract_join(state,source,out):
             key=bind_state(fact)
             if key not in seen:memories.append(fact);seen.add(key)
     value=delta({'memories':memories},prose,[c['id'] for c in state['request']['characters']])
+    from .universe_events import validate_lifecycle
+    try:validate_lifecycle(state,value['memories'])
+    except ValueError as exc:value.update(unverified=True,error=str(exc))
     missing=sorted(expected-set(found));failed=[key for key,v in found.items() if v.get('unverified') or v.get('fallback')]
     if missing or failed or p.get('upstream_unverified'):value.update(unverified=True,error='Incomplete extraction; verified facts retained',missing_batches=missing,unverified_batches=failed)
     save(Path(out)/'memory.json',value);return value

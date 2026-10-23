@@ -5,7 +5,7 @@ from .storage import load,save
 from .contracts import require
 from .evidence import passages
 from .patching import digest
-from .editorial import RHETORIC_CHECKS,editorial_review
+from .editorial import RHETORIC_CHECKS,STORY_CHECKS,editorial_review
 from .editorial_transport import call_editorial
 
 
@@ -14,7 +14,7 @@ def plan(state,source,out):
     prose=(Path(source)/'edited/prose.txt').read_text();catalog=passages(prose)
     sections=[{'id':str(i//2),'ids':[p['id'] for p in catalog[i:i+2]]} for i in range(0,len(catalog),2)]
     value={'state_sha256':bind_state(state),'source_sha256':digest(prose),'sections':sections}
-    save(Path(out)/'section-plan.json',value);output('characters',[s['id'] for s in sections]);output('reviews',[s['id']+'-'+str(g) for s in sections for g in range(2)])
+    save(Path(out)/'section-plan.json',value);output('characters',[s['id'] for s in sections]);output('reviews',[s['id']+'-'+str(g) for s in sections for g in range(2)]);output('final_reviews',final_ids(value))
     return value
 
 
@@ -29,6 +29,14 @@ def summarize(state,card,source,out,backend,bid):
     from .inference import Executor
     p,prose=inputs(state,source);section=next((s for s in p['sections'] if s['id']==bid),None);require(section is not None,'Unknown section')
     source_rows=[x for x in passages(prose) if x['id'] in section['ids']]
+    previous=Path(source)/'previous-summaries/summaries.json';original=Path(source)/'original/prose.txt'
+    if previous.exists() and original.exists():
+        old=load(previous);old_rows={x['id']:x['text'] for x in passages(original.read_text())}
+        require(old['source_sha256']==digest(original.read_text()),'Stale original summaries')
+        cached=next((x for x in old['sections'] if x['ids']==section['ids'] and not x.get('unverified')),None)
+        if cached and all(old_rows.get(x['id'])==x['text'] for x in source_rows):
+            value={**cached,'source_sha256':digest(prose),'reused_exact_source':True}
+            save(Path(out)/'summary-batch.json',value);return value
     error=None
     if backend=='fixture':text='FIXTURE source-linked summary; transport only.'
     else:
@@ -94,33 +102,69 @@ def join_reviews(state,source,out):
     save(Path(out)/'review.json',value);return value
 
 
+def final_ids(plan):
+    return ['story-'+str(g) for g in range(3)]+['local-'+s['id']+'-'+str(g) for s in plan['sections'] for g in range(2)]
+
+
 def final_review(state,card,source,out,backend,bid):
     from .batch_pipeline import scoped,review_context,bind_state
     from .adjudication import CHECKS
     from .inference import Executor
-    prose=(Path(source)/'edited/prose.txt').read_text();group=int(bid);checks=CHECKS[group*3:(group+1)*3]
-    require(bool(checks),'Unknown final review group')
-    data={**review_context(state,card),'evidence_passages':[{'id':p['id'],'text':p['text']} for p in passages(prose)],
-          'required_checks':checks,'prior_scenes_in_current_chapter':[{'id':s['id'],'prose':s['prose'],'quality_status':s.get('quality_status','reviewed')} for s in state['accepted'] if s['chapter']==card['chapter']]}
+    prose=(Path(source)/'edited/prose.txt').read_text();catalog=passages(prose)
+    hybrid='-' in str(bid);data=review_context(state,card)
+    if hybrid:
+        p,_=inputs(state,source);require(bid in final_ids(p),'Unknown final batch')
+        if bid.startswith('local-'):
+            _,sid,g=bid.split('-');section=next(s for s in p['sections'] if s['id']==sid)
+            checks=RHETORIC_CHECKS[int(g)*4:(int(g)+1)*4]
+            positions=[i for i,x in enumerate(catalog) if x['id'] in section['ids']]
+            rows=[x for i,x in enumerate(catalog) if any(abs(i-j)<=1 for j in positions)]
+            data['owned_passages']=section['ids']
+            instruction='Judge only your owned passages, using adjacent passages as read-only context. Detect repetitive wording, duplicated actions, POV/style/medium drift and instruction leakage. Anchor issues to owned IDs.'
+        else:
+            g=int(bid.split('-')[1]);checks=STORY_CHECKS[g*3:(g+1)*3]
+            summaries=load(Path(source)/'summaries/summaries.json')
+            require(summaries['source_sha256']==digest(prose),'Stale final summaries')
+            if summaries.get('unverified'):
+                value={'group':bid,'state_sha256':bind_state(state),'source_sha256':digest(prose),'review':{'pass':False,'checks':[],'issues':[],'unverified':True,'error':'Incomplete final summaries'}}
+                save(Path(out)/'final-review-batch.json',value);return value
+            data['current_scene_summaries']=summaries['sections']
+            # Exact changed text and joins support summary-based judgments. Never use old summaries after repair.
+            original=Path(source)/'original/prose.txt'
+            old_texts={x['text'] for x in passages(original.read_text())} if original.exists() else set()
+            selected={i for i,x in enumerate(catalog) if x['text'] not in old_texts} if original.exists() else set(range(len(catalog)))
+            selected.update({0,len(catalog)-1})
+            rows=[x for i,x in enumerate(catalog) if i in selected]
+            memory_path=Path(source)/'memory/memory.json'
+            if memory_path.exists():data['proposed_memory_changes']=load(memory_path)
+            data['prior_scene_outcomes']=[{k:s.get(k) for k in ['id','pov','quality_status','canon_committed','intended_change']} for s in state.get('universe_history',[])+state['accepted']]
+            instruction='Assess causal cohesion across the source-linked summaries, full current canon, proposed memory changes and exact supplied passages. Summaries and intended changes are navigation/proposals, never accepted facts. Catch repeated completed events, incompatible chronology, knowledge leaks, abandoned consequences, unearned twists and missing setups. Prior provisional outcomes cannot override canon. Cite exact evidence, not an invented quote.'
+    else:
+        group=int(bid);checks=CHECKS[group*3:(group+1)*3];require(bool(checks),'Unknown final review group');rows=catalog
+        instruction='Independently assess the actual candidate against the original prompt and canon.'
+    data.update(evidence_passages=[{'id':x['id'],'text':x['text']} for x in rows],required_checks=checks)
     try:
         verdict=call_editorial(Executor(scoped(state['request']),out,backend),'chapter_quality',data,
-            'This is the ONE final judgment round for your requested dimensions. Independently read the complete actual candidate, original prompt, immutable author contract, source-bound canon and supplied prior chapter scenes. Check actual results of editing, not earlier reviewer opinions. Preserve POV, knowledge, form, style, chronology and source influence. Do not require forbidden dialogue or approve to finish. Return concise source-bound judgments and actionable author-consistent issues; no further rewrite cycle.',prose,checks,1000)
+            'ONE final strict judgment round; no debate or rewrite loop. '+instruction+' Author medium, knowledge, style and explicit constraints govern. Give concise source-bound judgments; never approve merely to finish.',prose,checks,1000)
+        if data.get('owned_passages'):require(all(set(i.get('evidence_ids',[])) & set(data['owned_passages']) for i in verdict.get('issues',[])),'Final issue outside owned section')
     except Exception as exc:verdict={'pass':False,'checks':[],'issues':[],'unverified':True,'error':str(exc)}
-    value={'group':group,'state_sha256':bind_state(state),'source_sha256':digest(prose),'review':verdict}
+    value={'group':str(bid) if hybrid else int(bid),'state_sha256':bind_state(state),'source_sha256':digest(prose),'review':verdict}
     save(Path(out)/'final-review-batch.json',value);return value
 
 
 def final_join(state,source):
     from .batch_pipeline import bind_state
     from .adjudication import CHECKS
-    prose=(Path(source)/'edited/prose.txt').read_text();expected=set(range(math.ceil(len(CHECKS)/3)));found={}
+    prose=(Path(source)/'edited/prose.txt').read_text();plan_path=Path(source)/'plan/section-plan.json'
+    expected=set(final_ids(inputs(state,source)[0])) if plan_path.exists() else set(range(math.ceil(len(CHECKS)/3)));found={}
     for path in (Path(source)/'final-batches').rglob('final-review-batch.json'):
         v=load(path);require(v['group'] in expected and v['group'] not in found,'Foreign or duplicate final review')
-        require(v['state_sha256']==bind_state(state) and v['source_sha256']==digest(prose),'Stale final review')
-        found[v['group']]=v['review']
-    valid=[v for _,v in sorted(found.items()) if not v.get('unverified')]
-    value={'pass':all(v['pass'] for v in valid),'checks':[c for v in valid for c in v['checks']],'issues':[i for v in valid for i in v['issues']]}
+        require(v['state_sha256']==bind_state(state) and v['source_sha256']==digest(prose),'Stale final review');found[v['group']]=v['review']
+    valid=[v for v in found.values() if not v.get('unverified')];checks=[]
+    for key in CHECKS:
+        candidates=[c for v in valid for c in v['checks'] if c['id']==key]
+        if candidates:checks.append(next((c for c in candidates if c['verdict']=='fail'),candidates[0]))
+    value={'pass':bool(valid) and all(v['pass'] for v in valid),'checks':checks,'issues':[i for v in valid for i in v['issues']],'batch_count':len(expected)}
     if set(found)!=expected or any(v.get('unverified') for v in found.values()):
-        value.update(unverified=True,error='Missing or unverified final dimension batch');value['pass']=False
-        return value
-    return editorial_review(value,prose,CHECKS)
+        value.update(unverified=True,error='Missing or unverified final batch; valid findings preserved');value['pass']=False;return value
+    return {**editorial_review(value,prose,CHECKS),'batch_count':len(expected)}

@@ -101,18 +101,27 @@ def development_stage(task,source,out,state,executor,plan_instruction,refine_ins
     raise ValueError('Unknown development stage')
 
 
-def validate_scene(scene,req,index):
+def validate_scene(scene,req,index,dead=None):
     expected=f'ch{index//req["scenes_per_chapter"]+1:02}-sc{index%req["scenes_per_chapter"]+1:02}'
-    ids={c['id'] for c in req['characters']}
+    from .universe_events import extended_request
+    contracts.require(isinstance(scene,dict),'Scene must be an object')
+    expanded=extended_request(req,scene)
+    ids={c['id'] for c in expanded['characters']}
     contracts.require(isinstance(scene,dict) and scene.get('id')==expected,'Scene design must keep scene ID')
     contracts.require(scene.get('chapter')==index//req['scenes_per_chapter']+1 and scene.get('pov') in ids,'Invalid scene design chapter/POV')
     prescribed=next((s for s in req.get('scene_designs',[]) if s['id']==expected),{})
-    if prescribed.get('pov'):contracts.require(scene['pov']==prescribed['pov'],'Scene design changed the author-specified POV')
+    if prescribed.get('pov') and not (prescribed['pov'] in (dead or set()) and req.get('creative_freedom',{}).get('flexible_pov',False)):
+        contracts.require(scene['pov']==prescribed['pov'],'Scene design changed the author-specified POV')
     participants=scene.get('participants',[])
     contracts.require(isinstance(participants,list) and bool(participants) and all(isinstance(x,str) for x in participants) and len(set(participants))==len(participants) and set(participants)<=ids and scene['pov'] in participants,'Invalid scene participants')
     for key in ['goal','obstacle','intended_change','location','time','choice','consequence','new_development']:
         contracts.require(isinstance(scene.get(key),str) and bool(scene[key].strip()),'Scene design needs '+key)
     contracts.require(isinstance(scene.get('reference_uses'),list),'Scene design needs reference_uses')
+    if 'writing_beats' in scene:
+        import math
+        beats=scene['writing_beats']
+        contracts.require(isinstance(beats,list) and len(beats)==max(1,min(6,math.ceil(req['words_per_scene']/320))),'Wrong writing beat count')
+        contracts.require(all(isinstance(b,dict) and all(isinstance(b.get(k),str) and b[k].strip() for k in ['action','entry_state','exit_state']) for b in beats),'Incomplete writing handoff')
     return scene
 
 

@@ -20,11 +20,13 @@ def prepare(source,out,checkpoint=None,backend='fixture'):
         require(old.get('backend')==state['backend'],'Cannot mix fixture and live universe canon')
         require(old.get('universe_bible_hash')==fid,'Cannot silently replace universe foundation')
         require(all(s.get('quality_status')=='reviewed' and all(s.get(k,{}).get('pass') for k in ['review','rhetoric_review','memory_review']) for s in old.get('accepted',[])),'Unreviewed events cannot enter universe canon')
-        old_cast={c['id']:c['name'] for c in old['request']['characters']};new_cast={c['id']:c['name'] for c in req['characters']}
-        require(all(new_cast.get(cid)==name for cid,name in old_cast.items()),'Existing character identities must remain stable')
+        from .universe_events import resume_cast
+        resume_cast(req,old)
         history=copy.deepcopy(old.get('universe_history',[]))+[dict(s,universe_episode=old['universe_episode']) for s in old.get('accepted',[])]
         state['memories']=copy.deepcopy(old['memories']);episode=old['universe_episode']+bool(old.get('accepted'))
         rng=old['universe_rng_state'];attempts=old['universe_attempts']
+    from .flow_common import fingerprint
+    state['request_hash']=fingerprint(req)
     if bounded:
         state.update(universe_bible_hash=fid,universe_episode=episode,universe_history=history,universe_rng_state=rng,universe_attempts=attempts,canon=index(state['memories']))
         state['refinement']=compile_brief(req);state['refinement_method']='application_compiled_author_brief_no_model_calls'
@@ -59,7 +61,7 @@ def chapter_proposal(state,out):
            'rng_state':state['universe_rng_state'],'attempts':state['universe_attempts']}
     proposal=propose(world,{'chaos':.6},state['request'])
     state['universe_rng_state']=world['rng_state'];state['universe_attempts']=world['attempts']
-    proposal['policy']+=' Bounded episode: the author chapter arc governs; select at most one compatible complication. No unrelated new subplot or changes to fixed resources, identities, locations or deadlines.'
+    proposal['policy']+=' Bounded episode: the author chapter arc governs. Select up to causal_budget connected complications only when earned. Preserve fixed resources, identities, travel time and deadlines. Foreshadow later shocks and carry their consequences through memory.'
     save(Path(out)/'proposal.json',proposal);save(Path(out)/'snapshot.json',state)
     return proposal
 

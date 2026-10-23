@@ -1,5 +1,6 @@
 """Explicit author brief and revision contracts; no model-written rules or canon."""
 import re
+from .media import contract as medium_contract
 from .contracts import require, refinement
 
 REVISION = '''Revise the complete scene in two priorities: dramatic causality, then language.
@@ -95,6 +96,6 @@ def validate_prose(prose,req,*,check_length=False):
     if len(paragraphs)!=len(set(paragraphs)):errors.append('Duplicate prose paragraph; revise before review')
     if 'no dialogue' in req.get('pov','').lower():
         if re.search(r'[“”"]',prose):errors.append('Quoted speech violates the no-dialogue contract. Narrate offers, refusals and commitments indirectly; do not reproduce speech or voice-example lines')
-        if re.search(r'(?im)^\s*(?:sing,?\s+muse|o\s+muse|#{1,6}\s)',prose):errors.append('Invocation or heading violates prose contract')
+        if not medium_contract(req)['script'] and re.search(r'(?im)^\s*(?:sing,?\s+muse|o\s+muse|#{1,6}\s)',prose):errors.append('Invocation or heading violates prose contract')
     require(not errors,'; '.join(errors))
     return prose

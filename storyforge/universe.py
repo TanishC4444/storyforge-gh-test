@@ -14,7 +14,7 @@ from .experimental_parts import review,repair,needs_repair
 from .editorial import STORY_CHECKS,RHETORIC_CHECKS
 from .craft import validate_prose,compile_scene_plan
 
-SHOCKS=['A resource becomes scarce','A neglected obligation is called in','An ally refuses the expected help','A rival moves first','Weather closes a route','An accident destroys a convenience','A hidden cost of an earlier choice emerges','A stranger brings an uncertain claim','An apparent opportunity creates a competing duty','An old grievance acquires a new witness','Two incompatible loyalties demand action','A discovery changes the value of an ordinary object']
+SHOCKS=['A resource becomes scarce','A neglected obligation is called in','An ally refuses the expected help','A rival moves first','Weather closes a route','An accident destroys a convenience','A hidden cost of an earlier choice emerges','A stranger brings an uncertain claim','An apparent opportunity creates a competing duty','An old grievance acquires a new witness','Two incompatible loyalties demand action','A discovery changes the value of an ordinary object','A trusted ally betrays a promise to save someone else','A successful rescue exposes a larger catastrophe','A faction splits over the cost of victory','A supposedly safe institution conceals an active conspiracy','A necessary sacrifice threatens a valued character','A planted clue reveals a dangerous second meaning','Two opponents must cooperate against a consequence they caused','A public revelation destroys the legitimacy of a leader','An apparent death leaves contradictory evidence','A debt comes due at the worst possible moment','An enemy protects someone the protagonists abandoned']
 
 
 def foundation(name):
@@ -35,11 +35,14 @@ def tuple_tree(x):return tuple(tuple_tree(v) for v in x) if isinstance(x,list) e
 
 def propose(state,spec,req):
     rng=random.Random();rng.setstate(tuple_tree(state['rng_state']))
-    ids=[c['id'] for c in req['characters']]
-    shocks=rng.sample(SHOCKS,1+int(spec['chaos']*4))
+    from .universe_events import freedom,current_life
+    f=freedom(req);dead={cid for cid,status in current_life(state.get('memories',[])).items() if status=='dead'}
+    ids=[c['id'] for c in req['characters'] if c['id'] not in dead]
+    intensity=f['intensity'] if f['enabled'] else spec['chaos']
+    shocks=rng.sample(SHOCKS,min(len(SHOCKS),1+int(intensity*4)))
     actors=rng.sample(ids,min(2,len(ids)))
     proposal={'shocks':shocks,'actors':actors,'intensity':round(rng.uniform(.3,.6)+spec['chaos']*.4,3),'roll':rng.getrandbits(32),
-              'policy':'Proposals only. Adapt to immutable world rules and current consequences. Reject incompatible shocks rather than overriding canon. Claims need not be true.'}
+              'creative_freedom':f,'causal_budget':1+int(intensity*2),'policy':'Proposals only. Adapt to immutable world rules and current consequences. Reject incompatible shocks rather than overriding canon. Claims need not be true.'}
     state['rng_state']=rng.getstate();state['attempts']+=1
     return proposal
 

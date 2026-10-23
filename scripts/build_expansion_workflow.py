@@ -10,7 +10,7 @@ def build_expansion(total=9,per_chapter=3):
     x['name']='Cinematic universe expansion / classic runners'
     x['concurrency']={'group':'classic-universe-expansion','cancel-in-progress':False}
     inputs=x['on']['workflow_dispatch']['inputs'];inputs['request_file']={'type':'string','default':'classic-universe-practice','description':'Author universe bible and explicit next-scene layout in examples/'}
-    inputs['profile']['default']='fast';inputs['scene_limit']={'type':'choice','options':['1'] if total==1 else ['1','3','9'],'default':'1'}
+    inputs['profile']['default']='fast';inputs['scene_limit']={'type':'choice','options':['1'] if total==1 else ['1','2','3','4','9'],'default':'1'}
     inputs.pop('refinement_seed_run',None)
     inputs['canon_run']={'type':'string','default':'','description':'Optional prior accepted universe-canon checkpoint; requires a new episode brief'}
     jobs=x['jobs'];prepare=jobs['prepare']
@@ -70,7 +70,7 @@ def build_living():
     x['name']='Living universe / Gemini-first / batched runner graph'
     x['concurrency']['group']='living-universe'
     inputs=x['on']['workflow_dispatch']['inputs'];inputs['request_file']['default']='local-universe-massive';inputs['profile']['default']='fast'
-    inputs['scene_limit']={'type':'choice','options':['1','4'],'default':'1','description':'One growing-world event or a four-chapter bounded episode'}
+    inputs['scene_limit']={'type':'choice','options':['1','2','4'],'default':'1','description':'One growing-world event or a two/four-chapter bounded episode'}
     inputs['resume_run']=inputs.pop('canon_run');inputs['resume_run']['description']='Prior accepted universe-canon run; empty starts a world'
     inputs['checkpoint_artifact']={'type':'choice','options':['universe-canon','quickstart'],'default':'universe-canon','description':'Use quickstart only to retry a failed event while retaining its saved random draw'}
     for key,job in x['jobs'].items():

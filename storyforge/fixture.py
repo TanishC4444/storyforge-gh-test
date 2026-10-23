@@ -23,6 +23,7 @@ def respond(role, packet, req):
     if role == 'scene_designer':
         card=dict(packet['proposed_scene'])
         card.update(choice='FIXTURE attempt a practical check',consequence='FIXTURE cooperation changes the next task',new_development='FIXTURE transition '+card['id'],reference_uses=[])
+        if packet.get('writing_batch_count'):card['writing_beats']=[{'action':f'FIXTURE assigned action {i}','entry_state':f'FIXTURE state {i}','exit_state':f'FIXTURE state {i+1}'} for i in range(packet['writing_batch_count'])]
         return json.dumps(card)
     if role == 'architect':
         ids = [c['id'] for c in req['characters']]
