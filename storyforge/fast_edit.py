@@ -15,7 +15,7 @@ def batches(prose, count=4):
 def validate(value, batch):
     require(isinstance(value,dict) and isinstance(value.get('replacements'),dict),'Editor requires replacements')
     require(set(value['replacements'])<=set(batch['owned']),'Editor changed an unowned paragraph')
-    require(all(isinstance(v,str) and v.strip() for v in value['replacements'].values()),'Editors cannot delete paragraphs')
+    require(all(isinstance(v,str) and (batch.get('allow_deletions') or v.strip()) for v in value['replacements'].values()),'Editors cannot delete paragraphs')
     return value
 
 

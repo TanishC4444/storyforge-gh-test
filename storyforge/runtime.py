@@ -16,7 +16,7 @@ def worker_timeout_seconds():
         return WORKER_TIMEOUT_SECONDS
     remaining = int(float(deadline) - time.time())
     if remaining <= 0:
-        raise TimeoutError('Six-hour job budget exhausted; stopping before cleanup reserve.')
+        raise TimeoutError('Inference/job time budget exhausted; preserving artifacts and cleanup time.')
     return min(WORKER_TIMEOUT_SECONDS, remaining)
 
 
@@ -38,3 +38,22 @@ def inference_timeout_seconds(role):
         if not 60<=cap<=1800:raise ValueError('Batch inference budget must be 60–1800 seconds')
         return min(remaining,cap)
     return remaining
+
+
+def scoped_call_budget(fn):
+    """One elapsed-time allowance shared by hosted routes and CPU fallback."""
+    from functools import wraps
+    @wraps(fn)
+    def wrapped(self,role,*args,**kwargs):
+        budgets=self.req.get('execution_policy',{}).get('total_call_seconds',{})
+        if role not in budgets or self.backend=='fixture':return fn(self,role,*args,**kwargs)
+        seconds=budgets[role]
+        if type(seconds) is not int or not 30<=seconds<=1800:raise ValueError('Invalid total call budget')
+        previous=os.getenv('STORY_JOB_DEADLINE');deadline=time.time()+seconds
+        if previous:deadline=min(deadline,float(previous))
+        os.environ['STORY_JOB_DEADLINE']=str(deadline)
+        try:return fn(self,role,*args,**kwargs)
+        finally:
+            if previous is None:os.environ.pop('STORY_JOB_DEADLINE',None)
+            else:os.environ['STORY_JOB_DEADLINE']=previous
+    return wrapped

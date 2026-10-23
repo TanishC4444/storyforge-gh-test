@@ -12,21 +12,36 @@
     "literary_quality": true,
     "continue_with_warnings": false,
     "cpu_models": {
-      "humanizer": "qwen3b",
-      "repair": "qwen3b",
-      "story_quality": "qwen3b",
-      "rhetoric_quality": "qwen3b",
-      "memory": "qwen3b",
-      "memory_quality": "qwen3b",
-      "chapter_quality": "qwen3b",
-      "director": "qwen3b",
-      "scene_designer": "qwen3b",
-      "character": "qwen3b",
+      "humanizer": "qwen7b",
+      "repair": "qwen7b",
+      "story_quality": "qwen7b",
+      "rhetoric_quality": "qwen7b",
+      "memory": "qwen7b",
+      "memory_quality": "qwen7b",
+      "chapter_quality": "qwen7b",
+      "director": "qwen7b",
+      "scene_designer": "qwen7b",
+      "character": "qwen7b",
       "writer": "qwen7b",
       "writer_beat": "qwen7b"
     },
     "editorial_disagreement": "one_strict_check",
-    "gemini_batches": true
+    "gemini_batches": true,
+    "total_call_seconds": {
+      "humanizer": 300,
+      "repair": 300,
+      "story_quality": 300,
+      "rhetoric_quality": 300,
+      "memory": 300,
+      "memory_quality": 300,
+      "chapter_quality": 420,
+      "director": 180,
+      "scene_designer": 180,
+      "character": 180,
+      "writer": 600,
+      "writer_beat": 600
+    },
+    "hosted_route_seconds": 60
   },
   "performance": {
     "compact_packets": true,
@@ -45,7 +60,11 @@
     "batched_prose": true,
     "batched_repairs": true,
     "living_universe": true,
-    "living_bounded": true
+    "living_bounded": true,
+    "readable_editorial": true,
+    "summary_reviews": true,
+    "memory_pair_batches": true,
+    "empowered_editors": true
   },
   "api_roles": {
     "writer_beat": "flash",

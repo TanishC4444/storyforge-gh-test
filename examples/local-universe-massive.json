@@ -25,7 +25,7 @@
   "retrieval_query": "Iliad heroic honor divine gift competing authority mortal vulnerability supplication war",
   "genre": "Mythic war epic; tragic alternate Trojan continuity",
   "reader_experience": "Close material attention, household urgency, curiosity and unease when an investigation imposes a concrete cost.",
-  "pov": "Third-person past-tense epic narrator, with a primary focal character per scene. The narrator may supply another character’s history or inner attention in a clearly separated paragraph, but this never grants other characters private knowledge. No dialogue, quoted speech, first-person narrator, invocation or direct address. Narrate offers and commitments briefly and show their consequences.",
+  "pov": "Third-person past-tense epic narrator, with a primary focal character per scene. The narrator may supply another character\u2019s history or inner attention in a clearly separated paragraph, but this never grants other characters private knowledge. No dialogue, quoted speech, first-person narrator, invocation or direct address. Narrate offers and commitments briefly and show their consequences.",
   "tone_mood": "Grave and martial, with tenderness in concrete duties; wonder before divine craft and unease beneath victory. No modern sarcasm or action-film triumphalism.",
   "sensory_detail": "Concrete material detail perceived through ancient experience: bronze, sea, wool, ash, labor, bodies and weather.",
   "ending_tendency": "Leave consequential open threads; the world has no predetermined final ending.",
@@ -96,7 +96,7 @@
     "interpretation": "Strong source influence and pinned source selection; strength is guidance, not a measured borrowed percentage."
   },
   "style": {
-    "narrator": "Third-person past-tense epic narrator, with a primary focal character per scene. The narrator may supply another character’s history or inner attention in a clearly separated paragraph, but this never grants other characters private knowledge. No dialogue, quoted speech, first-person narrator, invocation or direct address. Narrate offers and commitments briefly and show their consequences.",
+    "narrator": "Third-person past-tense epic narrator, with a primary focal character per scene. The narrator may supply another character\u2019s history or inner attention in a clearly separated paragraph, but this never grants other characters private knowledge. No dialogue, quoted speech, first-person narrator, invocation or direct address. Narrate offers and commitments briefly and show their consequences.",
     "register": "Concrete, grave, musical ancient epic in intelligible English. Use material acts, reciprocal obligation, shame and rank; no stock modern cinematic gestures.",
     "wording": [
       "Recurring epithets at meaningful moments; avoid attaching one to every name.",
@@ -179,7 +179,7 @@
         "tension": "Resents concealment by leaders but initially hides what makes him indispensable."
       },
       "emotional_behavior": {
-        "under_pressure": "Checks tools or another person’s equipment when frightened."
+        "under_pressure": "Checks tools or another person\u2019s equipment when frightened."
       },
       "voice_design": {
         "register": "Concrete and restrained before kings, less guarded with his apprentice.",
@@ -314,21 +314,36 @@
     "literary_quality": true,
     "continue_with_warnings": false,
     "cpu_models": {
-      "humanizer": "qwen3b",
-      "repair": "qwen3b",
-      "story_quality": "qwen3b",
-      "rhetoric_quality": "qwen3b",
-      "memory": "qwen3b",
-      "memory_quality": "qwen3b",
-      "chapter_quality": "qwen3b",
-      "director": "qwen3b",
-      "scene_designer": "qwen3b",
-      "character": "qwen3b",
+      "humanizer": "qwen7b",
+      "repair": "qwen7b",
+      "story_quality": "qwen7b",
+      "rhetoric_quality": "qwen7b",
+      "memory": "qwen7b",
+      "memory_quality": "qwen7b",
+      "chapter_quality": "qwen7b",
+      "director": "qwen7b",
+      "scene_designer": "qwen7b",
+      "character": "qwen7b",
       "writer": "qwen7b",
       "writer_beat": "qwen7b"
     },
     "editorial_disagreement": "one_strict_check",
-    "gemini_batches": true
+    "gemini_batches": true,
+    "total_call_seconds": {
+      "humanizer": 300,
+      "repair": 300,
+      "story_quality": 300,
+      "rhetoric_quality": 300,
+      "memory": 300,
+      "memory_quality": 300,
+      "chapter_quality": 420,
+      "director": 180,
+      "scene_designer": 180,
+      "character": 180,
+      "writer": 600,
+      "writer_beat": 600
+    },
+    "hosted_route_seconds": 60
   },
   "performance": {
     "compact_packets": true,
@@ -346,7 +361,11 @@
     "validate_scene_prose": true,
     "batched_prose": true,
     "batched_repairs": true,
-    "living_universe": true
+    "living_universe": true,
+    "readable_editorial": true,
+    "summary_reviews": true,
+    "memory_pair_batches": true,
+    "empowered_editors": true
   },
   "api_roles": {
     "writer_beat": "flash",
