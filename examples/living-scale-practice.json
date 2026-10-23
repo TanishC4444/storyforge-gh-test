@@ -1585,7 +1585,8 @@
     "adaptive_batches": true,
     "verified_draft_continuity": true,
     "living_bounded": true,
-    "pipelined_living": true
+    "pipelined_living": true,
+    "strict_draft_handoff": true
   },
   "api_roles": {
     "writer_beat": "flash",

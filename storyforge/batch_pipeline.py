@@ -92,13 +92,17 @@ def write_batch(state,card,source,out,backend,bid):
         'instruction':'Write only your assigned contiguous part. Other batches supply other parts. Never repeat the scene opening or narrate a later beat early.'}
     data['author_contract']['length'].update(target_scene_words=beat['target_words'],complete_scene_target_words=req['words_per_scene'])
     errors=[];text=''
+    minimum=math.ceil(beat['target_words']*local.get('min_words_ratio',.75))
+    maximum=math.floor(beat['target_words']*local.get('max_words_ratio',1.3))
+    length_instruction=(f' Length is mandatory: write {beat["target_words"]} words, within {minimum}–{maximum} words. Do not stop at a synopsis. Expand actual resistance, concrete action, competing motives and consequences; do not add repetitive explanation or change canon.' if local.get('length_policy',{}).get('scene_words')=='strict' else '')
     for attempt in range(0 if backend=='fixture' else 2):
         role='writer_beat' if attempt==0 else 'repair'
         folder=out/str(attempt);executor=Executor(req,folder,backend)
         try:
             text=executor.call(role,{**data,'rejected_batch':text or None,'specific_errors':errors},
-                'Return ONLY this assigned beat near its target_words, in the application-owned medium. Preserve the shared chronology, POV, voice and author form. Use a scene heading only in the first batch if the medium requires it. No quoted dialogue against a no-dialogue brief, plot-summary substitutes or neighboring beats. If correcting a rejected batch, fix only that batch, never the whole scene.',
-                tokens=min(3600 if adaptive(req) else 1500,int(beat['target_words']*2.4)+200),output_format='text',validator=lambda t:validate_prose(t,local,check_length=backend!='fixture'))
+                'Return ONLY this assigned beat near its target_words, in the application-owned medium. Preserve the shared chronology, POV, voice and author form. Use a scene heading only in the first batch if the medium requires it. No quoted dialogue against a no-dialogue brief, plot-summary substitutes or neighboring beats. If correcting a rejected batch, return the complete corrected assigned batch; when count is one this is the complete scene. Preserve its events and expand its dramatization to the required length.'+length_instruction,
+                tokens=min(4200 if adaptive(req) else 1500,int(beat['target_words']*3.2)+400),output_format='text',validator=lambda t:validate_prose(t,local,check_length=backend!='fixture'))
+            validate_prose(text,local,check_length=backend!='fixture')
             errors=[];break
         except Exception as exc:
             text=cached_prose(folder) or text;errors=[str(exc)]
@@ -119,6 +123,10 @@ def merge_draft(state,source,out):
         found[v['id']]=v
     prose='\n\n'.join(found[b['id']]['prose'].strip() for b in plan['beats'] if b['id'] in found and found[b['id']]['prose'].strip())
     require(bool(prose),'No writing batch produced readable prose')
+    if state['request'].get('performance',{}).get('strict_draft_handoff'):
+        require(set(found)==allowed,'Missing writing batch; cannot hand off partial prose')
+        require(all(v.get('verified_form') and not v.get('errors') for v in found.values()),'Unverified writing batch; retain draft but do not advance')
+        validate_prose(prose,state['request'],check_length=state.get('backend')!='fixture')
     save(Path(out)/'draft.txt',prose);save(Path(out)/'writing-report.json',{'missing':[b['id'] for b in plan['beats'] if b['id'] not in found],'batches':[{k:v for k,v in x.items() if k!='prose'} for x in found.values()],'unreviewed':True})
     preview(out,'Compiled writing batches - unreviewed');return prose
 
@@ -335,9 +343,9 @@ def main():
     elif a.task=='draft_plan':plan_draft(state,card,source,out,a.backend)
     elif a.task=='write_batch':
         result=write_batch(state,card,source,out,a.backend,a.batch)
-        if not result.get('prose','').strip():
-            save(out/'status.json',{'task':a.task,'status':'failure','phase':'writer_unavailable','elapsed_seconds':round(time.monotonic()-started,3),'warning_artifacts':['draft-batch.json']})
-            raise SystemExit('No readable writer output; artifacts preserved and job marked failed for targeted retry')
+        if not result.get('prose','').strip() or (state['request'].get('performance',{}).get('strict_draft_handoff') and not result.get('verified_form')):
+            save(out/'status.json',{'task':a.task,'status':'failure','phase':'writer_form_rejected' if result.get('prose') else 'writer_unavailable','elapsed_seconds':round(time.monotonic()-started,3),'warning_artifacts':['draft-batch.json']})
+            raise SystemExit('No verified writer output; artifacts preserved and job marked failed for targeted retry')
     elif a.task=='merge_draft':merge_draft(state,source,out)
     elif a.task=='forward':save(out/'prose.txt',(source/'draft/draft.txt').read_text())
     elif a.task=='review_batch':review_batch(state,card,source,out,a.backend,a.kind,a.group)
