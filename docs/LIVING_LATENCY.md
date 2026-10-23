@@ -143,3 +143,12 @@ Incomplete extraction schedules one explicitly blocked diagnostic check rather
 than a matrix of identical failures; no missing verification is treated as a pass.
 A replay of the failed live batch recovered all six records with original fields
 unchanged; this is a mocked transport regression, not a new live quality result.
+
+A strict short draft with separate paragraphs now uses the existing single repair
+slot for source-owned insertions rather than regenerating the entire scene.
+The repair aims for the requested target and must reach the allowed minimum; all original
+paragraphs stay verbatim, and the exact final exit stays last. The assembled scene
+must pass the word range, form and repetition checks before handoff, then still
+undergoes literary and factual review. An invalid insertion retains the original
+draft for diagnostics, never the raw edit protocol. This adds no rewrite loop or
+extra model call beyond the existing writer plus one repair allowance.
