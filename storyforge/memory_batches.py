@@ -2,16 +2,19 @@
 import math
 from pathlib import Path
 from .storage import load,save
+from .continuation import history as continuity_history
 from .contracts import require,review
 from .evidence import passages
 from .patching import digest
 from .output_schema import memory_review_schema
+from .adaptive import enabled as adaptive,windows
 
 
 def memory_canon(state):
     from .canon import index
-    view=index(state['memories']);current={m['id'] for m in view['current']}
-    keys={'id','kind','text','known_by','holder','claim_source','source','state_version','subject','life_state','thread_id','thread_state','fact_key','supersedes','evidence_prose_sha256'}
+    from .continuation import history
+    view=index(history(state));current={m['id'] for m in view['current']}
+    keys={'id','kind','text','known_by','holder','claim_source','source','state_version','continuity_scope','literary_status','subject','life_state','thread_id','thread_state','fact_key','supersedes','evidence_prose_sha256'}
     return [{**{k:v for k,v in m.items() if k in keys},'canonical_status':'current' if m['id'] in current else 'historical_superseded'} for m in view['history']]
 
 
@@ -25,14 +28,22 @@ def plan(state,source,out,phase):
               'fact_indices':list(range(i*4,min(len(facts),(i+1)*4)))} for i in range(count)]
     if state['request'].get('performance',{}).get('memory_pair_batches'):
         from .canon import cards
-        prior=memory_canon(state);prior_groups=[list(range(i,min(i+8,len(prior)))) for i in range(0,len(prior),8)] or [[]]
-        candidates=[{'task':'facts','owned_passages':[],'fact_indices':list(range(i,min(i+2,len(facts))))} for i in range(0,len(facts),2)]
-        candidates += [{'task':'continuity' if phase=='preflight' else 'coverage','owned_passages':[p['id'] for p in catalog[i:i+2]],'fact_indices':[]} for i in range(0,len(catalog),2)]
+        prior=memory_canon(state);prior_size=20 if adaptive(state['request']) else 8;fact_size=8 if adaptive(state['request']) else 2
+        prior_groups=[list(range(i,min(i+prior_size,len(prior)))) for i in range(0,len(prior),prior_size)] or [[]]
+        candidates=[{'task':'facts','owned_passages':[],'fact_indices':list(range(i,min(i+fact_size,len(facts))))} for i in range(0,len(facts),fact_size)]
+        groups=windows(catalog,450) if adaptive(state['request']) else [catalog[i:i+2] for i in range(0,len(catalog),2)]
+        candidates += [{'task':'continuity' if phase=='preflight' else 'coverage','owned_passages':[p['id'] for p in group],'fact_indices':[]} for group in groups]
         if not candidates:candidates=[{'task':'facts','owned_passages':[],'fact_indices':[]}]
         batches=[dict(c,id=str(i*len(prior_groups)+j),prior_indices=group) for i,c in enumerate(candidates) for j,group in enumerate(prior_groups)]
+    previous=Path(source)/'preflight-memory/review.json'
+    reuse=None
+    if phase=='final' and adaptive(state['request']) and previous.exists():
+        v=load(previous)
+        if v.get('pass') and not v.get('unverified') and v.get('state_sha256')==bind_state(state) and v.get('source_sha256')==digest(prose) and v.get('memory_sha256')==bind_state(memory):
+            reuse=v;batches=[{'id':'reuse','owned_passages':[],'fact_indices':[]}]
     require(len(batches)<=256,'Memory coverage exceeds one Actions matrix; split the episode or use continuation without dropping facts')
     value={'phase':phase,'state_sha256':bind_state(state),'source_sha256':digest(prose),
-           'memory_sha256':bind_state(memory),'batches':batches}
+           'memory_sha256':bind_state(memory),'batches':batches,'reused_preflight':reuse}
     save(Path(out)/'memory-plan.json',value);output('characters',[b['id'] for b in batches]);return value
 
 
@@ -51,7 +62,7 @@ def validate(value,prose,batch,phase):
         require(issue.get('target') in {'memory','prose'},'Memory issue requires target')
         require(phase=='preflight' or issue['target']=='memory','Final memory check assesses facts only; prose belongs to final adjudication')
         if issue['target']=='prose':
-            ids=[p['id'] for p in catalog if issue['quote'] in p['text']]
+            ids=[p['id'] for p in catalog if issue['quote'] in p['text']] or issue.get('evidence_ids',[])
             require(bool(set(ids)&set(batch['owned_passages'])),'Prose issue outside owned memory batch')
             issue['evidence_ids']=[pid for pid in ids if pid in batch['owned_passages']]
     return value
@@ -60,14 +71,16 @@ def validate(value,prose,batch,phase):
 def check(state,card,source,out,backend,bid):
     from .batch_pipeline import scoped,scene_context,bind_state
     from .canon import cards
-    from .editorial_transport import factual
+    from .editorial_transport import factual,factual_ids
     from .inference import Executor
     p,prose,memory=inputs(state,source);batch=next((b for b in p['batches'] if b['id']==bid),None)
     require(batch is not None,'Unknown memory batch')
-    if memory.get('unverified'):
+    if p.get('reused_preflight'):
+        verdict={'pass':True,'issues':p['reused_preflight']['issues'],'reused_unchanged_verified_memory':True}
+    elif memory.get('unverified'):
         verdict={'pass':False,'issues':[],'unverified':True,'error':'Memory extraction unavailable'}
     else:
-        facts=[{'index':i,**{k:v for k,v in memory['memories'][i].items() if k in {'kind','text','known_by','holder','claim_source','subject','life_state','thread_id','thread_state','fact_key','supersedes','evidence_ids'}}} for i in batch['fact_indices']]
+        facts=[{'index':i,**{k:v for k,v in memory['memories'][i].items() if k in {'kind','text','known_by','holder','claim_source','continuity_scope','literary_status','subject','life_state','thread_id','thread_state','fact_key','supersedes','evidence_ids'}}} for i in batch['fact_indices']]
         mode=('Also check continuity ONLY in owned_passages: character arrival before action, acquired knowledge, custody, resources and causal joins. Quote the affected owned paragraph and target prose for a demonstrated continuity fault. '
               if p['phase']=='preflight' else 'Assess ONLY the supplied extracted facts and knowledge holders. Do not report prose, entrances, style, similes or editorial preferences; those were assessed in the final editorial check. Issues must target memory. ')
         data={**scene_context(state,card,'memory_quality'),'current_prose':prose,'owned_passages':batch['owned_passages'],
@@ -79,22 +92,23 @@ def check(state,card,source,out,backend,bid):
             evidence=[x for i,x in enumerate(catalog) if x['id'] in ids or any(abs(i-j)<=1 for j in positions)]
             prior=memory_canon(state)
             if batch['task'] in {'continuity','coverage'}:
-                facts=[{'index':i,**{k:v for k,v in f.items() if k in {'kind','text','known_by','holder','claim_source','subject','life_state','thread_id','thread_state','fact_key','supersedes','evidence_ids'}}} for i,f in enumerate(memory['memories']) if set(f.get('evidence_ids',[])) & set(batch['owned_passages'])]
+                facts=[{'index':i,**{k:v for k,v in f.items() if k in {'kind','text','known_by','holder','claim_source','continuity_scope','literary_status','subject','life_state','thread_id','thread_state','fact_key','supersedes','evidence_ids'}}} for i,f in enumerate(memory['memories']) if set(f.get('evidence_ids',[])) & set(batch['owned_passages'])]
             data={'original_prompt':state['request']['premise'],'scene_contract':next((c for c in state['request']['scene_designs'] if c['id']==card['id']),{}),
                   'current_prose':'\n\n'.join(x['text'] for x in evidence),'evidence_passages':[{'id':x['id'],'text':x['text']} for x in evidence],
                   'owned_passages':batch['owned_passages'],'proposed_memory':{'memories':facts},
                   'prior_canon':[prior[i] for i in batch['prior_indices']],'check_phase':p['phase'],'task':batch['task'],
-                  'coverage_policy':'This is one exhaustive canon partition, not a summary. Other partitions are checked separately. Do not invent omitted facts. Canon knowledge holders, uncertainty and supersession govern. Historical_superseded facts describe earlier states; do not mistake them for current contradictions. A private update does not automatically grant knowledge to previous holders.'}
+                  'coverage_policy':'This is one exhaustive continuity partition, not a summary. Records tagged draft_branch are source-verified facts of this provisional manuscript, not published universe canon. Other partitions are checked separately. Do not invent omitted facts. Canon knowledge holders, uncertainty and supersession govern. Historical_superseded facts describe earlier states; do not mistake them for current contradictions. A private update does not automatically grant knowledge to previous holders.'}
             mode = ((mode+' Also check extraction completeness: material facts, resource changes, obligations and knowledge acquired in owned passages must appear accurately in proposed_memory. Missing facts target memory, never rewrite prose to justify them. ') if batch['task']=='continuity' else 'Check completeness of proposed_memory against owned passages. Missing material facts or unsupported knowledge target memory. No prose or style judgments. ' if batch['task']=='coverage' else 'Check ONLY supplied facts, their source evidence and knowledge holders against this canon partition. Issues target memory; no prose or style judgment. ')
-        options={'tokens':650 if text_mode else 1200,'response_schema':memory_review_schema()}
+        id_mode=adaptive(state['request'])
+        options={'tokens':1200 if id_mode else 650 if text_mode else 1200,'response_schema':memory_review_schema()}
         if text_mode and backend!='fixture':options.update(response_schema=False,output_format='text',skill='Verify source-supported facts and knowledge; do not edit prose.')
         try:
             verdict=Executor(scoped(state['request']),out,backend).call('memory_quality',
                 data,
                 'Verify every supplied fact, uncertainty, chronology and knowledge holder against actual prose and established canon. Other paragraphs are read-only context. Never rewrite prose to make a false extraction true. '+mode+
                 'Do not flag stylistic repetition or require changes contrary to the author brief. A passing result may contain advisory issues only. '+
-                ('Return PASS or FAIL, followed only when necessary by lines: ISSUE blocking/advisory | memory/prose | category | exact source quote | specific problem | specific fix. No JSON.' if text_mode and backend!='fixture' else 'Return pass and issues with exact source quotations, target memory or prose, and specific fixes.'),
-                validator=lambda v:validate(factual(v,prose),prose,batch,p['phase']),**options)
+                (('Return PASS or FAIL, followed only when necessary by lines: ISSUE blocking/advisory | memory/prose | category | p001,p002 source IDs | specific problem | specific fix. Use existing supplied IDs, never write quotes. No JSON.' if id_mode else 'Return PASS or FAIL, followed only when necessary by lines: ISSUE blocking/advisory | memory/prose | category | exact source quote | specific problem | specific fix. No JSON.') if text_mode and backend!='fixture' else 'Return pass and issues with exact source quotations, target memory or prose, and specific fixes.'),
+                validator=lambda v:validate(factual_ids(v,prose,{x['id'] for x in evidence}) if id_mode and text_mode and backend!='fixture' else factual(v,prose),prose,batch,p['phase']),**options)
         except Exception as exc:verdict={'pass':False,'issues':[],'unverified':True,'error':str(exc)}
     value={'id':bid,'plan_sha256':bind_state(p),'review':verdict}
     save(Path(out)/'memory-check-batch.json',value);return value
@@ -109,15 +123,16 @@ def join(state,source,out):
     issues=[issue for b in p['batches'] if b['id'] in found for issue in found[b['id']]['review'].get('issues',[])]
     missing=sorted(expected-set(found));unverified=memory.get('unverified',False) or bool(missing) or any(v['review'].get('unverified') for v in found.values())
     verdict={'pass':not unverified and all(v['review']['pass'] for v in found.values()),'issues':issues,
-             'source_sha256':digest(prose),'memory_sha256':bind_state(memory),'phase':p['phase'],'missing_batches':missing}
-    if unverified:verdict.update(unverified=True,error='Missing or unverified memory-check batch')
+             'source_sha256':digest(prose),'state_sha256':bind_state(state),'memory_sha256':bind_state(memory),'phase':p['phase'],'missing_batches':missing,'reused_preflight':bool(p.get('reused_preflight'))}
+    if unverified:verdict.update(unverified=True,error='Missing or unverified memory-check batch',batch_errors={key:v['review'].get('error') for key,v in found.items() if v['review'].get('unverified')})
     save(Path(out)/'review.json',verdict);return verdict
 
 
 def extract_plan(state,source,out):
     from .batch_pipeline import bind_state,output
     prose=(Path(source)/'edited/prose.txt').read_text();catalog=passages(prose)
-    batches=[{'id':str(i//2),'ids':[p['id'] for p in catalog[i:i+2]]} for i in range(0,len(catalog),2)]
+    groups=windows(catalog,350) if adaptive(state['request']) else [catalog[i:i+2] for i in range(0,len(catalog),2)]
+    batches=[{'id':str(i),'ids':[p['id'] for p in group]} for i,group in enumerate(groups)]
     value={'state_sha256':bind_state(state),'source_sha256':digest(prose),'batches':batches}
     save(Path(out)/'extract-plan.json',value);output('characters',[b['id'] for b in batches]);return value
 
@@ -132,7 +147,7 @@ def extract_batch(state,card,source,out,backend,bid):
     require(p['state_sha256']==bind_state(state) and p['source_sha256']==digest(prose),'Stale extraction plan')
     batch=next((b for b in p['batches'] if b['id']==bid),None);require(batch is not None,'Unknown extraction batch')
     packet={'evidence_passages':[{'id':x['id'],'text':x['text']} for x in passages(prose) if x['id'] in batch['ids']],
-            'characters':[c['id'] for c in state['request']['characters']],'prior_canon':cards(state['memories']),
+            'characters':[c['id'] for c in state['request']['characters']],'prior_canon':cards(continuity_history(state)),
             'original_prompt':state['request']['premise'],'scene':card,'specific_memory_findings':p.get('memory_corrections',[])}
     instruction=MEMORY_INSTRUCTION+' Extract all material supported changes and obligations in these owned passages; do not invent or summarize away facts. Other batches cover other passages. Preserve uncertainty and individual knowledge.'
     result=None;last=None;req=scoped(state['request'])
@@ -191,7 +206,8 @@ def refresh_plan(state,source,out):
     if initial.get('unverified'):
         changed={p['id'] for p in passages(prose)};retained=[]
     ids=[p['id'] for p in passages(prose) if p['id'] in changed]
-    batches=[{'id':str(i//2),'ids':ids[i:i+2]} for i in range(0,len(ids),2)] or [{'id':'noop','ids':[]}]
+    groups=windows([p for p in passages(prose) if p['id'] in changed],350) if adaptive(state['request']) else [[{'id':pid} for pid in ids[i:i+2]] for i in range(0,len(ids),2)]
+    batches=[{'id':str(i),'ids':[p['id'] for p in group]} for i,group in enumerate(groups)] or [{'id':'noop','ids':[]}]
     value={'state_sha256':bind_state(state),'source_sha256':digest(prose),'batches':batches,
            'retained':retained,'memory_corrections':corrections,'upstream_unverified':False,'full_reextraction':initial.get('unverified',False)}
     save(Path(out)/'extract-plan.json',value);output('characters',[b['id'] for b in batches]);return value

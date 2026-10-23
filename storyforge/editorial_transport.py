@@ -68,6 +68,34 @@ def factual(value,prose):
 
 def call_editorial(executor,role,data,instruction,prose,checks,tokens=1100):
     from .output_schema import editorial_schema
+    if executor.req.get('performance',{}).get('adaptive_batches'):
+        from .editorial import validate_review_brief
+        from .storage import load,save
+        def validate(v):return validate_review_brief(editorial(v,prose,checks),executor.req)
+        try:
+            result=executor.call(role,data,instruction+' Return the native editorial schema. Assess every dimension once. Each failing check needs a matching, source-supported issue; issue categories are check IDs, never scene IDs. Reasons must identify actual evidence. No issue quota.',tokens=tokens,response_schema=editorial_schema(data),validator=validate)
+            require(not result.get('unverified'),result.get('error','Editorial response unavailable'))
+            return result
+        except Exception as error:
+            # Retry only a returned malformed verdict; transport outages do not generate another round.
+            raw=[load(p).get('output') for p in (executor.folder/'calls').glob(role+'-*.json')]
+            if executor.backend=='fixture' or not raw:raise
+            try:previous=parse_json(raw[-1])
+            except ValueError:raise error
+            rows=previous.get('checks',{})
+            frozen={k:v.get('verdict') for k,v in rows.items()} if isinstance(rows,dict) else {c['id']:c.get('verdict') for c in rows if isinstance(c,dict) and 'id' in c}
+            def repaired(v):
+                verdict=validate(v)
+                require(all(c['verdict']==frozen[c['id']] for c in verdict['checks'] if c['id'] in frozen),'Clarification changed an existing verdict')
+                for issue in previous.get('issues',[]):
+                    if issue.get('severity')=='blocking':require(any(i.get('severity')=='blocking' and i.get('category')==issue.get('category') and i.get('problem')==issue.get('problem') for i in verdict['issues']),'Clarification erased a blocking finding')
+                return verdict
+            request=copy.deepcopy(executor.req);request['max_stage_retries']=0
+            repair=Executor(request,executor.folder/'verdict-clarification',executor.backend)
+            packet={**data,'returned_assessment':previous,'validation_failure':str(error),'immutable_existing_verdicts':frozen}
+            result=repair.call('director',packet,'Clarify this returned assessment once. Preserve every existing check verdict. Supply missing dimensions and exact evidence-supported issues for failing checks, matching the required schema. Never invent a fault, erase a blocking issue or turn failure into approval. If evidence cannot support the assessment, do not fabricate it.',tokens=tokens,response_schema=editorial_schema(data),validator=repaired,allow_cpu_fallback=False)
+            save(executor.folder/'clarification.json',{'original_validation_error':str(error),'changed_existing_verdicts':False})
+            return result
     if not executor.req.get('performance',{}).get('readable_editorial'):
         return executor.call(role,data,instruction,tokens=tokens,response_schema=editorial_schema(data),validator=lambda v:editorial_review(v,prose,checks))
     def validate(value):
@@ -77,3 +105,27 @@ def call_editorial(executor,role,data,instruction,prose,checks,tokens=1100):
         return executor.call(role,data,instruction,tokens=tokens,response_schema=editorial_schema(data),validator=validate)
     return executor.call(role,data,instruction+'\n'+REVIEW_FORMAT,tokens=tokens,response_schema=False,output_format='text',
                          skill='Judge actual source against the immutable author contract and source-bound canon. Keep reasons concise. Literary judgment remains yours.',validator=validate)
+
+
+def factual_ids(value,prose,allowed):
+    """Resolve source quotes ourselves; never accept a paraphrased model citation."""
+    from .evidence import passages
+    if not isinstance(value,str):return factual(value,prose)
+    try:parsed=parse_json(value)
+    except (ValueError,TypeError):parsed=None
+    if parsed is not None:return factual(parsed,prose)
+    catalog={p['id']:p['text'] for p in passages(prose)};lines=[]
+    for line in value.splitlines():
+        if line.strip().startswith('ISSUE '):
+            fields=[x.strip() for x in line.strip()[6:].split('|',5)]
+            require(len(fields)==6,'Malformed memory issue')
+            ids=re.findall(r'p\d+',fields[3]);require(bool(ids) and set(ids)<=set(allowed),'Memory issue cites unsupplied source')
+            # Each issue has one contiguous source span. Adjacent IDs are joined exactly.
+            ordered=list(catalog);positions=[ordered.index(pid) for pid in ids]
+            require(positions==list(range(min(positions),max(positions)+1)),'Memory evidence must be contiguous')
+            fields[3]='\n\n'.join(catalog[pid] for pid in ids)
+            issue={**dict(zip(['severity','target','category','quote','problem','fix'],fields)),'evidence_ids':ids}
+            lines.append(issue)
+        elif line.strip() in {'PASS','FAIL'}:status=line.strip()=='PASS'
+    require('status' in locals(),'Missing memory verdict')
+    return factual({'pass':status,'issues':lines},prose)

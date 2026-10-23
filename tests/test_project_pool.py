@@ -5,6 +5,25 @@ from storyforge.hosted import GoogleHosted,HostedError
 
 class IndependentProjectTests(unittest.TestCase):
     def env(self):return patch.dict(os.environ,{'GEMINI_API_KEY':'placeholder-primary','GEMINI_API_KEYS':json.dumps(['placeholder-b','placeholder-c','placeholder-d','placeholder-e','placeholder-f']),'GEMINI_DISTINCT_PROJECTS':'true','GITHUB_JOB':'batch-test'},clear=False)
+    def test_expanded_pool_distributes_batches_without_expanding_retry_budget(self):
+        backups=['placeholder-backup-'+str(i) for i in range(18)]
+        with self.env(),tempfile.TemporaryDirectory() as d,patch.dict(os.environ,{'GEMINI_API_KEYS':json.dumps(backups)}):
+            h=GoogleHosted(d);seen=[]
+            self.assertEqual(len(h.project_children),19)
+            for child in h.project_children:child.complete=lambda *a,**k:('text',{'model':'test'})
+            for batch in range(19):
+                with patch.dict(os.environ,{'STORY_BATCH':str(batch)}):
+                    _,meta=h.complete('flash','system','prompt',100,role='writer_beat',policy={'timeout':10,'max_project_attempts':2})
+                    seen.append(meta['project_slot'])
+            self.assertEqual(set(seen),set(range(1,20)))
+            calls=[]
+            def unavailable(*a,**k):
+                calls.append(1)
+                raise HostedError('Google HTTP 429 RESOURCE_EXHAUSTED')
+            for child in h.project_children:child.complete=unavailable
+            with self.assertRaises(HostedError):
+                h.complete('flash','system','prompt',100,role='writer_beat',policy={'timeout':10,'max_project_attempts':2})
+            self.assertEqual(len(calls),2)
     def test_distinct_numeric_batches_start_on_distinct_projects(self):
         with self.env(),tempfile.TemporaryDirectory() as d:
             h=GoogleHosted(d);seen=[]

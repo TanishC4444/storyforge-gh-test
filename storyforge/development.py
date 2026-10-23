@@ -118,9 +118,9 @@ def validate_scene(scene,req,index,dead=None):
         contracts.require(isinstance(scene.get(key),str) and bool(scene[key].strip()),'Scene design needs '+key)
     contracts.require(isinstance(scene.get('reference_uses'),list),'Scene design needs reference_uses')
     if 'writing_beats' in scene:
-        import math
+        from .adaptive import writing_count
         beats=scene['writing_beats']
-        contracts.require(isinstance(beats,list) and len(beats)==max(1,min(6,math.ceil(req['words_per_scene']/320))),'Wrong writing beat count')
+        contracts.require(isinstance(beats,list) and len(beats)==writing_count(req),'Wrong writing beat count')
         contracts.require(all(isinstance(b,dict) and all(isinstance(b.get(k),str) and b[k].strip() for k in ['action','entry_state','exit_state']) for b in beats),'Incomplete writing handoff')
     return scene
 

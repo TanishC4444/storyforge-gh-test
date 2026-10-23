@@ -7,6 +7,7 @@ from .editorial import STORY_CHECKS,RHETORIC_CHECKS,editorial_review
 from .output_schema import editorial_schema
 from .inference import Executor
 from .canon import working,cards
+from .continuation import history as continuity_history
 from .contracts import require
 from .craft import validate_prose
 from .flow_common import fingerprint
@@ -27,12 +28,12 @@ def split(verdict,required):
 def decide(req,state,card,prose,reviews,out,backend,*,batch_verdict=None):
     """Exactly one scoped model judgment, cached by immutable source + contract."""
     out=Path(out);chapter=chapter_text(state,card,prose)
-    key=fingerprint([prose,chapter,req['premise'],contract(req),req.get('references'),req.get('adaptation'),state['memories'],card])
+    key=fingerprint([prose,chapter,req['premise'],contract(req),req.get('references'),req.get('adaptation'),continuity_history(state),card])
     path=out/'editorial-adjudication.json'
     if path.exists():
         old=load(path);require(old['decision_key']==key,'Cannot reuse final adjudication after source/contract changes');return old
     data={**payload(prose),'required_checks':CHECKS,'scene':card,'original_prompt':req['premise'],
-          'prior_canon':(cards(state['memories']) if req.get('performance',{}).get('memory_pair_batches') else working(state,query=str(card),budget=6500)),
+          'prior_canon':(cards(continuity_history(state)) if req.get('performance',{}).get('memory_pair_batches') else working(state,query=str(card),budget=6500)),
           'reference_applications':application_packet(req,state['retrieval'],'story_quality',card['id']) if state.get('retrieval') else req.get('references',[]),
           'prior_scenes_in_current_chapter':[{'id':s['id'],'prose':s['prose'],'quality_status':s.get('quality_status','reviewed')} for s in state['accepted'] if s['chapter']==card['chapter']],
           'disputed_assessments':[{'pass':r.get('pass'),'unverified':r.get('unverified',False),
@@ -48,7 +49,10 @@ def decide(req,state,card,prose,reviews,out,backend,*,batch_verdict=None):
     try:
         from .editorial_transport import call_editorial
         verdict=batch_verdict if batch_verdict is not None else call_editorial(executor,'chapter_quality',data,instruction,prose,CHECKS,3200)
-        if verdict.get('unverified'):raise ValueError('Final adjudication unavailable')
+        if verdict.get('unverified'):
+            failed=copy.deepcopy(verdict);failed['pass']=False
+            result={'decision_key':key,'prose_sha256':digest(prose),'chapter_sha256':digest(chapter),'judgment_calls':verdict.get('batch_count',1),'judgment_rounds':1,'verdict':failed,'story':{**split(failed,STORY_CHECKS),'unverified':True},'rhetoric':{**split(failed,RHETORIC_CHECKS),'unverified':True},'unverified':True}
+            save(path,result);return result
         mechanical_override=None
         try:validate_prose(prose,req,check_length=backend!='fixture')
         except ValueError as exc:

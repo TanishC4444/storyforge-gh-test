@@ -1,6 +1,8 @@
 """Gemini-first small writing/repair batches with deterministic source-bound merges."""
 import argparse,copy,json,math,os,time
 from pathlib import Path
+from .adaptive import enabled as adaptive,repetitions
+from .continuation import history as continuity_history
 from .contracts import require,delta
 from .storage import load,save
 from .inference import Executor,ROOT
@@ -46,13 +48,14 @@ def review_context(state,card):
     req=state['request']
     return {'original_prompt':req['premise'],'scene':card,
             'scene_contract':next((c for c in req['scene_designs'] if c['id']==card['id']),{}),
-            'prior_canon':cards(state['memories']),
+            'prior_canon':cards(continuity_history(state)),
             'prior_scene_summaries':[{'id':s['id'],'quality_status':s.get('quality_status'),'canon_committed':s.get('canon_committed',True),'source_summary':s['source_summary']} for s in state.get('universe_history',[])+state['accepted'] if s.get('source_summary') and s['source_summary'].get('source_sha256')==digest(s['prose'])],
             'reference_applications':application_packet(req,state['retrieval'],'story_quality',card['id'])}
 
 
 def plan_draft(state,card,source,out,backend):
-    req=state['request'];count=max(1,min(6,math.ceil(req['words_per_scene']/320)))
+    from .adaptive import writing_count
+    req=state['request'];count=writing_count(req)
     goals=[('Develop the attempted task and immediate resistance. Do not make the decisive choice yet.',card['goal']),
            ('Develop the competing alternative and decisive choice. Preserve the initial pressure.',card['obstacle']),
            ('Render the material consequence and aftermath. End at the planned exit; no moral summary.',card['intended_change'])]
@@ -63,6 +66,7 @@ def plan_draft(state,card,source,out,backend):
             'entry':'Actual initial scene conditions.' if i==0 else 'Continue the preceding planned beat without repeating its setup.',
             'exit':card['intended_change'] if i==count-1 else 'Hand off causally to the next planned beat; its later outcome must not happen early.',
             'target_words':req['words_per_scene']//count+(1 if i<req['words_per_scene']%count else 0)})
+    if count==1:beats[0].update(purpose='Write the complete scene once: attempted action, resistance, consequential choice, aftermath and planned exit. No recap or outline commentary.',entry='Continue actual current memory and the previous exact exit, if any.')
     concrete=card.get('writing_beats',[])
     if concrete:
         require(len(concrete)==count,'Scene writing contract has wrong beat count')
@@ -93,10 +97,11 @@ def write_batch(state,card,source,out,backend,bid):
         try:
             text=executor.call(role,{**data,'rejected_batch':text or None,'specific_errors':errors},
                 'Return ONLY this assigned beat near its target_words, in the application-owned medium. Preserve the shared chronology, POV, voice and author form. Use a scene heading only in the first batch if the medium requires it. No quoted dialogue against a no-dialogue brief, plot-summary substitutes or neighboring beats. If correcting a rejected batch, fix only that batch, never the whole scene.',
-                tokens=min(1500,int(beat['target_words']*2.4)+200),output_format='text',validator=lambda t:validate_prose(t,local,check_length=backend!='fixture'))
+                tokens=min(3600 if adaptive(req) else 1500,int(beat['target_words']*2.4)+200),output_format='text',validator=lambda t:validate_prose(t,local,check_length=backend!='fixture'))
             errors=[];break
         except Exception as exc:
             text=cached_prose(folder) or text;errors=[str(exc)]
+            if not text:break
     if backend=='fixture':text=f'FIXTURE writing batch {bid}: the assigned planned beat is a transport test only.'
     result={'id':bid,'scene_id':card['id'],'state_sha256':plan['state_sha256'],'plan_sha256':plan['plan_sha256'],'prose':text,'verified_form':bool(text) and not errors,'errors':errors}
     save(out/'draft-batch.json',result)
@@ -118,11 +123,13 @@ def merge_draft(state,source,out):
 
 def review_batch(state,card,source,out,backend,kind,group):
     prose=(Path(source)/'edited/prose.txt').read_text();all_checks=STORY_CHECKS if kind=='story' else RHETORIC_CHECKS
-    checks=all_checks[group*3:(group+1)*3];require(bool(checks),'Unknown review group')
+    from .adaptive import enabled as adaptive
+    checks=all_checks if adaptive(state['request']) and group==0 else all_checks[group*3:(group+1)*3];require(bool(checks),'Unknown review group')
     req=scoped(state['request']);req['execution_policy'].setdefault('cpu_models',{})[kind+'_quality']='qwen7b'
-    data={**payload(prose),**scene_context(state,card,kind+'_quality'),'required_checks':checks,'prior_scene':state['accepted'][-1]['prose'][-1800:] if state['accepted'] else None}
+    data={**payload(prose),'scene_wide_repetition_candidates':repetitions(prose),**scene_context(state,card,kind+'_quality'),'required_checks':checks,'prior_scene':state['accepted'][-1]['prose'][-1800:] if state['accepted'] else None}
+    if adaptive(req):data={**review_context(state,card),**payload(prose),'scene_wide_repetition_candidates':repetitions(prose),'required_checks':checks}
     summary_path=Path(source)/'summaries/summaries.json'
-    if kind=='story' and req.get('performance',{}).get('summary_reviews') and summary_path.exists():
+    if kind=='story' and not adaptive(req) and req.get('performance',{}).get('summary_reviews') and summary_path.exists():
         summaries=load(summary_path);require(summaries['source_sha256']==digest(prose),'Stale story summaries')
         if summaries.get('unverified'):
             result={'kind':kind,'group':group,'state_sha256':bind_state(state),'source_sha256':digest(prose),
@@ -135,14 +142,14 @@ def review_batch(state,card,source,out,backend,kind,group):
     try:
         from .editorial_transport import call_editorial
         verdict=call_editorial(Executor(req,out,backend),kind+'_quality',data,
-            'Assess ONLY the requested dimensions against the actual source and author brief. Cite the exact affected paragraph IDs for every issue; do not request a whole-scene rewrite. Do not invent a preceding scene. Suggestions that contradict the author POV or no-dialogue form are invalid. Give a concrete correction and keep reasons concise.',prose,checks,1200)
+            'Assess ONLY the requested dimensions against the actual source and author brief. Cite the exact affected paragraph IDs for every issue; do not request a whole-scene rewrite. Do not invent a preceding scene. Suggestions that contradict the author POV or no-dialogue form are invalid. Give a concrete correction and keep reasons concise.',prose,checks,2000 if adaptive(req) else 1200)
     except Exception as exc:verdict={'pass':False,'checks':[],'issues':[],'unverified':True,'error':str(exc)}
     result={'kind':kind,'group':group,'state_sha256':bind_state(state),'source_sha256':digest(prose),'review':verdict}
     save(Path(out)/'review-batch.json',result);return result
 
 def join_reviews(state,source,out,kind):
     prose=(Path(source)/'edited/prose.txt').read_text();required=STORY_CHECKS if kind=='story' else RHETORIC_CHECKS
-    values=[load(p) for p in (Path(source)/'batches').rglob('review-batch.json')];expected=set(range(math.ceil(len(required)/3)))
+    values=[load(p) for p in (Path(source)/'batches').rglob('review-batch.json')];expected={0} if adaptive(state['request']) else set(range(math.ceil(len(required)/3)))
     require(len({v['group'] for v in values})==len(values),'Duplicate review batch')
     require(all(v['kind']==kind and v['state_sha256']==bind_state(state) and v['source_sha256']==digest(prose) for v in values),'Stale or foreign review batch')
     if {v['group'] for v in values}!=expected or any(v['review'].get('unverified') for v in values):verdict={'pass':False,'checks':[c for v in values if not v['review'].get('unverified') for c in v['review'].get('checks',[])],'issues':[i for v in values if not v['review'].get('unverified') for i in v['review'].get('issues',[])],'unverified':True,'error':'Missing or unverified review group; valid findings preserved'}
@@ -195,7 +202,11 @@ def repair_batch(state,card,source,out,backend,bid):
             data={**review_context(state,card),'batch':batch,'immutable_world_rules':req['world_rules']}
             instruction='Check allegations against the original author prompt and actual canon. Repair ONLY owned passages. Neighbors are read-only. Dismiss criticism that conflicts with the brief. Preserve required events, knowledge and voice. '
             instruction+=('You may delete redundant passages, combine owned passages, restructure, shorten or replace them. Keep each necessary event once. For a merge put the complete combined text under one owned ID and delete the redundant owned IDs. Never move events into unowned passages. Return plain blocks: REPLACE p001 followed by the replacement on new lines, then END_REPLACE. Use DELETE p002 for deletion, or NO_CHANGES. No JSON or commentary.' if empowered else 'Return JSON replacements keyed only by owned IDs. No whole-scene rewrite.')
-            result=Executor(req,out,backend).call('repair',data,instruction,**options)
+            try:result=Executor(req,out,backend).call('repair',data,instruction,**options)
+            except ValueError as exc:
+                raw=[load(p).get('output') for p in (Path(out)/'calls').glob('repair-*.json')]
+                if not adaptive(req) or not raw or not any(x in str(exc) for x in ['Duplicate deletion','Duplicate replacement','unowned paragraph','No valid edit blocks']):raise
+                result=Executor(req,Path(out)/'patch-clarification',backend).call('repair',{**data,'rejected_patch':raw[-1],'specific_protocol_error':str(exc)},instruction+' Correct only this returned patch once. Use exactly one operation per owned paragraph; never both REPLACE and DELETE. Do not echo paragraph IDs into story text. Do not add NO_CHANGES beside edits.',allow_cpu_fallback=False,**options)
             if empowered and result['replacements']:
                 original={x['id']:x['text'] for x in batch['passages'] if x['id'] in batch['owned']}
                 candidate={pid:result['replacements'].get(pid,text) for pid,text in original.items()}
@@ -256,7 +267,7 @@ def refresh_memory(state,card,source,out,backend):
     req=scoped(state['request']);data=payload(prose);data['evidence_passages']=[p for p in data['evidence_passages'] if p['id'] in changed]
     additions={'memories':[]}
     if data['evidence_passages']:
-        try:additions=memory_extract(Executor(req,out,backend),req,out,prose,{**data,'characters':[c['id'] for c in req['characters']],'prior_canon':cards(state['memories'])},MEMORY_INSTRUCTION+' Extract ONLY changed passages; unchanged facts are retained separately.')
+        try:additions=memory_extract(Executor(req,out,backend),req,out,prose,{**data,'characters':[c['id'] for c in req['characters']],'prior_canon':cards(continuity_history(state))},MEMORY_INSTRUCTION+' Extract ONLY changed passages; unchanged facts are retained separately.')
         except Exception as exc:additions={'memories':[],'unverified':True,'error':str(exc)}
     result=delta({'memories':retained+additions['memories']},prose,[c['id'] for c in req['characters']])
     if additions.get('unverified') or initial.get('unverified'):result.update(unverified=True,error=additions.get('error',initial.get('error','Unverified original facts remain')))
@@ -265,7 +276,7 @@ def refresh_memory(state,card,source,out,backend):
 def extract_initial(state,card,source,out,backend):
     prose=(Path(source)/'edited/prose.txt').read_text();req=scoped(state['request'])
     try:
-        result=memory_extract(Executor(req,out,backend),req,out,prose,{**payload(prose),'characters':[c['id'] for c in req['characters']],'prior_canon':cards(state['memories'])},MEMORY_INSTRUCTION)
+        result=memory_extract(Executor(req,out,backend),req,out,prose,{**payload(prose),'characters':[c['id'] for c in req['characters']],'prior_canon':cards(continuity_history(state))},MEMORY_INSTRUCTION)
     except Exception as exc:result={'memories':[],'unverified':True,'error':str(exc)}
     save(Path(out)/'memory.json',result);return result
 
@@ -328,13 +339,17 @@ def main():
     elif a.task=='extract_initial':extract_initial(state,card,source,out,a.backend)
     elif a.task=='verify_memory':verify_memory(state,card,source,out,a.backend)
     else:raise ValueError('Unknown batch task')
-    warnings=[]
-    for filename in ['draft-batch.json','review-batch.json','repair-batch.json','writing-report.json','repair.json','memory.json','memory-check-batch.json','review.json']:
+    warnings=[];judgments=[]
+    for filename in ['draft-batch.json','review-batch.json','repair-batch.json','writing-report.json','repair.json','memory.json','memory-check-batch.json','review.json','final-review-batch.json','section-review.json','summary-batch.json']:
         path=out/filename
         if path.exists():
             value=load(path)
-            if value.get('unverified') or value.get('merge_error') or value.get('errors') or value.get('missing') or value.get('missing_batches') or value.get('unverified_batches') or value.get('review',{}).get('unverified'):
+            assessment=value.get('review',value.get('editorial_adjudication',{}).get('verdict',value))
+            if 'pass' in assessment:judgments.append(assessment)
+            if assessment.get('pass') is False or value.get('unverified') or value.get('merge_error') or value.get('errors') or value.get('missing') or value.get('missing_batches') or value.get('unverified_batches') or value.get('review',{}).get('unverified'):
                 warnings.append(filename)
-    save(out/'status.json',{'task':a.task,'status':'success','phase':'complete_with_warnings' if warnings else 'success','elapsed_seconds':round(time.monotonic()-started,3),'warning_artifacts':warnings,'fixture':a.backend=='fixture'})
+    if warnings:print('::warning::'+a.task+': unresolved checks; inspect '+', '.join(warnings),flush=True)
+    approval='unverified' if any(v.get('unverified') for v in judgments) else 'changes_requested' if any(v.get('pass') is False for v in judgments) else 'checks_passed' if judgments else 'not_assessed'
+    save(out/'status.json',{'approval_status':approval,'task':a.task,'status':'success','phase':'complete_with_warnings' if warnings else 'success','elapsed_seconds':round(time.monotonic()-started,3),'warning_artifacts':warnings,'fixture':a.backend=='fixture'})
 
 if __name__=='__main__':main()

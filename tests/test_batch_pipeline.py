@@ -11,7 +11,7 @@ from storyforge.patching import digest
 class BatchPipelineTests(unittest.TestCase):
     def setup_scene(self,p):
         stage('prepare',p/'none',p/'base',request_file='classic-universe-practice',profile='fast',backend='fixture')
-        s=prepare(p/'base/snapshot.json',p/'prepared');return s,s['plan']['scenes'][0]
+        s=prepare(p/'base/snapshot.json',p/'prepared');s['request']['performance']['adaptive_batches']=False;return s,s['plan']['scenes'][0]
     def test_full_fixture_batches_compile_and_share_one_final_verdict(self):
         with tempfile.TemporaryDirectory() as d:
             p=Path(d);s,c=self.setup_scene(p);save(p/'source/direction/direction.txt','FIXTURE direction')

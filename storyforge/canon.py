@@ -39,7 +39,8 @@ def working(state,character=None,query='',budget=6500):
     """Project after visibility filtering: an uninformed actor retains their old belief."""
     from .coordinator import visible
     import json,re
-    records=index(state['memories'])['history']
+    from .continuation import history
+    records=index(history(state))['history']
     if character is not None:
         audiences={}
         for s in state.get('universe_history',[])+state['accepted']:
@@ -67,7 +68,7 @@ def working(state,character=None,query='',budget=6500):
 def cards(memories):
     """Prompt projections retain identity/provenance; full evidence stays in history."""
     keys={'id','kind','text','known_by','holder','claim_source','source','state_version',
-          'subject','life_state','thread_id','thread_state','fact_key','supersedes','evidence_prose_sha256'}
+          'continuity_scope','literary_status','subject','life_state','thread_id','thread_state','fact_key','supersedes','evidence_prose_sha256'}
     return [{k:v for k,v in m.items() if k in keys} for m in index(memories)['current']]
 
 
@@ -79,6 +80,6 @@ def recording_context(state,card):
 def bridge(state,character=None):
     """All current facts; projection respects actor visibility and never drops facts."""
     view=working(state,character=character,budget=None)
-    view['policy']='Full current memory connects scenes. Superseded evidence remains in append-only history. Author knowledge never becomes actor knowledge by proximity. Provisional prose has no authority over these facts.'
+    view['policy']='Full source-verified memory connects scenes. Records tagged draft_branch belong only to the provisional manuscript; they are not published universe canon. Superseded evidence remains in append-only history. Author knowledge never becomes actor knowledge by proximity. Unverified prose cannot override these facts.'
     view['provisional_scenes']=[s['id'] for s in state.get('accepted',[]) if not s.get('canon_committed',True)]
     return view

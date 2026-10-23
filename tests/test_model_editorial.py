@@ -12,7 +12,7 @@ from storyforge.storage import save,load
 class ModelEditorialTests(unittest.TestCase):
     def scene(self,p):
         stage('prepare',p/'none',p/'base',request_file='classic-universe-practice',profile='fast',backend='fixture')
-        s=prepare(p/'base/snapshot.json',p/'prepared');return s,s['plan']['scenes'][0]
+        s=prepare(p/'base/snapshot.json',p/'prepared');s['request']['performance']['adaptive_batches']=False;return s,s['plan']['scenes'][0]
     def test_readable_reviews_preserve_blocking_findings_despite_bad_pass_header(self):
         text='The smith refuses.'
         v=editorial('CHECK scene_change | fail | p001 | The character makes no consequential choice.\nISSUE blocking | scene_change | p001 | No changed state | Show the cost of refusal.',text,['scene_change'])
@@ -122,7 +122,7 @@ class ModelEditorialTests(unittest.TestCase):
         from storyforge.inference import Executor
         from storyforge.editorial_transport import call_editorial
         with tempfile.TemporaryDirectory() as d:
-            p=Path(d);s,c=self.scene(p);req=copy.deepcopy(s['request']);req['api_roles']={}
+            p=Path(d);s,c=self.scene(p);req=copy.deepcopy(s['request']);req['api_roles']={};req['execution_policy']['hosted_required_roles']=[]
             seen=[]
             def local(model,system,prompt,tokens,n_ctx,role,response_schema=None):
                 seen.append((model,system,response_schema))
