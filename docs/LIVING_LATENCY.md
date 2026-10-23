@@ -103,3 +103,13 @@ proposals. Historical beliefs remain explicit when they differ from current cano
 Multi-project routes reserve time for the remaining configured backup attempts,
 so a first timeout cannot consume the entire shared deadline. The HTTP attempt
 cap and model quality are unchanged.
+
+The scale practice now gives prose routes up to 90 seconds per attempt, sharing
+one 180-second writer deadline across three model routes. The former blanket
+40-second cap prematurely cut off the second model after the first returned 503.
+After both strong Flash routes fail, Flash-Lite can supply a candidate through the
+same source, format, literary and factual gates. Review and repair routes also
+have this capacity fallback. At most three HTTP requests are allowed per call;
+this does not rotate through all keys or change approvals into warnings. If every
+provider fails, the workflow preserves diagnostics and remains failed rather than
+inventing prose or marking an unreviewed story approved.

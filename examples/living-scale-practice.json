@@ -1446,8 +1446,8 @@
     }
   ],
   "execution_intent": {
-    "authorized": "User requested a short live one-scene practice after merging fixes.",
-    "workflow": "Same separate-runner gates as the full experiment, with one scene and smaller CPU models."
+    "authorized": "User requested two substantial scenes with a larger cast and complete memory; merge fixes and launch without confirmation.",
+    "workflow": "Full separate-runner pipeline with bounded provider failover and unchanged literary and factual approval gates."
   },
   "execution_policy": {
     "experimental": false,
@@ -1501,31 +1501,38 @@
     "hosted_routes": {
       "story_quality": [
         "flash36",
-        "flash"
+        "flash",
+        "lite"
       ],
       "rhetoric_quality": [
         "flash36",
-        "flash"
+        "flash",
+        "lite"
       ],
       "chapter_quality": [
         "flash36",
-        "flash"
+        "flash",
+        "lite"
       ],
       "writer": [
         "flash36",
-        "flash"
+        "flash",
+        "lite"
       ],
       "writer_beat": [
         "flash36",
-        "flash"
+        "flash",
+        "lite"
       ],
       "repair": [
         "flash36",
-        "flash"
+        "flash",
+        "lite"
       ],
       "humanizer": [
         "flash",
-        "flash36"
+        "flash36",
+        "lite"
       ],
       "memory": [
         "lite"
@@ -1543,7 +1550,16 @@
         "lite"
       ]
     },
-    "max_hosted_requests": 2
+    "max_hosted_requests": 3,
+    "hosted_role_seconds": {
+      "writer": 90,
+      "writer_beat": 90,
+      "repair": 60,
+      "humanizer": 90,
+      "story_quality": 60,
+      "rhetoric_quality": 60,
+      "chapter_quality": 60
+    }
   },
   "performance": {
     "compact_packets": true,
