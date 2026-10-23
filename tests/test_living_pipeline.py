@@ -12,7 +12,14 @@ from storyforge.storage import load,save
 class LivingPipelineTests(unittest.TestCase):
     def test_two_scene_generated_graph_with_full_cast_rules_and_memory(self):
         graph=yaml.safe_load(Path('.github/workflows/living-universe-pipeline.yml').read_text());jobs=graph['jobs']
-        for name,job in jobs.items():self.assertTrue(set(job.get('needs',[]))<=set(jobs),name)
+        for name,job in jobs.items():
+            self.assertTrue(set(job.get('needs',[]))<=set(jobs),name)
+            if name.startswith('s'):
+                self.assertIn('always()',job['if'],name)
+                self.assertIn('!cancelled()',job['if'],name)
+                self.assertEqual(sum(step.get('uses')=='actions/download-artifact@v4' for step in job['steps']),1,name)
+                manifest=next(step for step in job['steps'] if step.get('name')=='Bind downloaded artifacts to explicit source aliases')['env']['STORY_ARTIFACT_MANIFEST']
+                self.assertNotIn('${{',manifest,name)
         self.assertEqual(jobs['s02_design']['needs'],['s01_accept'])
         self.assertEqual(jobs['s01_memory_preflight_batches']['strategy']['max-parallel'],6)
         self.assertGreater(len(jobs),60)
@@ -46,16 +53,14 @@ class LivingPipelineTests(unittest.TestCase):
                     else:values=[None]
                     for value in values:
                         folder=root/key/(str(value) if value is not None else 'single');source=folder/'inputs';out=folder/'out'
-                        for step in job['steps']:
-                            if step.get('uses')!='actions/download-artifact@v4':continue
-                            condition=step.get('if','')
-                            if 'refresh_required' in condition and not required(p+'_repair','refresh_required'):continue
-                            if 'checks_required' in condition and not required(p+'_final_memory','checks_required'):continue
-                            spec=step['with'];dest=folder/spec['path']
-                            if 'name' in spec:shutil.copytree(artifacts[spec['name']],dest,dirs_exist_ok=True)
-                            else:
-                                names=[name for name in artifacts if fnmatch.fnmatch(name,spec['pattern'])];self.assertTrue(names,spec)
-                                for name in names:shutil.copytree(artifacts[name],dest/name,dirs_exist_ok=True)
+                        arrangement=next(step for step in job['steps'] if step.get('name')=='Bind downloaded artifacts to explicit source aliases')
+                        manifest=json.loads(arrangement['env']['STORY_ARTIFACT_MANIFEST'])
+                        for name,artifact in artifacts.items():
+                            if any(fnmatch.fnmatch(name,item['name']) for item in manifest):shutil.copytree(artifact,folder/'incoming'/name)
+                        upstream={}
+                        if p+'_repair' in artifacts:upstream[p+'_repair']={'outputs':{'refresh_required':'true' if required(p+'_repair','refresh_required') else 'false'}}
+                        if p+'_final_memory' in artifacts:upstream[p+'_final_memory']={'outputs':{'checks_required':'true' if required(p+'_final_memory','checks_required') else 'false'}}
+                        ls.arrange(folder/'incoming',source,manifest,upstream)
                         command=next(s['run'] for s in job['steps'] if s.get('id')=='task')
                         line=next(line for line in command.splitlines() if line.startswith('python -m'))
                         parts=shlex.split(line.replace('$backend','fixture').replace('$STORY_BATCH',str(value)).replace('$STORY_CHARACTER',str(value)))
@@ -124,3 +129,17 @@ class LivingPipelineTests(unittest.TestCase):
             self.assertIsNotNone(packet['response_schema'])
             self.assertEqual(len(packet['input']['prior_canon']),96)
             self.assertEqual(packet['input']['required_checks'],STORY_CHECKS+RHETORIC_CHECKS)
+    def test_extended_context_requires_all_roles_to_be_hosted(self):
+        from storyforge.contracts import request,ContractError
+        req=load('examples/living-scale-practice.json');self.assertEqual(request(copy.deepcopy(req))['context_chars'],64000)
+        req['execution_policy']['hosted_required_roles']=[]
+        with self.assertRaisesRegex(ContractError,'hosted-only'):request(req)
+    def test_empty_writer_is_a_failed_job_and_preserves_diagnostic_artifact(self):
+        with tempfile.TemporaryDirectory() as d,redirect_stdout(io.StringIO()):
+            root=Path(d);stage('prepare',root/'none',root/'base',request_file='living-scale-practice',backend='fixture');state=prepare(root/'base/snapshot.json',root/'quick',backend='fixture')
+            save(root/'source/state/snapshot.json',state)
+            def no_text(state,card,source,out,backend,bid):
+                value={'prose':'','errors':['Provider unavailable']};save(Path(out)/'draft-batch.json',value);return value
+            with patch.object(b,'write_batch',side_effect=no_text),patch.object(sys,'argv',['batch_pipeline','write_batch','--source',str(root/'source'),'--out',str(root/'out'),'--backend','worker','--batch','0']):
+                with self.assertRaises(SystemExit):b.main()
+            self.assertTrue((root/'out/draft-batch.json').exists());self.assertEqual(load(root/'out/status.json')['status'],'failure')

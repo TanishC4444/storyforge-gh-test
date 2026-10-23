@@ -163,7 +163,7 @@ class Executor:
                                         if self.req.get('execution_policy',{}).get('hosted_route_seconds'):
                                             route_policy={**(stage_policy or {'timeout':120 if role=='chapter_quality' else 90,'thinking':'low','quality_routing':True,'literary_quality':True}),'route_budget':self.req['execution_policy']['hosted_route_seconds']}
                                         if attempt_limit is not None:
-                                            route_policy={**(route_policy or {'timeout':40,'thinking':'low','quality_routing':True,'literary_quality':True}),'estimate_small_calls':True,'estimate_max_bytes':48000,'request_attempt_limit':attempt_limit,'max_project_attempts':2 if len(set(routes))==1 else 1,'project_offset':route_index}
+                                            route_policy={**(route_policy or {'timeout':40,'thinking':'low','quality_routing':True,'literary_quality':True}),'estimate_small_calls':True,'estimate_max_bytes':131072 if self.req.get('performance',{}).get('pipelined_living') else 48000,'request_attempt_limit':attempt_limit,'max_project_attempts':2 if len(set(routes))==1 else 1,'project_offset':route_index}
                                         hosted_result=self.hosted.complete(route,system,prompt,tokens,structured=bool(validator) and output_format=='json',response_schema=response_schema,role=role,policy=route_policy)
                                     break
                                 except Exception as exc:

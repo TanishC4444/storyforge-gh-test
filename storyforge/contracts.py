@@ -15,9 +15,13 @@ def request(value):
     require(isinstance(value, dict), 'Request must be an object')
     require(bool(re.fullmatch(r'[a-zA-Z0-9_-]{1,64}', value.get('project_id', ''))), 'Invalid project ID')
     require(isinstance(value.get('premise'), str) and bool(value['premise'].strip()), 'Premise required')
-    for name, low, high, default in [('chapters', 1, 12, 3), ('scenes_per_chapter', 1, 8, 3), ('words_per_scene', 100, 1600, 850), ('max_repairs', 0, 3, 1), ('max_stage_retries', 0, 3, 1), ('context_chars', 4000, 48000, 22000), ('n_ctx', 4096, 16384, 8192)]:
+    for name, low, high, default in [('chapters', 1, 12, 3), ('scenes_per_chapter', 1, 8, 3), ('words_per_scene', 100, 1600, 850), ('max_repairs', 0, 3, 1), ('max_stage_retries', 0, 3, 1), ('context_chars', 4000, 96000, 22000), ('n_ctx', 4096, 16384, 8192)]:
         value.setdefault(name, default)
         require(type(value[name]) is int and low <= value[name] <= high, f'Invalid {name}')
+    if value['context_chars']>48000:
+        required=set(value.get('execution_policy',{}).get('hosted_required_roles',[]))
+        roles=set(value.get('api_roles',{}))
+        require(value.get('performance',{}).get('pipelined_living') and roles and roles<=required,'Extended context requires an explicitly hosted-only pipeline; CPU context remains bounded')
     chars = value.get('characters', [])
     from .universe_events import freedom,validate_config
     validate_config(value)

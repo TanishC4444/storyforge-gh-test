@@ -80,3 +80,17 @@ checks and all issues, while independently reassessing all 17 dimensions; repeat
 passing explanations are omitted. A measured stress packet with the previous
 900-word output fell from over the 48,000-character limit to 41,085 characters,
 with all 96 initial facts retained. This measures packet size, not live quality.
+
+Pipeline jobs explicitly check immediate dependency results with status functions,
+so a deliberately skipped no-change refresh cannot silently skip acceptance or
+later scenes. Upstream artifacts are fetched once in parallel and mapped locally
+to explicit aliases; duplicate aliases no longer trigger repeated downloads.
+Hosted-only workers import the dependency-free checkout directly instead of
+reinstalling it for every role. An empty writer response now marks that job failed
+while retaining diagnostics, enabling a targeted retry.
+
+The scale brief explicitly permits a 64,000-character hosted context budget;
+extended budgets are rejected unless all routed roles require hosted inference.
+This accommodates actual memory growth without silently dropping facts or
+falling back to an undersized CPU context. Strong review routes can try Flash 3.6
+then Flash 3.8 within the same two-HTTP-attempt cap.

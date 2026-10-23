@@ -333,7 +333,11 @@ def main():
         elif a.task=='memory_check_join':memory_batches.join(state,source,out)
         else:raise ValueError('Unknown memory-check task')
     elif a.task=='draft_plan':plan_draft(state,card,source,out,a.backend)
-    elif a.task=='write_batch':write_batch(state,card,source,out,a.backend,a.batch)
+    elif a.task=='write_batch':
+        result=write_batch(state,card,source,out,a.backend,a.batch)
+        if not result.get('prose','').strip():
+            save(out/'status.json',{'task':a.task,'status':'failure','phase':'writer_unavailable','elapsed_seconds':round(time.monotonic()-started,3),'warning_artifacts':['draft-batch.json']})
+            raise SystemExit('No readable writer output; artifacts preserved and job marked failed for targeted retry')
     elif a.task=='merge_draft':merge_draft(state,source,out)
     elif a.task=='forward':save(out/'prose.txt',(source/'draft/draft.txt').read_text())
     elif a.task=='review_batch':review_batch(state,card,source,out,a.backend,a.kind,a.group)

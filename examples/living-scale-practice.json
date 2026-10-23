@@ -18,7 +18,7 @@
   "chapters": 2,
   "scenes_per_chapter": 1,
   "words_per_scene": 900,
-  "context_chars": 48000,
+  "context_chars": 64000,
   "n_ctx": 16384,
   "profile": "expressive",
   "retrieval_mode": "keyword",
@@ -1500,13 +1500,16 @@
     ],
     "hosted_routes": {
       "story_quality": [
-        "flash36"
+        "flash36",
+        "flash"
       ],
       "rhetoric_quality": [
-        "flash36"
+        "flash36",
+        "flash"
       ],
       "chapter_quality": [
-        "flash36"
+        "flash36",
+        "flash"
       ],
       "writer": [
         "flash36",
