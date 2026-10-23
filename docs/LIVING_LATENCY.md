@@ -94,3 +94,12 @@ extended budgets are rejected unless all routed roles require hosted inference.
 This accommodates actual memory growth without silently dropping facts or
 falling back to an undersized CPU context. Strong review routes can try Flash 3.6
 then Flash 3.8 within the same two-HTTP-attempt cap.
+
+The optimized pipeline compiles actor packets from authored profiles and exact
+knowledge allowlists instead of requesting an optional model tactic for each
+character. Separate actor runners and version validation remain; the strong writer
+chooses actions. Set `performance.model_character_proposals=true` to restore model
+proposals. Historical beliefs remain explicit when they differ from current canon.
+Multi-project routes reserve time for the remaining configured backup attempts,
+so a first timeout cannot consume the entire shared deadline. The HTTP attempt
+cap and model quality are unchanged.

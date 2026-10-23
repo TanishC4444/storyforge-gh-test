@@ -208,6 +208,13 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
         save(out/'proposal.json',{'character':character,'observable_proposal':'Existing draft retained; no new proposal.','state_version':state['version']});return
     if task == 'character' and index==0 and state.get('recovery'):
         save(out/'proposal.json',{'character':character,'observable_proposal':'Recovered scene already exists; no new actions proposed.','state_version':state['version']});return
+    if task == 'character' and req.get('performance',{}).get('pipelined_living') and not req.get('performance',{}).get('model_character_proposals',False):
+        data=actor_packet(req,state,card,character)
+        from .canon import bridge
+        author={m['id']:m for m in bridge(state)['facts']}
+        known=[{'fact_id':m['id'],'source':'prior_canon.facts'} if m.get('id') in author and m==author[m['id']] else m for m in data['known_facts']]
+        save(out/'proposal.json',{'character':character,'state_version':state['version'],'method':'source_bound_character_context_no_inference','observable_proposal':'Use this authored character profile and knowledge allowlist to choose a tactic; no action is precommitted and no new fact is asserted.','character_profile':data['character'],'known_facts':known,'knowledge_policy':'Resolve fact_id only against prior_canon.facts. Listed historical facts remain this character’s beliefs; other author facts are not shared knowledge.'})
+        return
     if task == 'character':
         result = executor.call('character', actor_packet(req, state, card, character), 'Propose one observable action or spoken line pursuing your goal in this situation. Use only known facts. Do not disclose private reasoning or secrets as commentary.', tokens=220)
         save(out / 'proposal.json', {'character': character, 'observable_proposal': result, 'state_version': state['version']})
