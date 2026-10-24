@@ -6,12 +6,50 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from scripts.combinatorial_stress import covering_cases, combinations, pairs, make_request, live_cases
+from scripts.combinatorial_stress import covering_cases, combinations, pairs, make_request, live_cases, representative_cases
 from storyforge.contracts import request
 from storyforge.storage import save, load
 
 
 class CombinatorialStressTests(unittest.TestCase):
+    def test_default_strategy_is_bounded_and_keeps_upper_scale_boundary(self):
+        from scripts.combinatorial_stress import DIMENSIONS
+        from scripts.live_matrix_stress import build_suite
+        cases=representative_cases()
+        self.assertEqual(len(cases),7)
+        for name,levels in DIMENSIONS.items():
+            self.assertEqual({c[name] for c in cases},set(levels))
+        self.assertTrue(any(c['cast']==32 and c['scenes']==4 and c['words']==1600 and c['complexity']=='dense' for c in cases))
+        self.assertEqual(len(build_suite()['cases']),3)
+        self.assertEqual([c['id'] for c in build_suite('matrix-03')['cases']],['matrix-03'])
+        for invalid in ['', 'matrix-99', 'matrix-03,matrix-03']:
+            with self.assertRaises(ValueError):build_suite(invalid)
+
+    def test_simultaneous_dashboards_parse_a_cold_catalog_once(self):
+        from storyforge.api import workflow_browser as workflows
+        from unittest.mock import patch
+        import threading
+        import time
+        with tempfile.TemporaryDirectory() as folder:
+            path=Path(folder)/'.github/workflows/example.yml'
+            path.parent.mkdir(parents=True)
+            path.write_text('name: Example\non: [push]\njobs: {}\n',encoding='utf-8')
+            original=workflows.parse_workflow
+            barrier=threading.Barrier(8)
+            def slow(*args):
+                time.sleep(.02)
+                return original(*args)
+            def read(_):
+                barrier.wait()
+                return workflows.local_catalog(Path(folder))
+            with patch.object(workflows,'parse_workflow',side_effect=slow) as parse:
+                with ThreadPoolExecutor(max_workers=8) as pool:
+                    results=list(pool.map(read,range(8)))
+                self.assertEqual(parse.call_count,1)
+                self.assertTrue(all(len(items)==1 for items in results))
+                path.unlink()
+                self.assertEqual(workflows.local_catalog(Path(folder)),[])
+
     def test_seeded_covering_array_covers_every_pair_without_exhaustive_execution(self):
         cases = covering_cases()
         expected = set().union(*(pairs(c) for c in combinations()))

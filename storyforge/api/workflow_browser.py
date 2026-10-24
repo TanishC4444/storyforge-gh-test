@@ -8,11 +8,13 @@ import os
 from pathlib import Path
 import re
 import time
+import threading
 import zipfile
 import yaml
 from .github import GitHubClient,GitHubError
 
 _CACHE={}
+_CATALOG_LOCK=threading.RLock()
 
 
 def repositories(settings):
@@ -40,7 +42,7 @@ def cached_get(api,path,**params):
 
 
 def parse_workflow(name,text):
-    data=yaml.safe_load(text) or {};on=data.get('on') or data.get(True) or {}
+    data=yaml.load(text,Loader=getattr(yaml,'CSafeLoader',yaml.SafeLoader)) or {};on=data.get('on') or data.get(True) or {}
     dispatch=on.get('workflow_dispatch') if isinstance(on,dict) else None
     enabled=isinstance(on,dict) and 'workflow_dispatch' in on
     inputs=(dispatch or {}).get('inputs',{})
@@ -52,14 +54,19 @@ def parse_workflow(name,text):
 
 
 def local_catalog(root):
-    key=('local_catalog',str(root));latest=max((p.stat().st_mtime for p in (Path(root)/'.github'/'workflows').glob('*.yml')),default=0)
-    if key in _CACHE and _CACHE[key][0]==latest:return _CACHE[key][1]
-    rows=[]
-    for path in sorted((Path(root)/'.github'/'workflows').glob('*.yml')):
-        item=parse_workflow(path.name,path.read_text(encoding='utf-8-sig'))
-        rows.append({k:v for k,v in item.items() if k not in ('source','jobs') }|{'job_count':len(item['jobs'])})
-    _CACHE[key]=(latest,rows)
-    return rows
+    # A cold catalog parses several large generated runner graphs. Serialize
+    # cache fills so simultaneous dashboard requests cannot repeat that work.
+    with _CATALOG_LOCK:
+        key=('local_catalog',str(Path(root).resolve()))
+        files=sorted((Path(root)/'.github'/'workflows').glob('*.yml'))
+        signature=tuple((p.name,p.stat().st_mtime_ns,p.stat().st_size) for p in files)
+        if key in _CACHE and _CACHE[key][0]==signature:return _CACHE[key][1]
+        rows=[]
+        for path in files:
+            item=parse_workflow(path.name,path.read_text(encoding='utf-8-sig'))
+            rows.append({k:v for k,v in item.items() if k not in ('source','jobs') }|{'job_count':len(item['jobs'])})
+        _CACHE[key]=(signature,rows)
+        return rows
 
 
 def workflow(api,filename,ref='main'):

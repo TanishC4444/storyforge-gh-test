@@ -1,4 +1,4 @@
-"""Six bounded, sequential live runs of the full existing Actions pipeline."""
+"""Targeted, bounded live checks of the full existing Actions pipeline."""
 import json
 import os
 from pathlib import Path
@@ -42,14 +42,23 @@ class MeasuredQueue(Queue):
         return row
 
 
-def main():
+def build_suite(selected='matrix-01,matrix-02,matrix-03'):
     suite = {'version':1,'per_run_timeout_minutes':20,'poll_seconds':30,
              'max_scene_retries':0,'cases':[
                  {'id':f'matrix-{i+1:02}','request_file':f'matrix-live-{i+1:02}',
                   'medium':c['medium'],'words_per_scene':c['words'],'scenes':c['scenes'],
                   'cast':c['cast'],'genre':c['genre'],'complexity':c['complexity']}
                  for i,c in enumerate(live_cases())]}
-    validate_suite(suite)
+    requested=[s.strip() for s in selected.split(',') if s.strip()]
+    known={c['id'] for c in suite['cases']}
+    if not requested or len(set(requested))!=len(requested) or not set(requested)<=known:
+        raise ValueError('Select unique known matrix case IDs')
+    suite['cases']=[c for c in suite['cases'] if c['id'] in requested]
+    return validate_suite(suite)
+
+
+def main():
+    suite=build_suite(os.getenv('MATRIX_LIVE_CASES','matrix-01,matrix-02,matrix-03'))
     api = GitHub(os.environ['GITHUB_REPOSITORY'],os.environ['GH_TOKEN'])
     queue = MeasuredQueue(api,suite,'live-matrix-results',os.environ['GITHUB_REF_NAME'],os.environ['GITHUB_SHA'],
                   'matrix-'+os.environ['GITHUB_RUN_ID'])

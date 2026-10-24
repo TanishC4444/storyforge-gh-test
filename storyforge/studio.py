@@ -13,6 +13,15 @@ def main():
     if args.workspace:os.environ['STORYFORGE_WORKSPACE']=str(args.workspace.resolve())
     import uvicorn
     print(f'StoryForge Studio: http://127.0.0.1:{args.port}',flush=True)
-    uvicorn.run('storyforge.api.app:app',host='127.0.0.1',port=args.port,access_log=False)
+    if os.name=='nt':
+        # The default Windows network stack stalled and reset connections under
+        # concurrent load. Use the tested selector/h11 combination; jobs stay in
+        # thread pool and do not require asyncio subprocess support.
+        import asyncio
+        config=uvicorn.Config('storyforge.api.app:app',host='127.0.0.1',port=args.port,http='h11',access_log=False)
+        with asyncio.Runner(loop_factory=asyncio.SelectorEventLoop) as runner:
+            runner.run(uvicorn.Server(config).serve())
+    else:
+        uvicorn.run('storyforge.api.app:app',host='127.0.0.1',port=args.port,access_log=False)
 
 if __name__=='__main__':main()

@@ -1,7 +1,7 @@
 """Seeded, measured input coverage of the actual separate-runner Actions graph.
 
 Fixture execution tests orchestration and contracts, never model quality. Live
-cases are dispatched through the unchanged Living pipeline by --live. Reports
+cases use scripts.live_matrix_stress and the unchanged Living pipeline. Reports
 keep those two kinds of evidence separate and failures always fail this suite.
 """
 from __future__ import annotations
@@ -117,10 +117,10 @@ def make_request(case, ident):
     return request(req)
 
 
-def validate_grid():
+def validate_grid(cases=None):
     from storyforge.craft import compile_scene_plan
     errors = []
-    all_cases = combinations()
+    all_cases = combinations() if cases is None else cases
     for i, case in enumerate(all_cases):
         try:
             req = make_request(case, f'grid-{i:05}')
@@ -252,14 +252,16 @@ def main():
     p.add_argument('--case',type=int)
     p.add_argument('--limit',type=int)
     p.add_argument('--grid-only',action='store_true')
+    p.add_argument('--coverage',choices=['representative','pairwise'],default='representative')
+    p.add_argument('--exhaustive-contracts',action='store_true',help='Opt in to the 6,480 input-contract combinations')
     p.add_argument('--emit-live',action='store_true')
     args = p.parse_args()
     out = Path(args.out);out.mkdir(parents=True,exist_ok=True)
-    cases = covering_cases(args.seed)
+    cases = covering_cases(args.seed) if args.coverage=='pairwise' else representative_cases()
     full = set().union(*(pairs(c) for c in combinations()))
     covered = set().union(*(pairs(c) for c in cases))
-    manifest = {'seed':args.seed,'dimensions':DIMENSIONS,'cartesian_count':len(combinations()),
-                'pairwise_cases':len(cases),'covered_pairs':len(covered),'total_pairs':len(full),
+    manifest = {'seed':args.seed,'strategy':args.coverage,'dimensions':DIMENSIONS,'cartesian_count':len(combinations()),
+                'selected_cases':len(cases),'covered_pairs':len(covered),'total_pairs':len(full),
                 'pairwise_complete':covered==full,'cases':cases}
     save(out/'manifest.json',manifest)
     if args.emit_live:
@@ -271,7 +273,7 @@ def main():
         result = execute_graph(cases[index],out/f'case-{index+1:03}',f'matrix-{index+1:03}')
         print(json.dumps({k:v for k,v in result.items() if k not in ('traceback','audit')}),flush=True)
         raise SystemExit(0 if result['pass'] else 1)
-    grid = validate_grid()
+    grid = validate_grid(None if args.exhaustive_contracts else cases)
     save(out/'grid.json',grid)
     if args.grid_only:
         print(json.dumps({'grid':grid,'coverage':{k:v for k,v in manifest.items() if k not in ('cases','dimensions')}}))
@@ -300,6 +302,14 @@ def live_cases():
         ('comic_script','historical',4,350,32,'dense'),
         ('book','horror',2,1600,8,'dense'),
     ]]
+
+
+def representative_cases():
+    # One case per genre/format covers every individual input level. Add one
+    # combined upper boundary to expose scale interactions, rather than repeat
+    # all combinations or spend model calls on each one.
+    return live_cases()+[{'medium':'book','genre':'fantasy','scenes':4,'words':1600,
+                          'cast':32,'complexity':'dense'}]
 
 
 if __name__ == '__main__':

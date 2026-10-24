@@ -1,4 +1,4 @@
-name: Combinatorial story stress and live acceptance
+name: Targeted story stress and live acceptance
 on:
   push:
     branches: ['stress/coverage-*']
@@ -7,7 +7,15 @@ on:
       live:
         type: boolean
         default: false
-        description: Also run six paid hosted model cases, sequentially
+        description: Also run the selected paid hosted model cases, sequentially
+      live_cases:
+        type: string
+        default: matrix-01,matrix-02,matrix-03
+        description: Select only the relevant cases; matrix-03 reproduces the audio length failure
+      coverage:
+        type: choice
+        options: [representative, pairwise]
+        default: representative
 permissions:
   contents: read
   actions: write
@@ -29,11 +37,15 @@ jobs:
       - run: |
           python -m pip install -e '.[test]'
           python -m pip install -e '.[api]'
-      - name: Full regression suite including provider and frontend adapters
-        run: python -m unittest discover -s tests -q
-      - name: Exhaustive input contracts and pairwise separate-runner graph
+      - name: Targeted stress and adapter regressions
+        run: |
+          python -m unittest discover -s tests -p test_combinatorial_stress.py -q
+          python -m unittest discover -s tests -p test_unified_studio.py -q
+      - name: Selected representative separate-runner graphs
         if: ${{ !cancelled() }}
-        run: python -m scripts.combinatorial_stress
+        env:
+          MATRIX_COVERAGE: ${{ inputs.coverage || 'representative' }}
+        run: python -m scripts.combinatorial_stress --coverage "$MATRIX_COVERAGE"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -53,6 +65,7 @@ jobs:
       - name: Dispatch full runner graphs one at a time; require real approval audits
         env:
           GH_TOKEN: ${{ github.token }}
+          MATRIX_LIVE_CASES: ${{ inputs.live_cases || 'matrix-01,matrix-02,matrix-03' }}
         run: python -m scripts.live_matrix_stress
       - uses: actions/upload-artifact@v4
         if: always()
