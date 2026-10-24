@@ -41,7 +41,7 @@ class FreshAndParallelTests(unittest.TestCase):
             p=Path(d);bundle=pp.prepare('hard-chronology',p/'prepared');bundle=pp.outline(bundle,p/'outline','fixture')
             scenes={}
             for c in bundle['plan']['scenes']:
-                prose='The rain struck the quay. '*200
+                prose=('The rain struck the quay. '*200).rstrip()
                 facts=[{'kind':'event','text':'Recorded fact '+str(i),'known_by':['c01'],'evidence_ids':['p001'],'evidence':prose,'evidence_spans':[{'id':'p001','start':0,'end':len(prose)}]} for i in range(20)]
                 scenes[c['id']]={'scene_id':c['id'],'prose':prose,'memory':{'memories':facts}}
             seen={}
