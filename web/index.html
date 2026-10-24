@@ -3,21 +3,46 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Storyforge Playground</title>
-  <meta name="description" content="Frontend playground for the Storyforge API: start, follow and read story runs.">
-  <link rel="icon" href="data:,">
+  <title>ParaMyth</title>
+  <meta name="description" content="Start, follow and read ParaMyth story runs.">
+  <meta name="theme-color" content="#203970">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%23203970%22/%3E%3Cpath d=%22M16 4l2.6 8.4L27 16l-8.4 2.6L16 27l-2.6-8.4L5 16l8.4-3.6z%22 fill=%22%23F2C358%22/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..900,0..100,0..1&family=Nunito:wght@400;600;700;800&display=swap">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 2l2.2 6.6L21 11l-6.8 2.4L12 20l-2.2-6.6L3 11l6.8-2.4z" fill="currentColor"/></symbol>
+    <symbol id="i-seq" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="5" rx="2"/><rect x="4" y="16" width="16" height="5" rx="2"/><path d="M12 8v8m-3-3 3 3 3-3"/></g></symbol>
+    <symbol id="i-par" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="4" r="2"/><path d="M12 6v3M12 9 5 14M12 9l7 5M12 9v5"/><rect x="2" y="15" width="6" height="6" rx="1.5"/><rect x="9" y="15" width="6" height="6" rx="1.5"/><rect x="16" y="15" width="6" height="6" rx="1.5"/></g></symbol>
+    <symbol id="i-rec" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4h4"/></g></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v4h-4"/></g></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-8-1.5V19c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5V4.5C17 4 14 4.5 12 6z"/><path d="M12 6v14.5"/></g></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-ext" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></g></symbol>
+    <symbol id="i-plug" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0zM12 17v4"/></g></symbol>
+  </svg>
+
+  <div class="ambient" aria-hidden="true"><span></span><span></span><span></span></div>
+
   <header class="top">
-    <a class="brand" href="#/">Storyforge <span>playground</span></a>
-    <span class="row">
-      <a href="console.html" class="muted">API console</a>
-      <button type="button" id="conn-pill" class="pill" title="Show connection settings">Not connected</button>
-    </span>
+    <a class="brand" href="#/"><svg class="brand-star" aria-hidden="true"><use href="#i-spark"/></svg>ParaMyth <span>Story studio</span></a>
+    <nav class="top-nav">
+      <a href="console.html" class="nav-link">API console</a>
+      <button type="button" id="conn-pill" class="pill" title="Show connection settings"><i class="dot" aria-hidden="true"></i><b>Not connected</b></button>
+    </nav>
   </header>
 
-  <section id="connect" class="panel connect">
+  <section id="connect" class="panel connect reveal">
+    <div class="connect-head">
+      <span class="icon-tile"><svg><use href="#i-plug"/></svg></span>
+      <div>
+        <h2>Connect</h2>
+        <p class="muted">Point the studio at a ParaMyth API, or explore with demo data.</p>
+      </div>
+    </div>
     <form id="connect-form">
       <label>API URL
         <input id="api-url" type="url" required placeholder="http://localhost:8000">
@@ -27,7 +52,7 @@
       </label>
       <div class="row">
         <button type="submit">Connect</button>
-        <button type="button" id="use-demo" class="secondary">Use demo data</button>
+        <button type="button" id="use-demo" class="secondary"><svg class="ico"><use href="#i-spark"/></svg>Use demo data</button>
         <button type="button" id="disconnect" class="ghost">Forget token</button>
       </div>
       <p class="hint">The token stays in this tab (sessionStorage) and is sent only to the API URL above.
@@ -36,27 +61,55 @@
     <p id="connect-msg" class="msg" role="status"></p>
   </section>
 
+  <section class="hero" aria-label="ParaMyth">
+    <figure class="hero-art">
+      <img src="assets/paramyth-banner.webp" width="1280" height="720" alt="ParaMyth: an open storybook with swirling mint and navy smoke and golden stars">
+      <svg class="twinkle t1"><use href="#i-spark"/></svg>
+      <svg class="twinkle t2"><use href="#i-spark"/></svg>
+      <svg class="twinkle t3"><use href="#i-spark"/></svg>
+      <svg class="twinkle t4"><use href="#i-spark"/></svg>
+      <svg class="twinkle t5"><use href="#i-spark"/></svg>
+    </figure>
+    <div class="stats" id="stats">
+      <div class="stat"><span class="stat-label">Runs</span><strong data-count="0" id="stat-runs">0</strong><span class="stat-sub">in this view</span></div>
+      <div class="stat"><span class="stat-label">Succeeded</span><strong data-count="0" id="stat-ok">0</strong><span class="stat-sub" id="stat-rate">—</span></div>
+      <div class="stat"><span class="stat-label">In flight</span><strong data-count="0" id="stat-live">0</strong><span class="stat-sub">queued or running</span></div>
+      <div class="stat"><span class="stat-label">Story briefs</span><strong data-count="0" id="stat-briefs">0</strong><span class="stat-sub">ready to start</span></div>
+    </div>
+  </section>
+
   <main id="view"></main>
+
+  <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
 
   <template id="tpl-home">
     <div class="grid">
-      <section class="panel">
-        <h2>Start a run</h2>
-        <div class="tabs" id="mode-tabs" role="tablist"></div>
-        <p class="muted" id="mode-desc"></p>
+      <section class="panel reveal" style="--i:0">
+        <div class="panel-title">
+          <span class="icon-tile gold"><svg><use href="#i-spark"/></svg></span>
+          <div><h2>Start a run</h2><p class="muted">Pick how scenes get written, then a brief.</p></div>
+        </div>
+        <div class="segmented" id="mode-tabs" role="tablist"></div>
+        <p class="mode-desc" id="mode-desc"></p>
         <form id="start-form">
           <label>Story brief
             <select id="brief" required></select>
           </label>
           <div id="brief-card" class="brief-card"></div>
-          <div id="mode-inputs"></div>
-          <button type="submit">Start run</button>
+          <details class="advanced" open>
+            <summary>Run settings</summary>
+            <div id="mode-inputs" class="mode-inputs"></div>
+          </details>
+          <button type="submit" class="cta"><span>Start run</span><svg class="ico"><use href="#i-spark"/></svg></button>
           <p id="start-msg" class="msg" role="status"></p>
         </form>
       </section>
-      <section class="panel">
+      <section class="panel reveal" style="--i:1">
         <div class="panel-head">
-          <h2>Runs</h2>
+          <div class="panel-title">
+            <span class="icon-tile mint"><svg><use href="#i-book"/></svg></span>
+            <div><h2>Runs</h2><p class="muted">Newest first. Live runs update on their own.</p></div>
+          </div>
           <div class="row">
             <select id="runs-mode" aria-label="Filter by mode">
               <option value="">All modes</option>
@@ -64,7 +117,7 @@
               <option value="parallel">Parallel</option>
               <option value="recovery">Recovery</option>
             </select>
-            <button type="button" id="refresh" class="ghost">Refresh</button>
+            <button type="button" id="refresh" class="icon-btn" aria-label="Refresh runs" title="Refresh"><svg><use href="#i-refresh"/></svg></button>
           </div>
         </div>
         <ul id="runs" class="runs"></ul>
@@ -73,24 +126,31 @@
   </template>
 
   <template id="tpl-run">
-    <section class="panel">
-      <a href="#/" class="back">← All runs</a>
+    <section class="panel run-head reveal" style="--i:0">
+      <a href="#/" class="back"><svg class="ico"><use href="#i-arrow"/></svg>All runs</a>
       <div class="panel-head">
         <div>
-          <h2 id="run-title"></h2>
+          <p class="eyebrow" id="run-mode"></p>
+          <h1 id="run-title"></h1>
           <p class="muted" id="run-meta"></p>
         </div>
-        <span id="run-status" class="badge"></span>
+        <div class="ring" id="ring" style="--p:0">
+          <svg viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-track" cx="60" cy="60" r="52"/><circle class="ring-fill" cx="60" cy="60" r="52" pathLength="100"/></svg>
+          <div class="ring-label"><strong id="ring-pct">0%</strong><span id="run-status" class="badge"></span></div>
+        </div>
       </div>
-      <div class="progress"><div id="progress-bar"></div></div>
+      <div class="progress" id="progress"><div id="progress-bar"></div></div>
       <p class="muted" id="progress-text"></p>
       <ul id="warnings" class="warnings"></ul>
       <div class="row" id="run-actions">
-        <button type="button" id="cancel" class="secondary" hidden>Cancel run</button>
-        <a id="gh-link" class="ghost-link" target="_blank" rel="noopener" hidden>Open on GitHub</a>
+        <button type="button" id="cancel" class="danger" hidden>Cancel run</button>
+        <a id="gh-link" class="ghost-link" target="_blank" rel="noopener" hidden>Open on GitHub<svg class="ico"><use href="#i-ext"/></svg></a>
       </div>
       <form id="recover-form" class="recover" hidden>
-        <h3>Recover this run</h3>
+        <div class="panel-title">
+          <span class="icon-tile peach"><svg><use href="#i-rec"/></svg></span>
+          <div><h3>Recover this run</h3><p class="muted">Restart from the first unfinished scene or stage.</p></div>
+        </div>
         <div class="row wrap">
           <label>Strategy <select name="strategy"><option value="fresh">Fresh run from saved prefix</option><option value="rerun">Rerun failed stage in place</option></select></label>
           <label>Scene <select name="scene"><option>auto</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
@@ -100,14 +160,15 @@
         <p id="recover-msg" class="msg" role="status"></p>
       </form>
     </section>
-    <section class="panel">
+    <section class="panel reveal" style="--i:1">
       <div class="tabs" role="tablist">
+        <span class="tab-thumb" aria-hidden="true"></span>
         <button type="button" data-tab="story" class="active">Story</button>
         <button type="button" data-tab="jobs">Jobs</button>
         <button type="button" data-tab="canon">Canon</button>
         <button type="button" data-tab="artifacts">Artifacts</button>
       </div>
-      <div id="tab-body"></div>
+      <div id="tab-body" class="tab-body"></div>
     </section>
   </template>
 
