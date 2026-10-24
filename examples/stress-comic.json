@@ -99,6 +99,8 @@
         "lite"
       ],
       "memory_quality": [
+        "flash36",
+        "flash",
         "lite"
       ],
       "director": [
@@ -119,7 +121,8 @@
       "humanizer": 90,
       "story_quality": 60,
       "rhetoric_quality": 60,
-      "chapter_quality": 60
+      "chapter_quality": 60,
+      "memory_quality": 60
     },
     "provider_outage_recovery": {
       "max_rounds": 3,
@@ -164,7 +167,7 @@
     "story_quality": "flash36",
     "rhetoric_quality": "flash36",
     "memory": "lite",
-    "memory_quality": "lite",
+    "memory_quality": "flash36",
     "chapter_quality": "flash36",
     "scene_designer": "lite",
     "director": "lite",
