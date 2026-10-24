@@ -1,4 +1,4 @@
-import copy,io,json,tempfile,unittest
+import copy,io,json,shutil,tempfile,unittest
 from pathlib import Path
 from contextlib import redirect_stdout
 from unittest.mock import patch

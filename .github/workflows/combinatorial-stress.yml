@@ -3,6 +3,11 @@ on:
   push:
     branches: ['stress/coverage-*']
   workflow_dispatch:
+    inputs:
+      live:
+        type: boolean
+        default: false
+        description: Also run six paid hosted model cases, sequentially
 permissions:
   contents: read
   actions: write
@@ -36,6 +41,7 @@ jobs:
           path: stress-matrix-results/
           retention-days: 30
   live-model-acceptance:
+    if: ${{ inputs.live == true || contains(github.event.head_commit.message, '[live-stress]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 145
     steps:
@@ -43,6 +49,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - run: python -m pip install -e '.[test]'
       - name: Dispatch full runner graphs one at a time; require real approval audits
         env:
           GH_TOKEN: ${{ github.token }}

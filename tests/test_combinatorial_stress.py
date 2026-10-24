@@ -46,6 +46,18 @@ class CombinatorialStressTests(unittest.TestCase):
             with self.subTest(override=override), self.assertRaises(ValueError):
                 request({**copy.deepcopy(base), **override})
 
+    def test_live_measures_reject_short_output_even_when_actions_and_reviews_pass(self):
+        from scripts.live_matrix_stress import assess_measures
+        case = live_cases()[0]
+        req = make_request(case, 'measure-test')
+        row = {'pass':True,'audit':{'expected_scenes':1,'cast':1,'retained_initial_facts':0,
+               'scenes':[{'scene':'ch01-sc01','words':100,'approved':True,'factual_proof_bound':True}]}}
+        self.assertTrue(assess_measures(case, row, req)['pass'])
+        row['audit']['scenes'][0]['words'] = 20
+        self.assertFalse(assess_measures(case, row, req)['pass'])
+        row['audit']['scenes'][0]['words'] = 2000
+        self.assertFalse(assess_measures(case, row, req)['pass'])
+
     def test_episode_audit_cannot_shrink_the_requested_scene_count(self):
         from storyforge.episode_audit import audit
         from storyforge.batch_pipeline import bind_state
