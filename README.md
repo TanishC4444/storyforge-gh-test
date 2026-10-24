@@ -23,6 +23,10 @@ Characters share an immutable starting state version and have scoped model input
 
 Actual simultaneous execution depends on available GitHub runners and account concurrency limits. Later scenes are deliberately sequential because their starting facts depend on earlier accepted scenes. Fresh runners reset context; they do not increase a model's context window.
 
+## HTTP API and frontend playground
+
+`storyforge/api` is a FastAPI layer for starting and reading Sequential, Parallel and Recovery runs with a GitHub token, and `web/` is a static playground frontend deployed to GitHub Pages. See [docs/API.md](docs/API.md).
+
 ## Run it
 
 Open Actions → **Story runners** → Run workflow.
@@ -285,3 +289,58 @@ See [mode behavior, practice runs and limitations](docs/THREE_MODES.md). The ori
 The [classic cinematic-universe expansion path](docs/CLASSIC_EXPANSION.md) uses Gemini-first parallel writing beats, batched reviews and source-bound paragraph repairs across six independent projects, compiles initial refinement without model calls, and exposes draft text before final acceptance. The Living universe Actions workflow also uses this full runner graph.
 
 The universe graphs now support a deterministic medium selector for novels, short stories, stage plays, screenplays, audio dramas and comic scripts. Short scenes are written continuously; larger writing batches share concrete entry/exit contracts. Reviews cover coherent passages and complete short scenes, with bounded provider use. Full source-bound memory connects scenes, including opt-in character lifecycle changes and foreshadowing threads. See [the universe workflow guide](docs/CLASSIC_EXPANSION.md) for controls and capacity limits.
+
+## Streaming soundtracks
+
+Run `python -m storyforge.soundtracks` from the repository to use the only available
+story automatically, or `python -m storyforge.soundtracks --list-stories` to find
+available folders. Select one with `--story outputs/troy-third-person`,
+then open http://127.0.0.1:8765. Use a story run folder containing `request.json`,
+`story.txt`, or exported story files. The installed command is also
+`storyforge-soundtracks --story runs/my-story`.
+
+The player builds its direction from story prose, character descriptions, world
+rules, accepted scenes, canon/memory and scene plans when present. The displayed
+prompt and source list show what was used; prompts use bounded excerpts, so they
+are not exhaustive summaries of long manuscripts. It never scans environment
+files or provider logs. Audio generation is a separate step and does not alter
+accepted writing or the Actions workflow.
+
+- **Ambient soundscape:** locally synthesized wind, water, low rumble and fire,
+  selected from narrative context and your sound direction. No speech or melody.
+- **Cinematic film score:** generates through Vultr using orchestral direction
+  from the story, with instrumental section tags rather than sung lyrics.
+  This is the default selection. A server-side inference key is required.
+  The model may still introduce vocals despite the instrumental request.
+  Ambient mode alone uses local procedural synthesis and streams PCM WAV.
+- **Song:** uses Vultr Serverless Inference. Set `VULTR_INFERENCE_API_KEY` in the
+  server process environment before starting the player. `.env.example` documents
+  the name; this command does not automatically load `.env` files. Never commit
+  keys. Supply lyrics and a duration of 30–360 seconds for `minimax-music3`.
+  Clicking Generate in song mode submits a billable job. The server polls status
+  and proxies progressive streaming through the local audio player; if streaming
+  is unavailable it plays completed audio. Press Play after the stream is ready.
+  Stopping playback does not cancel a submitted provider job.
+
+Vultr's current catalog requires lyrics and does not promise instrumental-only
+music or sound-effect generation. The film-score mode requests instrumental output using section tags; instrumental
+compliance is advisory. Ambient mode works without a provider key.
+Local cue manifests and provider job records are saved under the story folder's
+`soundtracks/` directory; local audio can be regenerated from its cue. Provider
+tracks expire after seven days. The player binds only to this computer and keeps
+provider authentication on the server, outside browser code.
+
+Provider contracts: [create music](https://api.vultrinference.com/docs/reference/create-music),
+[model capabilities](https://api.vultrinference.com/docs/reference/list-music-models),
+[job status and stream URLs](https://api.vultrinference.com/docs/reference/get-music).
+
+## Production planning desk
+
+Run `python -m storyforge.production_web` and open http://127.0.0.1:8766 for
+scene scheduling, location scouting, editable budgets, legal/logistical follow-ups,
+crew/equipment planning, and draft call sheets. Text and optional scene images are
+processed by Vultr Muse Glimmer; SerpAPI research uses cached searches, strict
+allowances and ordered backup-key failover. Google Calendar supports file export
+and an explicit OAuth sync action; CSV/JSON exports support other tools.
+
+See [setup, limits and integration details](docs/PRODUCTION_PLANNING.md).

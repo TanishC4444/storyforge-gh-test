@@ -131,25 +131,23 @@ jobs:
       with:
         backend: ${{ inputs.backend }}
         hosted-only: 'true'
-    - uses: actions/download-artifact@v4
-      if: ${{ inputs.resume_run != '' }}
-      with:
-        name: ${{ inputs.checkpoint_artifact }}
-        path: inputs/canon
-        run-id: ${{ inputs.resume_run }}
-        github-token: ${{ github.token }}
-    - uses: actions/download-artifact@v4
-      with:
-        name: prepare
-        path: inputs/state
+    - if: ${{ inputs.resume_run != '' }}
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"name":"${{ inputs.checkpoint_artifact }}","path":"inputs/canon","run-id":"${{ inputs.resume_run
+          }}"}'
+      run: python -m storyforge.artifact_fetch
+    - env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"name":"prepare","path":"inputs/state"}'
+      run: python -m storyforge.artifact_fetch
     - name: Import prior episode artifacts into a fresh run
       if: ${{ inputs.fresh_run != '' }}
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{quickstart,s*_accept,s*_design,s*_final_check,s*_draft,s*_repair,s*_final_memory,s*_memory_review,s*_memory_recovery_join}'
-        run-id: ${{ inputs.fresh_run }}
-        github-token: ${{ github.token }}
-        path: inputs/restart
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{quickstart,s*_accept,s*_design,s*_final_check,s*_draft,s*_repair,s*_final_memory,s*_memory_review,s*_memory_recovery_join}","run-id":"${{
+          inputs.fresh_run }}","path":"inputs/restart"}'
+      run: python -m storyforge.artifact_fetch
     - name: Execute Refine initial story prompt
       id: task
       env:
@@ -194,10 +192,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: quickstart
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"quickstart","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"quickstart","path":"state","pattern":false,"condition":null,"fallback":"quickstart"}]'
@@ -240,10 +238,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: s01_design
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"s01_design","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null}]'
@@ -291,10 +289,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_characters-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_characters-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_characters-*","path":"characters","pattern":true,"condition":null}]'
@@ -335,10 +333,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_direction}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_direction}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_direction","path":"plan","pattern":false,"condition":null}]'
@@ -346,12 +344,10 @@ jobs:
       run: python -m storyforge.living_stages arrange
     - name: Recover saved first-scene prose without inheriting approval
       if: ${{ inputs.saved_draft_run != '' }}
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_write_batches-0}'
-        run-id: ${{ inputs.saved_draft_run }}
-        github-token: ${{ github.token }}
-        path: inputs/reused
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_write_batches-0}","run-id":"${{ inputs.saved_draft_run }}","path":"inputs/reused"}'
+      run: python -m storyforge.artifact_fetch
     - name: Write coherent scene / batch ${{ matrix.batch }}
       id: task
       env: &id009
@@ -396,10 +392,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_direction,s01_write_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_direction,s01_write_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_direction","path":"plan","pattern":false,"condition":null},{"name":"s01_write_batches-*","path":"batches","pattern":true,"condition":null}]'
@@ -441,10 +437,10 @@ jobs:
     - *id005
     - &id010
       name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_draft}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_draft}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - &id011
       name: Bind downloaded artifacts to explicit source aliases
       env:
@@ -573,10 +569,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_draft,s01_memory_extract_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_draft,s01_memory_extract_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_draft","path":"edited","pattern":false,"condition":null},{"name":"s01_draft","path":"plan","pattern":false,"condition":null},{"name":"s01_memory_extract_batches-*","path":"batches","pattern":true,"condition":null}]'
@@ -619,10 +615,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_draft,s01_memory}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_draft,s01_memory}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_draft","path":"edited","pattern":false,"condition":null},{"name":"s01_memory","path":"memory","pattern":false,"condition":null},{"name":"s01_memory","path":"plan","pattern":false,"condition":null}]'
@@ -670,10 +666,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_draft,s01_memory,s01_memory_preflight_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_draft,s01_memory,s01_memory_preflight_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_draft","path":"edited","pattern":false,"condition":null},{"name":"s01_memory","path":"memory","pattern":false,"condition":null},{"name":"s01_memory","path":"plan","pattern":false,"condition":null},{"name":"s01_memory_preflight_batches-*","path":"batches","pattern":true,"condition":null}]'
@@ -717,10 +713,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_draft,s01_story_batches-*,s01_rhetoric_batches-*,s01_memory_preflight}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_draft,s01_story_batches-*,s01_rhetoric_batches-*,s01_memory_preflight}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_draft","path":"edited","pattern":false,"condition":null},{"name":"s01_story_batches-*","path":"story-batches","pattern":true,"condition":null},{"name":"s01_rhetoric_batches-*","path":"rhetoric-batches","pattern":true,"condition":null},{"name":"s01_memory_preflight","path":"memory-review","pattern":false,"condition":null}]'
@@ -761,10 +757,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_repair_plan}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_repair_plan}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_repair_plan","path":"plan","pattern":false,"condition":null}]'
@@ -815,10 +811,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_draft,s01_repair_plan,s01_repair_batches-*,s01_memory,s01_memory_preflight}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_draft,s01_repair_plan,s01_repair_batches-*,s01_memory,s01_memory_preflight}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_draft","path":"edited","pattern":false,"condition":null},{"name":"s01_repair_plan","path":"plan","pattern":false,"condition":null},{"name":"s01_repair_batches-*","path":"batches","pattern":true,"condition":null},{"name":"s01_memory","path":"initial-memory","pattern":false,"condition":null},{"name":"s01_memory_preflight","path":"preflight-memory","pattern":false,"condition":null}]'
@@ -865,10 +861,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_repair,s01_draft,s01_repair_plan,s01_memory}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_repair,s01_draft,s01_repair_plan,s01_memory}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_repair","path":"edited","pattern":false,"condition":null},{"name":"s01_draft","path":"original","pattern":false,"condition":null},{"name":"s01_repair_plan","path":"findings","pattern":false,"condition":null},{"name":"s01_memory","path":"initial-memory","pattern":false,"condition":null}]'
@@ -909,10 +905,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_repair}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_repair}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_repair","path":"edited","pattern":false,"condition":null},{"name":"s01_repair","path":"plan","pattern":false,"condition":null}]'
@@ -960,10 +956,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_repair,s01_memory_preflight,s01_memory_refresh_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_repair,s01_memory_preflight,s01_memory_refresh_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_repair","path":"edited","pattern":false,"condition":null},{"name":"s01_repair","path":"plan","pattern":false,"condition":null},{"name":"s01_memory_preflight","path":"preflight-memory","pattern":false,"condition":null},{"name":"s01_memory_refresh_batches-*","path":"batches","pattern":true,"condition":"needs.s01_repair.outputs.refresh_required
@@ -1009,10 +1005,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_repair,s01_final_memory}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_repair,s01_final_memory}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_repair","path":"edited","pattern":false,"condition":null},{"name":"s01_final_memory","path":"memory","pattern":false,"condition":null},{"name":"s01_final_memory","path":"plan","pattern":false,"condition":null}]'
@@ -1060,10 +1056,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_repair,s01_final_memory,s01_memory_final_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_repair,s01_final_memory,s01_memory_final_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_repair","path":"edited","pattern":false,"condition":null},{"name":"s01_final_memory","path":"memory","pattern":false,"condition":null},{"name":"s01_final_memory","path":"plan","pattern":false,"condition":null},{"name":"s01_memory_final_batches-*","path":"batches","pattern":true,"condition":"needs.s01_final_memory.outputs.checks_required
@@ -1108,10 +1104,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_repair,s01_memory_review}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_repair,s01_memory_review}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_repair","path":"edited","pattern":false,"condition":null},{"name":"s01_memory_review","path":"memory","pattern":false,"condition":null},{"name":"s01_memory_review","path":"memory-review","pattern":false,"condition":null}]'
@@ -1154,10 +1150,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_repair,s01_memory_recovery_plan}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_repair,s01_memory_recovery_plan}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_repair","path":"edited","pattern":false,"condition":null},{"name":"s01_memory_recovery_plan","path":"plan","pattern":false,"condition":null}]'
@@ -1205,10 +1201,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_repair,s01_memory_recovery_plan,s01_memory_recovery_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_repair,s01_memory_recovery_plan,s01_memory_recovery_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_repair","path":"edited","pattern":false,"condition":null},{"name":"s01_memory_recovery_plan","path":"plan","pattern":false,"condition":null},{"name":"s01_memory_recovery_batches-*","path":"batches","pattern":true,"condition":null}]'
@@ -1251,10 +1247,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_repair,s01_memory_recovered}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_repair,s01_memory_recovered}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_repair","path":"edited","pattern":false,"condition":null},{"name":"s01_memory_recovered","path":"memory","pattern":false,"condition":null},{"name":"s01_memory_recovered","path":"plan","pattern":false,"condition":null}]'
@@ -1302,10 +1298,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_repair,s01_memory_recovered,s01_memory_recovery_checks-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_repair,s01_memory_recovered,s01_memory_recovery_checks-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_repair","path":"edited","pattern":false,"condition":null},{"name":"s01_memory_recovered","path":"memory","pattern":false,"condition":null},{"name":"s01_memory_recovered","path":"plan","pattern":false,"condition":null},{"name":"s01_memory_recovery_checks-*","path":"batches","pattern":true,"condition":null}]'
@@ -1349,10 +1345,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_design,s01_final_check,s01_memory_review,s01_memory_recovery_join}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_design,s01_final_check,s01_memory_review,s01_memory_recovery_join}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_final_check","path":"edited","pattern":false,"condition":null},{"name":"s01_memory_review","path":"memory","pattern":false,"condition":null},{"name":"s01_memory_review","path":"memory-review","pattern":false,"condition":null},{"name":"s01_memory_recovery_join","path":"recovered-memory","pattern":false,"condition":"needs.s01_memory_review.outputs.repair_required
@@ -1392,10 +1388,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s01_accept,quickstart}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s01_accept,quickstart}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_accept","path":"state","pattern":false,"condition":null,"fallback":"quickstart"}]'
@@ -1440,10 +1436,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: s02_design
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"s02_design","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null}]'
@@ -1488,10 +1484,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_characters-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_characters-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_characters-*","path":"characters","pattern":true,"condition":null}]'
@@ -1532,10 +1528,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_direction}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_direction}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_direction","path":"plan","pattern":false,"condition":null}]'
@@ -1582,10 +1578,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_direction,s02_write_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_direction,s02_write_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_direction","path":"plan","pattern":false,"condition":null},{"name":"s02_write_batches-*","path":"batches","pattern":true,"condition":null}]'
@@ -1627,10 +1623,10 @@ jobs:
     - *id005
     - &id014
       name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_draft}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_draft}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - &id015
       name: Bind downloaded artifacts to explicit source aliases
       env:
@@ -1754,10 +1750,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_draft,s02_memory_extract_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_draft,s02_memory_extract_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_draft","path":"edited","pattern":false,"condition":null},{"name":"s02_draft","path":"plan","pattern":false,"condition":null},{"name":"s02_memory_extract_batches-*","path":"batches","pattern":true,"condition":null}]'
@@ -1800,10 +1796,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_draft,s02_memory}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_draft,s02_memory}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_draft","path":"edited","pattern":false,"condition":null},{"name":"s02_memory","path":"memory","pattern":false,"condition":null},{"name":"s02_memory","path":"plan","pattern":false,"condition":null}]'
@@ -1851,10 +1847,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_draft,s02_memory,s02_memory_preflight_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_draft,s02_memory,s02_memory_preflight_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_draft","path":"edited","pattern":false,"condition":null},{"name":"s02_memory","path":"memory","pattern":false,"condition":null},{"name":"s02_memory","path":"plan","pattern":false,"condition":null},{"name":"s02_memory_preflight_batches-*","path":"batches","pattern":true,"condition":null}]'
@@ -1898,10 +1894,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_draft,s02_story_batches-*,s02_rhetoric_batches-*,s02_memory_preflight}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_draft,s02_story_batches-*,s02_rhetoric_batches-*,s02_memory_preflight}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_draft","path":"edited","pattern":false,"condition":null},{"name":"s02_story_batches-*","path":"story-batches","pattern":true,"condition":null},{"name":"s02_rhetoric_batches-*","path":"rhetoric-batches","pattern":true,"condition":null},{"name":"s02_memory_preflight","path":"memory-review","pattern":false,"condition":null}]'
@@ -1942,10 +1938,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_repair_plan}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_repair_plan}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_repair_plan","path":"plan","pattern":false,"condition":null}]'
@@ -1996,10 +1992,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_draft,s02_repair_plan,s02_repair_batches-*,s02_memory,s02_memory_preflight}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_draft,s02_repair_plan,s02_repair_batches-*,s02_memory,s02_memory_preflight}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_draft","path":"edited","pattern":false,"condition":null},{"name":"s02_repair_plan","path":"plan","pattern":false,"condition":null},{"name":"s02_repair_batches-*","path":"batches","pattern":true,"condition":null},{"name":"s02_memory","path":"initial-memory","pattern":false,"condition":null},{"name":"s02_memory_preflight","path":"preflight-memory","pattern":false,"condition":null}]'
@@ -2044,10 +2040,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_repair,s02_draft,s02_repair_plan,s02_memory}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_repair,s02_draft,s02_repair_plan,s02_memory}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_repair","path":"edited","pattern":false,"condition":null},{"name":"s02_draft","path":"original","pattern":false,"condition":null},{"name":"s02_repair_plan","path":"findings","pattern":false,"condition":null},{"name":"s02_memory","path":"initial-memory","pattern":false,"condition":null}]'
@@ -2088,10 +2084,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_repair}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_repair}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_repair","path":"edited","pattern":false,"condition":null},{"name":"s02_repair","path":"plan","pattern":false,"condition":null}]'
@@ -2139,10 +2135,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_repair,s02_memory_preflight,s02_memory_refresh_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_repair,s02_memory_preflight,s02_memory_refresh_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_repair","path":"edited","pattern":false,"condition":null},{"name":"s02_repair","path":"plan","pattern":false,"condition":null},{"name":"s02_memory_preflight","path":"preflight-memory","pattern":false,"condition":null},{"name":"s02_memory_refresh_batches-*","path":"batches","pattern":true,"condition":"needs.s02_repair.outputs.refresh_required
@@ -2186,10 +2182,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_repair,s02_final_memory}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_repair,s02_final_memory}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_repair","path":"edited","pattern":false,"condition":null},{"name":"s02_final_memory","path":"memory","pattern":false,"condition":null},{"name":"s02_final_memory","path":"plan","pattern":false,"condition":null}]'
@@ -2237,10 +2233,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_repair,s02_final_memory,s02_memory_final_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_repair,s02_final_memory,s02_memory_final_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_repair","path":"edited","pattern":false,"condition":null},{"name":"s02_final_memory","path":"memory","pattern":false,"condition":null},{"name":"s02_final_memory","path":"plan","pattern":false,"condition":null},{"name":"s02_memory_final_batches-*","path":"batches","pattern":true,"condition":"needs.s02_final_memory.outputs.checks_required
@@ -2284,10 +2280,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_repair,s02_memory_review}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_repair,s02_memory_review}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_repair","path":"edited","pattern":false,"condition":null},{"name":"s02_memory_review","path":"memory","pattern":false,"condition":null},{"name":"s02_memory_review","path":"memory-review","pattern":false,"condition":null}]'
@@ -2330,10 +2326,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_repair,s02_memory_recovery_plan}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_repair,s02_memory_recovery_plan}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_repair","path":"edited","pattern":false,"condition":null},{"name":"s02_memory_recovery_plan","path":"plan","pattern":false,"condition":null}]'
@@ -2381,10 +2377,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_repair,s02_memory_recovery_plan,s02_memory_recovery_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_repair,s02_memory_recovery_plan,s02_memory_recovery_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_repair","path":"edited","pattern":false,"condition":null},{"name":"s02_memory_recovery_plan","path":"plan","pattern":false,"condition":null},{"name":"s02_memory_recovery_batches-*","path":"batches","pattern":true,"condition":null}]'
@@ -2427,10 +2423,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_repair,s02_memory_recovered}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_repair,s02_memory_recovered}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_repair","path":"edited","pattern":false,"condition":null},{"name":"s02_memory_recovered","path":"memory","pattern":false,"condition":null},{"name":"s02_memory_recovered","path":"plan","pattern":false,"condition":null}]'
@@ -2478,10 +2474,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_repair,s02_memory_recovered,s02_memory_recovery_checks-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_repair,s02_memory_recovered,s02_memory_recovery_checks-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_repair","path":"edited","pattern":false,"condition":null},{"name":"s02_memory_recovered","path":"memory","pattern":false,"condition":null},{"name":"s02_memory_recovered","path":"plan","pattern":false,"condition":null},{"name":"s02_memory_recovery_checks-*","path":"batches","pattern":true,"condition":null}]'
@@ -2525,10 +2521,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_design,s02_final_check,s02_memory_review,s02_memory_recovery_join}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_design,s02_final_check,s02_memory_review,s02_memory_recovery_join}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_final_check","path":"edited","pattern":false,"condition":null},{"name":"s02_memory_review","path":"memory","pattern":false,"condition":null},{"name":"s02_memory_review","path":"memory-review","pattern":false,"condition":null},{"name":"s02_memory_recovery_join","path":"recovered-memory","pattern":false,"condition":"needs.s02_memory_review.outputs.repair_required
@@ -2568,10 +2564,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s02_accept,quickstart}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s02_accept,quickstart}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s02_accept","path":"state","pattern":false,"condition":null,"fallback":"quickstart"}]'
@@ -2611,10 +2607,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: s03_design
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"s03_design","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null}]'
@@ -2659,10 +2655,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_characters-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_characters-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_characters-*","path":"characters","pattern":true,"condition":null}]'
@@ -2703,10 +2699,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_direction}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_direction}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_direction","path":"plan","pattern":false,"condition":null}]'
@@ -2753,10 +2749,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_direction,s03_write_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_direction,s03_write_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_direction","path":"plan","pattern":false,"condition":null},{"name":"s03_write_batches-*","path":"batches","pattern":true,"condition":null}]'
@@ -2798,10 +2794,10 @@ jobs:
     - *id005
     - &id019
       name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_draft}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_draft}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - &id020
       name: Bind downloaded artifacts to explicit source aliases
       env:
@@ -2925,10 +2921,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_draft,s03_memory_extract_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_draft,s03_memory_extract_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_draft","path":"edited","pattern":false,"condition":null},{"name":"s03_draft","path":"plan","pattern":false,"condition":null},{"name":"s03_memory_extract_batches-*","path":"batches","pattern":true,"condition":null}]'
@@ -2971,10 +2967,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_draft,s03_memory}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_draft,s03_memory}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_draft","path":"edited","pattern":false,"condition":null},{"name":"s03_memory","path":"memory","pattern":false,"condition":null},{"name":"s03_memory","path":"plan","pattern":false,"condition":null}]'
@@ -3022,10 +3018,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_draft,s03_memory,s03_memory_preflight_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_draft,s03_memory,s03_memory_preflight_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_draft","path":"edited","pattern":false,"condition":null},{"name":"s03_memory","path":"memory","pattern":false,"condition":null},{"name":"s03_memory","path":"plan","pattern":false,"condition":null},{"name":"s03_memory_preflight_batches-*","path":"batches","pattern":true,"condition":null}]'
@@ -3069,10 +3065,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_draft,s03_story_batches-*,s03_rhetoric_batches-*,s03_memory_preflight}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_draft,s03_story_batches-*,s03_rhetoric_batches-*,s03_memory_preflight}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_draft","path":"edited","pattern":false,"condition":null},{"name":"s03_story_batches-*","path":"story-batches","pattern":true,"condition":null},{"name":"s03_rhetoric_batches-*","path":"rhetoric-batches","pattern":true,"condition":null},{"name":"s03_memory_preflight","path":"memory-review","pattern":false,"condition":null}]'
@@ -3113,10 +3109,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_repair_plan}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_repair_plan}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_repair_plan","path":"plan","pattern":false,"condition":null}]'
@@ -3167,10 +3163,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_draft,s03_repair_plan,s03_repair_batches-*,s03_memory,s03_memory_preflight}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_draft,s03_repair_plan,s03_repair_batches-*,s03_memory,s03_memory_preflight}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_draft","path":"edited","pattern":false,"condition":null},{"name":"s03_repair_plan","path":"plan","pattern":false,"condition":null},{"name":"s03_repair_batches-*","path":"batches","pattern":true,"condition":null},{"name":"s03_memory","path":"initial-memory","pattern":false,"condition":null},{"name":"s03_memory_preflight","path":"preflight-memory","pattern":false,"condition":null}]'
@@ -3215,10 +3211,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_repair,s03_draft,s03_repair_plan,s03_memory}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_repair,s03_draft,s03_repair_plan,s03_memory}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_repair","path":"edited","pattern":false,"condition":null},{"name":"s03_draft","path":"original","pattern":false,"condition":null},{"name":"s03_repair_plan","path":"findings","pattern":false,"condition":null},{"name":"s03_memory","path":"initial-memory","pattern":false,"condition":null}]'
@@ -3259,10 +3255,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_repair}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_repair}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_repair","path":"edited","pattern":false,"condition":null},{"name":"s03_repair","path":"plan","pattern":false,"condition":null}]'
@@ -3310,10 +3306,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_repair,s03_memory_preflight,s03_memory_refresh_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_repair,s03_memory_preflight,s03_memory_refresh_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_repair","path":"edited","pattern":false,"condition":null},{"name":"s03_repair","path":"plan","pattern":false,"condition":null},{"name":"s03_memory_preflight","path":"preflight-memory","pattern":false,"condition":null},{"name":"s03_memory_refresh_batches-*","path":"batches","pattern":true,"condition":"needs.s03_repair.outputs.refresh_required
@@ -3357,10 +3353,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_repair,s03_final_memory}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_repair,s03_final_memory}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_repair","path":"edited","pattern":false,"condition":null},{"name":"s03_final_memory","path":"memory","pattern":false,"condition":null},{"name":"s03_final_memory","path":"plan","pattern":false,"condition":null}]'
@@ -3408,10 +3404,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_repair,s03_final_memory,s03_memory_final_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_repair,s03_final_memory,s03_memory_final_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_repair","path":"edited","pattern":false,"condition":null},{"name":"s03_final_memory","path":"memory","pattern":false,"condition":null},{"name":"s03_final_memory","path":"plan","pattern":false,"condition":null},{"name":"s03_memory_final_batches-*","path":"batches","pattern":true,"condition":"needs.s03_final_memory.outputs.checks_required
@@ -3455,10 +3451,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_repair,s03_memory_review}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_repair,s03_memory_review}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_repair","path":"edited","pattern":false,"condition":null},{"name":"s03_memory_review","path":"memory","pattern":false,"condition":null},{"name":"s03_memory_review","path":"memory-review","pattern":false,"condition":null}]'
@@ -3501,10 +3497,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_repair,s03_memory_recovery_plan}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_repair,s03_memory_recovery_plan}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_repair","path":"edited","pattern":false,"condition":null},{"name":"s03_memory_recovery_plan","path":"plan","pattern":false,"condition":null}]'
@@ -3552,10 +3548,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_repair,s03_memory_recovery_plan,s03_memory_recovery_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_repair,s03_memory_recovery_plan,s03_memory_recovery_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_repair","path":"edited","pattern":false,"condition":null},{"name":"s03_memory_recovery_plan","path":"plan","pattern":false,"condition":null},{"name":"s03_memory_recovery_batches-*","path":"batches","pattern":true,"condition":null}]'
@@ -3598,10 +3594,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_repair,s03_memory_recovered}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_repair,s03_memory_recovered}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_repair","path":"edited","pattern":false,"condition":null},{"name":"s03_memory_recovered","path":"memory","pattern":false,"condition":null},{"name":"s03_memory_recovered","path":"plan","pattern":false,"condition":null}]'
@@ -3649,10 +3645,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_repair,s03_memory_recovered,s03_memory_recovery_checks-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_repair,s03_memory_recovered,s03_memory_recovery_checks-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_repair","path":"edited","pattern":false,"condition":null},{"name":"s03_memory_recovered","path":"memory","pattern":false,"condition":null},{"name":"s03_memory_recovered","path":"plan","pattern":false,"condition":null},{"name":"s03_memory_recovery_checks-*","path":"batches","pattern":true,"condition":null}]'
@@ -3696,10 +3692,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_design,s03_final_check,s03_memory_review,s03_memory_recovery_join}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_design,s03_final_check,s03_memory_review,s03_memory_recovery_join}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_final_check","path":"edited","pattern":false,"condition":null},{"name":"s03_memory_review","path":"memory","pattern":false,"condition":null},{"name":"s03_memory_review","path":"memory-review","pattern":false,"condition":null},{"name":"s03_memory_recovery_join","path":"recovered-memory","pattern":false,"condition":"needs.s03_memory_review.outputs.repair_required
@@ -3739,10 +3735,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s03_accept,quickstart}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s03_accept,quickstart}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_accept","path":"state","pattern":false,"condition":null,"fallback":"quickstart"}]'
@@ -3782,10 +3778,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: s04_design
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"s04_design","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null}]'
@@ -3830,10 +3826,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_characters-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_characters-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_characters-*","path":"characters","pattern":true,"condition":null}]'
@@ -3874,10 +3870,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_direction}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_direction}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_direction","path":"plan","pattern":false,"condition":null}]'
@@ -3924,10 +3920,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_direction,s04_write_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_direction,s04_write_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_direction","path":"plan","pattern":false,"condition":null},{"name":"s04_write_batches-*","path":"batches","pattern":true,"condition":null}]'
@@ -3969,10 +3965,10 @@ jobs:
     - *id005
     - &id021
       name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_draft}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_draft}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - &id022
       name: Bind downloaded artifacts to explicit source aliases
       env:
@@ -4096,10 +4092,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_draft,s04_memory_extract_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_draft,s04_memory_extract_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_draft","path":"edited","pattern":false,"condition":null},{"name":"s04_draft","path":"plan","pattern":false,"condition":null},{"name":"s04_memory_extract_batches-*","path":"batches","pattern":true,"condition":null}]'
@@ -4142,10 +4138,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_draft,s04_memory}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_draft,s04_memory}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_draft","path":"edited","pattern":false,"condition":null},{"name":"s04_memory","path":"memory","pattern":false,"condition":null},{"name":"s04_memory","path":"plan","pattern":false,"condition":null}]'
@@ -4193,10 +4189,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_draft,s04_memory,s04_memory_preflight_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_draft,s04_memory,s04_memory_preflight_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_draft","path":"edited","pattern":false,"condition":null},{"name":"s04_memory","path":"memory","pattern":false,"condition":null},{"name":"s04_memory","path":"plan","pattern":false,"condition":null},{"name":"s04_memory_preflight_batches-*","path":"batches","pattern":true,"condition":null}]'
@@ -4240,10 +4236,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_draft,s04_story_batches-*,s04_rhetoric_batches-*,s04_memory_preflight}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_draft,s04_story_batches-*,s04_rhetoric_batches-*,s04_memory_preflight}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_draft","path":"edited","pattern":false,"condition":null},{"name":"s04_story_batches-*","path":"story-batches","pattern":true,"condition":null},{"name":"s04_rhetoric_batches-*","path":"rhetoric-batches","pattern":true,"condition":null},{"name":"s04_memory_preflight","path":"memory-review","pattern":false,"condition":null}]'
@@ -4284,10 +4280,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_repair_plan}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_repair_plan}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_repair_plan","path":"plan","pattern":false,"condition":null}]'
@@ -4338,10 +4334,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_draft,s04_repair_plan,s04_repair_batches-*,s04_memory,s04_memory_preflight}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_draft,s04_repair_plan,s04_repair_batches-*,s04_memory,s04_memory_preflight}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_draft","path":"edited","pattern":false,"condition":null},{"name":"s04_repair_plan","path":"plan","pattern":false,"condition":null},{"name":"s04_repair_batches-*","path":"batches","pattern":true,"condition":null},{"name":"s04_memory","path":"initial-memory","pattern":false,"condition":null},{"name":"s04_memory_preflight","path":"preflight-memory","pattern":false,"condition":null}]'
@@ -4386,10 +4382,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_repair,s04_draft,s04_repair_plan,s04_memory}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_repair,s04_draft,s04_repair_plan,s04_memory}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_repair","path":"edited","pattern":false,"condition":null},{"name":"s04_draft","path":"original","pattern":false,"condition":null},{"name":"s04_repair_plan","path":"findings","pattern":false,"condition":null},{"name":"s04_memory","path":"initial-memory","pattern":false,"condition":null}]'
@@ -4430,10 +4426,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_repair}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_repair}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_repair","path":"edited","pattern":false,"condition":null},{"name":"s04_repair","path":"plan","pattern":false,"condition":null}]'
@@ -4481,10 +4477,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_repair,s04_memory_preflight,s04_memory_refresh_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_repair,s04_memory_preflight,s04_memory_refresh_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_repair","path":"edited","pattern":false,"condition":null},{"name":"s04_repair","path":"plan","pattern":false,"condition":null},{"name":"s04_memory_preflight","path":"preflight-memory","pattern":false,"condition":null},{"name":"s04_memory_refresh_batches-*","path":"batches","pattern":true,"condition":"needs.s04_repair.outputs.refresh_required
@@ -4528,10 +4524,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_repair,s04_final_memory}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_repair,s04_final_memory}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_repair","path":"edited","pattern":false,"condition":null},{"name":"s04_final_memory","path":"memory","pattern":false,"condition":null},{"name":"s04_final_memory","path":"plan","pattern":false,"condition":null}]'
@@ -4579,10 +4575,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_repair,s04_final_memory,s04_memory_final_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_repair,s04_final_memory,s04_memory_final_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_repair","path":"edited","pattern":false,"condition":null},{"name":"s04_final_memory","path":"memory","pattern":false,"condition":null},{"name":"s04_final_memory","path":"plan","pattern":false,"condition":null},{"name":"s04_memory_final_batches-*","path":"batches","pattern":true,"condition":"needs.s04_final_memory.outputs.checks_required
@@ -4626,10 +4622,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_repair,s04_memory_review}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_repair,s04_memory_review}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_repair","path":"edited","pattern":false,"condition":null},{"name":"s04_memory_review","path":"memory","pattern":false,"condition":null},{"name":"s04_memory_review","path":"memory-review","pattern":false,"condition":null}]'
@@ -4672,10 +4668,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_repair,s04_memory_recovery_plan}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_repair,s04_memory_recovery_plan}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_repair","path":"edited","pattern":false,"condition":null},{"name":"s04_memory_recovery_plan","path":"plan","pattern":false,"condition":null}]'
@@ -4723,10 +4719,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_repair,s04_memory_recovery_plan,s04_memory_recovery_batches-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_repair,s04_memory_recovery_plan,s04_memory_recovery_batches-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_repair","path":"edited","pattern":false,"condition":null},{"name":"s04_memory_recovery_plan","path":"plan","pattern":false,"condition":null},{"name":"s04_memory_recovery_batches-*","path":"batches","pattern":true,"condition":null}]'
@@ -4769,10 +4765,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_repair,s04_memory_recovered}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_repair,s04_memory_recovered}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_repair","path":"edited","pattern":false,"condition":null},{"name":"s04_memory_recovered","path":"memory","pattern":false,"condition":null},{"name":"s04_memory_recovered","path":"plan","pattern":false,"condition":null}]'
@@ -4820,10 +4816,10 @@ jobs:
     - *id002
     - *id008
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_repair,s04_memory_recovered,s04_memory_recovery_checks-*}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_repair,s04_memory_recovered,s04_memory_recovery_checks-*}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_repair","path":"edited","pattern":false,"condition":null},{"name":"s04_memory_recovered","path":"memory","pattern":false,"condition":null},{"name":"s04_memory_recovered","path":"plan","pattern":false,"condition":null},{"name":"s04_memory_recovery_checks-*","path":"batches","pattern":true,"condition":null}]'
@@ -4867,10 +4863,10 @@ jobs:
     - *id002
     - *id005
     - name: Fetch upstream artifacts in one parallel transfer
-      uses: actions/download-artifact@v4
-      with:
-        pattern: '{s04_design,s04_final_check,s04_memory_review,s04_memory_recovery_join}'
-        path: incoming
+      env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"pattern":"{s04_design,s04_final_check,s04_memory_review,s04_memory_recovery_join}","path":"incoming"}'
+      run: python -m storyforge.artifact_fetch
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_final_check","path":"edited","pattern":false,"condition":null},{"name":"s04_memory_review","path":"memory","pattern":false,"condition":null},{"name":"s04_memory_review","path":"memory-review","pattern":false,"condition":null},{"name":"s04_memory_recovery_join","path":"recovered-memory","pattern":false,"condition":"needs.s04_memory_review.outputs.repair_required
@@ -5006,9 +5002,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - *id002
-    - uses: actions/download-artifact@v4
-      with:
-        path: results/
+    - env:
+        GH_TOKEN: ${{ github.token }}
+        STORY_ARTIFACT_FETCH: '{"path":"results/"}'
+      run: python -m storyforge.artifact_fetch
     - name: Restore approved prefix evidence from fresh-run checkpoint
       if: always()
       run: if [ -d results/quickstart/seed-results ]; then cp -rn results/quickstart/seed-results/. results/; fi

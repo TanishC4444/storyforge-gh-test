@@ -1,0 +1,1019 @@
+{
+  "schema_version": 1,
+  "id": "021488f99d23da022f34439a",
+  "title": "The Fire Beneath the Bronze",
+  "created_at": "2026-10-24T18:49:08.558824+00:00",
+  "provider": "Vultr Serverless Inference",
+  "model": "muse-glimmer-30b",
+  "model_calls": [
+    {
+      "model": "muse-glimmer-30b",
+      "usage": {
+        "prompt_tokens": 5492,
+        "completion_tokens": 4103,
+        "total_tokens": 9595,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 1695
+        }
+      }
+    },
+    {
+      "model": "muse-glimmer-30b",
+      "usage": {
+        "prompt_tokens": 5964,
+        "completion_tokens": 2199,
+        "total_tokens": 8163,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 774
+        }
+      }
+    }
+  ],
+  "source_files": [
+    "FINAL_STORY.txt"
+  ],
+  "image_count": 0,
+  "config": {
+    "start_date": "2026-11-02",
+    "timezone": "America/Chicago",
+    "search_limit": 0,
+    "brief": "Create a practical independent short-film adaptation of this Troy story. Filming region and actual cast availability are not yet chosen; do not invent them.",
+    "region": "",
+    "currency": "USD",
+    "day_hours": 10.0,
+    "setup_minutes": 30.0,
+    "move_minutes": 45.0,
+    "contingency": 15.0,
+    "budget_cap": 0.0,
+    "skip_weekends": true,
+    "focus": [
+      "schedule",
+      "locations",
+      "budget",
+      "legal",
+      "logistics"
+    ],
+    "blackout_dates": [],
+    "cast_unavailable": {},
+    "location_unavailable": {}
+  },
+  "breakdown": {
+    "title": "The Fire Beneath the Bronze",
+    "summary": "An independent short-film adaptation of the Troy story following smith Thestor and his nephew Meles as they bargain for passage home, travel to the sanctuary at Cape Lekton to recover iron tubes and charges, and witness the weapons’ first use at the Scamander ditch. The arc moves from a windswept Myrmidon beach camp through a cliff sanctuary exchange to a rain-soaked battlefield and a quiet aftermath at the ships, emphasizing practical craft, negotiation, and cost.",
+    "visual_criteria": [
+      "Gravel shingle beach with damp sand, charcoal trenches, overturned troughs and goat-hair blankets; muted gray kelp, broken timber, overcast morning light",
+      "Beached merchant coaster on wet rollers with cedar skids, Ithacan rowers and casks; desaturated sea palette with wind-blown dust",
+      "Rocky cliff path with grey silt, narrow ledges, spray and sail-strips for foot binding; high contrast daylight with white spray",
+      "Limestone sanctuary interior with fallen lintel, smoke-darkened roof, anvil stone and wooden stand; warm hearth glow against cool stone",
+      "Open camp on shingle under red-prowed flagship; cedar rack, bronze basin with crossed tools stamp; bright midday sun and hard shadows",
+      "Rain-soaked ditch bank with mud, shields, smoke haze and blue wool strips; low overcast, diffused wet palette"
+    ],
+    "scenes": [
+      {
+        "id": "s01",
+        "title": "Bronze on the Shingle",
+        "location": "gravel beach south of Myrmidon shelters with charcoal trenches",
+        "description": "Dawn wind dies over kelp-strewn shingle. Thestor works bronze steering braces on an anvil stone while Meles sits on an overturned trough with possessions. Thestor finds a hollow bronze sleeve in seaweed, uncovers mallet and tongs stamp.",
+        "cast": [
+          "Thestor",
+          "Meles"
+        ],
+        "minutes": 90,
+        "light": "day",
+        "dependencies": [],
+        "props": [
+          "bronze sleeve prop",
+          "anvil stone",
+          "steering braces",
+          "goat-hair blanket",
+          "oilskin pouch"
+        ],
+        "risks": [
+          "wet slippery shingle",
+          "cold water exposure",
+          "prop metal handling"
+        ]
+      },
+      {
+        "id": "s02",
+        "title": "Bargain on the Skids",
+        "location": "beached merchant coaster on shingle with Ithacan rowers",
+        "description": "Odysseus with spearmen checks casks. Thestor offers refitted rudder box for Meles’ passage and barley. Odysseus refuses, then Thestor reveals the bronze sleeve. Odysseus offers barley and passage for a trip to Lekton.",
+        "cast": [
+          "Thestor",
+          "Meles",
+          "Odysseus",
+          "Ithacan spearmen"
+        ],
+        "minutes": 120,
+        "light": "day",
+        "dependencies": [
+          "s01"
+        ],
+        "props": [
+          "cedar tally stick",
+          "bronze sleeve",
+          "barley sack",
+          "steering braces"
+        ],
+        "risks": [
+          "crowd choreography",
+          "prop weight handling"
+        ]
+      },
+      {
+        "id": "s03",
+        "title": "Skiff to Lekton",
+        "location": "rocky silt landing at Cape Lekton with cliff climb",
+        "description": "Skiff grounded on grey silt. Crew haul boat, climb narrow path. Thestor carries sleeve under cloak, rower loses sandal. Leather around bronze soaks through.",
+        "cast": [
+          "Thestor",
+          "Odysseus",
+          "Ithacan oarsmen"
+        ],
+        "minutes": 90,
+        "light": "day",
+        "dependencies": [
+          "s02"
+        ],
+        "props": [
+          "skiff",
+          "sail strips",
+          "bronze sleeve"
+        ],
+        "risks": [
+          "uneven cliff climb",
+          "water spray",
+          "slip hazard"
+        ]
+      },
+      {
+        "id": "s04",
+        "title": "Sanctuary Exchange",
+        "location": "inland limestone sanctuary behind fallen lintel",
+        "description": "Keeper with white-clouded eyes and bronze tokens demands return of stolen basin. Odysseus recalls basin used by Agamemnon. Odysseus offers seal ring for temporary return of basin. Ring placed under altar.",
+        "cast": [
+          "Thestor",
+          "Odysseus",
+          "Sanctuary keeper"
+        ],
+        "minutes": 105,
+        "light": "either",
+        "dependencies": [
+          "s03"
+        ],
+        "props": [
+          "bronze fragment",
+          "anvil",
+          "wooden stand",
+          "seal ring"
+        ],
+        "risks": [
+          "confined interior",
+          "smoke haze",
+          "low light"
+        ]
+      },
+      {
+        "id": "s05",
+        "title": "Weapons Revealed",
+        "location": "sanctuary interior near anvil",
+        "description": "Keeper uncovers six iron tubes on frames and chest of twenty-five charges. Count with counters. Demonstration shot on fallen block. Smoke clears to scar.",
+        "cast": [
+          "Thestor",
+          "Odysseus",
+          "Sanctuary keeper",
+          "Ithacan oarsmen"
+        ],
+        "minutes": 120,
+        "light": "either",
+        "dependencies": [
+          "s04"
+        ],
+        "props": [
+          "iron tube props",
+          "charge chest",
+          "counters",
+          "sail slings"
+        ],
+        "risks": [
+          "simulated blast effects",
+          "noise",
+          "heavy prop lifting"
+        ]
+      },
+      {
+        "id": "s06",
+        "title": "Return to Camp",
+        "location": "cliff descent to skiff and shingle camp",
+        "description": "Crew rig sail slings, carry tubes and chest down narrow ledge. Odysseus braces load. Tide returns, hull lifted. Arrival at camp under Agamemnon’s flagship.",
+        "cast": [
+          "Thestor",
+          "Odysseus",
+          "Ithacan oarsmen"
+        ],
+        "minutes": 90,
+        "light": "day",
+        "dependencies": [
+          "s05"
+        ],
+        "props": [
+          "tubes",
+          "charge chest",
+          "sail slings"
+        ],
+        "risks": [
+          "load carrying on uneven terrain",
+          "water entry"
+        ]
+      },
+      {
+        "id": "s07",
+        "title": "Trial Before the King",
+        "location": "shingle under red-prowed flagship with cedar rack",
+        "description": "Agamemnon places token on rack. Achilles watches. Thestor prepares tube, Meles holds linen. First shot splinters oak target, burns Thestor’s wrist. Thestor demands passage recorded before further use.",
+        "cast": [
+          "Thestor",
+          "Meles",
+          "Agamemnon",
+          "Achilles",
+          "Odysseus"
+        ],
+        "minutes": 150,
+        "light": "day",
+        "dependencies": [
+          "s06"
+        ],
+        "props": [
+          "cedar rack",
+          "iron tube",
+          "oak target",
+          "linen",
+          "Achilles cloak strip"
+        ],
+        "risks": [
+          "simulated muzzle flash",
+          "smoke",
+          "stunt burn makeup"
+        ]
+      },
+      {
+        "id": "s08",
+        "title": "Ditch in Rain",
+        "location": "rain-soaked Scamander ditch bank",
+        "description": "Rain flattens grass. Achilles shields operators. Thestor crouches by frame, Meles holds chest on stones. First three shots fire at Hector’s line, smoke spreads.",
+        "cast": [
+          "Thestor",
+          "Meles",
+          "Achilles",
+          "Hector",
+          "Myrmidon guards"
+        ],
+        "minutes": 150,
+        "light": "day",
+        "dependencies": [
+          "s07"
+        ],
+        "props": [
+          "frames",
+          "charge chest",
+          "shields",
+          "rain effects"
+        ],
+        "risks": [
+          "wet mud slip",
+          "stunt falls",
+          "water safety"
+        ]
+      },
+      {
+        "id": "s09",
+        "title": "Frame Collapse",
+        "location": "ditch bank during javelin exchange",
+        "description": "Packets spill into rain, black stroke runs. Fourth charge hisses, no shot. Frame tips, breaks collar, tube falls across Meles’s leg. Thestor cuts sling, tube plunges into water.",
+        "cast": [
+          "Thestor",
+          "Meles",
+          "Achilles",
+          "Myrmidon guards"
+        ],
+        "minutes": 120,
+        "light": "day",
+        "dependencies": [
+          "s08"
+        ],
+        "props": [
+          "broken frame",
+          "knife",
+          "sling",
+          "wet charges"
+        ],
+        "risks": [
+          "prop collapse",
+          "actor impact",
+          "water immersion"
+        ]
+      },
+      {
+        "id": "s10",
+        "title": "Shield Rescue",
+        "location": "ditch lip with Trojan advance",
+        "description": "Achilles drops into trench, drives shield into clay, forces Trojan back. Myrmidons lift brace, Thestor draws Meles out. Trojans withdraw toward oak.",
+        "cast": [
+          "Achilles",
+          "Thestor",
+          "Meles",
+          "Hector",
+          "Trojan soldiers",
+          "Myrmidon guards"
+        ],
+        "minutes": 120,
+        "light": "day",
+        "dependencies": [
+          "s09"
+        ],
+        "props": [
+          "spear",
+          "shields",
+          "mud"
+        ],
+        "risks": [
+          "combat choreography",
+          "stunt falls"
+        ]
+      },
+      {
+        "id": "s11",
+        "title": "Aftermath at the Ships",
+        "location": "ship-side healer tent on shingle",
+        "description": "Healer treats Meles’s leg, saves boy but not foot. Thestor sits with burned hand, gives unworn tunic for cloth. Meles packs for homeward ship.",
+        "cast": [
+          "Thestor",
+          "Meles",
+          "Healer",
+          "Odysseus"
+        ],
+        "minutes": 90,
+        "light": "day",
+        "dependencies": [
+          "s10"
+        ],
+        "props": [
+          "healer kit",
+          "tunic",
+          "rasps",
+          "blanket"
+        ],
+        "risks": [
+          "medical prosthetic",
+          "emotional performance"
+        ]
+      },
+      {
+        "id": "s12",
+        "title": "Tally and Basin",
+        "location": "Agamemnon’s meal area with bronze basin",
+        "description": "Odysseus carries weapon count to Agamemnon. Attendant pours water into broad bronze basin with crossed tools stamp. Odysseus places unringed hand through handle.",
+        "cast": [
+          "Odysseus",
+          "Agamemnon",
+          "Attendant"
+        ],
+        "minutes": 75,
+        "light": "day",
+        "dependencies": [
+          "s11"
+        ],
+        "props": [
+          "bronze basin",
+          "tally",
+          "seal ring absence"
+        ],
+        "risks": [
+          "period set handling"
+        ]
+      }
+    ],
+    "budget_items": [
+      {
+        "category": "crew",
+        "description": "Core independent crew package for 10-hour day with setup and move allowances",
+        "quantity": 1,
+        "unit": "day",
+        "low_rate": 0,
+        "high_rate": 0,
+        "basis": "unverified model estimate or unknown"
+      },
+      {
+        "category": "equipment",
+        "description": "Camera, sound and lighting package for coastal and interior scenes",
+        "quantity": 1,
+        "unit": "day",
+        "low_rate": 0,
+        "high_rate": 0,
+        "basis": "unverified model estimate or unknown"
+      },
+      {
+        "category": "locations",
+        "description": "Descriptive coastal beach, cliff path and inland sanctuary location access",
+        "quantity": 1,
+        "unit": "day",
+        "low_rate": 0,
+        "high_rate": 0,
+        "basis": "unverified model estimate or unknown"
+      },
+      {
+        "category": "transport",
+        "description": "Boat, van and gear transport for beach and cliff moves",
+        "quantity": 1,
+        "unit": "day",
+        "low_rate": 0,
+        "high_rate": 0,
+        "basis": "unverified model estimate or unknown"
+      },
+      {
+        "category": "art",
+        "description": "Period props, costumes and set dressing for Bronze Age camp and sanctuary",
+        "quantity": 1,
+        "unit": "item",
+        "low_rate": 0,
+        "high_rate": 0,
+        "basis": "unverified model estimate or unknown"
+      },
+      {
+        "category": "insurance",
+        "description": "Production liability and equipment coverage",
+        "quantity": 1,
+        "unit": "day",
+        "low_rate": 0,
+        "high_rate": 0,
+        "basis": "unverified model estimate or unknown"
+      },
+      {
+        "category": "permits",
+        "description": "Location, water access and pyrotechnic simulation permits",
+        "quantity": 1,
+        "unit": "item",
+        "low_rate": 0,
+        "high_rate": 0,
+        "basis": "unverified model estimate or unknown"
+      },
+      {
+        "category": "post",
+        "description": "Edit, sound design and color for short film",
+        "quantity": 1,
+        "unit": "item",
+        "low_rate": 0,
+        "high_rate": 0,
+        "basis": "unverified model estimate or unknown"
+      }
+    ],
+    "search_queries": [],
+    "assumptions": [
+      "Scene minutes are estimated shooting time not screen runtime and assume 10-hour day with 30-minute setup, 45-minute move and 15% contingency",
+      "All budget rates are zero because a responsible estimate cannot be made without chosen filming region and vendor quotes",
+      "No cast availability is assumed; characters are not booked actors",
+      "No filming region is chosen; locations are descriptive groups only",
+      "Skip weekends constraint applied to scheduling conceptually from start date 2026-11-02 America/Chicago",
+      "Visual criteria derived from story text and are scouting guidance only, not proof of real address or permission",
+      "Prop weapons and simulated blasts require safety planning and are not real pyrotechnics"
+    ],
+    "missing_info": [
+      "Filming region and specific venues not chosen",
+      "Actual cast availability and SAG status not provided",
+      "Permit requirements, insurance minimums and local regulations for water/cliff access not identified",
+      "Exact dates within schedule window and crew size not specified",
+      "Budget cap is zero, so funding source and rate basis remain undefined",
+      "Accessibility needs, power, toilets, parking and community impact assessments not provided"
+    ]
+  },
+  "schedule": {
+    "events": [
+      {
+        "scene_id": "s01",
+        "summary": "Bronze on the Shingle",
+        "location": "gravel beach south of Myrmidon shelters with charcoal trenches",
+        "start": "2026-11-02T08:30:00-06:00",
+        "end": "2026-11-02T10:00:00-06:00",
+        "cast": [
+          "Thestor",
+          "Meles"
+        ],
+        "setup_move_minutes": 30.0,
+        "meal_before": false,
+        "status": "tentative"
+      },
+      {
+        "scene_id": "s02",
+        "summary": "Bargain on the Skids",
+        "location": "beached merchant coaster on shingle with Ithacan rowers",
+        "start": "2026-11-02T11:45:00-06:00",
+        "end": "2026-11-02T13:45:00-06:00",
+        "cast": [
+          "Thestor",
+          "Meles",
+          "Odysseus",
+          "Ithacan spearmen"
+        ],
+        "setup_move_minutes": 75.0,
+        "meal_before": true,
+        "status": "tentative"
+      },
+      {
+        "scene_id": "s03",
+        "summary": "Skiff to Lekton",
+        "location": "rocky silt landing at Cape Lekton with cliff climb",
+        "start": "2026-11-02T15:00:00-06:00",
+        "end": "2026-11-02T16:30:00-06:00",
+        "cast": [
+          "Thestor",
+          "Odysseus",
+          "Ithacan oarsmen"
+        ],
+        "setup_move_minutes": 75.0,
+        "meal_before": false,
+        "status": "tentative"
+      },
+      {
+        "scene_id": "s04",
+        "summary": "Sanctuary Exchange",
+        "location": "inland limestone sanctuary behind fallen lintel",
+        "start": "2026-11-03T08:30:00-06:00",
+        "end": "2026-11-03T10:15:00-06:00",
+        "cast": [
+          "Thestor",
+          "Odysseus",
+          "Sanctuary keeper"
+        ],
+        "setup_move_minutes": 30.0,
+        "meal_before": false,
+        "status": "tentative"
+      },
+      {
+        "scene_id": "s05",
+        "summary": "Weapons Revealed",
+        "location": "sanctuary interior near anvil",
+        "start": "2026-11-03T12:00:00-06:00",
+        "end": "2026-11-03T14:00:00-06:00",
+        "cast": [
+          "Thestor",
+          "Odysseus",
+          "Sanctuary keeper",
+          "Ithacan oarsmen"
+        ],
+        "setup_move_minutes": 75.0,
+        "meal_before": true,
+        "status": "tentative"
+      },
+      {
+        "scene_id": "s06",
+        "summary": "Return to Camp",
+        "location": "cliff descent to skiff and shingle camp",
+        "start": "2026-11-03T15:15:00-06:00",
+        "end": "2026-11-03T16:45:00-06:00",
+        "cast": [
+          "Thestor",
+          "Odysseus",
+          "Ithacan oarsmen"
+        ],
+        "setup_move_minutes": 75.0,
+        "meal_before": false,
+        "status": "tentative"
+      },
+      {
+        "scene_id": "s07",
+        "summary": "Trial Before the King",
+        "location": "shingle under red-prowed flagship with cedar rack",
+        "start": "2026-11-04T08:30:00-06:00",
+        "end": "2026-11-04T11:00:00-06:00",
+        "cast": [
+          "Thestor",
+          "Meles",
+          "Agamemnon",
+          "Achilles",
+          "Odysseus"
+        ],
+        "setup_move_minutes": 30.0,
+        "meal_before": false,
+        "status": "tentative"
+      },
+      {
+        "scene_id": "s08",
+        "summary": "Ditch in Rain",
+        "location": "rain-soaked Scamander ditch bank",
+        "start": "2026-11-04T12:45:00-06:00",
+        "end": "2026-11-04T15:15:00-06:00",
+        "cast": [
+          "Thestor",
+          "Meles",
+          "Achilles",
+          "Hector",
+          "Myrmidon guards"
+        ],
+        "setup_move_minutes": 75.0,
+        "meal_before": true,
+        "status": "tentative"
+      },
+      {
+        "scene_id": "s09",
+        "summary": "Frame Collapse",
+        "location": "ditch bank during javelin exchange",
+        "start": "2026-11-05T08:30:00-06:00",
+        "end": "2026-11-05T10:30:00-06:00",
+        "cast": [
+          "Thestor",
+          "Meles",
+          "Achilles",
+          "Myrmidon guards"
+        ],
+        "setup_move_minutes": 30.0,
+        "meal_before": false,
+        "status": "tentative"
+      },
+      {
+        "scene_id": "s10",
+        "summary": "Shield Rescue",
+        "location": "ditch lip with Trojan advance",
+        "start": "2026-11-05T12:15:00-06:00",
+        "end": "2026-11-05T14:15:00-06:00",
+        "cast": [
+          "Achilles",
+          "Thestor",
+          "Meles",
+          "Hector",
+          "Trojan soldiers",
+          "Myrmidon guards"
+        ],
+        "setup_move_minutes": 75.0,
+        "meal_before": true,
+        "status": "tentative"
+      },
+      {
+        "scene_id": "s11",
+        "summary": "Aftermath at the Ships",
+        "location": "ship-side healer tent on shingle",
+        "start": "2026-11-05T15:30:00-06:00",
+        "end": "2026-11-05T17:00:00-06:00",
+        "cast": [
+          "Thestor",
+          "Meles",
+          "Healer",
+          "Odysseus"
+        ],
+        "setup_move_minutes": 75.0,
+        "meal_before": false,
+        "status": "tentative"
+      },
+      {
+        "scene_id": "s12",
+        "summary": "Tally and Basin",
+        "location": "Agamemnon’s meal area with bronze basin",
+        "start": "2026-11-06T08:30:00-06:00",
+        "end": "2026-11-06T09:45:00-06:00",
+        "cast": [
+          "Odysseus",
+          "Agamemnon",
+          "Attendant"
+        ],
+        "setup_move_minutes": 30.0,
+        "meal_before": false,
+        "status": "tentative"
+      }
+    ],
+    "unscheduled": [],
+    "warnings": [
+      "Day/night windows are planning assumptions; verify local sunrise, sunset, weather and permit hours before locking."
+    ],
+    "shoot_days": 5,
+    "assumptions": [
+      "30 minute meal break by hour five when needed; 12 hour turnaround; one unit; sequential filming; scene estimates include performance time; setup/moves added separately."
+    ]
+  },
+  "budget": {
+    "currency": "USD",
+    "items": [
+      {
+        "category": "crew",
+        "description": "Core independent crew package for 10-hour day with setup and move allowances",
+        "quantity": 1,
+        "unit": "day",
+        "low_rate": 0,
+        "high_rate": 0,
+        "basis": "unverified model estimate or unknown",
+        "low_total": 0.0,
+        "high_total": 0.0,
+        "status": "unknown / excluded from total"
+      },
+      {
+        "category": "equipment",
+        "description": "Camera, sound and lighting package for coastal and interior scenes",
+        "quantity": 1,
+        "unit": "day",
+        "low_rate": 0,
+        "high_rate": 0,
+        "basis": "unverified model estimate or unknown",
+        "low_total": 0.0,
+        "high_total": 0.0,
+        "status": "unknown / excluded from total"
+      },
+      {
+        "category": "locations",
+        "description": "Descriptive coastal beach, cliff path and inland sanctuary location access",
+        "quantity": 1,
+        "unit": "day",
+        "low_rate": 0,
+        "high_rate": 0,
+        "basis": "unverified model estimate or unknown",
+        "low_total": 0.0,
+        "high_total": 0.0,
+        "status": "unknown / excluded from total"
+      },
+      {
+        "category": "transport",
+        "description": "Boat, van and gear transport for beach and cliff moves",
+        "quantity": 1,
+        "unit": "day",
+        "low_rate": 0,
+        "high_rate": 0,
+        "basis": "unverified model estimate or unknown",
+        "low_total": 0.0,
+        "high_total": 0.0,
+        "status": "unknown / excluded from total"
+      },
+      {
+        "category": "art",
+        "description": "Period props, costumes and set dressing for Bronze Age camp and sanctuary",
+        "quantity": 1,
+        "unit": "item",
+        "low_rate": 0,
+        "high_rate": 0,
+        "basis": "unverified model estimate or unknown",
+        "low_total": 0.0,
+        "high_total": 0.0,
+        "status": "unknown / excluded from total"
+      },
+      {
+        "category": "insurance",
+        "description": "Production liability and equipment coverage",
+        "quantity": 1,
+        "unit": "day",
+        "low_rate": 0,
+        "high_rate": 0,
+        "basis": "unverified model estimate or unknown",
+        "low_total": 0.0,
+        "high_total": 0.0,
+        "status": "unknown / excluded from total"
+      },
+      {
+        "category": "permits",
+        "description": "Location, water access and pyrotechnic simulation permits",
+        "quantity": 1,
+        "unit": "item",
+        "low_rate": 0,
+        "high_rate": 0,
+        "basis": "unverified model estimate or unknown",
+        "low_total": 0.0,
+        "high_total": 0.0,
+        "status": "unknown / excluded from total"
+      },
+      {
+        "category": "post",
+        "description": "Edit, sound design and color for short film",
+        "quantity": 1,
+        "unit": "item",
+        "low_rate": 0,
+        "high_rate": 0,
+        "basis": "unverified model estimate or unknown",
+        "low_total": 0.0,
+        "high_total": 0.0,
+        "status": "unknown / excluded from total"
+      }
+    ],
+    "subtotal_low": 0.0,
+    "subtotal_high": 0.0,
+    "contingency_percent": 15.0,
+    "total_low": 0.0,
+    "total_high": 0.0,
+    "cap": 0.0,
+    "over_cap": false,
+    "unknown_costs": [
+      "Core independent crew package for 10-hour day with setup and move allowances",
+      "Camera, sound and lighting package for coastal and interior scenes",
+      "Descriptive coastal beach, cliff path and inland sanctuary location access",
+      "Boat, van and gear transport for beach and cliff moves",
+      "Period props, costumes and set dressing for Bronze Age camp and sanctuary",
+      "Production liability and equipment coverage",
+      "Location, water access and pyrotechnic simulation permits",
+      "Edit, sound design and color for short film"
+    ],
+    "assumptions": [
+      "Model rates are provisional estimates until replaced with actual quotes; zero/unknown costs are not included. Quantities must be checked against shoot days, overtime, taxes and scope."
+    ]
+  },
+  "recommendations": {
+    "summary": "The Fire Beneath the Bronze is a 12-scene independent short set in a story-world Troy with a 5-day tentative shoot starting 2026-11-02 America/Chicago, skipping weekends. No filming region, venues, cast availability, vendors or rates have been chosen. All budget items are zero/unknown and all permit, insurance and access requirements remain unverified as of research date 2026-10-24. Scene minutes are shooting estimates, not screen time, and assume a 10-hour day with 30-min setup, 45-min moves and 15% contingency. Visual criteria are scouting guidance only and do not prove a real address, permission, accessibility or availability. Story-world geography must be distinguished from any actual filming region.",
+    "locations": [
+      {
+        "name": "Gravel shingle beach with charcoal trenches and goat-hair blankets",
+        "match": "Scouting criteria: damp sand and gravel shingle, muted gray kelp, broken timber, overcast morning light, space for anvil stone work and overturned troughs. No real venue identified.",
+        "source_ids": [],
+        "unknowns": [
+          "real address",
+          "public/private ownership",
+          "coastal access permit",
+          "parking and load-in",
+          "power and toilets",
+          "tide and weather windows",
+          "insurance requirements"
+        ],
+        "verification": "unverified planning suggestion"
+      },
+      {
+        "name": "Beached merchant coaster on wet rollers with cedar skids",
+        "match": "Scouting criteria: wet shingle beach able to support a large prop vessel on rollers, desaturated sea palette, wind-blown dust, room for crowd choreography with rowers and casks. No real venue identified.",
+        "source_ids": [],
+        "unknowns": [
+          "vessel prop availability",
+          "beach driving restrictions",
+          "environmental protection rules",
+          "crowd control and safety barriers"
+        ],
+        "verification": "unverified planning suggestion"
+      },
+      {
+        "name": "Rocky cliff path with grey silt and narrow ledges",
+        "match": "Scouting criteria: rocky silt landing, narrow ledges, spray, sail-strips for foot binding, high contrast daylight with white spray. No real venue identified.",
+        "source_ids": [],
+        "unknowns": [
+          "cliff stability and access rights",
+          "fall protection requirements",
+          "water spray and slip hazards",
+          "emergency egress"
+        ],
+        "verification": "unverified planning suggestion"
+      },
+      {
+        "name": "Limestone sanctuary interior with fallen lintel and hearth",
+        "match": "Scouting criteria: limestone interior, fallen lintel, smoke-darkened roof, anvil stone and wooden stand, warm hearth glow against cool stone, confined low-light space. No real venue identified.",
+        "source_ids": [],
+        "unknowns": [
+          "historic site restrictions",
+          "fire and smoke effects approval",
+          "confined space safety",
+          "power for lighting"
+        ],
+        "verification": "unverified planning suggestion"
+      },
+      {
+        "name": "Open camp on shingle under red-prowed flagship",
+        "match": "Scouting criteria: shingle camp with cedar rack, bronze basin with crossed tools stamp, bright midday sun and hard shadows. No real venue identified.",
+        "source_ids": [],
+        "unknowns": [
+          "flagship prop or set build",
+          "sun exposure and crew rest",
+          "period set handling rules"
+        ],
+        "verification": "unverified planning suggestion"
+      },
+      {
+        "name": "Rain-soaked ditch bank with mud and shields",
+        "match": "Scouting criteria: muddy ditch bank, low overcast diffused wet palette, blue wool strips, space for frames, shields and simulated blast effects. No real venue identified.",
+        "source_ids": [],
+        "unknowns": [
+          "water safety and mud slip",
+          "stunt and combat choreography approval",
+          "weather cover and contingency"
+        ],
+        "verification": "unverified planning suggestion"
+      }
+    ],
+    "legal_logistics": [
+      {
+        "task": "Confirm jurisdiction-specific coastal filming and water access permits for beach and boat scenes",
+        "owner": "location manager",
+        "source_ids": [],
+        "status": "needs verification",
+        "verification": "unverified planning suggestion"
+      },
+      {
+        "task": "Verify cliff and coastal path access rights, safety inspections and fall protection requirements",
+        "owner": "location manager",
+        "source_ids": [],
+        "status": "needs verification",
+        "verification": "unverified planning suggestion"
+      },
+      {
+        "task": "Check historic or protected site rules for limestone sanctuary interior use and any fire/smoke effects",
+        "owner": "legal counsel",
+        "source_ids": [],
+        "status": "needs verification",
+        "verification": "unverified planning suggestion"
+      },
+      {
+        "task": "Confirm production liability and equipment insurance minimums for water, cliff and stunt work",
+        "owner": "producer",
+        "source_ids": [],
+        "status": "needs verification",
+        "verification": "unverified planning suggestion"
+      },
+      {
+        "task": "Obtain written approvals for simulated blast effects, noise and pyrotechnic simulation safety plan",
+        "owner": "safety coordinator",
+        "source_ids": [],
+        "status": "needs verification",
+        "verification": "unverified planning suggestion"
+      },
+      {
+        "task": "Verify minor performer, stunt and water safety regulations for Meles scenes and medical prosthetic use",
+        "owner": "legal counsel",
+        "source_ids": [],
+        "status": "needs verification",
+        "verification": "unverified planning suggestion"
+      },
+      {
+        "task": "Confirm accessibility, parking, power, toilets and community impact requirements for each location",
+        "owner": "location manager",
+        "source_ids": [],
+        "status": "needs verification",
+        "verification": "unverified planning suggestion"
+      },
+      {
+        "task": "Validate copyright and music rights for period props and any reproduced designs",
+        "owner": "legal counsel",
+        "source_ids": [],
+        "status": "needs verification",
+        "verification": "unverified planning suggestion"
+      },
+      {
+        "task": "Check local noise ordinances and working hour restrictions for coastal and residential areas",
+        "owner": "producer",
+        "source_ids": [],
+        "status": "needs verification",
+        "verification": "unverified planning suggestion"
+      },
+      {
+        "task": "Confirm releases for crew, cast and any background performers and image use",
+        "owner": "producer",
+        "source_ids": [],
+        "status": "needs verification",
+        "verification": "unverified planning suggestion"
+      },
+      {
+        "task": "Verify transport permits for boat, van and gear moves between beach, cliff and inland sites",
+        "owner": "location manager",
+        "source_ids": [],
+        "status": "needs verification",
+        "verification": "unverified planning suggestion"
+      },
+      {
+        "task": "Confirm weather contingency and contingency day planning for rain-soaked ditch scenes",
+        "owner": "safety coordinator",
+        "source_ids": [],
+        "status": "needs verification",
+        "verification": "unverified planning suggestion"
+      }
+    ],
+    "crew_equipment": [
+      "Assumption: core independent crew package for 10-hour day with setup and move allowances - rate unconfirmed",
+      "Assumption: camera, sound and lighting package for coastal and interior scenes - rate unconfirmed",
+      "Assumption: period props, costumes and set dressing for Bronze Age camp and sanctuary - availability unconfirmed",
+      "Assumption: boat, van and gear transport for beach and cliff moves - availability unconfirmed",
+      "Assumption: safety equipment for wet shingle, cliff climb, water entry and simulated effects - specification unconfirmed"
+    ],
+    "risks": [
+      "Wet slippery shingle and cold water exposure s01",
+      "Prop metal handling and weight handling s02",
+      "Uneven cliff climb, water spray and slip hazard s03",
+      "Confined interior, smoke haze and low light s04",
+      "Simulated blast effects, noise and heavy prop lifting s05",
+      "Load carrying on uneven terrain and water entry s06",
+      "Simulated muzzle flash, smoke and stunt burn makeup s07",
+      "Wet mud slip, stunt falls and water safety s08",
+      "Prop collapse, actor impact and water immersion s09",
+      "Combat choreography and stunt falls s10",
+      "Medical prosthetic and emotional performance s11",
+      "Period set handling s12"
+    ],
+    "next_steps": [
+      "Select a filming region and jurisdiction before any location scouting or permit research",
+      "Conduct in-person scouting against visual criteria for each scene type and document access, power, toilets, parking and egress",
+      "Request written quotes from qualified vendors for crew, equipment, transport, art department and post; replace zero budget assumptions",
+      "Engage legal counsel and safety coordinator to verify permits, insurance minimums and stunt/pyrotechnic simulation rules for chosen jurisdiction",
+      "Confirm cast availability and SAG status; do not assume bookings",
+      "Create a verified call sheet with sunrise/sunset, tide and weather windows and contingency plans",
+      "Obtain formal location agreements and permit applications; do not assume approval"
+    ]
+  },
+  "evidence": [],
+  "research": [],
+  "warnings": [
+    "No filming region supplied: location and jurisdiction-specific web research skipped."
+  ],
+  "status": "draft — availability, estimates, permits and legal requirements require verification"
+}

@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Storyforge Playground</title>
+  <meta name="description" content="Frontend playground for the Storyforge API: start, follow and read story runs.">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="#/">Storyforge <span>playground</span></a>
+    <span class="row">
+      <a href="console.html" class="muted">API console</a>
+      <button type="button" id="conn-pill" class="pill" title="Show connection settings">Not connected</button>
+    </span>
+  </header>
+
+  <section id="connect" class="panel connect">
+    <form id="connect-form">
+      <label>API URL
+        <input id="api-url" type="url" required placeholder="http://localhost:8000">
+      </label>
+      <label>GitHub token
+        <input id="token" type="password" autocomplete="off" placeholder="ghp_… or github_pat_…">
+      </label>
+      <div class="row">
+        <button type="submit">Connect</button>
+        <button type="button" id="use-demo" class="secondary">Use demo data</button>
+        <button type="button" id="disconnect" class="ghost">Forget token</button>
+      </div>
+      <p class="hint">The token stays in this tab (sessionStorage) and is sent only to the API URL above.
+        It needs Actions read/write on the repo. "Demo" needs no token.</p>
+    </form>
+    <p id="connect-msg" class="msg" role="status"></p>
+  </section>
+
+  <main id="view"></main>
+
+  <template id="tpl-home">
+    <div class="grid">
+      <section class="panel">
+        <h2>Start a run</h2>
+        <div class="tabs" id="mode-tabs" role="tablist"></div>
+        <p class="muted" id="mode-desc"></p>
+        <form id="start-form">
+          <label>Story brief
+            <select id="brief" required></select>
+          </label>
+          <div id="brief-card" class="brief-card"></div>
+          <div id="mode-inputs"></div>
+          <button type="submit">Start run</button>
+          <p id="start-msg" class="msg" role="status"></p>
+        </form>
+      </section>
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Runs</h2>
+          <div class="row">
+            <select id="runs-mode" aria-label="Filter by mode">
+              <option value="">All modes</option>
+              <option value="sequential">Sequential</option>
+              <option value="parallel">Parallel</option>
+              <option value="recovery">Recovery</option>
+            </select>
+            <button type="button" id="refresh" class="ghost">Refresh</button>
+          </div>
+        </div>
+        <ul id="runs" class="runs"></ul>
+      </section>
+    </div>
+  </template>
+
+  <template id="tpl-run">
+    <section class="panel">
+      <a href="#/" class="back">← All runs</a>
+      <div class="panel-head">
+        <div>
+          <h2 id="run-title"></h2>
+          <p class="muted" id="run-meta"></p>
+        </div>
+        <span id="run-status" class="badge"></span>
+      </div>
+      <div class="progress"><div id="progress-bar"></div></div>
+      <p class="muted" id="progress-text"></p>
+      <ul id="warnings" class="warnings"></ul>
+      <div class="row" id="run-actions">
+        <button type="button" id="cancel" class="secondary" hidden>Cancel run</button>
+        <a id="gh-link" class="ghost-link" target="_blank" rel="noopener" hidden>Open on GitHub</a>
+      </div>
+      <form id="recover-form" class="recover" hidden>
+        <h3>Recover this run</h3>
+        <div class="row wrap">
+          <label>Strategy <select name="strategy"><option value="fresh">Fresh run from saved prefix</option><option value="rerun">Rerun failed stage in place</option></select></label>
+          <label>Scene <select name="scene"><option>auto</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
+          <label>Restart stage <select name="restart_stage"><option>auto</option><option>editing</option><option>memory</option><option>scene</option></select></label>
+        </div>
+        <button type="submit">Recover</button>
+        <p id="recover-msg" class="msg" role="status"></p>
+      </form>
+    </section>
+    <section class="panel">
+      <div class="tabs" role="tablist">
+        <button type="button" data-tab="story" class="active">Story</button>
+        <button type="button" data-tab="jobs">Jobs</button>
+        <button type="button" data-tab="canon">Canon</button>
+        <button type="button" data-tab="artifacts">Artifacts</button>
+      </div>
+      <div id="tab-body"></div>
+    </section>
+  </template>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

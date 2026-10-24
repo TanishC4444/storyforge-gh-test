@@ -69,3 +69,26 @@ The 584-word chapter from run 39897042290 demonstrates the allocation change wit
 The one-final-judgment policy remains: no endless editorial debate. Missing or unresolved reviews preserve a labeled provisional draft and withhold its facts from canon. Later chapters on a provisional branch also withhold published-canon updates while retaining independently verified draft continuity. Workflow completion, verified writing and canon commitment are distinct outcomes.
 
 Drafts appear in job summaries and artifacts as stages finish. `readable-story` collects the available manuscript even if approval is unresolved. An accepted `universe-canon` checkpoint can resume the same world; `quickstart` can preserve earlier history and random state after a failed event. Fixture and live checkpoints cannot mix. Fixture tests demonstrate orchestration, not literary quality or provider availability.
+
+### Sequential nonlinear stories and foreshadowing
+
+Use **Living universe / verified-memory pipeline** with scene designs in reading
+order. Give each scene an explicit `time`, `setting`, and dramatic task; use
+`restrictions` to identify what must remain unknown or unresolved. For a flashback,
+state the earlier event time explicitly and mark the return to the present. The
+`hard-chronology` brief demonstrates four scenes with a flashback and a climax.
+
+The designer, writer and reviewers receive the authored reading-order/time map.
+They must distinguish reader knowledge from character knowledge, and historical
+state from present state. Source-bound thread records retain their stable identity
+through setup, escalation and payoff, with exact earlier passage evidence when
+available. These instructions share the existing calls; they add no review round
+and do not shorten the full memory ledger. They guide model judgment rather than
+providing a complete automatic temporal reasoning engine.
+
+For a failed episode, `fresh_run` imports its approved prefix and saved unfinished
+drafts into a new run. Artifact fetching traverses every GitHub listing page,
+including checkpoints older than the first 100 artifacts. Finished scenes keep
+their original evidence; unfinished drafts receive fresh checks. Formatting-only
+normalization can supply a missing suggestion on an otherwise complete advisory;
+blocking findings and invalid citations still prevent acceptance.

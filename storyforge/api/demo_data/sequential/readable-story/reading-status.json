@@ -1,0 +1,17 @@
+{
+  "baseline_run": "39552359292",
+  "scenes": [
+    {
+      "scene_id": "s01",
+      "status": "reviewed",
+      "words": 514
+    },
+    {
+      "scene_id": "s02",
+      "status": "reviewed",
+      "words": 318
+    }
+  ],
+  "accepted_scenes": 2,
+  "prose_available": true
+}
