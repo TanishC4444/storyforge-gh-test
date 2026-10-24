@@ -126,7 +126,10 @@ class DemoApiTest(unittest.TestCase):
         parallel = self.client.get(P + '/runs/9002/story', headers=DEMO).json()
         self.assertEqual(len(parallel['scenes']), 4)
         self.assertFalse(parallel['complete'])
-        self.assertTrue(self.client.get(P + '/runs/9003', headers=DEMO).json()['recoverable'])
+        failed = self.client.get(P + '/runs/9003', headers=DEMO).json()
+        self.assertTrue(failed['recoverable'])
+        self.assertEqual((failed['resume_scene'], failed['progress']['accepted_scenes'], failed['progress']['total_scenes']), (2, 1, 2))
+        self.assertEqual(parallel['title'], 'Hard situation: chronology')
         self.assertFalse(self.client.get(P + '/runs/9002', headers=DEMO).json()['recoverable'])
         archive = self.client.get(P + '/runs/9001/artifacts/readable-story', headers=DEMO)
         self.assertIn('READABLE_DRAFT.txt', zipfile.ZipFile(io.BytesIO(archive.content)).namelist())
@@ -208,6 +211,12 @@ class GitHubBackendTest(unittest.TestCase):
             return httpx.Response(200, json={'permissions': {'push': True}})
         if path == f'{base}/actions/runs/77':
             return httpx.Response(200, json=run)
+        if path == f'{base}/actions/runs/78':
+            return httpx.Response(200, json={**run, 'id': 78, 'status': 'queued', 'conclusion': None})
+        if path == f'{base}/actions/runs/78/jobs':
+            jobs = [{'id': 3, 'name': 'Prepare request and literary retrieval', 'status': 'completed', 'conclusion': 'success'},
+                    {'id': 4, 'name': 'Compile universe beginning', 'status': 'queued', 'conclusion': None}]
+            return httpx.Response(200, json={'total_count': 2, 'jobs': jobs})
         if path == f'{base}/actions/runs/404':
             return httpx.Response(404, json={'message': 'Not Found'})
         if path == f'{base}/actions/runs/77/jobs':
@@ -284,6 +293,16 @@ class GitHubBackendTest(unittest.TestCase):
         self.assertEqual(started.run_id, 77)
         bodies = [c[1] for c in self.calls if c[0] == 'dispatch']
         self.assertEqual(['return_run_details' in b for b in bodies], [True, False])
+
+    def test_started_run_reported_queued_by_github_is_running(self):
+        detail = self.backend().get_run(78)
+        self.assertEqual(detail.status, 'running')
+
+    def test_cancel_finished_run_conflicts_without_calling_github(self):
+        from storyforge.api.service import Conflict
+        with self.assertRaises(Conflict):
+            self.backend().cancel_run(77)
+        self.assertFalse([c for c in self.calls if c[1].endswith('/cancel')])
 
     def test_recover_rejects_successful_run(self):
         from storyforge.api.schemas import RecoverRun

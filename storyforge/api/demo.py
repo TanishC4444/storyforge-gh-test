@@ -63,6 +63,7 @@ def _partial_sequential(full: dict[str, Files]) -> dict[str, Files]:
     story['READABLE_DRAFT.txt'] = first.encode()
     story['reading-status.json'] = json.dumps({'scenes': [{'scene_id': 's01', 'status': 'reviewed', 'words': len(first.split())}], 'accepted_scenes': 1}).encode()
     files['quickstart'] = {'snapshot.json': b'{}'}
+    files['story-recovery'] = {'recovery.json': json.dumps({'mode': 'retry_same_episode', 'completed_scenes': 1, 'total_scenes': 2, 'resume_scene': 2}).encode()}
     return files
 
 
@@ -207,18 +208,10 @@ class DemoBackend(Backend):
         run = self._run(run_id)
         status, jobs, _ = self._state(run)
         detail = RunDetail(**self._summary(run).model_dump(), jobs=jobs, progress=parse.progress(run.mode, jobs))
-        if run.mode == 'sequential' and self._done(run):
-            reader = self.reader(run_id)
-            detail.recoverable = status == 'failed' and 'quickstart' in reader.names()
-            snapshot = parse._snapshot(reader) or {}
-            if snapshot:
-                request = snapshot.get('request') or {}
-                detail.progress.total_scenes = (request.get('chapters') or 0) * (request.get('scenes_per_chapter') or 0) or None
-                detail.progress.accepted_scenes = len(snapshot.get('accepted') or [])
-            detail.warnings = parse.sequential_warnings(reader)
-            if status == 'succeeded' and detail.warnings:
-                detail.status = 'succeeded_with_warnings'
-        return detail
+        return self.finish_detail(detail, done=self._done(run))
+
+    def request_file_of(self, run_id: int) -> str | None:
+        return self._run(run_id).request_file
 
     def start_run(self, body: StartRun) -> StartedRun:
         check_request_file(self.settings, body.request_file)

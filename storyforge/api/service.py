@@ -81,6 +81,7 @@ class Backend:
     def artifact_zip(self, run_id: int, name: str) -> bytes: raise NotImplementedError
     def reader(self, run_id: int) -> ArtifactReader: raise NotImplementedError
     def mode_of(self, run_id: int) -> str: raise NotImplementedError
+    def request_file_of(self, run_id: int) -> str | None: raise NotImplementedError
 
     # Shared
 
@@ -90,10 +91,41 @@ class Backend:
     def refresh(self, run_id: int):
         """Drop anything cached about a run so the next read is current."""
 
+    def finish_detail(self, detail: RunDetail, done: bool) -> RunDetail:
+        """Fill status details that need jobs or artifacts. Both backends call this from get_run."""
+        # GitHub reports a started run as "queued" again while new jobs wait for runners.
+        if detail.status == 'queued' and any(j.status != 'queued' for j in detail.jobs):
+            detail.status = 'running'
+        if not done or detail.mode != 'sequential':
+            return detail
+        reader = self.reader(detail.id)
+        names = set(reader.names())
+        detail.recoverable = detail.status == 'failed' and 'quickstart' in names
+        snapshot = parse._snapshot(reader) or {}
+        request = snapshot.get('request') or {}
+        if snapshot:
+            detail.progress.accepted_scenes = len(snapshot.get('accepted') or [])
+            if request.get('chapters') and request.get('scenes_per_chapter'):
+                detail.progress.total_scenes = request['chapters'] * request['scenes_per_chapter']
+        recovery = parse.sequential_recovery(reader) if detail.status == 'failed' else None
+        if recovery:
+            detail.progress.accepted_scenes = recovery.get('completed_scenes', detail.progress.accepted_scenes)
+            detail.progress.total_scenes = recovery.get('total_scenes') or detail.progress.total_scenes
+            detail.resume_scene = recovery.get('resume_scene')
+        detail.warnings = parse.sequential_warnings(reader)
+        if detail.status == 'succeeded' and detail.warnings:
+            detail.status = 'succeeded_with_warnings'
+        return detail
+
     def story(self, run_id: int) -> Story:
         mode = self._content_mode(run_id)
         reader = self.reader(run_id)
-        return parse.sequential_story(run_id, reader) if mode == 'sequential' else parse.parallel_story(run_id, reader)
+        story = parse.sequential_story(run_id, reader) if mode == 'sequential' else parse.parallel_story(run_id, reader)
+        if not story.title:
+            request_file = self.request_file_of(run_id)
+            if request_file and request_file in request_files(self.settings):
+                story.title = json.loads((self.settings.examples_dir / f'{request_file}.json').read_text()).get('title')
+        return story
 
     def scene(self, run_id: int, scene_id: str) -> Scene:
         mode = self._content_mode(run_id)
@@ -219,21 +251,10 @@ class GitHubBackend(Backend):
                     started_at=j.get('started_at'), completed_at=j.get('completed_at'), html_url=j.get('html_url'))
                 for j in self.client.jobs(run_id)]
         detail = RunDetail(**summary.model_dump(), jobs=jobs, progress=parse.progress(mode, jobs))
-        if run['status'] == 'completed' and mode in {'sequential', 'parallel'}:
-            reader = self.reader(run_id)
-            names = set(reader.names())
-            if mode == 'sequential':
-                detail.recoverable = detail.status == 'failed' and 'quickstart' in names
-                if 'readable-story' in names:
-                    detail.warnings = parse.sequential_warnings(reader)
-                    snapshot = parse._snapshot(reader) or {}
-                    request = snapshot.get('request') or {}
-                    if request.get('chapters') and request.get('scenes_per_chapter'):
-                        detail.progress.total_scenes = request['chapters'] * request['scenes_per_chapter']
-                    detail.progress.accepted_scenes = len(snapshot.get('accepted') or [])
-                    if detail.status == 'succeeded' and detail.warnings:
-                        detail.status = 'succeeded_with_warnings'
-        return detail
+        return self.finish_detail(detail, done=run['status'] == 'completed')
+
+    def request_file_of(self, run_id: int) -> str | None:
+        return parse_title(self._raw_run(run_id).get('display_title', ''))[0]
 
     def _find_run(self, workflow: str, tag: str | None, since: float) -> int | None:
         """Find a just-dispatched run: by tag when the workflow shows one, else by creation time."""
@@ -278,6 +299,8 @@ class GitHubBackend(Backend):
 
     def cancel_run(self, run_id: int) -> None:
         self.mode_of(run_id)
+        if self._raw_run(run_id)['status'] == 'completed':
+            raise Conflict(f'Run {run_id} has already finished')
         self.client.cancel(run_id)
 
     def list_artifacts(self, run_id: int) -> list[Artifact]:

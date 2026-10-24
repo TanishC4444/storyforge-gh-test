@@ -99,6 +99,12 @@ def sequential_canon(run_id: int, reader: ArtifactReader) -> Canon:
                  memories=snapshot.get('memories') or [], canon=snapshot.get('canon'))
 
 
+def sequential_recovery(reader: ArtifactReader) -> dict | None:
+    """The failed run's own resume summary: completed_scenes, total_scenes, resume_scene."""
+    files = reader.files('story-recovery')
+    return _json(files, 'recovery.json') if files else None
+
+
 def sequential_warnings(reader: ArtifactReader) -> list[str]:
     snapshot = _snapshot(reader) or {}
     return [f'{s["id"]} is a provisional draft ({s["quality_status"]})' for s in snapshot.get('accepted') or [] if s.get('quality_status') not in (None, 'reviewed')]

@@ -126,7 +126,9 @@ Every run uses one status vocabulary, whatever GitHub reports:
 | `failed` | Stopped; check `recoverable` |
 | `cancelled` | Cancelled |
 
-`progress` gives `jobs_done / jobs_total` for a progress bar and `accepted_scenes / total_scenes` when known. `total_scenes` for sequential runs is only known once the story artifact exists.
+`progress` gives `jobs_done / jobs_total` for a progress bar and `accepted_scenes / total_scenes` when known. `total_scenes` counts every scene in the brief, so a run started with a smaller `scene_limit` finishes with fewer accepted scenes than the total. For sequential runs it is known once the run finishes.
+
+A failed sequential run also reports `resume_scene`, the first unfinished scene that recovery would restart from.
 
 ### Following a run live
 
@@ -163,6 +165,7 @@ A dependency-free page for trying the API and seeing how a frontend could look:
 
 - `web/js/api.js`: the reusable client (`StoryforgeClient`). Import it from any framework.
 - `web/js/app.js`, `web/index.html`, `web/styles.css`: the playground UI. Edit or replace freely.
+- `web/console.html`: the **API console**. It has one button per endpoint, with inputs for every parameter, and shows the raw response, HTTP status and timing plus a call log. Use it to check any backend feature before building UI for it. Buttons outlined in red start or change real runs.
 
 The API URL defaults to `http://localhost:8000`. Change it in the connection panel or with `?api=https://your-api.example`.
 
