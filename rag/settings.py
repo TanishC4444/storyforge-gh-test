@@ -17,5 +17,5 @@ class Settings:
         if not database_path.is_absolute():
             database_path = root / database_path
         database_path.parent.mkdir(parents=True, exist_ok=True)
-        from rag.embeddings import MODEL_NAME
-        return cls(str(database_path), MODEL_NAME, 384)
+        from rag.identity import MODEL_NAME, EMBEDDING_DIMENSIONS
+        return cls(str(database_path), MODEL_NAME, EMBEDDING_DIMENSIONS)

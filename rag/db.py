@@ -5,7 +5,7 @@ from typing import Any, Iterable
 from contextlib import contextmanager
 import numpy as np
 from rag.settings import Settings
-from rag.embeddings import INDEX_VERSION, encode_texts
+from rag.embeddings import INDEX_VERSION, encode_query
 class DatabaseError(RuntimeError): pass
 @dataclass(frozen=True)
 class CorpusStats: documents:int; with_location:int; corpus_name:str|None
@@ -50,7 +50,7 @@ def indexed_contents(settings):
         return {row[0]: row[1] for row in conn.execute("SELECT record_id,content FROM rag_documents WHERE embedding_model=?", (INDEX_VERSION,))}
 def search(settings,query,limit,semantic_weight,record_types,location,adaptation_mode="Balanced"):
     try:
-        q=np.array(encode_texts([query])[0],dtype=np.float32)
+        q=np.array(encode_query(query),dtype=np.float32)
     except Exception as exc: raise DatabaseError(f"Could not create query embedding: {exc}") from exc
     with connection(settings) as conn:
         initialize(conn); sql="SELECT * FROM rag_documents WHERE enabled=1 AND embedding_model=?"; params=[INDEX_VERSION]

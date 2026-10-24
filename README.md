@@ -74,7 +74,7 @@ To retry infrastructure or malformed-output failures, use GitHub's failed-job re
 ## RAG: what is included
 
 - data/literary-corpus.json: 605 analysis records with provenance and disabled-record flags.
-- data/literary_rag.db: 605 freshly rebuilt MiniLM vectors, source JSON, and revision-pinned retrieval projections (603 eligible records).
+- data/literary_rag.db: 605 Gemini `gemini-embedding-001` vectors (768 dimensions), source JSON, and revision-pinned retrieval projections (603 eligible records).
 - data/MASTER_GUIDE.md: indexed craft reference, selected by small section-level keyword matching.
 - skills/story_architect.md: the supplied architect brief in full; the planner receives its task-focused craft excerpt to reserve context for the outline.
 - skills/distinct_writing.md: the user's complete editing brief. This is an editing role, not an authorship detector.
@@ -87,7 +87,7 @@ python -m pip install -e '.[rag]'
 python -m rag.ingest --json data/literary-corpus.json
 ```
 
-The encoder downloads on first use, then embeddings compute locally. No hosted embedding key is required. Hybrid mode refuses stale projections. Copying arbitrary vectors into a folder is insufficient: source IDs, encoder, dimensions, and pooling must match. Corpus analyses are model-authored drafts with recorded source limitations.
+Embeddings come from Gemini `gemini-embedding-001` (768 dimensions, document/query task types) and need `GEMINI_API_KEY` for indexing and for each hybrid query. Hybrid mode refuses stale projections. Copying arbitrary vectors into a folder is insufficient: source IDs, encoder, dimensions, and pooling must match. Corpus analyses are model-authored drafts with recorded source limitations.
 
 ## Local checks and compatibility CLI
 

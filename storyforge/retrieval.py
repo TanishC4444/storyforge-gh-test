@@ -82,7 +82,8 @@ def retrieve(req):
         if stale:raise ValueError(f'{stale} index projections are stale. Rebuild before hybrid search.')
         from rag.settings import Settings
         from rag.db import search
-        settings=Settings(str(path),'sentence-transformers/all-MiniLM-L6-v2',384)
+        from rag.identity import MODEL_NAME,EMBEDDING_DIMENSIONS
+        settings=Settings(str(path),MODEL_NAME,EMBEDDING_DIMENSIONS)
         for q in facets:
             for rank,h in enumerate(search(settings,q['text'],60 if explicit_weights else 8,1.0 if explicit_weights else .65,None,None,'Balanced'),1):
                 if explicit_weights and h.semantic_rank is None:continue

@@ -78,14 +78,14 @@ def build(total=9, per_chapter=3, troy=False, continuation=False, full_api=False
         if full_api and task=='prepare':
             lines += ['      - name: Check inference contracts before benchmark', '        run: |', "          python -m pip install -e '.[test]' -q", '          python -m unittest discover -s tests -q']
         if task == 'prepare':
-            lines += ['      - name: Install local RAG encoder when requested', '        env:', '          STORY_REQUEST: ${{ inputs.request_file }}', '        run: |', "          python - <<'PY'", '          import json, os, subprocess, sys', '          from pathlib import Path', "          request=json.loads(Path('examples',os.environ['STORY_REQUEST']+'.json').read_text())", "          if request.get('retrieval_mode')=='hybrid' and not request.get('execution_policy',{}).get('resume_seed'):", "              subprocess.run([sys.executable,'-m','pip','install','-e','.[rag]'],check=True)", '          PY']
+            lines += ['      - name: Install Gemini RAG encoder when requested', '        env:', '          STORY_REQUEST: ${{ inputs.request_file }}', '        run: |', "          python - <<'PY'", '          import json, os, subprocess, sys', '          from pathlib import Path', "          request=json.loads(Path('examples',os.environ['STORY_REQUEST']+'.json').read_text())", "          if request.get('retrieval_mode')=='hybrid' and not request.get('execution_policy',{}).get('resume_seed'):", "              subprocess.run([sys.executable,'-m','pip','install','-e','.[rag]'],check=True)", '          PY']
         if task == 'refine':
             lines += ['      - uses: actions/download-artifact@v4', "        if: inputs.refinement_seed_run != ''", '        with:', '          name: refine', '          path: inputs/seed', '          run-id: ${{ inputs.refinement_seed_run }}', '          github-token: ${{ github.token }}']
         for artifact, path, pattern in downloads:
             lines += ['      - uses: actions/download-artifact@v4', '        with:', f'          {"pattern" if pattern else "name"}: {artifact}', f'          path: inputs/{path}']
             if task=='resume':lines += ['          run-id: ${{ inputs.checkpoint_run }}', '          github-token: ${{ github.token }}']
         lines += [f'      - name: Execute {title}', '        id: task', '        env:', '          PYTHONUNBUFFERED: 1', '          STORY_BACKEND: ${{ inputs.backend }}', '          STORY_PROFILE: ${{ inputs.profile }}', '          STORY_REQUEST: ${{ inputs.request_file }}', '          REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}']
-        if full_api:lines += ['          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}','          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}']
+        if full_api or task=='prepare':lines += ['          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}','          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}']
         if continuation:lines += ['          CONTINUATION_RUN: ${{ inputs.checkpoint_run }}']
         if matrix:
             lines += ['          STORY_CHARACTER: ${{ matrix.character }}']

@@ -44,7 +44,7 @@ jobs:
       - uses: ./.github/actions/setup-worker
         with:
           backend: fixture
-      - name: Install local RAG encoder when requested
+      - name: Install Gemini RAG encoder when requested
         env:
           STORY_REQUEST: ${{ inputs.request_file }}
         run: |
@@ -63,6 +63,8 @@ jobs:
           STORY_PROFILE: ${{ inputs.profile }}
           STORY_REQUEST: ${{ inputs.request_file }}
           REFINEMENT_SEED_RUN: ${{ inputs.refinement_seed_run }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         run: |
           backend=fixture
           if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
