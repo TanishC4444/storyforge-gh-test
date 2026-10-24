@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "per_run_timeout_minutes": 45,
+  "poll_seconds": 30,
+  "cases": [
+    {
+      "id": "fairytale",
+      "request_file": "stress-fairytale",
+      "scenes": 4,
+      "medium": "short_story",
+      "words_per_scene": 350,
+      "cast": 6,
+      "resume_case": null
+    },
+    {
+      "id": "ensemble",
+      "request_file": "stress-ensemble",
+      "scenes": 4,
+      "medium": "book",
+      "words_per_scene": 1100,
+      "cast": 16,
+      "resume_case": null
+    },
+    {
+      "id": "screenplay",
+      "request_file": "stress-screenplay",
+      "scenes": 2,
+      "medium": "screenplay",
+      "words_per_scene": 800,
+      "cast": 8,
+      "resume_case": null
+    },
+    {
+      "id": "theatre",
+      "request_file": "stress-theatre",
+      "scenes": 2,
+      "medium": "stage_play",
+      "words_per_scene": 550,
+      "cast": 6,
+      "resume_case": null
+    },
+    {
+      "id": "audio",
+      "request_file": "stress-audio",
+      "scenes": 2,
+      "medium": "audio_drama",
+      "words_per_scene": 450,
+      "cast": 6,
+      "resume_case": null
+    },
+    {
+      "id": "comic",
+      "request_file": "stress-comic",
+      "scenes": 2,
+      "medium": "comic_script",
+      "words_per_scene": 300,
+      "cast": 6,
+      "resume_case": null
+    },
+    {
+      "id": "ensemble-continuation",
+      "request_file": "stress-ensemble-continuation",
+      "scenes": 4,
+      "medium": "book",
+      "words_per_scene": 1100,
+      "cast": 16,
+      "resume_case": "ensemble"
+    }
+  ],
+  "assessment": [
+    "strict automated audit",
+    "memory and private knowledge",
+    "repetition and form",
+    "source-supported setup and climax",
+    "distinct character agency",
+    "travel and resource continuity"
+  ],
+  "literary_assessment": "Automated pass is not a human verdict on originality or literary quality; inspect saved output."
+}
