@@ -326,11 +326,12 @@ function route() {
   const view = $('#view');
   if (!state.client) {
     view.replaceChildren(el('section', { class: 'panel' },
-      el('h2', {}, 'Connect to a Storyforge API'),
+      el('h2', {}, 'Connect to the ParaMyth API'),
       el('p', { class: 'muted' }, 'Start the API locally (see docs/API.md), then connect with a GitHub token or the demo data.')));
     return;
   }
   const match = /^#\/runs\/(\d+)/.exec(location.hash);
+  document.querySelector('.hero')?.toggleAttribute('hidden', Boolean(match));
   if (match) renderRun(Number(match[1]));
   else renderHome();
 }

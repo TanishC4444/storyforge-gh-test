@@ -3,14 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Storyforge Playground</title>
-  <meta name="description" content="Frontend playground for the Storyforge API: start, follow and read story runs.">
-  <link rel="icon" href="data:,">
+  <title>ParaMyth</title>
+  <meta name="description" content="Start, follow and read ParaMyth story runs.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%23203970%22/%3E%3Cpath d=%22M16 4l2.6 8.4L27 16l-8.4 2.6L16 27l-2.6-8.4L5 16l8.4-3.6z%22 fill=%22%23F2C358%22/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..900,0..100,0..1&family=Nunito:wght@400;600;700;800&display=swap">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <header class="top">
-    <a class="brand" href="#/">Storyforge <span>playground</span></a>
+    <a class="brand" href="#/"><span class="brand-star" aria-hidden="true">✦</span>ParaMyth <span>Story studio</span></a>
     <span class="row">
       <a href="console.html" class="muted">API console</a>
       <button type="button" id="conn-pill" class="pill" title="Show connection settings">Not connected</button>
@@ -35,6 +38,10 @@
     </form>
     <p id="connect-msg" class="msg" role="status"></p>
   </section>
+
+  <div class="hero">
+    <figure><img src="assets/paramyth-banner.webp" width="1280" height="720" alt="ParaMyth: an open storybook with swirling mint and navy smoke and golden stars"></figure>
+  </div>
 
   <main id="view"></main>
 

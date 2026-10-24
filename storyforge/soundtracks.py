@@ -126,19 +126,20 @@ class Vultr:
         return self.json('/music', {'model': model, 'prompt': cue['prompt'][:spec.get('prompt_max_length', 6000)], 'duration': seconds, 'lyrics': lyrics, 'response_format': 'mp3'})
 
 
-PAGE = '''<!doctype html><meta charset="utf-8"><title>StoryForge soundtracks</title>
-<style>body{font:18px system-ui;background:#101725;color:#e8edf5;max-width:850px;margin:50px auto;padding:20px}button,select,input,textarea{font:inherit;padding:10px;margin:8px 0;box-sizing:border-box}textarea{width:100%;height:100px}audio{width:100%}pre{white-space:pre-wrap;font-size:14px}button{cursor:pointer}</style>
-<h1>StoryForge soundtracks</h1><p>Build sound from the story, characters and world in this run folder.</p>
-<label>Soundtrack type <select id="mode"><option value="ambience">Ambient soundscape Â· local streaming</option><option value="score">Instrumental drone score Â· local streaming</option><option value="song">Song Â· Vultr</option></select></label>
-<textarea id="direction" placeholder="Sound direction: distant surf, wind, mounting dreadâ€¦"></textarea>
+PAGE = '''<!doctype html><meta charset="utf-8"><title>ParaMyth soundtracks</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..900,0..100,0..1&family=Nunito:wght@400;600;700;800&display=swap">
+<style>:root{color-scheme:dark}html{background:#152750}body{font:18px/1.55 Nunito,system-ui,sans-serif;background:radial-gradient(120% 80% at 50% 0%,#2A4884 0%,#203970 45%,#152750 100%) no-repeat;background-size:100% 100%;min-height:100vh;color:#FBEBCB;max-width:850px;margin:50px auto;padding:20px}h1{font-family:Fraunces,Georgia,serif;font-variation-settings:"SOFT" 100,"WONK" 1;color:#F2C358;letter-spacing:-.01em}label{display:block;color:#A4DAC5;font-weight:600}button,select,input,textarea{font:inherit;padding:10px;margin:8px 0;box-sizing:border-box;border-radius:10px;border:1.5px solid rgba(164,218,197,.25);background:#152A56;color:#FBEBCB}input:focus,select:focus,textarea:focus{outline:none;border-color:#91C8AD;box-shadow:0 0 0 3px rgba(145,200,173,.4)}textarea{width:100%;height:100px}audio{width:100%}pre{white-space:pre-wrap;font-size:14px;color:#A4DAC5}button{cursor:pointer;background:#F2C358;color:#203970;border:0;border-radius:999px;font-weight:700;padding:10px 20px}button:hover{background:#F0C15E}:focus-visible{outline:3px solid #F2C358;outline-offset:3px}::selection{background:#A4DAC5;color:#203970}</style>
+<h1>✦ ParaMyth soundtracks</h1><p>Build sound from the story, characters and world in this run folder.</p>
+<label>Soundtrack type <select id="mode"><option value="ambience">Ambient soundscape · local streaming</option><option value="score">Instrumental drone score · local streaming</option><option value="song">Song · Vultr</option></select></label>
+<textarea id="direction" placeholder="Sound direction: distant surf, wind, mounting dread…"></textarea>
 <label>Duration in seconds <input id="seconds" type="number" min="5" max="360" value="60"></label>
 <input id="model" value="minimax-music3" placeholder="Vultr model ID (for songs)"><textarea id="lyrics" placeholder="Lyrics (only for songs)"></textarea>
 <button onclick="generate()">Generate soundtrack</button><p id="status" role="status"></p><audio id="player" controls></audio><pre id="details"></pre>
 <script>
 const $=id=>document.getElementById(id);let timer;
 async function api(path,data){const r=await fetch(path,data?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}:{});const v=await r.json();if(!r.ok)throw Error(v.error);return v}
-async function poll(id){try{const j=await api('/job/'+id);$('status').textContent=j.status+' Â· '+(j.progress||0)+'%';if(j.stream_url&&!$('player').getAttribute('src'))$('player').src='/audio/'+id+'/stream';if(j.status==='completed'){if(!$('player').getAttribute('src'))$('player').src='/audio/'+id+'/content';return}if(['failed','cancelled','expired'].includes(j.status))throw Error(j.error||j.status);timer=setTimeout(()=>poll(id),3000)}catch(e){$('status').textContent=e.message}}
-async function generate(){clearTimeout(timer);$('player').pause();$('player').removeAttribute('src');$('player').load();$('status').textContent='Preparingâ€¦';try{const v=await api('/generate',{mode:$('mode').value,direction:$('direction').value,seconds:Number($('seconds').value),model:$('model').value,lyrics:$('lyrics').value});$('details').textContent=v.cue.prompt+'\\nSources: '+v.cue.sources.join(', ');if(v.local){$('player').src='/ambience/'+v.local;$('status').textContent='Soundscape ready Â· play to stream'}else{poll(v.job.id)}}catch(e){$('status').textContent=e.message}}
+async function poll(id){try{const j=await api('/job/'+id);$('status').textContent=j.status+' · '+(j.progress||0)+'%';if(j.stream_url&&!$('player').getAttribute('src'))$('player').src='/audio/'+id+'/stream';if(j.status==='completed'){if(!$('player').getAttribute('src'))$('player').src='/audio/'+id+'/content';return}if(['failed','cancelled','expired'].includes(j.status))throw Error(j.error||j.status);timer=setTimeout(()=>poll(id),3000)}catch(e){$('status').textContent=e.message}}
+async function generate(){clearTimeout(timer);$('player').pause();$('player').removeAttribute('src');$('player').load();$('status').textContent='Preparing…';try{const v=await api('/generate',{mode:$('mode').value,direction:$('direction').value,seconds:Number($('seconds').value),model:$('model').value,lyrics:$('lyrics').value});$('details').textContent=v.cue.prompt+'\\nSources: '+v.cue.sources.join(', ');if(v.local){$('player').src='/ambience/'+v.local;$('status').textContent='Soundscape ready · play to stream'}else{poll(v.job.id)}}catch(e){$('status').textContent=e.message}}
 </script>'''
 
 
@@ -163,7 +164,7 @@ def serve(folder, port=8765):
                 if not 0 < length <= 32000: raise ValueError('Invalid request size')
                 data = json.loads(self.rfile.read(length))
                 seconds = data.get('seconds', 60)
-                if type(seconds) is not int or not 5 <= seconds <= 360: raise ValueError('Duration must be 5â€“360 seconds')
+                if type(seconds) is not int or not 5 <= seconds <= 360: raise ValueError('Duration must be 5–360 seconds')
                 cue = plan(root, data.get('mode', 'ambience'), str(data.get('direction', '')))
                 if cue['mode'] == 'ambience':
                     ident = hashlib.sha256(json.dumps([cue, seconds]).encode()).hexdigest()[:24]
