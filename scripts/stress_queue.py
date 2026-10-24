@@ -120,6 +120,9 @@ class Queue:
                 try:self.api.artifact(artifact,path/artifact['name'])
                 except Exception as exc:errors.append(artifact['name']+': '+type(exc).__name__)
         audits=list((path/'episode-audit').rglob('episode-audit.json'));audit=json.loads(audits[0].read_text()) if audits else {}
+        snapshots=list((path/'readable-story').rglob('snapshot.json'))
+        partial=max((json.loads(p.read_text()) for p in snapshots),key=lambda s:len(s.get('accepted',[])),default={})
+        accepted=partial.get('accepted',[])
         jobs=[]
         if run.get('conclusion')!='success':
             for page in range(1,6):
@@ -127,6 +130,9 @@ class Queue:
                 if len(jobs)>=data['total_count']:break
         failed=[{'name':j['name'],'conclusion':j['conclusion'],'url':j['html_url'],'steps':[{'name':s['name'],'conclusion':s['conclusion']} for s in j.get('steps',[]) if s.get('conclusion') in {'failure','timed_out','cancelled'}]} for j in jobs if j.get('conclusion') in {'failure','timed_out','cancelled'}]
         row={**case,'run_id':run['id'],'url':run['html_url'],'status':run.get('conclusion'),'pass':verdict(run,audit,case['scenes']) and not errors,'words':sum(x['words'] for x in audit.get('scenes',[])),'audit':audit,'collection_errors':errors,'failed_jobs':failed}
+        row['accepted_scenes']=len(accepted)
+        row['accepted_words']=sum(len(s['prose'].split()) for s in accepted)
+        if not audit:row['words']=row['accepted_words']
         parse=lambda x:datetime.datetime.fromisoformat(x.replace('Z','+00:00'))
         row['elapsed_seconds']=(parse(run['updated_at'])-parse(run['created_at'])).total_seconds()
         (path/'result.json').write_text(json.dumps(row,indent=2)+'\n');return row

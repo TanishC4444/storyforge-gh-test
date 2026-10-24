@@ -67,7 +67,7 @@ def build():
         add(p+'_accept',p+'_accept','Commit scene '+str(i+1)+' only after literary and factual gates','accept',[p+'_design',p+'_final_check',p+'_final_memory',p+'_memory_review'],state+[(p+'_final_check','edited'),(p+'_final_memory','memory'),(p+'_memory_review','memory-review')],i)
     jobs['results']=old['results'];jobs['results']['needs']=list(jobs)[:-1] if list(jobs)[-1]=='results' else [k for k in jobs if k!='results']
     jobs['results']['steps'] += [
-        {'name':'Require actual scene approvals and complete source-bound memory','env':{'EXPECTED_SCENES':'${{ inputs.scene_limit }}'},'run':'python -m storyforge.episode_audit --source results --out audit --expected "$EXPECTED_SCENES"'},
+        {'name':'Require actual scene approvals and complete source-bound memory','if':'always()','env':{'EXPECTED_SCENES':'${{ inputs.scene_limit }}'},'run':'python -m storyforge.episode_audit --source results --out audit --expected "$EXPECTED_SCENES"'},
         {'uses':'actions/upload-artifact@v4','if':'always()','with':{'name':'episode-audit','path':'audit/','retention-days':30}}]
     graph['jobs']=jobs
     return dump_workflow(graph)

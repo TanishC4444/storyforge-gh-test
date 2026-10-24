@@ -52,6 +52,7 @@ class Executor:
         if backend=='worker' and (req.get('api_roles') or req.get('execution_policy',{}).get('model_routing')=='quality'):
             from .hosted import GoogleHosted
             self.hosted=GoogleHosted(os.getenv('STORY_QUOTA_DIR',str(self.folder/'provider-budget')))
+            save(self.folder/'provider-pool.json',{'configured_credentials':len(self.hosted.keys),'independent_projects':len(self.hosted.project_children) or (1 if self.hosted.keys else 0),'distinct_project_routing':bool(self.hosted.project_children)})
             if req.get('performance',{}).get('inherit_provider_budget') and not os.getenv('STORY_QUOTA_DIR'):
                 self.hosted.inherit((self.folder.parent/'inputs').rglob('quota.json') if self.hosted.project_children else (self.folder.parent/'inputs').rglob('provider-budget/quota.json'))
 
@@ -182,6 +183,11 @@ class Executor:
                                                 route_policy={**(route_policy or {'thinking':'low','quality_routing':True,'literary_quality':True}),'timeout':route_seconds,'route_budget':route_seconds}
                                             if attempt_limit is not None:
                                                 route_policy={**(route_policy or {'timeout':40,'thinking':'low','quality_routing':True,'literary_quality':True}),'estimate_small_calls':True,'estimate_max_bytes':131072 if self.req.get('performance',{}).get('pipelined_living') else 48000,'request_attempt_limit':attempt_limit,'max_project_attempts':2 if len(set(routes))==1 else 1,'project_offset':route_index+capacity_round*len(routes)}
+                                            project_attempts=self.req.get('execution_policy',{}).get('hosted_project_attempts')
+                                            if project_attempts is not None:
+                                                if type(project_attempts) is not int or not 1<=project_attempts<=3:raise ContractError('Invalid independent-project attempt cap')
+                                                route_policy={**(route_policy or {}),'max_project_attempts':project_attempts,'project_offset':(route_index+capacity_round*len(routes))*project_attempts}
+                                            if capacity_round:route_policy={**(route_policy or {}),'output_retry_reserve':capacity_round*1024}
                                             hosted_result=self.hosted.complete(route,system,prompt,tokens,structured=bool(validator) and output_format=='json',response_schema=response_schema,role=role,policy=route_policy)
                                         break
                                     except Exception as exc:

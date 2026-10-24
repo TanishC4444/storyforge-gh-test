@@ -15,12 +15,26 @@ NAMES=['Mara Venn','Ivo Venn','Sera Holt','Tomas Reed','Nadi Vale','Oren Pike','
 JOBS=['ferryman','radio operator','city archivist','district physician','power engineer','harbor captain','courier','quartermaster','council speaker','mechanic','teacher','watch officer','botanist','union steward','accountant','night porter']
 VOICES=['short practical questions','careful pauses and literal answers','formal corrections with dry humor','warm plain speech that hardens under pressure']
 GOALS=['Keep the ferry open while refusing to choose which household is abandoned.','Establish whether a distress call is authentic without revealing a family debt.','Expose a falsified record while protecting the person who gave access.','Get patients across the water before medical supplies run out.','Secure an honest power ration without making the poorest district pay first.','Preserve crew loyalty while being ordered to deny passage.','Deliver a sealed parcel without surrendering the recipient\u2019s identity.','Account for missing supplies without scapegoating a subordinate.','Win public support without admitting an earlier promise cannot be kept.','Repair one failing mechanism while refusing an unsafe shortcut.','Keep displaced children together while negotiating space in another district.','Enforce an unpopular order while protecting a relative on the other side.','Keep a fragile seed collection alive without claiming ownership of the next harvest.','Protect workers without giving a rival faction control of the harbor.','Recover the chain of payment evidence without mistaking suspicion for proof.','Keep access to a closed building while demanding recognition for invisible work.']
+FOCUS={
+ 'fairytale':'The river spirit and purchased dawn are the central supernatural conflict. Establish their observable effects and the bargain\u2019s limits. A mundane accounting correction alone cannot resolve the missing sunrise.',
+ 'ensemble':'The floating city, power shortage, evacuation decision and missing ledger must causally interact. Make the science-fiction setting tangible; do not reduce the story to ordinary paperwork.',
+ 'screenplay':'The stolen relief fund and guarded harbor transfer must drive an enacted heist attempt. Establish the crew\u2019s concrete tactic and its cost; a ferry permission dispute alone is not this story.',
+ 'theatre':'The inherited municipal clock and family claims must stay central, with playable comedy and a consequential inheritance choice. Medical ferry bargaining must not replace the clock story.',
+ 'audio':'The dead father\u2019s call sign must become an audible mystery. By the ending, enact a consequential response to its evidence; merely locating a signal is not the promised climax.',
+ 'comic':'The fragile seed bank must appear visually and drive the courier\u2019s journey, faction pressure and consequential delivery choice. A dialogue-only ferry dispute is not the requested adventure.'}
 
 def build():
  base=json.loads((ROOT/'examples/iron-man-alternate-origin.json').read_text())
  manifest=[]
  for slug,medium,genre,count,words,cast_size,premise in CASES:
   r=copy.deepcopy(base);project='stress-'+slug
+  r['context_chars']=192000 if cast_size>=16 else 96000
+  r['execution_policy']['max_hosted_requests']=6
+  r['execution_policy']['hosted_project_attempts']=2
+  r['execution_policy']['provider_outage_recovery'].update(buffer_seconds=600,extra_requests=12)
+  r['api_roles']['memory_quality']='flash36'
+  r['execution_policy']['hosted_routes']['memory_quality']=['flash36','flash','lite']
+  r['execution_policy']['hosted_role_seconds']['memory_quality']=60
   r.update(project_id=project,universe_id=project,title='The Harbor Test: '+genre,medium=medium,chapters=count,scenes_per_chapter=1,words_per_scene=words,genre=genre,premise=premise+' Develop '+str(count)+' connected scenes. Invent the decisive discovery and climax yourself; no exact solution, culprit or twist is prescribed. Plant observable evidence before any revelation and make the climax change a relationship and consume a real advantage.',references=[],retrieval_query='dramatic irony competing obligations planted clues reversal consequences',reference_policy='Optional craft guidance only; never import another work\u2019s facts, genre, characters or style.',reader_experience='Distinct voices, escalating choices and a surprising but retrospectively supported turn.',pov='Present-tense filmable or performable action for scripts; close third-person past tense for prose. Limit private knowledge to actual witnesses.',tone_mood=genre+' with specific human stakes and varied emotional pacing.',sensory_detail='Select details appropriate to the medium; audio establishes action through sound, comics through drawable panels.',ending_tendency='Resolve this episode\u2019s main choice with an earned reversal and a lasting consequence; leave one meaningful unresolved thread.')
   r['style']={'narrator':'Follow the selected medium; do not add internal narration to scripts.','register':genre+'; original language, economical exposition, no generic moral.','wording':['No borrowed quotations, catchphrases or stock epic imagery.','Do not repeat earlier negotiations, discoveries or explanations.'],'interiority':'Show conflicting obligations through choices; prose may access only its focal viewpoint.','dialogue':'Distinct motives and speech patterns; use subtext and changing leverage.'}
   r['style']['figurative_language']={'density':'sparse','devices':['concrete metaphor'],'image_domains':['harbor work','weather','household objects']}
@@ -60,6 +74,8 @@ def build():
   r['chapter_contract']={'arc':'Escalation through distinct choices and a climax with earned surprise.','continuity':'Full memory, private knowledge, resource counts, travel and relationships remain authoritative.','ending':'Pay off an enacted setup, change leverage and retain a consequence.'}
   r['chapter_arcs']=goals
   r['quality_contract']=['Respect the selected medium, its headings, tense, cues and representable action.','Distinct voices and conflicting aims must cause choices, not inventory exposition.','Connect all scenes through full authoritative memory, with no repetition or reset.','Check exact custody, counted resources, character knowledge, chronology and geography.','Final climax must reinterpret an earlier enacted clue or choice; surprise cannot depend on a retroactively invented fact.','The original outcome is not prescribed; assess source-supported originality and consequences rather than conformity to a hidden plot.']
+  r['quality_contract'].append(FOCUS[slug])
+  for scene in r['scene_designs']:scene['development']=FOCUS[slug]+' '+scene['development']
   r['must_avoid']=['Imported Marvel, Homeric or other external canon.','Recapping an earlier negotiation instead of progressing.','Instant offstage construction, unexplained reserves, or leaks of private information.','Adding prose narration to a script or headings to prose.']
   r['creative_freedom'].update(protected_characters=['c01'],cast_limit=min(32,cast_size+2),max_new_per_scene=1,flexible_pov=True)
   r['execution_intent']={'authorized':'User requested sequential live stress tests across formats, genres, lengths and larger worlds.','workflow':'Full separate-runner pipeline; strict literary and factual gates; Gemini waits and no automatic local downgrade.'}
@@ -68,6 +84,8 @@ def build():
   if slug=='ensemble':
    continuation=copy.deepcopy(r);continuation['project_id']='stress-ensemble-continuation';continuation['title']+=': Aftermath'
    continuation['premise']='Continue the accepted harbor episode from its actual outcome. Do not replay the opening ledger mystery or assume its solution in advance. Across four new scenes, turn the prior climax\u2019s actual cost into a new public conflict. Preserve all history, cast, knowledge, spent resources and changed relationships. Invent a new earned climax from unresolved threads; never restore the opening state.'
+   continuation['quality_contract'][-1]='The floating city and power constraints remain material. Develop the actual consequences of the preceding accepted episode; do not reopen a solved ledger mystery or repeat the evacuation vote as if no decision occurred.'
+   for scene in continuation['scene_designs']:scene['development']=continuation['quality_contract'][-1]+' Invent specific new action and resistance from the actual current memory.'
    for scene in continuation['scene_designs']:scene['restrictions']+=' This is a continuation: use prior accepted history and never reset the world to this file\u2019s initial facts.'
    (ROOT/'examples/stress-ensemble-continuation.json').write_text(json.dumps(continuation,indent=2,ensure_ascii=False)+'\n')
  manifest.append({'id':'ensemble-continuation','request_file':'stress-ensemble-continuation','scenes':4,'medium':'book','words_per_scene':1100,'cast':16,'resume_case':'ensemble'})

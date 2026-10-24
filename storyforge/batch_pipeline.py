@@ -77,6 +77,10 @@ def plan_draft(state,card,source,out,backend):
 
 def cached_prose(folder):
     calls=[]
+    for p in Path(folder).rglob('incomplete-generation.json'):
+        try:c=load(p)
+        except (ValueError,OSError):continue
+        if c.get('role') in {'writer','writer_beat','humanizer','repair'} and c.get('text'):calls.append((p.stat().st_mtime,c['text']))
     for p in Path(folder).rglob('calls/*.json'):
         try:c=load(p)
         except (ValueError,OSError):continue
