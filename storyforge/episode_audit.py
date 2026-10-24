@@ -20,6 +20,9 @@ def audit(source,out,expected):
             # Acceptance consumes this exact pair after bounded recovery. Never
             # fall back to an older passing ledger if recovered proof is invalid.
             proof_path=recovered/'review.json';facts_path=recovered/'memory.json'
+        receipt=source/(p+'_accept')
+        if (receipt/'acceptance-binding.json').exists():
+            proof_path=receipt/'consumed-proof.json';facts_path=receipt/'consumed-memory.json';state_path=receipt/'acceptance-state.json'
         bound=False
         if all(p.exists() for p in [proof_path,facts_path,state_path]):
             proof=load(proof_path)

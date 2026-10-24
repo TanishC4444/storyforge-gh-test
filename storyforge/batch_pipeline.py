@@ -120,6 +120,11 @@ def write_batch(state,card,source,out,backend,bid):
             else:old_error=''
             require(bool(old_error) and all(e in {old_error,'repair failed after bounded retries: '+old_error} for e in old['errors']),'Saved draft rejection was not solely the validated length error')
         reused={'source_sha256':digest(text),'original_verified_form':old.get('verified_form',False),'policy':'Imported verbatim as unreviewed prose; all current literary and memory gates still run.'}
+    fresh=state.get('fresh_drafts',{}).get(str(state['plan']['scenes'].index(card)))
+    if fresh and len(plan['beats'])==1:
+        text=fresh['prose'];require(digest(text)==fresh['source_sha256'],'Fresh draft hash mismatch')
+        validate_prose(text,local,check_length=backend!='fixture')
+        reused={'source_sha256':digest(text),'policy':'Fresh-run draft import, with all current reviews rebuilt.'}
     for attempt in range(0 if backend=='fixture' or reused is not None else 2):
         role='writer_beat' if attempt==0 else 'repair'
         folder=out/str(attempt);executor=Executor(req,folder,backend)

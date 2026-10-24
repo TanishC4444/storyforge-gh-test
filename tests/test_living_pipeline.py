@@ -24,7 +24,7 @@ class LivingPipelineTests(unittest.TestCase):
                 self.assertEqual(sum(step.get('uses')=='actions/download-artifact@v4' for step in job['steps']),2 if name=='s01_write_batches' else 1,name)
                 manifest=next(step for step in job['steps'] if step.get('name')=='Bind downloaded artifacts to explicit source aliases')['env']['STORY_ARTIFACT_MANIFEST']
                 self.assertNotIn('${{',manifest,name)
-        self.assertEqual(jobs['s02_design']['needs'],['s01_accept'])
+        self.assertEqual(jobs['s02_design']['needs'],['s01_accept','quickstart'])
         self.assertEqual(jobs['s01_memory_preflight_batches']['strategy']['max-parallel'],6)
         self.assertGreater(len(jobs),60)
         with tempfile.TemporaryDirectory() as d,patch.dict(os.environ,{'STORY_LEAN_LIVING':'true','STORY_LIVING_PIPELINE':'true','STORY_HOSTED_ONLY':'true'}),redirect_stdout(io.StringIO()):
@@ -95,7 +95,7 @@ class LivingPipelineTests(unittest.TestCase):
                 if name.endswith(('_accept','_design','_final_memory','_memory_review','_memory_recovery_join')):shutil.copytree(folder,root/'results'/name)
             assessment=audit(root/'results',root/'audit',2)
             self.assertTrue(assessment['pass']);self.assertEqual(assessment['retained_initial_facts'],96)
-            corrupt=root/'results'/('s01_memory_recovery_join' if force_recovery else 's02_memory_review')/'review.json'
+            corrupt=root/'results'/('s01_accept' if force_recovery else 's02_accept')/'consumed-proof.json'
             bad=load(corrupt);bad['source_sha256']='stale';save(corrupt,bad)
             self.assertFalse(audit(root/'results',root/'bad-audit',2)['pass'])
             for prefix in ['s01','s02']:

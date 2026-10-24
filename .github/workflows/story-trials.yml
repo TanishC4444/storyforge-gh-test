@@ -1,0 +1,38 @@
+name: Fresh recovery and simultaneous-scene comparison
+on:
+  workflow_dispatch:
+    inputs:
+      source_run:
+        type: string
+        default: '40103398653'
+        description: Original nonlinear full-pipeline run to recover into a fresh run
+permissions:
+  contents: read
+  actions: write
+jobs:
+  trials:
+    name: '${{ matrix.mode }} trial'
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        mode: [recovery, parallel]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run experiment and wait for its final result
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TRIAL_MODE: ${{ matrix.mode }}
+          SOURCE_RUN: ${{ inputs.source_run }}
+        run: python -m scripts.story_trials --mode "$TRIAL_MODE" --source-run "$SOURCE_RUN"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trial-${{ matrix.mode }}
+          path: trial/
+          retention-days: 30

@@ -12,7 +12,14 @@ def build():
     inputs=graph['on']['workflow_dispatch']['inputs'];inputs['request_file']['default']='living-scale-practice';inputs['scene_limit']['default']='2'
     inputs['saved_draft_run']={'type':'string','default':'','description':'Optional prior run: import its complete first-scene draft under the same brief/canon; recheck quality and memory'}
     inputs['recovery_probe']={'type':'boolean','default':False,'description':'Benchmark only: interrupt scene 2 once to verify checkpoint recovery'}
+    inputs['fresh_run']={'type':'string','default':'','description':'Prior failed full-pipeline run: resume its approved prefix and recheck saved unfinished drafts in a NEW run'}
     graph['env']['STORY_LIVING_PIPELINE']='true'
+    quick=jobs['quickstart'];steps=quick['steps'];position=next(i for i,s in enumerate(steps) if s.get('id')=='task')
+    steps.insert(position,{'name':'Import prior episode artifacts into a fresh run','if':"${{ inputs.fresh_run != '' }}",'uses':'actions/download-artifact@v4','with':{'pattern':'{quickstart,s*_accept,s*_design,s*_final_check,s*_draft,s*_repair,s*_final_memory,s*_memory_review,s*_memory_recovery_join}','run-id':'${{ inputs.fresh_run }}','github-token':'${{ github.token }}','path':'inputs/restart'}})
+    task=next(s for s in steps if s.get('id')=='task');task['env']['FRESH_RUN']='${{ inputs.fresh_run }}'
+    task['run']+='\nif [ -n "$FRESH_RUN" ]; then python -m storyforge.fresh_resume; fi\npython -c "import json,os; s=json.load(open(\'out/snapshot.json\')); open(os.environ[\'GITHUB_OUTPUT\'],\'a\').write(\'resume_index=\'+str(len(s.get(\'accepted\',[])))+\'\\n\')"'
+    quick.setdefault('outputs',{})['resume_index']='${{ steps.task.outputs.resume_index }}'
+
     def add(key,template,title,task,needs,files,index,*,module='living_stages',matrix=None,outputs=(),condition=None):
         job=copy.deepcopy(old[template]);job['name']='Scene '+str(index+1)+' / '+title;job['needs']=list(dict.fromkeys(needs));job.pop('strategy',None);job.pop('outputs',None)
         job['if']=condition or '${{ always() && !cancelled() && '+str(index)+' < fromJSON(inputs.scene_limit)'+''.join(' && needs.'+name+".result == 'success'" for name in job['needs'])+' }}'
@@ -26,7 +33,9 @@ def build():
             if step.get('uses')=='actions/download-artifact@v4' or step.get('name')=='Show generated prose before final acceptance':continue
             if step.get('id')=='task':
                 manifest=[{'name':spec[0],'path':spec[1],'pattern':bool(len(spec)>2 and spec[2]),'condition':spec[3].replace('${{','').replace('}}','').strip() if len(spec)>3 else None} for spec in files]
-                patterns=list(dict.fromkeys(spec[0] for spec in files))
+                if task=='scene_design':
+                    manifest[0]['fallback']='quickstart'
+                patterns=list(dict.fromkeys([spec[0] for spec in files]+(['quickstart'] if task=='scene_design' else [])))
                 steps.append({'name':'Fetch upstream artifacts in one parallel transfer','uses':'actions/download-artifact@v4','with':{'pattern':patterns[0] if len(patterns)==1 else '{'+','.join(patterns)+'}','path':'incoming'}})
                 steps.append({'name':'Bind downloaded artifacts to explicit source aliases','env':{'STORY_ARTIFACT_MANIFEST':json.dumps(manifest,separators=(',',':')),'STORY_UPSTREAM_NEEDS':'${{ toJSON(needs) }}'},'run':'python -m storyforge.living_stages arrange'})
                 step['name']=title;env=step['env'];env.pop('STORY_BATCH',None);env.pop('STORY_CHARACTER',None)
@@ -38,6 +47,11 @@ def build():
                 step['run']='backend=fixture\nif [ "$STORY_BACKEND" = live ]; then backend=worker; fi\n'+command
             if step.get('uses')=='actions/upload-artifact@v4':step['with']['name']=key+('-${{ matrix.character }}' if key.endswith('_characters') else '-${{ matrix.batch }}' if matrix is not None else '')
             steps.append(step)
+        job['needs']=list(dict.fromkeys([*job['needs'],'quickstart']))
+        job['if']=job['if'].replace('always() && !cancelled() && ', 'always() && !cancelled() && '+str(index)+" >= fromJSON(needs.quickstart.outputs.resume_index || '0') && " )
+        if task=='scene_design':
+            prior=needs[0]
+            job['if']='${{ always() && !cancelled() && needs.quickstart.result == \'success\' && '+str(index)+" < fromJSON(inputs.scene_limit) && "+str(index)+" >= fromJSON(needs.quickstart.outputs.resume_index || '0') && ("+str(index)+" == fromJSON(needs.quickstart.outputs.resume_index || '0') || needs."+prior+".result == 'success') }}"
         job['steps']=steps;jobs[key]=job
     for i in range(4):
         p=f's{i+1:02}';prior='quickstart' if i==0 else f's{i:02}_accept';state=[(p+'_design','state')]
@@ -81,6 +95,7 @@ def build():
         allow='${{ always() && !cancelled() && '+str(i)+' < fromJSON(inputs.scene_limit) && needs.'+p+'_design.result == \'success\' && needs.'+p+'_final_check.result == \'success\' && needs.'+p+'_memory_review.result == \'success\' && (needs.'+p+'_memory_recovery_join.result == \'success\' || (needs.'+p+'_memory_review.outputs.repair_required != \'true\' && needs.'+p+'_memory_recovery_join.result == \'skipped\')) }}'
         add(p+'_accept',p+'_accept','Commit scene '+str(i+1)+' only after literary and factual gates','accept',[p+'_design',p+'_final_check',p+'_memory_review',p+'_memory_recovery_join'],state+[(p+'_final_check','edited'),(p+'_memory_review','memory'),(p+'_memory_review','memory-review'),(p+'_memory_recovery_join','recovered-memory',False,'${{ needs.'+p+'_memory_review.outputs.repair_required == \'true\' }}')],i,condition=allow)
     jobs['results']=old['results'];jobs['results']['needs']=list(jobs)[:-1] if list(jobs)[-1]=='results' else [k for k in jobs if k!='results']
+    jobs['results']['steps'].insert(2,{'name':'Restore approved prefix evidence from fresh-run checkpoint','if':'always()','run':'if [ -d results/quickstart/seed-results ]; then cp -rn results/quickstart/seed-results/. results/; fi'})
     jobs['results']['steps'] += [
         {'name':'Save restart checkpoint and all scene drafts even after failure','if':'always()','run':'python -m storyforge.story_checkpoint --source results --out recovery --expected "${{ inputs.scene_limit }}"'},
         {'uses':'actions/upload-artifact@v4','if':'always()','with':{'name':'story-recovery','path':'recovery/','retention-days':30,'overwrite':True}},

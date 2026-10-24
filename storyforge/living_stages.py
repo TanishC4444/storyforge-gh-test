@@ -22,6 +22,7 @@ def arrange(incoming='incoming',source='inputs',manifest=None,needs=None):
             require(match is not None,'Unsupported artifact condition')
             if needs.get(match[1],{}).get('outputs',{}).get(match[2])!='true':continue
         names=[p for p in incoming.iterdir() if p.is_dir() and fnmatch.fnmatch(p.name,spec['name'])]
+        if not names and spec.get('fallback') and (incoming/spec['fallback']).is_dir():names=[incoming/spec['fallback']]
         require(bool(names),'Missing required upstream artifact: '+spec['name'])
         for folder in names:
             target=source/spec['path']/(folder.name if spec['pattern'] else '')
@@ -32,7 +33,9 @@ def execute(task,source,out,index=0,backend='fixture'):
     source=Path(source);out=Path(out);out.mkdir(parents=True,exist_ok=True)
     state=load(source/'state/snapshot.json');card=state['plan']['scenes'][index]
     if task=='direction_plan':
-        stage('director',source,out/'direction',index=index,backend=backend)
+        if str(index) in state.get('fresh_drafts',{}):
+            save(out/'direction/direction.txt','Keep the recovered draft; recheck it against the complete current canon and author scene contract.')
+        else:stage('director',source,out/'direction',index=index,backend=backend)
         b.plan_draft(state,card,out,out,backend)
     elif task=='draft_extract_plan':
         prose=b.merge_draft(state,source,out);save(out/'prose.txt',prose)
@@ -119,6 +122,12 @@ def execute(task,source,out,index=0,backend='fixture'):
         final=load(source/'edited/repair.json')['editorial_adjudication']
         save(source/'story-review/review.json',final['story']);save(source/'rhetoric-review/review.json',final['rhetoric'])
         stage('accept',source,out,index=index,backend=backend)
+        # Store the exact pair consumed here; later audit never guesses from a
+        # leftover recovery folder belonging to an earlier attempt.
+        copy_file(source/'state/snapshot.json',out/'acceptance-state.json')
+        copy_file(source/'memory/memory.json',out/'consumed-memory.json')
+        copy_file(source/'memory-review/review.json',out/'consumed-proof.json')
+        save(out/'acceptance-binding.json',{'state_sha256':b.bind_state(state),'source_sha256':b.digest(prose if state['request'].get('performance',{}).get('strict_draft_handoff') else (source/'edited/prose.txt').read_text())})
     else:raise ValueError('Unknown Living runner stage')
 
 

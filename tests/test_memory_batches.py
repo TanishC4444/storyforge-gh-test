@@ -50,7 +50,7 @@ class MemoryBatchTests(unittest.TestCase):
             for batch in plan['batches']:m.check(s,c,p,p/'batches'/batch['id'],'fixture',batch['id'])
             self.assertTrue(m.join(s,p,p/'joined')['pass'])
             value=load(p/'batches/0/memory-check-batch.json');value['plan_sha256']='stale';save(p/'batches/0/memory-check-batch.json',value)
-            with self.assertRaises(ContractError):m.join(s,p,p/'stale')
+            self.assertFalse(m.join(s,p,p/'stale')['pass'])
     def test_preflight_continuity_issue_reaches_only_targeted_prose_repair(self):
         with tempfile.TemporaryDirectory() as d:
             p=Path(d);s,c=self.scene(p);prose,plan=self.make_inputs(p,s)

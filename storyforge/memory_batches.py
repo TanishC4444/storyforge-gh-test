@@ -149,8 +149,11 @@ def join(state,source,out):
     from .batch_pipeline import bind_state
     p,prose,memory=inputs(state,source);expected={b['id'] for b in p['batches']};found={}
     for path in (Path(source)/'batches').rglob('memory-check-batch.json'):
-        v=load(path);require(v['id'] in expected and v['id'] not in found,'Duplicate or foreign memory batch')
-        require(v['plan_sha256']==bind_state(p),'Stale memory batch');found[v['id']]=v
+        v=load(path)
+        # Native reruns leave surplus matrix artifacts from previous plans.
+        # They are not evidence for this plan; missing CURRENT batches still fail.
+        if v.get('plan_sha256')!=bind_state(p):continue
+        require(v['id'] in expected and v['id'] not in found,'Duplicate or foreign current memory batch');found[v['id']]=v
     issues=[issue for b in p['batches'] if b['id'] in found for issue in found[b['id']]['review'].get('issues',[])]
     missing=sorted(expected-set(found));unverified=memory.get('unverified',False) or bool(missing) or any(v['review'].get('unverified') for v in found.values())
     verdict={'pass':not unverified and all(v['review']['pass'] for v in found.values()),'issues':issues,
@@ -212,8 +215,9 @@ def extract_join(state,source,out):
     require(p['state_sha256']==bind_state(state) and p['source_sha256']==digest(prose),'Stale extraction merge')
     expected={b['id'] for b in p['batches']};found={}
     for path in (Path(source)/'batches').rglob('memory-extract-batch.json'):
-        v=load(path);require(v['id'] in expected and v['id'] not in found,'Foreign or duplicate extraction batch')
-        require(v['plan_sha256']==bind_state(p),'Stale extraction batch');found[v['id']]=v['memory']
+        v=load(path)
+        if v.get('plan_sha256')!=bind_state(p):continue
+        require(v['id'] in expected and v['id'] not in found,'Foreign or duplicate current extraction batch');found[v['id']]=v['memory']
     memories=list(p.get('retained',[]));seen={bind_state(fact) for fact in memories}
     for b in p['batches']:
         for fact in found.get(b['id'],{}).get('memories',[]):

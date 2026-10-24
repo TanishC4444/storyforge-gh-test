@@ -10,10 +10,25 @@ def approved(scene):
 
 def preserve(source,out,expected=None):
     source=Path(source);out=Path(out)
+    seed=source/'quickstart/seed-results'
+    if seed.exists():
+        for folder in seed.iterdir():
+            if folder.is_dir() and not (source/folder.name).exists():shutil.copytree(folder,source/folder.name)
     candidates=[]
     for path in source.glob('s*_accept/snapshot.json'):
         state=load(path)
-        if all(approved(s) for s in state.get('accepted',[])):candidates.append((len(state['accepted']),path,state))
+        valid=all(approved(s) for s in state.get('accepted',[]))
+        # If source proof artifacts are present, flags alone cannot establish a
+        # safe recovery boundary. Old native reruns may leave stale proofs.
+        if valid:
+            from .episode_audit import audit
+            has_proofs=any(source.glob('s*_memory_review/review.json')) or any(source.glob('s*_accept/consumed-proof.json'))
+            if has_proofs:
+                import tempfile
+                with tempfile.TemporaryDirectory() as d:
+                    assessment=audit(source,Path(d),len(state['accepted']))
+                valid=all(r['approved'] and r['factual_proof_bound'] for r in assessment['scenes'][:len(state['accepted'])])
+        if valid:candidates.append((len(state['accepted']),path,state))
     if candidates:
         count,path,state=max(candidates,key=lambda x:x[0])
     else:

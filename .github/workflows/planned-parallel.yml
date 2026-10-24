@@ -1,0 +1,427 @@
+name: Deep planning / simultaneous scenes
+run-name: Planned parallel | ${{ inputs.request_file }} | ${{ inputs.queue_tag || github.run_number }}
+'on':
+  workflow_dispatch:
+    inputs:
+      request_file:
+        type: string
+        default: hard-chronology
+      backend:
+        type: choice
+        options:
+        - fixture
+        - live
+        default: live
+      queue_tag:
+        type: string
+        default: ''
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: planned-parallel-experiment
+  cancel-in-progress: false
+env:
+  PYTHONUNBUFFERED: '1'
+  GEMINI_DISTINCT_PROJECTS: 'true'
+  STORY_HOSTED_ONLY: 'true'
+  STORY_REVIEW_TIMEOUT_SECONDS: '180'
+  STORY_BATCH_TIMEOUT_SECONDS: '300'
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+        hosted-only: 'true'
+    - name: prepare
+      id: task
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        BACKEND: ${{ inputs.backend }}
+        SCENE_ID: ''
+      run: 'backend=fixture
+
+        if [ "$BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.planned_parallel prepare --backend "$backend" --request-file "$STORY_REQUEST"'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: planned-prepare
+        path: out/
+        retention-days: 30
+        overwrite: true
+    outputs:
+      scenes: ${{ steps.task.outputs.scenes }}
+  outline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+        hosted-only: 'true'
+    - uses: actions/download-artifact@v4
+      with:
+        name: planned-prepare
+        path: inputs/state
+    - name: outline
+      id: task
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        BACKEND: ${{ inputs.backend }}
+        SCENE_ID: ''
+      run: 'backend=fixture
+
+        if [ "$BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.planned_parallel outline --backend "$backend" --request-file "$STORY_REQUEST"'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: planned-outline
+        path: out/
+        retention-days: 30
+        overwrite: true
+    needs:
+    - prepare
+  description:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+        hosted-only: 'true'
+    - uses: actions/download-artifact@v4
+      with:
+        name: planned-outline
+        path: inputs/state
+    - name: refine
+      id: task
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        BACKEND: ${{ inputs.backend }}
+        SCENE_ID: ${{ matrix.scene }}
+      run: 'backend=fixture
+
+        if [ "$BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.planned_parallel refine --backend "$backend" --request-file "$STORY_REQUEST" --scene-id "$SCENE_ID"'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: planned-description-${{ matrix.scene }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    needs:
+    - prepare
+    - outline
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        scene: ${{ fromJSON(needs.prepare.outputs.scenes) }}
+  lock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+        hosted-only: 'true'
+    - uses: actions/download-artifact@v4
+      with:
+        name: planned-outline
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: planned-description-*
+        path: inputs/descriptions
+    - name: lock
+      id: task
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        BACKEND: ${{ inputs.backend }}
+        SCENE_ID: ''
+      run: 'backend=fixture
+
+        if [ "$BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.planned_parallel lock --backend "$backend" --request-file "$STORY_REQUEST"'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: planned-lock
+        path: out/
+        retention-days: 30
+        overwrite: true
+    needs:
+    - description
+    - outline
+  write:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+        hosted-only: 'true'
+    - uses: actions/download-artifact@v4
+      with:
+        name: planned-lock
+        path: inputs/state
+    - name: write
+      id: task
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        BACKEND: ${{ inputs.backend }}
+        SCENE_ID: ${{ matrix.scene }}
+      run: 'backend=fixture
+
+        if [ "$BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.planned_parallel write --backend "$backend" --request-file "$STORY_REQUEST" --scene-id "$SCENE_ID"'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: planned-write-${{ matrix.scene }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    needs:
+    - prepare
+    - lock
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        scene: ${{ fromJSON(needs.prepare.outputs.scenes) }}
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+        hosted-only: 'true'
+    - uses: actions/download-artifact@v4
+      with:
+        name: planned-lock
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: planned-write-${{ matrix.scene }}
+        path: inputs/draft
+    - name: check
+      id: task
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        BACKEND: ${{ inputs.backend }}
+        SCENE_ID: ${{ matrix.scene }}
+      run: 'backend=fixture
+
+        if [ "$BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.planned_parallel check --backend "$backend" --request-file "$STORY_REQUEST" --scene-id "$SCENE_ID"'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: planned-check-${{ matrix.scene }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    needs:
+    - prepare
+    - lock
+    - write
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        scene: ${{ fromJSON(needs.prepare.outputs.scenes) }}
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+        hosted-only: 'true'
+    - uses: actions/download-artifact@v4
+      with:
+        name: planned-lock
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: planned-check-*
+        path: inputs/scenes
+    - name: audit
+      id: task
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        BACKEND: ${{ inputs.backend }}
+        SCENE_ID: ''
+      run: 'backend=fixture
+
+        if [ "$BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.planned_parallel audit --backend "$backend" --request-file "$STORY_REQUEST"'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: planned-audit
+        path: out/
+        retention-days: 30
+        overwrite: true
+    needs:
+    - lock
+    - check
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+        hosted-only: 'true'
+    - uses: actions/download-artifact@v4
+      with:
+        name: planned-lock
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        name: planned-check-${{ matrix.scene }}
+        path: inputs/draft
+    - uses: actions/download-artifact@v4
+      with:
+        name: planned-audit
+        path: inputs/audit
+    - name: patch
+      id: task
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        BACKEND: ${{ inputs.backend }}
+        SCENE_ID: ${{ matrix.scene }}
+      run: 'backend=fixture
+
+        if [ "$BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.planned_parallel patch --backend "$backend" --request-file "$STORY_REQUEST" --scene-id "$SCENE_ID"'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: planned-patch-${{ matrix.scene }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    needs:
+    - prepare
+    - lock
+    - check
+    - audit
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        scene: ${{ fromJSON(needs.prepare.outputs.scenes) }}
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@v4
+    - uses: ./.github/actions/setup-worker
+      with:
+        backend: ${{ inputs.backend }}
+        hosted-only: 'true'
+    - uses: actions/download-artifact@v4
+      with:
+        name: planned-lock
+        path: inputs/state
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: planned-patch-*
+        path: inputs/scenes
+    - name: publish
+      id: task
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
+        STORY_REQUEST: ${{ inputs.request_file }}
+        BACKEND: ${{ inputs.backend }}
+        SCENE_ID: ''
+      run: 'backend=fixture
+
+        if [ "$BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.planned_parallel publish --backend "$backend" --request-file "$STORY_REQUEST"'
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: planned-publish
+        path: out/
+        retention-days: 30
+        overwrite: true
+    needs:
+    - lock
+    - patch
+  results:
+    runs-on: ubuntu-latest
+    needs:
+    - prepare
+    - outline
+    - description
+    - lock
+    - write
+    - check
+    - audit
+    - patch
+    - publish
+    if: always()
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4
+      with:
+        pattern: planned-*
+        path: results
+    - name: Collect all readable scenes and their real approval state
+      run: "python - <<'PY'\nimport json\nfrom pathlib import Path\nsource=Path('results');out=Path('reading');out.mkdir(exist_ok=True)\n\
+        scenes={}\nfor phase in ['write','check','patch']:\n for p in source.glob('planned-'+phase+'-*/scene.json'):\n  s=json.loads(p.read_text());scenes[s['scene_id']]=s\n\
+        (out/'STORY-DRAFT.txt').write_text('\\n\\n* * *\\n\\n'.join(scenes[k]['prose'] for k in sorted(scenes))+'\\n')\nreport=source/'planned-publish/report.json'\n\
+        if report.exists():(out/'report.json').write_text(report.read_text())\nelse:(out/'report.json').write_text(json.dumps({'pass':False,'status':'incomplete','saved_scenes':len(scenes)}))\n\
+        PY"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: parallel-readable-story
+        path: reading/
+        retention-days: 30
+        overwrite: true

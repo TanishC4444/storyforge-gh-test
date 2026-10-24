@@ -22,7 +22,7 @@ def configuration(req):
 def transient(error):
     if getattr(error,'daily',False):return False
     text=str(error)
-    return any(code in text for code in ['HTTP 408','HTTP 429','HTTP 500','HTTP 502','HTTP 503','HTTP 504','connection failed or timed out','MAX_TOKENS'])
+    return any(code in text for code in ['HTTP 408','HTTP 429','HTTP 500','HTTP 502','HTTP 503','HTTP 504','connection failed or timed out','Provider request attempt budget exhausted','MAX_TOKENS'])
 
 
 def wait_to_retry(errors,folder,role,round_number,config):

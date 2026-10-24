@@ -46,7 +46,7 @@ def build():
     r['scene_designs'][2]['participants']=['c02','c05','c06']
     r['scene_designs'][3]['participants']=['c01','c02','c03','c07','c08']
     r['quality_contract']+=['Clearly distinguish story order from event chronology. Preserve present resource and lifecycle state across flashbacks.','No POV leakage: a reader-visible flashback grants no new knowledge to absent characters.']
-    write('chronology',r)
+    write('chronology',r,fresh_on_failure=True)
 
     r=configure(ensemble,'ensemble','book',750,4)
     r['quality_contract'].append('All sixteen characters retain stable identities and independent goals; only established participants act. Not every character needs dialogue in every scene.')
