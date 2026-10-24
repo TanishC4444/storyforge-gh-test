@@ -86,6 +86,12 @@ jobs:
         python -m unittest discover -s tests -p test_preflight.py -q
 
         '
+    - name: Install Gemini RAG encoder when requested
+      env:
+        STORY_REQUEST: ${{ inputs.request_file }}
+      run: "python - <<'PY'\nimport json, os, subprocess, sys\nfrom pathlib import Path\nrequest=json.loads(Path('examples',os.environ['STORY_REQUEST']+'.json').read_text())\n\
+        if request.get('retrieval_mode')=='hybrid' and not request.get('execution_policy',{}).get('resume_seed'):\n    subprocess.run([sys.executable,'-m','pip','install','-e','.[rag]'],check=True)\n\
+        PY\n"
     - name: Execute Prepare request and literary retrieval
       id: task
       env: &id006
@@ -97,7 +103,8 @@ jobs:
 
         python -m storyforge.dag prepare --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
 
-        '
+
+        python -m scripts.verify_gemini_rag --if-hybrid'
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact
