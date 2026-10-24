@@ -13,6 +13,29 @@ from storyforge.contracts import ContractError
 
 
 class FreshAndParallelTests(unittest.TestCase):
+    def test_parallel_review_through_real_executor_accepts_canonical_list_transport(self):
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d);bundle=pp.prepare('hard-chronology',p/'prepared');bundle=pp.outline(bundle,p/'outline','fixture')
+            sid=bundle['plan']['scenes'][0]['id'];scene={'scene_id':sid,'prose':'Mara waited at the quay.','memory':{'memories':[]}}
+            raw={'pass':True,'checks':{k:{'verdict':'pass','evidence_ids':[sid+':p001'],'reason':'Supported by this source.'} for k in pp.CHECKS},'issues':[]}
+            diagnostic={'finish_reason':'stop','provider':'google','model':'test'}
+            with patch('storyforge.hosted.GoogleHosted.complete',return_value=(json.dumps(raw),diagnostic)):
+                verdict=pp.assess(bundle,{sid:scene},p/'review','worker')
+            self.assertTrue(verdict['pass']);self.assertEqual(set(verdict['checks']),set(pp.CHECKS))
+    def test_parallel_fresh_run_preserves_all_four_drafts_without_inference(self):
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d);bundle=pp.prepare('hard-chronology',p/'prepared');bundle=pp.outline(bundle,p/'outline','fixture')
+            save(p/'old/planned-lock/bundle.json',bundle)
+            texts={}
+            for c in bundle['plan']['scenes']:
+                scene=pp.write(bundle,c['id'],p/'old'/('planned-write-'+c['id']),'fixture');texts[c['id']]=scene['prose']
+            restored=pp.prepare('hard-chronology',p/'new',p/'old')
+            with patch('storyforge.planned_parallel.call',side_effect=AssertionError('No repeated inference')):
+                restored=pp.outline(restored,p/'new-outline','worker')
+                for c in restored['plan']['scenes']:
+                    pp.refine(restored,c['id'],p/'descriptions'/c['id'],'worker')
+                    scene=pp.write(restored,c['id'],p/'new-drafts'/c['id'],'worker')
+                    self.assertEqual(scene['prose'],texts[c['id']]);self.assertEqual(scene['status'],'unreviewed')
     def test_existing_cast_alias_is_normalized_without_overwriting_profile(self):
         req={'characters':[{'id':'c05','name':'Nadi Vale','goal':'Immutable goal.'}]}
         proposal={'new_characters':[{'id':'c05','name':'Nadi Vale','goal':'Wrong replacement goal.'}]}
