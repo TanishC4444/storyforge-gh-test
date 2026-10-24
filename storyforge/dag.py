@@ -170,6 +170,8 @@ def stage(task, source, out, index=0, character=None, request_file='silent-bell-
                 receipts=state.get('draft_continuity_receipts',[])
                 contracts.require(any(r['scene']==previous['id'] and r.get('memory_verified') and r['source_sha256']==hashlib.sha256(previous['prose'].encode()).hexdigest() for r in receipts),'Previous scene has no verified memory handoff. Preserve its draft and resolve memory verification before writing the next scene; do not reset to initial facts.')
         old=state['plan']['scenes'][index]
+        if str(index) in state.get('fresh_drafts',{}):
+            save(out/'scene-design.json',old);save(out/'snapshot.json',state);output('characters',old['participants']);return state
         if req.get('performance',{}).get('single_editorial_pass'):
             save(out/'scene-design.json',old);save(out/'snapshot.json',state);output('characters',old['participants']);event('design','Using approved scene card; writer reconciles with latest accepted canon');return state
         if index==0 and state.get('recovery'):

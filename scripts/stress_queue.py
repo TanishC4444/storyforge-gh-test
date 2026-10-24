@@ -103,6 +103,7 @@ class Queue:
         inputs={'backend':'live','profile':'fast','request_file':case['request_file'],'scene_limit':str(case['scenes']),'resume_run':str(resume) if resume else '','checkpoint_artifact':'universe-canon','queue_tag':tag}
         if case.get('saved_draft_run'):inputs['saved_draft_run']=case['saved_draft_run']
         if case.get('recovery_probe'):inputs['recovery_probe']='true'
+        if case.get('fresh_run'):inputs['fresh_run']=str(case['fresh_run'])
         dispatch_error=None
         try:self.api.api(f'actions/workflows/{PIPELINE}/dispatches','POST',{'ref':self.ref,'inputs':inputs})
         except (urllib.error.URLError,TimeoutError) as exc:
@@ -176,13 +177,17 @@ class Queue:
         except (ValueError,urllib.error.URLError,TimeoutError) as exc:
             row['recovery']={'attempted':False,'reason':type(exc).__name__+': '+str(exc)};return row
         row['recovery']={'attempted':True,'plan':value};self.rows.append(row);self.save();self.rows.pop()
-        self.active=run['id'];self.save();apply(self.api,out)
-        # The rerun POST is asynchronous: do not mistake the previous completed
-        # attempt for the new one and dispatch another story concurrently.
-        for _ in range(12):
-            self.sleep(10);latest=self.api.api(f'actions/runs/{run["id"]}')
-            if latest.get('run_attempt',1)>value['run_attempt']:break
-        else:raise RuntimeError('Recovery dispatch unresolved; refusing to overlap another run')
+        if case.get('fresh_on_failure'):
+            tag=self.tag;self.tag+='-fresh'
+            try:latest=self.dispatch({**case,'fresh_run':run['id']},None)
+            finally:self.tag=tag
+        else:
+            self.active=run['id'];self.save();apply(self.api,out)
+            # Do not mistake the previous completed attempt for the new one.
+            for _ in range(12):
+                self.sleep(10);latest=self.api.api(f'actions/runs/{run["id"]}')
+                if latest.get('run_attempt',1)>value['run_attempt']:break
+            else:raise RuntimeError('Recovery dispatch unresolved; refusing to overlap another run')
         latest=self.wait(latest,case.get('retry_timeout_minutes',self.suite.get('retry_timeout_minutes',20)))
         # Download into a fresh attempt directory. Old audits must not masquerade
         # as the new verdict if a download or the results job is unavailable.

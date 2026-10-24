@@ -13,7 +13,8 @@
       "words_per_scene": 450,
       "scenes": 4,
       "cast": 8,
-      "resume_case": null
+      "resume_case": null,
+      "fresh_on_failure": true
     },
     {
       "id": "ensemble",

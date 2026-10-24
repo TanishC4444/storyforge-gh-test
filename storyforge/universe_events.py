@@ -24,6 +24,15 @@ def validate_config(req):
     require(isinstance(f['protected_characters'],list) and all(isinstance(cid,str) for cid in f['protected_characters']) and set(f['protected_characters'])<=ids,'Unknown protected character')
 
 
+def normalize_existing_cast(req,scene):
+    """Lossless normalization: an exact existing ID/name is not a new identity."""
+    value=copy.deepcopy(scene);known={c['id']:c['name'].casefold() for c in req['characters']}
+    additions=value.get('new_characters',[])
+    if isinstance(additions,list):
+        value['new_characters']=[c for c in additions if not (isinstance(c,dict) and isinstance(c.get('name'),str) and known.get(c.get('id'))==c['name'].casefold())]
+    return value
+
+
 def extended_request(req,scene):
     f=freedom(req);v=copy.deepcopy(req);additions=scene.get('new_characters',[])
     require(isinstance(additions,list),'New characters must be a list')

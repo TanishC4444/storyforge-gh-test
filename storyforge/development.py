@@ -105,6 +105,8 @@ def validate_scene(scene,req,index,dead=None):
     expected=f'ch{index//req["scenes_per_chapter"]+1:02}-sc{index%req["scenes_per_chapter"]+1:02}'
     from .universe_events import extended_request
     contracts.require(isinstance(scene,dict),'Scene must be an object')
+    from .universe_events import normalize_existing_cast
+    scene=normalize_existing_cast(req,scene)
     expanded=extended_request(req,scene)
     ids={c['id'] for c in expanded['characters']}
     contracts.require(isinstance(scene,dict) and scene.get('id')==expected,'Scene design must keep scene ID')
