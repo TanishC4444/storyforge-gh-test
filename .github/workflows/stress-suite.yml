@@ -1,0 +1,47 @@
+name: Sequential story stress suite
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: write
+concurrency:
+  group: sequential-story-stress-suite
+  cancel-in-progress: false
+jobs:
+  queue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate all requests and sequential dependencies
+        run: python -m scripts.stress_queue --validate-only
+      - name: Run one full pipeline at a time and collect audits and drafts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python -m scripts.stress_queue
+      - name: Preserve comparison report and all collected story output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stress-suite-results
+          path: stress-results/
+          retention-days: 30
+      - name: Cancel the active child if this queue is cancelled
+        if: cancelled()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          from scripts.stress_queue import GitHub
+          path=Path('stress-results/active.json')
+          active=json.loads(path.read_text()).get('run_id') if path.exists() else None
+          if active:
+              api=GitHub(os.environ['GITHUB_REPOSITORY'],os.environ['GH_TOKEN'])
+              run=api.api('actions/runs/'+str(active))
+              if run['status']!='completed':api.api(f'actions/runs/{active}/cancel','POST')
+          PY

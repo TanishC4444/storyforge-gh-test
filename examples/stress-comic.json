@@ -1,0 +1,814 @@
+{
+  "min_words_ratio": 0.8,
+  "max_words_ratio": 1.3,
+  "auto_approve_plan": true,
+  "max_repairs": 1,
+  "max_stage_retries": 0,
+  "runner_repo": "storyforge-inference-runner",
+  "chapters": 2,
+  "scenes_per_chapter": 1,
+  "words_per_scene": 300,
+  "context_chars": 64000,
+  "n_ctx": 16384,
+  "execution_policy": {
+    "experimental": false,
+    "literary_quality": true,
+    "continue_with_warnings": false,
+    "cpu_models": {
+      "humanizer": "qwen7b",
+      "repair": "qwen7b",
+      "story_quality": "qwen7b",
+      "rhetoric_quality": "qwen7b",
+      "memory": "qwen7b",
+      "memory_quality": "qwen7b",
+      "chapter_quality": "qwen7b",
+      "director": "qwen7b",
+      "scene_designer": "qwen7b",
+      "character": "qwen7b",
+      "writer": "qwen7b",
+      "writer_beat": "qwen7b"
+    },
+    "editorial_disagreement": "one_strict_check",
+    "gemini_batches": true,
+    "total_call_seconds": {
+      "humanizer": 180,
+      "repair": 180,
+      "story_quality": 120,
+      "rhetoric_quality": 120,
+      "memory": 180,
+      "memory_quality": 120,
+      "chapter_quality": 120,
+      "director": 120,
+      "scene_designer": 120,
+      "character": 120,
+      "writer": 180,
+      "writer_beat": 180
+    },
+    "hosted_route_seconds": 40,
+    "hosted_required_roles": [
+      "writer_beat",
+      "writer",
+      "repair",
+      "humanizer",
+      "story_quality",
+      "rhetoric_quality",
+      "memory",
+      "memory_quality",
+      "chapter_quality",
+      "scene_designer",
+      "director",
+      "character"
+    ],
+    "hosted_routes": {
+      "story_quality": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "rhetoric_quality": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "chapter_quality": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "writer": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "writer_beat": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "repair": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "humanizer": [
+        "flash",
+        "flash36",
+        "lite"
+      ],
+      "memory": [
+        "lite"
+      ],
+      "memory_quality": [
+        "lite"
+      ],
+      "director": [
+        "lite"
+      ],
+      "scene_designer": [
+        "lite"
+      ],
+      "character": [
+        "lite"
+      ]
+    },
+    "max_hosted_requests": 3,
+    "hosted_role_seconds": {
+      "writer": 90,
+      "writer_beat": 90,
+      "repair": 60,
+      "humanizer": 90,
+      "story_quality": 60,
+      "rhetoric_quality": 60,
+      "chapter_quality": 60
+    },
+    "provider_outage_recovery": {
+      "max_rounds": 3,
+      "delay_seconds": 45,
+      "buffer_seconds": 360,
+      "extra_requests": 6
+    }
+  },
+  "performance": {
+    "compact_packets": true,
+    "application_prompt_binding": true,
+    "hosted_failover": false,
+    "batch_development": true,
+    "canon_index": true,
+    "inherit_provider_budget": false,
+    "application_plan_binding": true,
+    "development_batch_size": 6,
+    "api_batch_probes": false,
+    "working_memory_chars": 3500,
+    "combine_direction": true,
+    "classic_expansion": true,
+    "validate_scene_prose": true,
+    "batched_prose": true,
+    "batched_repairs": true,
+    "living_universe": true,
+    "readable_editorial": true,
+    "summary_reviews": false,
+    "memory_pair_batches": true,
+    "empowered_editors": true,
+    "adaptive_batches": true,
+    "verified_draft_continuity": true,
+    "living_bounded": true,
+    "pipelined_living": true,
+    "strict_draft_handoff": true
+  },
+  "api_roles": {
+    "writer_beat": "flash",
+    "writer": "flash",
+    "repair": "flash36",
+    "humanizer": "flash36",
+    "story_quality": "flash36",
+    "rhetoric_quality": "flash36",
+    "memory": "lite",
+    "memory_quality": "lite",
+    "chapter_quality": "flash36",
+    "scene_designer": "lite",
+    "director": "lite",
+    "character": "lite"
+  },
+  "project_id": "stress-comic",
+  "title": "The Harbor Test: Hopeful science-fiction adventure",
+  "brief_version": 2,
+  "medium": "comic_script",
+  "profile": "fast",
+  "retrieval_mode": "keyword",
+  "retrieval_query": "dramatic irony competing obligations planted clues reversal consequences",
+  "references": [],
+  "reference_policy": "Optional craft guidance only; never import another work’s facts, genre, characters or style.",
+  "genre": "Hopeful science-fiction adventure",
+  "reader_experience": "Distinct voices, escalating choices and a surprising but retrospectively supported turn.",
+  "pov": "Present-tense filmable or performable action for scripts; close third-person past tense for prose. Limit private knowledge to actual witnesses.",
+  "tone_mood": "Hopeful science-fiction adventure with specific human stakes and varied emotional pacing.",
+  "sensory_detail": "Select details appropriate to the medium; audio establishes action through sound, comics through drawable panels.",
+  "ending_tendency": "Resolve this episode’s main choice with an earned reversal and a lasting consequence; leave one meaningful unresolved thread.",
+  "premise": "A young courier must carry a fragile seed bank across a floating city while two factions dispute who gets the first harvest. Develop 2 connected scenes. Invent the decisive discovery and climax yourself; no exact solution, culprit or twist is prescribed. Plant observable evidence before any revelation and make the climax change a relationship and consume a real advantage.",
+  "length_policy": {
+    "scene_words": "strict",
+    "chapter_words": "target",
+    "allow_compression": false,
+    "policy": "2 scenes, target 300 words each; strict allowed range 240–390. Script cues count toward words; no padding."
+  },
+  "keywords": [
+    {
+      "term": "responsibility for distant harm",
+      "kind": "theme",
+      "priority": 3
+    },
+    {
+      "term": "survival versus complicity",
+      "kind": "tension",
+      "priority": 3
+    },
+    {
+      "term": "trust between unequal prisoners",
+      "kind": "relationship",
+      "priority": 3
+    },
+    {
+      "term": "improvisation with persistent costs",
+      "kind": "technique",
+      "priority": 3
+    }
+  ],
+  "adaptation": {
+    "strength": 0,
+    "mode": "structural_echo",
+    "max_active_sources_per_scene": 0,
+    "relationship": "Entirely original test world",
+    "preserve_user_choices": true,
+    "preserve": [
+      "Author rules and private knowledge"
+    ],
+    "divergence": "Invent solutions and climax; do not import film or epic canon."
+  },
+  "style": {
+    "narrator": "Follow the selected medium; do not add internal narration to scripts.",
+    "register": "Hopeful science-fiction adventure; original language, economical exposition, no generic moral.",
+    "wording": [
+      "No borrowed quotations, catchphrases or stock epic imagery.",
+      "Do not repeat earlier negotiations, discoveries or explanations."
+    ],
+    "interiority": "Show conflicting obligations through choices; prose may access only its focal viewpoint.",
+    "dialogue": "Distinct motives and speech patterns; use subtext and changing leverage.",
+    "figurative_language": {
+      "density": "sparse",
+      "devices": [
+        "concrete metaphor"
+      ],
+      "image_domains": [
+        "harbor work",
+        "weather",
+        "household objects"
+      ]
+    }
+  },
+  "characters": [
+    {
+      "id": "c01",
+      "name": "Mara Venn",
+      "goal": "Keep the ferry open while refusing to choose which household is abandoned.",
+      "value": "Reciprocity",
+      "fear": "Pursuing this goal at the expense of someone dependent on the ferryman.",
+      "habitual_strategy": "Ask for proof",
+      "limits": "No unwitnessed secrets, unexplained travel or replacement of spent resources.",
+      "voice": "short practical questions; concrete vocabulary from work as a ferryman.",
+      "arc": {
+        "starting_belief": "Duty can be discharged without personal loss.",
+        "old_strategy": "Ask for proof",
+        "pressure_test": "Keep the ferry open while refusing to choose which household is abandoned.",
+        "costly_choice": "Choose whom to trust and spend a real advantage.",
+        "possible_change": "Accept responsibility through action."
+      },
+      "contradiction": {
+        "tension": "Public duty conflicts with private loyalty."
+      },
+      "emotional_behavior": {
+        "pressure": "Speech and action diverge under pressure."
+      },
+      "voice_design": {
+        "register": "short practical questions; concrete vocabulary from work as a ferryman.",
+        "examples": [
+          "Who crosses first?",
+          "Count it before you promise it."
+        ]
+      },
+      "source_status": "Original author-defined test character"
+    },
+    {
+      "id": "c02",
+      "name": "Ivo Venn",
+      "goal": "Establish whether a distress call is authentic without revealing a family debt.",
+      "value": "Accuracy",
+      "fear": "Pursuing this goal at the expense of someone dependent on the radio operator.",
+      "habitual_strategy": "Trade a limited concession",
+      "limits": "No unwitnessed secrets, unexplained travel or replacement of spent resources.",
+      "voice": "careful pauses and literal answers; concrete vocabulary from work as a radio operator.",
+      "arc": {
+        "starting_belief": "Duty can be discharged without personal loss.",
+        "old_strategy": "Trade a limited concession",
+        "pressure_test": "Establish whether a distress call is authentic without revealing a family debt.",
+        "costly_choice": "Choose whom to trust and spend a real advantage.",
+        "possible_change": "Accept responsibility through action."
+      },
+      "contradiction": {
+        "tension": "Public duty conflicts with private loyalty."
+      },
+      "emotional_behavior": {
+        "pressure": "Speech and action diverge under pressure."
+      },
+      "voice_design": {
+        "register": "careful pauses and literal answers; concrete vocabulary from work as a radio operator.",
+        "examples": [
+          "I heard the words. I need their meaning.",
+          "Give me a moment before I answer."
+        ]
+      },
+      "source_status": "Original author-defined test character"
+    },
+    {
+      "id": "c03",
+      "name": "Sera Holt",
+      "goal": "Expose a falsified record while protecting the person who gave access.",
+      "value": "Institutional accountability",
+      "fear": "Pursuing this goal at the expense of someone dependent on the city archivist.",
+      "habitual_strategy": "Challenge an assumption",
+      "limits": "No unwitnessed secrets, unexplained travel or replacement of spent resources.",
+      "voice": "formal corrections with dry humor; concrete vocabulary from work as a city archivist.",
+      "arc": {
+        "starting_belief": "Duty can be discharged without personal loss.",
+        "old_strategy": "Challenge an assumption",
+        "pressure_test": "Expose a falsified record while protecting the person who gave access.",
+        "costly_choice": "Choose whom to trust and spend a real advantage.",
+        "possible_change": "Accept responsibility through action."
+      },
+      "contradiction": {
+        "tension": "Public duty conflicts with private loyalty."
+      },
+      "emotional_behavior": {
+        "pressure": "Speech and action diverge under pressure."
+      },
+      "voice_design": {
+        "register": "formal corrections with dry humor; concrete vocabulary from work as a city archivist.",
+        "examples": [
+          "That is a claim, not a record.",
+          "An impressive signature on a very empty page."
+        ]
+      },
+      "source_status": "Original author-defined test character"
+    },
+    {
+      "id": "c04",
+      "name": "Tomas Reed",
+      "goal": "Get patients across the water before medical supplies run out.",
+      "value": "Care for vulnerable people",
+      "fear": "Pursuing this goal at the expense of someone dependent on the district physician.",
+      "habitual_strategy": "Withhold a personal cost",
+      "limits": "No unwitnessed secrets, unexplained travel or replacement of spent resources.",
+      "voice": "warm plain speech that hardens under pressure; concrete vocabulary from work as a district physician.",
+      "arc": {
+        "starting_belief": "Duty can be discharged without personal loss.",
+        "old_strategy": "Withhold a personal cost",
+        "pressure_test": "Get patients across the water before medical supplies run out.",
+        "costly_choice": "Choose whom to trust and spend a real advantage.",
+        "possible_change": "Accept responsibility through action."
+      },
+      "contradiction": {
+        "tension": "Public duty conflicts with private loyalty."
+      },
+      "emotional_behavior": {
+        "pressure": "Speech and action diverge under pressure."
+      },
+      "voice_design": {
+        "register": "warm plain speech that hardens under pressure; concrete vocabulary from work as a district physician.",
+        "examples": [
+          "Sit down. Your hands are shaking.",
+          "You can ask me. You cannot volunteer my family."
+        ]
+      },
+      "source_status": "Original author-defined test character"
+    },
+    {
+      "id": "c05",
+      "name": "Nadi Vale",
+      "goal": "Secure an honest power ration without making the poorest district pay first.",
+      "value": "Fair allocation",
+      "fear": "Pursuing this goal at the expense of someone dependent on the power engineer.",
+      "habitual_strategy": "Ask for proof",
+      "limits": "No unwitnessed secrets, unexplained travel or replacement of spent resources.",
+      "voice": "short practical questions; concrete vocabulary from work as a power engineer.",
+      "arc": {
+        "starting_belief": "Duty can be discharged without personal loss.",
+        "old_strategy": "Ask for proof",
+        "pressure_test": "Secure an honest power ration without making the poorest district pay first.",
+        "costly_choice": "Choose whom to trust and spend a real advantage.",
+        "possible_change": "Accept responsibility through action."
+      },
+      "contradiction": {
+        "tension": "Public duty conflicts with private loyalty."
+      },
+      "emotional_behavior": {
+        "pressure": "Speech and action diverge under pressure."
+      },
+      "voice_design": {
+        "register": "short practical questions; concrete vocabulary from work as a power engineer.",
+        "examples": [
+          "Who crosses first?",
+          "Count it before you promise it."
+        ]
+      },
+      "source_status": "Original author-defined test character"
+    },
+    {
+      "id": "c06",
+      "name": "Oren Pike",
+      "goal": "Preserve crew loyalty while being ordered to deny passage.",
+      "value": "Loyalty to workers",
+      "fear": "Pursuing this goal at the expense of someone dependent on the harbor captain.",
+      "habitual_strategy": "Trade a limited concession",
+      "limits": "No unwitnessed secrets, unexplained travel or replacement of spent resources.",
+      "voice": "careful pauses and literal answers; concrete vocabulary from work as a harbor captain.",
+      "arc": {
+        "starting_belief": "Duty can be discharged without personal loss.",
+        "old_strategy": "Trade a limited concession",
+        "pressure_test": "Preserve crew loyalty while being ordered to deny passage.",
+        "costly_choice": "Choose whom to trust and spend a real advantage.",
+        "possible_change": "Accept responsibility through action."
+      },
+      "contradiction": {
+        "tension": "Public duty conflicts with private loyalty."
+      },
+      "emotional_behavior": {
+        "pressure": "Speech and action diverge under pressure."
+      },
+      "voice_design": {
+        "register": "careful pauses and literal answers; concrete vocabulary from work as a harbor captain.",
+        "examples": [
+          "I heard the words. I need their meaning.",
+          "Give me a moment before I answer."
+        ]
+      },
+      "source_status": "Original author-defined test character"
+    }
+  ],
+  "world_rules": [
+    "Only this brief and accepted on-page events are canon.",
+    "Private beliefs and clues cannot leak without an enacted disclosure.",
+    "Mara and Ivo remain siblings, with stable names and identities.",
+    "Every token or radio transmission is counted at its actual expenditure.",
+    "Physical travel, entrances and exits need an explicit cause and interval.",
+    "No retroactive backup power, extra token, secret tunnel or unearned rescue.",
+    "Plans, suspicions and hypotheses are not completed history.",
+    "Any extraordinary mechanism must be established with limits before solving a conflict.",
+    "Different medium presentation never changes underlying facts.",
+    "Costs, injuries, custody and consequences persist.",
+    "A twist needs an observable setup before payoff; no new retrospective facts to explain it.",
+    "Only the current scene participants may act unless a new entrance is established."
+  ],
+  "initial_facts": [
+    {
+      "kind": "event",
+      "text": "Mara Venn is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "life:c01",
+      "subject": "c01",
+      "life_state": "alive"
+    },
+    {
+      "kind": "event",
+      "text": "Mara Venn begins at the Ferry quay.",
+      "known_by": [
+        "c01"
+      ],
+      "fact_key": "location:c01"
+    },
+    {
+      "kind": "belief",
+      "text": "Mara Venn privately fears failing a dependent and has not confessed this fear.",
+      "known_by": [
+        "c01"
+      ],
+      "holder": "c01",
+      "fact_key": "belief:c01"
+    },
+    {
+      "kind": "event",
+      "text": "Mara Venn knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+      "known_by": [
+        "c01"
+      ],
+      "fact_key": "promise:c01"
+    },
+    {
+      "kind": "event",
+      "text": "Ivo Venn is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "life:c02",
+      "subject": "c02",
+      "life_state": "alive"
+    },
+    {
+      "kind": "event",
+      "text": "Ivo Venn begins at the Signal tower.",
+      "known_by": [
+        "c02"
+      ],
+      "fact_key": "location:c02"
+    },
+    {
+      "kind": "belief",
+      "text": "Ivo Venn privately fears failing a dependent and has not confessed this fear.",
+      "known_by": [
+        "c02"
+      ],
+      "holder": "c02",
+      "fact_key": "belief:c02"
+    },
+    {
+      "kind": "event",
+      "text": "Ivo Venn knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+      "known_by": [
+        "c02"
+      ],
+      "fact_key": "promise:c02"
+    },
+    {
+      "kind": "event",
+      "text": "Sera Holt is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "life:c03",
+      "subject": "c03",
+      "life_state": "alive"
+    },
+    {
+      "kind": "event",
+      "text": "Sera Holt begins at the Public archive.",
+      "known_by": [
+        "c03"
+      ],
+      "fact_key": "location:c03"
+    },
+    {
+      "kind": "belief",
+      "text": "Sera Holt privately fears failing a dependent and has not confessed this fear.",
+      "known_by": [
+        "c03"
+      ],
+      "holder": "c03",
+      "fact_key": "belief:c03"
+    },
+    {
+      "kind": "event",
+      "text": "Sera Holt knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+      "known_by": [
+        "c03"
+      ],
+      "fact_key": "promise:c03"
+    },
+    {
+      "kind": "event",
+      "text": "Tomas Reed is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "life:c04",
+      "subject": "c04",
+      "life_state": "alive"
+    },
+    {
+      "kind": "event",
+      "text": "Tomas Reed begins at the Council chamber.",
+      "known_by": [
+        "c04"
+      ],
+      "fact_key": "location:c04"
+    },
+    {
+      "kind": "belief",
+      "text": "Tomas Reed privately fears failing a dependent and has not confessed this fear.",
+      "known_by": [
+        "c04"
+      ],
+      "holder": "c04",
+      "fact_key": "belief:c04"
+    },
+    {
+      "kind": "event",
+      "text": "Tomas Reed knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+      "known_by": [
+        "c04"
+      ],
+      "fact_key": "promise:c04"
+    },
+    {
+      "kind": "event",
+      "text": "Nadi Vale is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "life:c05",
+      "subject": "c05",
+      "life_state": "alive"
+    },
+    {
+      "kind": "event",
+      "text": "Nadi Vale begins at the Ferry quay.",
+      "known_by": [
+        "c05"
+      ],
+      "fact_key": "location:c05"
+    },
+    {
+      "kind": "belief",
+      "text": "Nadi Vale privately fears failing a dependent and has not confessed this fear.",
+      "known_by": [
+        "c05"
+      ],
+      "holder": "c05",
+      "fact_key": "belief:c05"
+    },
+    {
+      "kind": "event",
+      "text": "Nadi Vale knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+      "known_by": [
+        "c05"
+      ],
+      "fact_key": "promise:c05"
+    },
+    {
+      "kind": "event",
+      "text": "Oren Pike is alive at the opening.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "life:c06",
+      "subject": "c06",
+      "life_state": "alive"
+    },
+    {
+      "kind": "event",
+      "text": "Oren Pike begins at the Signal tower.",
+      "known_by": [
+        "c06"
+      ],
+      "fact_key": "location:c06"
+    },
+    {
+      "kind": "belief",
+      "text": "Oren Pike privately fears failing a dependent and has not confessed this fear.",
+      "known_by": [
+        "c06"
+      ],
+      "holder": "c06",
+      "fact_key": "belief:c06"
+    },
+    {
+      "kind": "event",
+      "text": "Oren Pike knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+      "known_by": [
+        "c06"
+      ],
+      "fact_key": "promise:c06"
+    },
+    {
+      "kind": "resource",
+      "text": "Mara holds exactly two single-use ferry passage tokens. Each token permits one ferry crossing; spent tokens cannot return.",
+      "known_by": [
+        "c01",
+        "c02"
+      ],
+      "fact_key": "passage-tokens"
+    },
+    {
+      "kind": "resource",
+      "text": "Ivo holds one portable radio with power for two outbound transmissions; receiving uses no counted transmission.",
+      "known_by": [
+        "c02"
+      ],
+      "fact_key": "radio-charge"
+    },
+    {
+      "kind": "event",
+      "text": "Mara and Ivo are siblings; neither has told the other their private household promise.",
+      "known_by": [
+        "c01",
+        "c02"
+      ],
+      "fact_key": "family:venn"
+    },
+    {
+      "kind": "event",
+      "text": "Sera alone knows that one archive ledger has an erased date; she has not identified who erased it or why.",
+      "known_by": [
+        "c03"
+      ],
+      "fact_key": "erased-date"
+    },
+    {
+      "kind": "event",
+      "text": "Travel among the four locations requires visible departure and arrival or an explicit interval of at least ten minutes.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "travel"
+    },
+    {
+      "kind": "event",
+      "text": "The quay connects the districts; the tower relays calls; the archive holds records; the council chamber hosts public decisions.",
+      "known_by": [
+        "public"
+      ],
+      "fact_key": "geography"
+    }
+  ],
+  "world_design": {
+    "setting": "A harbor city with four districts linked by a ferry quay, signal tower, archive and council chamber.",
+    "technology": "Genre-appropriate tools constrained by the authored resource limits.",
+    "institutions": "Harbor authority, district council, archive and household obligations.",
+    "physical_systems": "A limited ferry service and radio; travel takes time.",
+    "deadlines": "The public decision occurs by the next dawn; establish changes to the deadline explicitly."
+  },
+  "plot_design": {
+    "central_question": "Who bears the cost when a city keeps one promise by breaking another?",
+    "causal_dependencies": [
+      "Later scenes inherit actual knowledge, resources and changed relationships.",
+      "An invented clue must be enacted before the climax uses it."
+    ],
+    "subplots": [
+      {
+        "id": "venn",
+        "owner": "c02",
+        "question": "Can the siblings disagree without making each other expendable?",
+        "intersection": "The public choice forces a private concession.",
+        "removal_cost": "The decision loses its human stakes."
+      }
+    ],
+    "alternatives_and_costs": [
+      "Spend a scarce advantage to disclose evidence, or protect a dependent while conceding leverage."
+    ]
+  },
+  "scene_designs": [
+    {
+      "id": "ch01-sc01",
+      "pov": "c01",
+      "participants": [
+        "c01",
+        "c02",
+        "c03",
+        "c04"
+      ],
+      "location": "Ferry quay",
+      "setting": "Ferry quay; establish who arrived and what they carry.",
+      "time": "Episode scene 1; explicitly bridge the preceding exit state and travel time.",
+      "dramatic_function": "Establish conflicting aims, a scarce advantage and an observable setup for a later reversal.",
+      "development": "Invent specific action and resistance from current memory, including independent motives for supporting characters.",
+      "restrictions": "Do not decide the mystery by unexplained knowledge or restore a spent resource.",
+      "choice_and_consequence": "Establish conflicting aims, a scarce advantage and an observable setup for a later reversal. The exact invention and outcome are left to the model."
+    },
+    {
+      "id": "ch02-sc01",
+      "pov": "c01",
+      "participants": [
+        "c01",
+        "c05",
+        "c06",
+        "c02"
+      ],
+      "location": "Signal tower",
+      "setting": "Signal tower; establish who arrived and what they carry.",
+      "time": "Episode scene 2; explicitly bridge the preceding exit state and travel time.",
+      "dramatic_function": "Invent a supported climax that changes the initial interpretation and resolves a concrete choice at a lasting cost.",
+      "development": "Invent specific action and resistance from current memory, including independent motives for supporting characters.",
+      "restrictions": "Do not decide the mystery by unexplained knowledge or restore a spent resource.",
+      "choice_and_consequence": "Invent a supported climax that changes the initial interpretation and resolves a concrete choice at a lasting cost. The exact invention and outcome are left to the model."
+    }
+  ],
+  "chapter_contract": {
+    "arc": "Escalation through distinct choices and a climax with earned surprise.",
+    "continuity": "Full memory, private knowledge, resource counts, travel and relationships remain authoritative.",
+    "ending": "Pay off an enacted setup, change leverage and retain a consequence."
+  },
+  "chapter_arcs": [
+    "Establish conflicting aims, a scarce advantage and an observable setup for a later reversal.",
+    "Invent a supported climax that changes the initial interpretation and resolves a concrete choice at a lasting cost."
+  ],
+  "quality_contract": [
+    "Respect the selected medium, its headings, tense, cues and representable action.",
+    "Distinct voices and conflicting aims must cause choices, not inventory exposition.",
+    "Connect all scenes through full authoritative memory, with no repetition or reset.",
+    "Check exact custody, counted resources, character knowledge, chronology and geography.",
+    "Final climax must reinterpret an earlier enacted clue or choice; surprise cannot depend on a retroactively invented fact.",
+    "The original outcome is not prescribed; assess source-supported originality and consequences rather than conformity to a hidden plot."
+  ],
+  "must_avoid": [
+    "Imported Marvel, Homeric or other external canon.",
+    "Recapping an earlier negotiation instead of progressing.",
+    "Instant offstage construction, unexplained reserves, or leaks of private information.",
+    "Adding prose narration to a script or headings to prose."
+  ],
+  "creative_freedom": {
+    "enabled": true,
+    "intensity": 0.8,
+    "new_characters": true,
+    "character_deaths": true,
+    "protected_characters": [
+      "c01"
+    ],
+    "max_new_per_scene": 1,
+    "cast_limit": 8,
+    "flexible_pov": true
+  },
+  "universe_id": "stress-comic",
+  "execution_intent": {
+    "authorized": "User requested sequential live stress tests across formats, genres, lengths and larger worlds.",
+    "workflow": "Full separate-runner pipeline; strict literary and factual gates; Gemini waits and no automatic local downgrade."
+  }
+}

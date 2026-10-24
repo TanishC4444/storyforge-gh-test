@@ -40,6 +40,10 @@ name: Living universe / verified-memory pipeline
         - quickstart
         default: universe-canon
         description: Use quickstart only to retry a failed event while retaining its saved random draw
+      queue_tag:
+        type: string
+        default: ''
+        description: Optional correlation ID for a sequential benchmark queue
 permissions:
   contents: read
   actions: read
@@ -3921,3 +3925,4 @@ env:
   STORY_HOSTED_ONLY: 'true'
   STORY_LEAN_LIVING: 'true'
   STORY_LIVING_PIPELINE: 'true'
+run-name: Living | ${{ inputs.request_file }} | ${{ inputs.queue_tag || github.run_number }}

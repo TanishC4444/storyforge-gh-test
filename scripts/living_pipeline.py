@@ -7,6 +7,8 @@ import yaml
 def build():
     graph=json.loads(json.dumps(yaml.safe_load(build_living())));old=graph['jobs'];jobs={k:old[k] for k in ['prepare','quickstart']}
     graph['name']='Living universe / verified-memory pipeline'
+    graph['run-name']='Living | ${{ inputs.request_file }} | ${{ inputs.queue_tag || github.run_number }}'
+    graph['on']['workflow_dispatch']['inputs']['queue_tag']={'type':'string','default':'','description':'Optional correlation ID for a sequential benchmark queue'}
     inputs=graph['on']['workflow_dispatch']['inputs'];inputs['request_file']['default']='living-scale-practice';inputs['scene_limit']['default']='2'
     graph['env']['STORY_LIVING_PIPELINE']='true'
     def add(key,template,title,task,needs,files,index,*,module='living_stages',matrix=None,outputs=(),condition=None):
