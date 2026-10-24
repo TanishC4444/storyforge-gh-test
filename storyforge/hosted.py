@@ -1,6 +1,7 @@
 """Quota-aware Google hosted inference. Secrets never enter packets or diagnostics."""
 from __future__ import annotations
-import fcntl,json,math,os,time,random,uuid,threading,urllib.request,urllib.error,hashlib
+import json,math,os,time,random,uuid,threading,urllib.request,urllib.error,hashlib
+from . import file_lock as fcntl
 from pathlib import Path
 from .storage import save
 

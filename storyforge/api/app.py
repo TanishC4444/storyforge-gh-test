@@ -10,6 +10,7 @@ from __future__ import annotations
 import asyncio
 import copy
 import json
+import os
 import time
 from collections.abc import Iterator
 from typing import Annotated, Any
@@ -33,8 +34,9 @@ PREFIX = '/api/v1'
 
 app = FastAPI(
     title='Storyforge API',
+    docs_url=None,
     version=API_VERSION,
-    description='Start and read Storyforge story runs on GitHub Actions. Authenticate with your own GitHub token, or `demo` for sample data.',
+    description='Unified local studio: writing workflows, revisions, Vultr images/music, production planning, workflow history and outputs. GitHub workflow API accepts a caller token or demo; local studio mutations use the injected X-Storyforge-Token.',
     responses={401: {'model': ErrorBody}, 404: {'model': ErrorBody}, 409: {'model': ErrorBody}, 422: {'model': ErrorBody}, 502: {'model': ErrorBody}},
 )
 
@@ -75,7 +77,7 @@ async def _conflict(_, exc):
 
 @app.exception_handler(ValueError)
 async def _invalid(_, exc):
-    return JSONResponse({'detail': str(exc)}, status_code=422)
+    return JSONResponse({'detail': str(exc),'error':str(exc)}, status_code=422)
 
 
 @app.exception_handler(GitHubError)
@@ -96,6 +98,9 @@ def make_backend(authorization: str | None, config: Settings) -> Backend:
     token = token.strip()
     if scheme.lower() != 'bearer' or not token:
         raise HTTPException(401, 'Send your GitHub token as "Authorization: Bearer <token>"', headers={'WWW-Authenticate': 'Bearer'})
+    if token == 'server':
+        token=os.getenv('STORYFORGE_GITHUB_TOKEN','')
+        if not token:raise HTTPException(401,'Configure the server GitHub token in Connections first')
     if token == 'demo':
         if not config.allow_demo:
             raise HTTPException(401, 'Demo mode is disabled on this server')
@@ -269,3 +274,13 @@ def list_artifacts(run_id: int, api: BackendDep):
 def download_artifact(run_id: int, name: str, api: BackendDep):
     return Response(api.artifact_zip(run_id, name), media_type='application/zip',
                     headers={'Content-Disposition': f'attachment; filename="{name}.zip"'})
+
+
+# The local studio uses the same FastAPI process and existing workflow API.
+from .studio_routes import router as studio_router
+app.include_router(studio_router)
+
+
+@app.exception_handler(FileNotFoundError)
+async def _missing_local(_,exc):
+    return JSONResponse({'detail':'Local output or record not found','error':'Local output or record not found'},status_code=404)

@@ -1,6 +1,7 @@
 """Prompt-free usage accounting. Observed tokens and reservations are distinct."""
 from __future__ import annotations
-import argparse,csv,fcntl,hashlib,json,os,time,uuid
+import argparse,csv,hashlib,json,os,time,uuid
+from . import file_lock as fcntl
 from pathlib import Path
 from .storage import save
 

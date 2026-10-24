@@ -17,7 +17,7 @@ window.fetch = async (...args) => {
   return response;
 };
 
-$('c-api').value = new URLSearchParams(location.search).get('api') || storage.get('local', 'sf.api') || 'http://localhost:8000';
+$('c-api').value = new URLSearchParams(location.search).get('api') || storage.get('local', 'sf.api') || (location.port === '8080' ? 'http://127.0.0.1:8000' : location.origin);
 $('c-token').value = storage.get('session', 'sf.token');
 
 function client() {

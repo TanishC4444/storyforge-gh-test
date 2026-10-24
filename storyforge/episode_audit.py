@@ -10,7 +10,9 @@ from .canon import index
 def audit(source,out,expected):
     source=Path(source);snapshots=[load(p) for p in source.glob('s*_accept/snapshot.json')]
     state=max(snapshots,key=lambda x:len(x.get('accepted',[])),default={});scenes=state.get('accepted',[])
-    target=min(expected,len(state.get('plan',{}).get('scenes',[]))) if state else expected
+    if type(expected) is not int or expected < 1:
+        raise ValueError('Expected scene count must be a positive integer')
+    target=expected
     errors=[];rows=[]
     if len(scenes)!=target:errors.append(f'Expected {target} scenes; found {len(scenes)}')
     for i,scene in enumerate(scenes):

@@ -6,6 +6,7 @@ cached or written to disk.
 from __future__ import annotations
 
 from typing import Any
+import ssl
 
 import httpx
 
@@ -25,11 +26,14 @@ class GitHubClient:
         self.http = httpx.Client(
             base_url=api,
             headers={
-                'Authorization': f'Bearer {token}',
+                **({'Authorization': f'Bearer {token}'} if token else {}),
                 'Accept': 'application/vnd.github+json',
                 'X-GitHub-Api-Version': '2022-11-28',
                 'User-Agent': 'storyforge-api',
             },
+            # Use the OS trust store, including trusted enterprise CAs, while
+            # retaining hostname and certificate verification.
+            verify=ssl.create_default_context(),
             timeout=30.0,
             follow_redirects=True,
             transport=transport,

@@ -23,6 +23,21 @@ Characters share an immutable starting state version and have scoped model input
 
 Actual simultaneous execution depends on available GitHub runners and account concurrency limits. Later scenes are deliberately sequential because their starting facts depend on earlier accepted scenes. Fresh runners reset context; they do not increase a model's context window.
 
+## Unified local studio
+
+Run the entire frontend and backend with FastAPI:
+
+```powershell
+python -m pip install -e ".[api]"
+python -m storyforge.studio
+```
+
+Open http://127.0.0.1:8000 for writing runners, idea/revision loops, Vultr images
+and music, production planning, all-workflow history and output previews. These
+share one project selector and one server. Configure providers in Connections;
+use the Test console or `/docs` to interact with every exposed API operation.
+See [the complete integration guide](docs/UNIFIED_STUDIO.md).
+
 ## HTTP API and frontend playground
 
 `storyforge/api` is a FastAPI layer for starting and reading Sequential, Parallel and Recovery runs with a GitHub token, and `web/` is a static playground frontend deployed to GitHub Pages. See [docs/API.md](docs/API.md).

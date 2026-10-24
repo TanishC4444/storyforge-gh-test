@@ -24,7 +24,7 @@ const write = (kind, key, value) => { try { value ? store(kind)?.setItem(key, va
 
 const params = new URLSearchParams(location.search);
 const state = {
-  apiUrl: params.get('api') || read('local', 'sf.api') || 'http://localhost:8000',
+  apiUrl: params.get('api') || read('local', 'sf.api') || (location.port === '8080' ? 'http://127.0.0.1:8000' : location.origin),
   token: read('session', 'sf.token'),
   client: null,
   modes: [],
@@ -83,6 +83,7 @@ async function connect(token) {
 }
 
 function setupConnect() {
+  $('#use-server')?.addEventListener('click', () => connect('server'));
   $('#api-url').value = state.apiUrl;
   $('#token').value = state.token && state.token !== 'demo' ? state.token : '';
   $('#connect-form').addEventListener('submit', (event) => {
