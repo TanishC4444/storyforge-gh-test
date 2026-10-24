@@ -89,7 +89,7 @@ def retrieve(req):
                 if explicit_weights and h.semantic_rank is None:continue
                 contribution=q.get('weight',1)*(weights['semantic_similarity']*41/(40+h.semantic_rank) if explicit_weights else 1/(40+rank))
                 scores[h.record_id]=scores.get(h.record_id,0)+contribution
-                hits.setdefault(h.record_id,[]).append({'query':q['id'],'channel':'semantic' if explicit_weights else 'hybrid','rank':h.semantic_rank if explicit_weights else rank,'score':h.score,'weighted_contribution':contribution})
+                hits.setdefault(h.record_id,[]).append({'query':q['id'],'channel':'semantic' if explicit_weights else 'hybrid','rank':h.semantic_rank if explicit_weights else rank,'score':h.score,'semantic_rank':h.semantic_rank,'keyword_rank':h.keyword_rank,'weighted_contribution':contribution})
     # Controlled mechanism labels get a traceable boost when all their words match
     # user terms, with a small general morphology/synonym map. No title-specific rules.
     for q in facets:

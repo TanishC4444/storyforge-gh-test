@@ -18,7 +18,7 @@ def verify(snapshot,root):
         assert len(v)==EMBEDDING_DIMENSIONS and all(math.isfinite(x) for x in v),'Invalid vector'
         assert abs(sum(x*x for x in v)-1)<1e-4,'Vector is not normalized'
     assert retrieved['index_version']==INDEX_VERSION and not retrieved['stale_embedding_records'],'Stale retrieval'
-    semantic=[{'record_id':s['id'],'query':hit['query'],'channel':hit['channel']} for s in retrieved['sources'] for hit in s['retrieval_hits'] if hit['channel'] in {'semantic','hybrid'}]
+    semantic=[{'record_id':s['id'],'query':hit['query'],'channel':hit['channel'],'semantic_rank':hit['semantic_rank']} for s in retrieved['sources'] for hit in s['retrieval_hits'] if hit['channel'] in {'semantic','hybrid'} and hit.get('semantic_rank') is not None]
     assert semantic,'No semantic search evidence in selected sources'
     scene=req['scene_designs'][0]['id']
     writer=application_packet(req,retrieved,'writer',scene)
