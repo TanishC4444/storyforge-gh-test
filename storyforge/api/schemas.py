@@ -111,6 +111,7 @@ class Job(BaseModel):
 
 
 class Progress(BaseModel):
+    """total_scenes counts every scene in the brief; a run with a smaller scene_limit stops before it."""
     jobs_total: int = 0
     jobs_done: int = 0
     accepted_scenes: int | None = None
@@ -139,6 +140,7 @@ class RunDetail(RunSummary):
     jobs: list[Job] = []
     progress: Progress = Progress()
     recoverable: bool = Field(False, description='True when POST /runs/{id}/recover can continue this run.')
+    resume_scene: int | None = Field(None, description='For a failed sequential run: the first unfinished scene recovery would restart from.')
     warnings: list[str] = []
 
 

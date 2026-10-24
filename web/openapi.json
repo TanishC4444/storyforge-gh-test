@@ -2069,7 +2069,8 @@
           }
         },
         "type": "object",
-        "title": "Progress"
+        "title": "Progress",
+        "description": "total_scenes counts every scene in the brief; a run with a smaller scene_limit stops before it."
       },
       "RecoverRun": {
         "properties": {
@@ -2302,6 +2303,18 @@
             "title": "Recoverable",
             "description": "True when POST /runs/{id}/recover can continue this run.",
             "default": false
+          },
+          "resume_scene": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resume Scene",
+            "description": "For a failed sequential run: the first unfinished scene recovery would restart from."
           },
           "warnings": {
             "items": {

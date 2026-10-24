@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Storyforge API Console</title>
+  <meta name="description" content="Barebones test console: one button per Storyforge API feature, with raw responses.">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="console.css">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="console.html">Storyforge <span>API console</span></a>
+    <a href="index.html" class="muted">Playground UI →</a>
+  </header>
+
+  <div class="console">
+    <div class="calls">
+      <section class="panel">
+        <h2>Connection</h2>
+        <div class="fields">
+          <label>API URL <input id="c-api" type="url"></label>
+          <label>Token <input id="c-token" type="password" autocomplete="off" placeholder="GitHub token, or demo"></label>
+        </div>
+        <div class="row wrap">
+          <button data-call="health">GET /health</button>
+          <button data-call="authCheck">GET /auth/check</button>
+          <button type="button" id="c-demo" class="secondary">Use demo token</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Catalog and briefs</h2>
+        <div class="row wrap">
+          <button data-call="modes">GET /modes</button>
+          <button data-call="listRequests">GET /requests</button>
+        </div>
+        <div class="fields">
+          <label>Brief ID <input id="c-brief" value="living-scale-practice" list="c-briefs"></label>
+        </div>
+        <datalist id="c-briefs"></datalist>
+        <div class="row wrap">
+          <button data-call="getRequest">GET /requests/{id}</button>
+          <button type="button" id="c-load-brief" class="secondary">Load brief into editor</button>
+        </div>
+        <label>Brief JSON for validation <textarea id="c-brief-json" rows="5" spellcheck="false">{"project_id": "x"}</textarea></label>
+        <button data-call="validateRequest">POST /requests/validate</button>
+      </section>
+
+      <section class="panel">
+        <h2>Runs</h2>
+        <div class="fields">
+          <label>Mode <select id="c-list-mode"><option value="">any</option><option>sequential</option><option>parallel</option><option>recovery</option></select></label>
+          <label>Status <select id="c-list-status"><option value="">any</option><option>queued</option><option>running</option><option>succeeded</option><option>succeeded_with_warnings</option><option>failed</option><option>cancelled</option></select></label>
+          <label>Tag <input id="c-list-tag" placeholder="api-…"></label>
+          <label>Limit <input id="c-list-limit" type="number" min="1" max="50" value="10"></label>
+        </div>
+        <button data-call="listRuns">GET /runs</button>
+      </section>
+
+      <section class="panel">
+        <h2>Start a run</h2>
+        <div class="fields">
+          <label>Mode <select id="c-start-mode"><option>sequential</option><option>parallel</option></select></label>
+          <label>Brief <input id="c-start-brief" value="living-scale-practice" list="c-briefs"></label>
+          <label>Backend <select id="c-start-backend"><option>fixture</option><option>live</option></select></label>
+        </div>
+        <label>Other inputs (JSON, see GET /modes) <textarea id="c-start-inputs" rows="2" spellcheck="false">{"scene_limit": "1"}</textarea></label>
+        <button data-call="startRun" class="warn">POST /runs (starts a real run)</button>
+      </section>
+
+      <section class="panel">
+        <h2>One run</h2>
+        <div class="fields">
+          <label>Run ID <input id="c-run" type="number" value="9001"></label>
+          <label>Scene ID <input id="c-scene" value="ch01-sc01"></label>
+          <label>Artifact name <input id="c-artifact" value="readable-story"></label>
+        </div>
+        <div class="row wrap">
+          <button data-call="getRun">GET /runs/{id}</button>
+          <button data-call="story">GET /story</button>
+          <button data-call="scene">GET /scenes/{scene}</button>
+          <button data-call="canon">GET /canon</button>
+          <button data-call="artifacts">GET /artifacts</button>
+          <button data-call="downloadArtifact">GET /artifacts/{name}</button>
+        </div>
+        <div class="row wrap">
+          <button type="button" id="c-watch">Watch /events</button>
+          <button type="button" id="c-unwatch" class="ghost" disabled>Stop watching</button>
+          <button data-call="cancelRun" class="warn">POST /cancel</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Recover a failed run</h2>
+        <div class="fields">
+          <label>Strategy <select id="c-rec-strategy"><option>fresh</option><option>rerun</option></select></label>
+          <label>Scene <select id="c-rec-scene"><option>auto</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
+          <label>Restart stage <select id="c-rec-stage"><option>auto</option><option>editing</option><option>memory</option><option>scene</option></select></label>
+          <label>Backend (fresh) <select id="c-rec-backend"><option>live</option><option>fixture</option></select></label>
+        </div>
+        <label>Inputs (fresh, JSON) <textarea id="c-rec-inputs" rows="2" spellcheck="false">{}</textarea></label>
+        <button data-call="recoverRun" class="warn">POST /runs/{id}/recover (starts a real run)</button>
+      </section>
+    </div>
+
+    <section class="panel output">
+      <div class="panel-head">
+        <h2>Response</h2>
+        <button type="button" id="c-clear" class="ghost">Clear log</button>
+      </div>
+      <p id="c-status" class="muted">Press a button.</p>
+      <pre id="c-out" class="json"></pre>
+      <h3>Log</h3>
+      <ol id="c-log" class="log"></ol>
+    </section>
+  </div>
+
+  <script type="module" src="js/console.js"></script>
+</body>
+</html>

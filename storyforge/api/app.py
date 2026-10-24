@@ -81,7 +81,7 @@ async def _invalid(_, exc):
 @app.exception_handler(GitHubError)
 async def _github(_, exc: GitHubError):
     # Pass auth and permission errors through; anything else is an upstream failure.
-    status = exc.status if exc.status in {401, 403, 404, 422} else 502
+    status = exc.status if exc.status in {401, 403, 404, 409, 422} else 502
     return JSONResponse({'detail': exc.message}, status_code=status)
 
 
