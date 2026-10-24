@@ -19,7 +19,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  ENRICH_LIMIT: '10'
+  ENRICH_LIMIT: '0'
 
 jobs:
   enrich:
