@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "per_run_timeout_minutes": 45,
+  "retry_timeout_minutes": 20,
+  "poll_seconds": 30,
+  "max_scene_retries": 1,
+  "continue_on_unapproved": true,
+  "cases": [
+    {
+      "id": "chronology",
+      "request_file": "hard-chronology",
+      "medium": "short_story",
+      "words_per_scene": 450,
+      "scenes": 4,
+      "cast": 8,
+      "resume_case": null
+    },
+    {
+      "id": "ensemble",
+      "request_file": "hard-ensemble",
+      "medium": "book",
+      "words_per_scene": 750,
+      "scenes": 4,
+      "cast": 16,
+      "resume_case": null,
+      "retry_timeout_minutes": 30
+    },
+    {
+      "id": "adapt-screenplay",
+      "request_file": "hard-adapt-screenplay",
+      "medium": "screenplay",
+      "words_per_scene": 400,
+      "scenes": 2,
+      "cast": 6,
+      "resume_case": null
+    },
+    {
+      "id": "adapt-comic",
+      "request_file": "hard-adapt-comic",
+      "medium": "comic_script",
+      "words_per_scene": 300,
+      "scenes": 2,
+      "cast": 6,
+      "resume_case": null
+    },
+    {
+      "id": "interruption",
+      "request_file": "hard-interruption",
+      "medium": "short_story",
+      "words_per_scene": 350,
+      "scenes": 2,
+      "cast": 8,
+      "resume_case": null,
+      "recovery_probe": true
+    }
+  ],
+  "assessment": [
+    "source-bound full-memory verification",
+    "flashback chronology and POV isolation",
+    "sixteen-character ensemble",
+    "same-source adaptation across screenplay and comic",
+    "controlled interruption and unchanged approved-prefix recovery"
+  ],
+  "literary_assessment": "Benchmark completion is separate from quality approval. Unresolved drafts remain needs_revision; they are never silently approved."
+}

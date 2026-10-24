@@ -42,6 +42,17 @@ class StoryResumeTests(unittest.TestCase):
             self.assertEqual(load(p/'saved-story/checkpoint/snapshot.json')['memories'],self.state()['memories'])
             self.assertTrue((p/'backup/s02_draft/prose.txt').exists())
             apply(api,p);self.assertEqual(api.posts,[('actions/jobs/42/rerun',{})])
+    def test_auto_resume_keeps_existing_draft_but_rebuilds_when_no_draft_exists(self):
+        with tempfile.TemporaryDirectory() as d:
+            result=plan(self.fake(),'12','auto','auto',d)
+            self.assertEqual(result['resolved_stage'],'editing');self.assertEqual(result['job_id'],42)
+        api=self.fake();download=api.artifact
+        def no_draft(artifact,dest):
+            if artifact['name']!='s02_draft':download(artifact,dest)
+        api.artifact=no_draft
+        with tempfile.TemporaryDirectory() as d:
+            result=plan(api,'12','auto','auto',d)
+            self.assertEqual(result['resolved_stage'],'scene');self.assertEqual(result['job_id'],41)
     def test_partial_writer_output_survives_without_a_compiled_scene(self):
         with tempfile.TemporaryDirectory() as d:
             p=Path(d);save(p/'input/s01_accept/snapshot.json',self.state())

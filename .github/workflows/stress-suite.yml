@@ -2,6 +2,11 @@ name: Sequential story stress suite
 on:
   workflow_dispatch:
     inputs:
+      suite:
+        type: choice
+        options: [stress-suite, harder-suite]
+        default: stress-suite
+        description: Harder suite tests chronology, ensemble, source adaptation and checkpoint recovery
       cases:
         type: string
         default: ''
@@ -21,6 +26,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 350
     env:
+      STRESS_SUITE: ${{ inputs.suite || 'stress-suite' }}
       STRESS_CASES: ${{ inputs.cases }}
       SAVED_DRAFT_RUN: ${{ inputs.saved_draft_run }}
     steps:
