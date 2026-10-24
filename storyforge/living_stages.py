@@ -75,13 +75,37 @@ def execute(task,source,out,index=0,backend='fixture'):
             review=load(proof);facts=load(source/'memory/memory.json')
             require(review.get('pass') and review.get('state_sha256')==b.bind_state(state) and review.get('source_sha256')==b.digest((source/'edited/prose.txt').read_text()) and review.get('memory_sha256')==b.bind_state(facts),'Stale reused final factual proof')
             save(out/'review.json',review)
-        else:m.join(state,source,out)
+        else:review=m.join(state,source,out)
+        copy_file(source/'memory/memory.json',out/'memory.json')
+        b.output('repair_required',not review.get('pass') or bool(review.get('unverified')))
+    elif task=='memory_recovery_plan':
+        # Exactly one recovery after final findings. Prose stays immutable; only
+        # source-owned facts are re-extracted, then independently checked again.
+        proof=load(source/'memory-review/review.json');facts=load(source/'memory/memory.json')
+        prose=(source/'edited/prose.txt').read_text()
+        require(proof.get('source_sha256')==b.digest(prose) and proof.get('state_sha256')==b.bind_state(state) and proof.get('memory_sha256')==b.bind_state(facts),'Stale final memory recovery inputs')
+        work=out/'work';save(work/'original/prose.txt',prose);save(work/'edited/prose.txt',prose)
+        save(work/'initial-memory/memory.json',facts);save(work/'preflight-memory/review.json',proof)
+        m.refresh_plan(state,work,out)
+        save(out/'recovery.json',{'original_review':proof,'round':1,'prose_changed':False})
+    elif task=='memory_recovered_plan':
+        facts=m.extract_join(state,source,out);save(source/'memory/memory.json',facts)
+        plan=m.plan(state,source,out,'final')
+        plan['recovery_findings']=load(source/'plan/recovery.json')['original_review'].get('issues',[])
+        save(out/'memory-plan.json',plan)
+    elif task=='memory_recovery_join':
+        m.join(state,source,out);copy_file(source/'memory/memory.json',out/'memory.json')
+        save(out/'recovery.json',{'round':1,'prose_changed':False,'further_recovery':False})
     elif task=='finalize':
         # The repair-plan artifact carries compiled, source-bound literary findings.
         for kind in ['story-review','rhetoric-review','memory-review']:
             copy_file(source/'findings'/kind/'review.json',source/kind/'review.json')
         b.finalize(state,card,source,out,backend)
     elif task=='accept':
+        recovered=source/'recovered-memory'
+        if recovered.exists():
+            copy_file(recovered/'memory.json',source/'memory/memory.json')
+            copy_file(recovered/'review.json',source/'memory-review/review.json')
         if state['request'].get('performance',{}).get('strict_draft_handoff'):
             from .craft import validate_prose
             prose=(source/'edited/prose.txt').read_text()

@@ -110,13 +110,23 @@ def check(state,card,source,out,backend,bid):
             catalog=passages(prose)
             evidence=evidence_context(catalog,batch['owned_passages'],facts)
             prior=memory_canon(state)
+            identity_index=[{k:f[k] for k in ['id','kind','fact_key','known_by','canonical_status'] if k in f} for f in prior]
             if batch['task'] in {'continuity','coverage'}:
                 facts=[{'index':i,**{k:v for k,v in f.items() if k in {'kind','text','known_by','holder','claim_source','continuity_scope','literary_status','subject','life_state','thread_id','thread_state','fact_key','supersedes','evidence_ids'}}} for i,f in enumerate(memory['memories']) if set(f.get('evidence_ids',[])) & set(batch['owned_passages'])]
+            prior_lookup={f['id']:f for f in prior}
+            references=[{'fact_index':f['index'],'prior_id':old,'exists':old in prior_lookup,
+                         'same_key_and_kind':old in prior_lookup and f.get('fact_key')==prior_lookup[old].get('fact_key') and f['kind']==prior_lookup[old]['kind']}
+                        for f in facts for old in f.get('supersedes',[])]
+            linked_ids={old for f in facts for old in f.get('supersedes',[])}
             data={'original_prompt':state['request']['premise'],'scene_contract':next((c for c in state['request']['scene_designs'] if c['id']==card['id']),{}),
                   'current_prose':'\n\n'.join(x['text'] for x in evidence),'evidence_passages':[{'id':x['id'],'text':x['text']} for x in evidence],
                   'owned_passages':batch['owned_passages'],'proposed_memory':{'memories':facts},
                   'prior_canon':[prior[i] for i in batch['prior_indices']],'check_phase':p['phase'],'task':batch['task'],
-                  'coverage_policy':'This is one exhaustive continuity partition, not a summary. Records tagged draft_branch are source-verified facts of this provisional manuscript, not published universe canon. Other partitions are checked separately. Do not invent omitted facts. Canon knowledge holders, uncertainty and supersession govern. Historical_superseded facts describe earlier states; do not mistake them for current contradictions. A private update does not automatically grant knowledge to previous holders.'}
+                  'canon_identity_index':identity_index,
+                  'application_reference_checks':references,
+                  'linked_prior_facts':[f for f in prior if f['id'] in linked_ids],
+                  'previous_findings_to_verify':p.get('recovery_findings',[]),
+                  'coverage_policy':'This is one exhaustive continuity partition, not a summary. canon_identity_index contains ALL prior IDs, exact keys and knowledge holders; linked_prior_facts supplies full referenced records, even outside this partition. application_reference_checks deterministically verifies exact ID existence and key/kind matching; judge semantic replacement validity, not a contradictory guess about those verified bytes. An ID absent from prior_canon is NOT nonexistent. Never renumber an ID or substitute an older fact with a different key. Records tagged draft_branch are source-verified facts of this provisional manuscript, not published universe canon. Other partitions are checked separately. Do not invent omitted facts. Historical_superseded facts describe earlier states. Previously acquired knowledge persists, but public observation of an action never grants access to private feelings. Check each atomic claim separately.'}
             mode = ((mode+' Also check extraction completeness: material facts, resource changes, obligations and knowledge acquired in owned passages must appear accurately in proposed_memory. Missing facts target memory, never rewrite prose to justify them. ') if batch['task']=='continuity' else 'Check completeness of proposed_memory against owned passages. Missing material facts or unsupported knowledge target memory. No prose or style judgments. ' if batch['task']=='coverage' else 'Check ONLY supplied facts, their source evidence and knowledge holders against this canon partition. Issues target memory; no prose or style judgment. ')
         id_mode=adaptive(state['request'])
         options={'tokens':1200 if id_mode else 650 if text_mode else 1200,'response_schema':memory_review_schema()}
@@ -165,7 +175,10 @@ def extract_batch(state,card,source,out,backend,bid):
     p=load(Path(source)/'plan/extract-plan.json');prose=(Path(source)/'edited/prose.txt').read_text()
     require(p['state_sha256']==bind_state(state) and p['source_sha256']==digest(prose),'Stale extraction plan')
     batch=next((b for b in p['batches'] if b['id']==bid),None);require(batch is not None,'Unknown extraction batch')
-    packet={'evidence_passages':[{'id':x['id'],'text':x['text']} for x in passages(prose) if x['id'] in batch['ids']],
+    catalog=passages(prose)
+    packet={'evidence_passages':[{'id':x['id'],'text':x['text']} for x in catalog if x['id'] in batch['ids']],
+            'read_only_source_context':[{'id':x['id'],'text':x['text']} for x in evidence_context(catalog,batch['ids'],[]) if x['id'] not in batch['ids']],
+            'character_registry':[{'id':c['id'],'name':c['name']} for c in state['request']['characters']],
             'characters':[c['id'] for c in state['request']['characters']],'prior_canon':cards(continuity_history(state)),
             'original_prompt':state['request']['premise'],'scene':card,'specific_memory_findings':p.get('memory_corrections',[])}
     instruction=MEMORY_INSTRUCTION+' Extract all material supported changes and obligations in these owned passages; do not invent or summarize away facts. Other batches cover other passages. Preserve uncertainty and individual knowledge.'
@@ -223,8 +236,14 @@ def refresh_plan(state,source,out):
         findings=load(review_path)
         require(findings['source_sha256']==digest(before),'Stale memory repair findings')
         corrections=[i for i in findings.get('issues',[]) if i.get('target')=='memory']
-        affected={p['id'] for p in passages(before) if any(i.get('quote') and i['quote'] in p['text'] for i in corrections)}
+        affected=affected_passages(corrections,before)
         changed.update(diff['unchanged'][pid] for pid in affected if pid in diff['unchanged'])
+        # A retained fact may cite several paragraphs. Re-extract all its source
+        # anchors if any anchor is invalidated, so the other half is not lost.
+        while True:
+            linked={pid for f in retained if set(f.get('evidence_ids',[]))&changed for pid in f.get('evidence_ids',[])}
+            if linked<=changed:break
+            changed.update(linked)
         retained=[f for f in retained if not set(f.get('evidence_ids',[]))&changed]
     if initial.get('unverified'):
         changed={p['id'] for p in passages(prose)};retained=[]
@@ -234,3 +253,16 @@ def refresh_plan(state,source,out):
     value={'state_sha256':bind_state(state),'source_sha256':digest(prose),'batches':batches,
            'retained':retained,'memory_corrections':corrections,'upstream_unverified':False,'full_reextraction':initial.get('unverified',False)}
     save(Path(out)/'extract-plan.json',value);output('characters',[b['id'] for b in batches]);return value
+
+
+def affected_passages(issues,prose):
+    from .evidence import quote_span
+    catalog=passages(prose);known={p['id'] for p in catalog};affected=set()
+    for issue in issues:
+        ids=issue.get('evidence_ids') or [s['id'] for s in issue.get('evidence_spans',[]) if s.get('id')]
+        if ids:
+            require(set(ids)<=known,'Memory correction cites unknown source');affected.update(ids)
+        elif issue.get('quote'):
+            start,end,_=quote_span(issue['quote'],prose)
+            affected.update(p['id'] for p in catalog if p['start']<end and p['end']>start)
+    return affected

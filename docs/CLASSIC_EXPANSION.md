@@ -26,7 +26,7 @@ A literary outage does not erase an independently verified factual handoff. Thos
 
 ## Coherent writing and review batches
 
-Scenes up to 900 target words are written continuously in one batch. Longer scene budgets use larger bounded writing units with concrete handoffs. Each writer gets the original author contract and full current continuity, rather than an automatically rewritten initial prompt.
+Scenes up to 1,500 target words are written continuously in one batch under adaptive batching. Longer scene budgets use larger bounded writing units with concrete handoffs. Each writer gets the original author contract and full current continuity, rather than an automatically rewritten initial prompt.
 
 Prose review windows are approximately 650 words. All eight prose dimensions are checked together; one story review reads the actual scene across all nine causal dimensions. A final scene up to 1,000 actual words is read as one complete unit, so repeated dialogue, reenacted revelations, tense drift, inventory errors and planning-language leakage cannot hide between tiny review windows. Longer final scenes use coherent passage windows plus a global causal check. Exact repeated-dialogue candidates are supplied as evidence for contextual judgment, never as an automatic literary score.
 

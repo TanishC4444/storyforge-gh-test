@@ -11,6 +11,10 @@ from storyforge.storage import load,save
 
 class LivingPipelineTests(unittest.TestCase):
     def test_two_scene_generated_graph_with_full_cast_rules_and_memory(self):
+        self.run_generated_graph()
+    def test_generated_graph_executes_bounded_recovery_and_audits_the_recovered_ledger(self):
+        self.run_generated_graph(force_recovery=True)
+    def run_generated_graph(self,force_recovery=False):
         graph=yaml.safe_load(Path('.github/workflows/living-universe-pipeline.yml').read_text());jobs=graph['jobs']
         for name,job in jobs.items():
             self.assertTrue(set(job.get('needs',[]))<=set(jobs),name)
@@ -30,6 +34,8 @@ class LivingPipelineTests(unittest.TestCase):
             self.assertEqual([m['kind'] for m in state['memories']],[m['kind'] for m in state['request']['initial_facts']]);self.assertEqual(len(state['memories']),96);self.assertEqual(len(state['request']['characters']),12);self.assertEqual(len(state['request']['world_rules']),24)
             pending={k for k in jobs if k.startswith(('s01_','s02_'))};done={'prepare','quickstart'}
             def required(prefix,field):
+                if field=='repair_required':
+                    proof=load(artifacts[prefix]/'review.json');return not proof.get('pass') or proof.get('unverified',False)
                 file='extract-plan.json' if field=='refresh_required' else 'memory-plan.json'
                 plan=load(artifacts[prefix]/file)
                 return any(x['ids'] for x in plan['batches']) if field=='refresh_required' else not bool(plan.get('reused_preflight'))
@@ -39,6 +45,7 @@ class LivingPipelineTests(unittest.TestCase):
                 for key in ready:
                     job=jobs[key];index=int(key[1:3])-1;p=key[:3]
                     skip=(key.endswith('_memory_refresh_batches') and not required(p+'_repair','refresh_required')) or (key.endswith('_memory_final_batches') and not required(p+'_final_memory','checks_required'))
+                    if ('_memory_recovery_' in key or key.endswith('_memory_recovered')) and not required(p+'_memory_review','repair_required'):skip=True
                     if skip:skipped.add(key);done.add(key);pending.remove(key);continue
                     matrix=job.get('strategy',{}).get('matrix',{});axis=None
                     if 'character' in matrix:
@@ -48,7 +55,7 @@ class LivingPipelineTests(unittest.TestCase):
                         if isinstance(value,list):values=value
                         else:
                             upstream=value.split('needs.',1)[1].split('.outputs.',1)[0]
-                            file='draft-plan.json' if upstream.endswith('_direction') else 'extract-plan.json' if upstream.endswith(('_draft','_repair')) else 'repair-plan.json' if upstream.endswith('_repair_plan') else 'memory-plan.json'
+                            file='draft-plan.json' if upstream.endswith('_direction') else 'extract-plan.json' if upstream.endswith(('_draft','_repair','_memory_recovery_plan')) else 'repair-plan.json' if upstream.endswith('_repair_plan') else 'memory-plan.json'
                             plan=load(artifacts[upstream]/file);values=[x['id'] for x in plan.get('batches',plan.get('beats',[]))]
                     else:values=[None]
                     for value in values:
@@ -60,6 +67,7 @@ class LivingPipelineTests(unittest.TestCase):
                         upstream={}
                         if p+'_repair' in artifacts:upstream[p+'_repair']={'outputs':{'refresh_required':'true' if required(p+'_repair','refresh_required') else 'false'}}
                         if p+'_final_memory' in artifacts:upstream[p+'_final_memory']={'outputs':{'checks_required':'true' if required(p+'_final_memory','checks_required') else 'false'}}
+                        if p+'_memory_review' in artifacts:upstream[p+'_memory_review']={'outputs':{'repair_required':'true' if required(p+'_memory_review','repair_required') else 'false'}}
                         ls.arrange(folder/'incoming',source,manifest,upstream)
                         command=next(s['run'] for s in job['steps'] if s.get('id')=='task')
                         line=next(line for line in command.splitlines() if line.startswith('python -m'))
@@ -68,6 +76,12 @@ class LivingPipelineTests(unittest.TestCase):
                         elif parts[2]=='storyforge.dag':stage(parts[3],source,out,index=index,character=value if axis=='character' else None,profile='fast',backend='fixture')
                         else:
                             with patch.object(sys,'argv',['batch_pipeline']+parts[3:]+['--source',str(source),'--out',str(out)]):b.main()
+                        if force_recovery and index==0 and parts[3]=='memory_final_join':
+                            facts=load(out/'memory.json');facts['memories'][0]['known_by']=['public'];save(out/'memory.json',facts)
+                            proof=load(out/'review.json');proof['pass']=False;proof['memory_sha256']=b.bind_state(facts)
+                            quote=b.passages((source/'edited/prose.txt').read_text())[0]['text']
+                            proof['issues']=[{'severity':'blocking','target':'memory','category':'knowledge','quote':quote,'evidence_ids':['p001'],'problem':'Injected public knowledge error in extracted memory.','fix':'Re-extract actual witnesses from owned evidence.'}]
+                            save(out/'review.json',proof)
                         artifacts[key+('-'+str(value) if axis else '')]=out
                     done.add(key);pending.remove(key)
             state=load(artifacts['s02_accept']/'snapshot.json')
@@ -78,17 +92,22 @@ class LivingPipelineTests(unittest.TestCase):
             self.assertGreater(len(second['memories']),96);self.assertEqual(len(second['accepted']),1)
             from storyforge.episode_audit import audit
             for name,folder in artifacts.items():
-                if name.endswith(('_accept','_design','_final_memory','_memory_review')):shutil.copytree(folder,root/'results'/name)
+                if name.endswith(('_accept','_design','_final_memory','_memory_review','_memory_recovery_join')):shutil.copytree(folder,root/'results'/name)
             assessment=audit(root/'results',root/'audit',2)
             self.assertTrue(assessment['pass']);self.assertEqual(assessment['retained_initial_facts'],96)
-            bad=load(root/'results/s02_memory_review/review.json');bad['source_sha256']='stale';save(root/'results/s02_memory_review/review.json',bad)
+            corrupt=root/'results'/('s01_memory_recovery_join' if force_recovery else 's02_memory_review')/'review.json'
+            bad=load(corrupt);bad['source_sha256']='stale';save(corrupt,bad)
             self.assertFalse(audit(root/'results',root/'bad-audit',2)['pass'])
             for prefix in ['s01','s02']:
                 plan=load(artifacts[prefix+'_memory']/'memory-plan.json');facts=load(artifacts[prefix+'_memory']/'memory.json')['memories']
                 before=load(artifacts[prefix+'_design']/'snapshot.json')
                 pairs={(i,j) for batch in plan['batches'] for i in batch['fact_indices'] for j in batch['prior_indices']}
                 self.assertEqual(pairs,{(i,j) for i in range(len(facts)) for j in range(len(memory.memory_canon(before)))})
-                self.assertTrue(load(artifacts[prefix+'_memory_review']/'review.json')['reused_preflight'])
+                if force_recovery and prefix=='s01':
+                    self.assertIn(prefix+'_memory_recovery_join',artifacts)
+                    self.assertTrue(load(artifacts[prefix+'_memory_recovery_join']/'review.json')['pass'])
+                    self.assertFalse(load(artifacts[prefix+'_memory_recovery_join']/'recovery.json')['further_recovery'])
+                else:self.assertTrue(load(artifacts[prefix+'_memory_review']/'review.json')['reused_preflight'])
     def test_complete_ledger_is_retained_when_pov_projection_uses_ids(self):
         from storyforge.working_context import concise_packet
         facts=[{'id':str(i),'text':'Fact '+str(i),'known_by':['a']} for i in range(96)]

@@ -47,6 +47,10 @@ def memory_extract(executor,req,out,prose,packet,instruction,allow_public=True):
             raw=source_defaults(raw,packet,prose,out)
         if capture:last_raw=copy.deepcopy(raw)
         result=salvage_memory(raw,prose,ids) if enabled(req) and not req.get('performance',{}).get('pipelined_living') else contracts.delta(raw,prose,ids)
+        if req.get('performance',{}).get('pipelined_living') and 'evidence_passages' in packet:
+            owned={p['id'] for p in packet['evidence_passages']}
+            for fact in result['memories']:
+                contracts.require(set(fact.get('evidence_ids',[]))<=owned,'Memory evidence_ids outside owned source passages')
         if not allow_public:
             retained=[]
             for item in result['memories']:
@@ -69,6 +73,7 @@ def memory_extract(executor,req,out,prose,packet,instruction,allow_public=True):
         instruction+=' For a changed resource, relationship or obligation, copy the exact fact_key and kind of the same prior fact when using its ID in supersedes. Prior facts without fact_key are immutable and cannot appear in supersedes. New events, consequences, and discoveries use a new fact_key and supersedes=[]; they do not replace the prior character or world premise. Never infer an update or erase history. Include unresolved callbacks and obligations, not only recent motion.'
     instruction+=' Every memory, including each thread update, MUST include a nonempty text description of at most 600 characters, evidence_ids and explicit known_by. Thread IDs and states supplement text; they never replace it. Never guess missing witnesses, outcomes or source evidence.'
     instruction+=' subject/life_state are ONLY for actual lifecycle changes with life:<character_id> keys. Do NOT attach them to arrival, location, presence or ordinary action records. thread_id/thread_state are ONLY for kind=thread with a matching thread:<id> key. Omit unrelated optional metadata entirely.'
+    instruction+=' Keep facts atomic: separate private sensations, fears and inferences from observable actions. Never assign a mixed public/private sentence one broad witness list. Use character_registry and read_only_source_context to identify actual listeners, not all characters in the world. Cite ONLY owned evidence_passages in output; context may establish an arrival or listener but is not independently owned for extraction. Existing knowledge does not disappear because a later paragraph does not repeat its acquisition.'
     from .adaptive import enabled as adaptive
     schema=memory_schema(packet,ids,allow_public=allow_public,prior_memories=prior)
     if adaptive(req):
