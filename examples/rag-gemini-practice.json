@@ -220,9 +220,9 @@
     }
   ],
   "adaptation": {
-    "strength": 0,
+    "strength": 1,
     "mode": "structural_echo",
-    "max_active_sources_per_scene": 0,
+    "max_active_sources_per_scene": 1,
     "relationship": "Entirely original test world",
     "preserve_user_choices": true,
     "preserve": [

@@ -103,8 +103,10 @@ jobs:
 
         python -m storyforge.dag prepare --backend "$backend" --profile "$STORY_PROFILE" --request-file "$STORY_REQUEST"
 
-
-        python -m scripts.verify_gemini_rag --if-hybrid'
+        '
+    - name: Verify live Gemini search and writer handoff
+      if: ${{ inputs.request_file == 'rag-gemini-practice' }}
+      run: python -m scripts.verify_gemini_rag
     - name: Save outputs and execution timeline
       uses: actions/upload-artifact@v4
       id: artifact

@@ -30,8 +30,7 @@ def verify(snapshot,root):
 
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--if-hybrid',action='store_true');p.add_argument('--snapshot',default='out/snapshot.json');p.add_argument('--out',default='out/gemini-rag-verification.json');a=p.parse_args()
-    if a.if_hybrid and json.loads(Path(a.snapshot).read_text())['request']['retrieval_mode']!='hybrid':return
+    p=argparse.ArgumentParser();p.add_argument('--snapshot',default='out/snapshot.json');p.add_argument('--out',default='out/gemini-rag-verification.json');a=p.parse_args()
     result=verify(a.snapshot,Path(__file__).resolve().parents[1])
     Path(a.out).write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
 

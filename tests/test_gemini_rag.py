@@ -11,12 +11,16 @@ class GeminiRAGTests(unittest.TestCase):
         setup=next(s for s in steps if s.get('name')=='Install Gemini RAG encoder when requested')
         self.assertIn("'.[rag]'",setup['run'])
         task=next(s for s in steps if s.get('id')=='task')
-        self.assertIn('scripts.verify_gemini_rag --if-hybrid',task['run'])
+        check=next(s for s in steps if s.get('name')=='Verify live Gemini search and writer handoff')
+        self.assertEqual(check['run'],'python -m scripts.verify_gemini_rag')
+        self.assertIn("inputs.request_file == 'rag-gemini-practice'",check['if'])
         self.assertIn('GEMINI_API_KEY',task['env'])
 
     def test_live_smoke_brief_is_valid_for_living_workflow(self):
         req=json.loads(Path('examples/rag-gemini-practice.json').read_text())
         self.assertEqual(req['retrieval_mode'],'hybrid')
+        self.assertGreater(req['adaptation']['strength'],0)
+        self.assertGreater(req['adaptation']['max_active_sources_per_scene'],0)
         self.assertTrue(req['performance']['classic_expansion'])
         self.assertTrue(req['performance']['living_universe'])
         self.assertTrue(req['performance']['living_bounded'])
