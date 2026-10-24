@@ -155,7 +155,7 @@ class DemoApiTest(unittest.TestCase):
         self.assertEqual(self.client.post(P + '/runs', headers=DEMO, json={'mode': 'sequential', 'request_file': 'missing'}).status_code, 404)
 
     def test_cancel(self):
-        run_id = self.client.post(P + '/runs', headers=DEMO, json={'mode': 'sequential', 'request_file': 'harbor'}).json()['run_id']
+        run_id = self.client.post(P + '/runs', headers=DEMO, json={'mode': 'sequential', 'request_file': 'living-scale-practice'}).json()['run_id']
         self.assertEqual(self.client.post(P + f'/runs/{run_id}/cancel', headers=DEMO).status_code, 202)
         self.assertEqual(self.client.get(P + f'/runs/{run_id}', headers=DEMO).json()['status'], 'cancelled')
         self.assertEqual(self.client.post(P + '/runs/9001/cancel', headers=DEMO).status_code, 409)
@@ -273,7 +273,7 @@ class GitHubBackendTest(unittest.TestCase):
 
     def test_dispatch(self):
         from storyforge.api.schemas import StartRun
-        started = self.backend().start_run(StartRun(mode='sequential', request_file='harbor'))
+        started = self.backend().start_run(StartRun(mode='sequential', request_file='living-scale-practice'))
         self.assertEqual(started.run_id, 88)
         body = next(c[1] for c in self.calls if c[0] == 'dispatch')
         self.assertEqual(body['ref'], 'main')
@@ -287,7 +287,7 @@ class GitHubBackendTest(unittest.TestCase):
         import storyforge.api.service as service
         service.new_tag = lambda: 'api-abcd1234'
         try:
-            started = self.backend().start_run(StartRun(mode='sequential', request_file='harbor'))
+            started = self.backend().start_run(StartRun(mode='sequential', request_file='living-scale-practice'))
         finally:
             service.new_tag = original
         self.assertEqual(started.run_id, 77)

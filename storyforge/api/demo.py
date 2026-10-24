@@ -114,19 +114,21 @@ class DemoStore:
 
 
 _STORE: DemoStore | None = None
+_STORE_LOCK = threading.Lock()
 
 
 def store() -> DemoStore:
     global _STORE
-    if _STORE is None:
-        _STORE = DemoStore()
-    return _STORE
+    with _STORE_LOCK:
+        if _STORE is None:
+            _STORE = DemoStore()
+        return _STORE
 
 
 def reset():
     """Forget started runs (used by tests)."""
     global _STORE
-    _STORE = None
+    with _STORE_LOCK:_STORE = None
 
 
 def _iso(t: float) -> str:
@@ -201,7 +203,8 @@ class DemoBackend(Backend):
         return DemoReader(self.store.datasets[run.data] if self._done(run) and not run.cancelled_at else {})
 
     def list_runs(self, mode, tag, limit):
-        runs = [self._summary(r) for r in self.store.runs.values() if (not mode or r.mode == mode) and (not tag or r.tag == tag)]
+        with self.store.lock:snapshot=list(self.store.runs.values())
+        runs = [self._summary(r) for r in snapshot if (not mode or r.mode == mode) and (not tag or r.tag == tag)]
         return sorted(runs, key=lambda r: r.created_at, reverse=True)[:limit]
 
     def get_run(self, run_id: int) -> RunDetail:
@@ -214,7 +217,8 @@ class DemoBackend(Backend):
         return self._run(run_id).request_file
 
     def start_run(self, body: StartRun) -> StartedRun:
-        check_request_file(self.settings, body.request_file)
+        from .service import checked_start
+        body=checked_start(self.settings,body)
         tag = new_tag()
         workflow, _ = start_inputs(body, tag)  # same validation as the real backend
         jobs = _SEQUENTIAL_JOBS if body.mode == 'sequential' else _PARALLEL_JOBS
@@ -228,6 +232,8 @@ class DemoBackend(Backend):
         status = self._state(source)[0]
         if status != 'failed':
             raise Conflict(f'Run {run_id} is {status}; only failed runs can be recovered')
+        from .service import checked_recovery
+        if body.strategy=='fresh':body=checked_recovery(self.settings,body,source.request_file,self.reader(run_id))
         tag = new_tag() if body.strategy == 'fresh' else None
         workflow, _ = recovery_inputs(body, run_id, source.request_file, tag)
         if body.strategy == 'fresh':

@@ -6,6 +6,7 @@ runner) only needs a new subclass.
 """
 from __future__ import annotations
 
+import copy
 import json
 import os
 import tempfile
@@ -61,6 +62,55 @@ def request_files(settings: Settings) -> list[str]:
 def check_request_file(settings: Settings, name: str):
     if name not in request_files(settings):
         raise NotFound(f'No story brief named {name!r}; see GET /requests')
+
+
+def supported_modes(value: dict) -> list[str]:
+    from ..contracts import request
+    try:
+        req=request(copy.deepcopy(value))
+    except (ValueError,TypeError,KeyError,AttributeError):
+        return []
+    modes=[];perf=req.get('performance',{})
+    if perf.get('classic_expansion') and perf.get('living_universe') and req['scenes_per_chapter']==1 and (1<=req['chapters']<=4 if perf.get('living_bounded') else req['chapters']==1):
+        modes.append('sequential')
+    if req['scenes_per_chapter']==1 and req['chapters'] in {3,4}:
+        modes.append('parallel')
+    return modes
+
+
+def checked_start(settings: Settings, body: StartRun) -> StartRun:
+    check_request_file(settings,body.request_file)
+    req=json.loads((settings.examples_dir/f'{body.request_file}.json').read_text())
+    if body.mode not in supported_modes(req):
+        raise ValueError(f'Brief {body.request_file!r} is incompatible with {body.mode}; choose a brief whose supported_modes includes it')
+    if body.mode=='sequential':
+        total=req['chapters']*req['scenes_per_chapter']
+        values=dict(body.inputs)
+        values.setdefault('scene_limit',str(min(2,total)))
+        if str(values['scene_limit']) in {'1','2','4'} and int(values['scene_limit'])>total:
+            raise ValueError(f'scene_limit exceeds the {total} scenes in this brief')
+        continuation=values.get('resume_run','')
+        if continuation and (not isinstance(continuation,str) or not continuation.isascii() or not continuation.isdecimal() or int(continuation)<=0):
+            raise ValueError('resume_run must be a positive GitHub run ID')
+        body=body.model_copy(update={'inputs':values})
+    return body
+
+
+def checked_recovery(settings,body,request_file,reader):
+    if body.strategy!='fresh':return body
+    recovery=parse.sequential_recovery(reader) or {}
+    checkpoint=parse._json(reader.files('quickstart') or {},'snapshot.json') or {}
+    original=checkpoint.get('backend')
+    backend='live' if original=='worker' else original if original in {'fixture','live'} else body.backend
+    if 'backend' in body.model_fields_set and body.backend!=backend:
+        raise Conflict(f'Fresh recovery must use the original {backend} backend')
+    inputs=dict(body.inputs)
+    if 'scene_limit' not in inputs and recovery.get('total_scenes') in {1,2,4}:
+        inputs['scene_limit']=str(recovery['total_scenes'])
+    start=checked_start(settings,StartRun(mode='sequential',request_file=request_file or '',backend=backend,inputs=inputs))
+    if recovery.get('resume_scene',1)>int(start.inputs['scene_limit']):
+        raise ValueError('scene_limit ends before the failed scene; retain the original episode length')
+    return body.model_copy(update={'backend':backend,'inputs':start.inputs})
 
 
 class Backend:
@@ -183,7 +233,11 @@ class GitHubReader:
     def files(self, name: str) -> Files | None:
         if name not in self._files:
             data = self.zip_bytes(name)
-            self._files[name] = parse.unzip(data) if data is not None else None
+            try:self._files[name] = parse.unzip(data) if data is not None else None
+            except parse.InvalidArtifact:
+                item=self.latest().get(name)
+                if item:(self.cache_dir/f'{item["id"]}.zip').unlink(missing_ok=True)
+                raise
         return self._files[name]
 
 
@@ -277,7 +331,7 @@ class GitHubBackend(Backend):
         return StartedRun(mode=mode, workflow=workflow, run_id=run_id, tracking_tag=tag, html_url=html)
 
     def start_run(self, body: StartRun) -> StartedRun:
-        check_request_file(self.settings, body.request_file)
+        body=checked_start(self.settings,body)
         tag = new_tag()
         workflow, inputs = start_inputs(body, tag)
         return self._dispatch(body.mode, workflow, inputs, tag)
@@ -288,6 +342,7 @@ class GitHubBackend(Backend):
         summary = self._summary(self._raw_run(run_id))
         if summary.status != 'failed':
             raise Conflict(f'Run {run_id} is {summary.status}; only failed runs can be recovered')
+        if body.strategy=='fresh':body=checked_recovery(self.settings,body,summary.request_file,self.reader(run_id))
         tag = new_tag() if body.strategy == 'fresh' else None
         workflow, inputs = recovery_inputs(body, run_id, summary.request_file, tag)
         if body.strategy == 'fresh':

@@ -25,6 +25,10 @@ class NotAvailable(Exception):
     """The run has not produced (or no longer has) the artifact needed."""
 
 
+class InvalidArtifact(ValueError):
+    """An upstream archive or saved record is corrupt, not a bad user request."""
+
+
 class ArtifactReader(Protocol):
     def names(self) -> list[str]: ...
 
@@ -32,16 +36,24 @@ class ArtifactReader(Protocol):
 
 
 def unzip(data: bytes) -> Files:
-    with zipfile.ZipFile(io.BytesIO(data)) as archive:
-        return {info.filename: archive.read(info) for info in archive.infolist() if not info.is_dir()}
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            return {info.filename: archive.read(info) for info in archive.infolist() if not info.is_dir()}
+    except (zipfile.BadZipFile,RuntimeError,NotImplementedError):
+        raise InvalidArtifact('The saved artifact archive could not be read; try fetching it again') from None
 
 
 def _json(files: Files, path: str):
-    return json.loads(files[path]) if path in files else None
+    if path not in files:return None
+    try:value=json.loads(files[path])
+    except (ValueError,UnicodeError):raise InvalidArtifact('The saved artifact contains invalid JSON') from None
+    if value is not None and not isinstance(value,dict):raise InvalidArtifact('The saved artifact record must be an object')
+    return value
 
 
 def _text(files: Files, path: str) -> str:
-    return files[path].decode('utf-8') if path in files else ''
+    try:return files[path].decode('utf-8') if path in files else ''
+    except UnicodeError:raise InvalidArtifact('The saved artifact contains invalid text') from None
 
 
 def _words(text: str) -> int:
@@ -62,32 +74,43 @@ def _snapshot(reader: ArtifactReader) -> dict | None:
     return _json(files, 'canon/snapshot.json') if files else None
 
 
+def _sequential_sections(files: Files, snapshot: dict) -> list[dict]:
+    """Overlay the intact approved checkpoint on legacy/partial text exports."""
+    text=_text(files,'READABLE_DRAFT.txt')
+    markers=list(re.finditer(r'(?m)^s(\d+) \| ([^\n]+)\n\n',text))
+    sections={}
+    accepted=snapshot.get('accepted') or []
+    plan=(snapshot.get('plan') or {}).get('scenes') or []
+    for i,match in enumerate(markers):
+        position=int(match[1])-1
+        end=markers[i+1].start() if i+1<len(markers) else len(text)
+        prose=text[match.end():end].removesuffix('\n\n* * *\n\n').strip()
+        sid=plan[position]['id'] if 0<=position<len(plan) else f's{position+1:02}'
+        sections[position]={'id':sid,'status':match[2],'prose':prose}
+    for i,scene in enumerate(accepted):
+        sections[i]={'id':scene['id'],'status':scene.get('quality_status','reviewed'),'prose':scene.get('prose',''),'reviews':{key:scene[field] for key,field in [('story','review'),('rhetoric','rhetoric_review'),('memory','memory_review')] if scene.get(field) is not None}}
+    return [sections[i] for i in sorted(sections)]
+
+
 def sequential_story(run_id: int, reader: ArtifactReader) -> Story:
     files = _need(reader, 'readable-story')
     snapshot = _json(files, 'canon/snapshot.json') or {}
     status = _json(files, 'reading-status.json') or {}
-    accepted = snapshot.get('accepted') or []
-    if accepted:
-        scenes = [SceneSummary(id=s['id'], status=s.get('quality_status', 'reviewed'), words=_words(s.get('prose', ''))) for s in accepted]
-    else:
-        scenes = [SceneSummary(id=s['scene_id'], status=s.get('status', 'unknown'), words=s.get('words', 0)) for s in status.get('scenes', [])]
-    return Story(
-        run_id=run_id, mode='sequential',
-        title=(snapshot.get('request') or {}).get('title'),
-        complete=bool(snapshot.get('complete')),
-        completion_status=snapshot.get('completion_status'),
-        text=_text(files, 'READABLE_DRAFT.txt'),
-        scenes=scenes,
-    )
+    sections=_sequential_sections(files,snapshot)
+    text=_text(files,'READABLE_DRAFT.txt')
+    # Rebuild only incomplete legacy exports; retain all saved unapproved sections.
+    if any(s.get('prose') and s['prose'] not in text for s in snapshot.get('accepted') or []):
+        text='CLASSIC UNIVERSE EXPANSION\nStatus applies separately to each scene. Unreviewed prose is not accepted canon.\n\n'+'\n\n* * *\n\n'.join(s['id']+' | '+s['status']+'\n\n'+s['prose'] for s in sections)
+    scenes=[SceneSummary(id=s['id'],status=s['status'],words=_words(s['prose'])) for s in sections] if sections else [SceneSummary(id=s['scene_id'],status=s.get('status','unknown'),words=s.get('words',0)) for s in status.get('scenes',[])]
+    return Story(run_id=run_id, mode='sequential',title=(snapshot.get('request') or {}).get('title'),complete=bool(snapshot.get('complete')),completion_status=snapshot.get('completion_status'),text=text,scenes=scenes)
 
 
 def sequential_scene(reader: ArtifactReader, scene_id: str) -> Scene:
-    snapshot = _snapshot(reader) or {}
-    for s in snapshot.get('accepted') or []:
-        if s['id'] == scene_id:
-            reviews = {key: s[field] for key, field in [('story', 'review'), ('rhetoric', 'rhetoric_review'), ('memory', 'memory_review')] if s.get(field) is not None}
-            return Scene(id=s['id'], status=s.get('quality_status', 'reviewed'), words=_words(s['prose']), prose=s['prose'], reviews=reviews)
-    raise NotAvailable(f'Scene {scene_id!r} has no accepted prose in this run')
+    files=_need(reader,'readable-story');snapshot=_json(files,'canon/snapshot.json') or {}
+    for scene in _sequential_sections(files,snapshot):
+        if scene['id']==scene_id:
+            return Scene(id=scene_id,status=scene['status'],words=_words(scene['prose']),prose=scene['prose'],reviews=scene.get('reviews',{}))
+    raise NotAvailable(f'Scene {scene_id!r} has no saved prose in this run')
 
 
 def sequential_canon(run_id: int, reader: ArtifactReader) -> Canon:

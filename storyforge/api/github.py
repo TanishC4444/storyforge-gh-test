@@ -45,14 +45,19 @@ class GitHubClient:
             raise GitHubError(502, f'GitHub request failed: {type(exc).__name__}') from None
         if response.status_code >= 400:
             try:
-                message = response.json().get('message', response.text)
+                payload=response.json()
+                message=payload.get('message', 'Upstream request failed') if isinstance(payload,dict) else 'Upstream request failed'
             except ValueError:
                 message = response.text
-            raise GitHubError(response.status_code, f'GitHub: {message}')
+            token=self.http.headers.get('Authorization','').removeprefix('Bearer ')
+            message=str(message).replace(token,'[redacted]') if token else str(message)
+            raise GitHubError(response.status_code, f'GitHub: {message[:500]}')
         return response
 
     def get(self, path: str, **params) -> Any:
-        return self._request('GET', path, params=params or None).json()
+        response=self._request('GET', path, params=params or None)
+        try:return response.json()
+        except ValueError:raise GitHubError(502,'GitHub returned invalid JSON') from None
 
     def repo_path(self, suffix: str) -> str:
         return f'/repos/{self.repo}/{suffix}'
