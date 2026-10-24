@@ -76,7 +76,8 @@ def build():
   r['pov']=('Close third-person past tense for all narration; dialogue keeps its natural tense. Limit private knowledge to actual witnesses.' if medium in {'book','short_story'} else 'Present-tense filmable or performable action. Limit private knowledge to actual witnesses; follow the selected script medium.')
   r['style']['figurative_language']={'density':'sparse','devices':['concrete metaphor'],'image_domains':['harbor work','weather','household objects']}
   r['adaptation']={'strength':0,'mode':'structural_echo','max_active_sources_per_scene':0,'relationship':'Entirely original test world','preserve_user_choices':True,'preserve':['Author rules and private knowledge'],'divergence':'Invent solutions and climax; do not import film or epic canon.'}
-  r['length_policy']['policy']=f'{count} scenes, target {words} words each; strict allowed range {int(words*.8)}–{int(words*1.3)}. Script cues count toward words; no padding.'
+  r['length_policy']['overflow']='advisory'
+  r['length_policy']['policy']=f'{count} scenes, target {words} words each, minimum {int(words*.8)} for developed action. Longer scenes are acceptable; excess length alone is advisory, not grounds for rejection or rewriting. Quality, pacing, memory and non-repetition remain mandatory. Script cues count toward words; no padding.'
   r['characters']=[];r['initial_facts']=[]
   locations=['Ferry quay','Signal tower','Public archive','Council chamber']
   for i in range(cast_size):

@@ -1,6 +1,15 @@
 name: Sequential story stress suite
 on:
   workflow_dispatch:
+    inputs:
+      cases:
+        type: string
+        default: ''
+        description: Optional comma-separated case IDs; blank runs all cases
+      saved_draft_run:
+        type: string
+        default: ''
+        description: Optional source run for the ensemble first-scene draft; all quality checks rerun
 permissions:
   contents: read
   actions: write
@@ -11,6 +20,9 @@ jobs:
   queue:
     runs-on: ubuntu-latest
     timeout-minutes: 350
+    env:
+      STRESS_CASES: ${{ inputs.cases }}
+      SAVED_DRAFT_RUN: ${{ inputs.saved_draft_run }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

@@ -69,6 +69,7 @@ def validate(req, require):
     require(isinstance(figures,dict) and figures.get('density') in {'sparse','moderate','lyrical'},'Invalid figurative language density')
     require(all(isinstance(figures.get(k,[]),list) and all(isinstance(x,str) for x in figures.get(k,[])) for k in ['devices','image_domains']),'Figurative devices/domains must be string arrays')
     require(req['length_policy'].get('scene_words') in {'guidance','strict'},'Invalid scene length policy')
+    require(req['length_policy'].get('overflow','strict') in {'strict','advisory'},'Invalid length overflow policy')
     if req['brief_version']==2:
         require(bool(req['keywords']) and bool(req['scene_designs']),'Deep brief requires keywords and scene designs')
         for key in ['technology','institutions','physical_systems','deadlines']:

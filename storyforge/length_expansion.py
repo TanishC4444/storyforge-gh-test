@@ -30,7 +30,7 @@ def expand(executor,req,prose,data,out):
             require(bool(text),'Empty scene expansion')
             additions[pid]=text
         added=sum(len(text.split()) for text in additions.values())
-        require(minimum<=added<=maximum,f'Expansion added {added} words; must add {minimum}–{maximum} words')
+        require(added>=minimum and (req.get('length_policy',{}).get('overflow')=='advisory' or added<=maximum),f'Expansion added {added} words; must add at least {minimum} words'+('' if req.get('length_policy',{}).get('overflow')=='advisory' else f' and at most {maximum} words'))
         revised=apply(prose,{pid:by_id[pid]['text']+'\n\n'+text for pid,text in additions.items()},digest(prose))
         validate_prose(revised,req,check_length=True)
         return {'prose':revised,'additions':additions,'added_words':added}

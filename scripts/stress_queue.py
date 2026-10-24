@@ -1,9 +1,22 @@
 """Dispatch exactly one existing full-graph run at a time; collect honest audits."""
 from __future__ import annotations
-import argparse,datetime,io,json,os,re,time,urllib.request,urllib.error,zipfile
+import argparse,copy,datetime,io,json,os,re,time,urllib.request,urllib.error,zipfile
 from pathlib import Path
 
 PIPELINE='living-universe-pipeline.yml'
+
+def select_cases(suite,requested='',saved_draft_run=''):
+    suite=copy.deepcopy(suite);known={c['id'] for c in suite['cases']}
+    if requested.strip():
+        names=[s.strip() for s in requested.split(',')]
+        if len(names)!=len(set(names)) or not set(names)<=known:raise ValueError('Unknown or duplicate selected stress case')
+        suite['cases']=[c for c in suite['cases'] if c['id'] in names]
+    selected={c['id'] for c in suite['cases']}
+    if any(c.get('resume_case') and c['resume_case'] not in selected for c in suite['cases']):raise ValueError('Selected continuation requires its parent case')
+    if saved_draft_run:
+        if not saved_draft_run.isdigit() or int(saved_draft_run)<=0 or 'ensemble' not in selected:raise ValueError('Saved novel draft requires a positive run ID and ensemble case')
+        next(c for c in suite['cases'] if c['id']=='ensemble')['saved_draft_run']=saved_draft_run
+    return suite
 
 def validate_suite(suite):
     from storyforge.contracts import request
@@ -82,6 +95,7 @@ class Queue:
     def dispatch(self,case,resume):
         tag=self.tag+'-'+case['id'];title='Living | '+case['request_file']+' | '+tag
         inputs={'backend':'live','profile':'fast','request_file':case['request_file'],'scene_limit':str(case['scenes']),'resume_run':str(resume) if resume else '','checkpoint_artifact':'universe-canon','queue_tag':tag}
+        if case.get('saved_draft_run'):inputs['saved_draft_run']=case['saved_draft_run']
         dispatch_error=None
         try:self.api.api(f'actions/workflows/{PIPELINE}/dispatches','POST',{'ref':self.ref,'inputs':inputs})
         except (urllib.error.URLError,TimeoutError) as exc:
@@ -154,7 +168,7 @@ class Queue:
 
 def main():
     parser=argparse.ArgumentParser();parser.add_argument('--validate-only',action='store_true');parser.add_argument('--out',default='stress-results');args=parser.parse_args()
-    root=Path(__file__).resolve().parents[1];suite=validate_suite(json.loads((root/'examples/stress-suite.json').read_text()))
+    root=Path(__file__).resolve().parents[1];suite=validate_suite(select_cases(json.loads((root/'examples/stress-suite.json').read_text()),os.getenv('STRESS_CASES',''),os.getenv('SAVED_DRAFT_RUN','')))
     if args.validate_only:print('Validated',len(suite['cases']),'strict sequential cases');return
     api=GitHub(os.environ['GITHUB_REPOSITORY'],os.environ['GH_TOKEN'])
     q=Queue(api,suite,args.out,os.environ['GITHUB_REF_NAME'],os.environ['GITHUB_SHA'],'stress-'+os.environ['GITHUB_RUN_ID']+'-'+os.environ['GITHUB_RUN_ATTEMPT'])

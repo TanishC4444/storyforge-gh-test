@@ -193,7 +193,8 @@
     "scene_words": "strict",
     "chapter_words": "target",
     "allow_compression": false,
-    "policy": "2 scenes, target 450 words each; strict allowed range 360–585. Script cues count toward words; no padding."
+    "policy": "2 scenes, target 450 words each, minimum 360 for developed action. Longer scenes are acceptable; excess length alone is advisory, not grounds for rejection or rewriting. Quality, pacing, memory and non-repetition remain mandatory. Script cues count toward words; no padding.",
+    "overflow": "advisory"
   },
   "keywords": [
     {
