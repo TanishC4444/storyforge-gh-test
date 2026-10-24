@@ -155,7 +155,7 @@ jobs:
     - *id003
     env: *id004
   s01_design:
-    name: Reconcile scene 1 with verified prior memory
+    name: Scene 1 / Reconcile scene 1 with verified prior memory
     needs:
     - quickstart
     runs-on: ubuntu-latest
@@ -197,7 +197,7 @@ jobs:
     outputs: &id007
       characters: ${{ steps.task.outputs.characters }}
   s01_characters:
-    name: Independent character ${{ matrix.character }} / scene 1
+    name: Scene 1 / Independent character ${{ matrix.character }} / scene 1
     needs:
     - s01_design
     if: ${{ always() && !cancelled() && 0 < fromJSON(inputs.scene_limit) && needs.s01_design.result == 'success' }}
@@ -245,7 +245,7 @@ jobs:
       matrix:
         character: ${{ fromJSON(needs.s01_design.outputs.characters) }}
   s01_direction:
-    name: Compile character direction and writing plan
+    name: Scene 1 / Compile character direction and writing plan
     needs:
     - s01_design
     - s01_characters
@@ -288,7 +288,7 @@ jobs:
     env: *id004
     outputs: *id007
   s01_write_batches:
-    name: Write coherent scene / batch ${{ matrix.batch }}
+    name: Scene 1 / Write coherent scene / batch ${{ matrix.batch }}
     needs:
     - s01_design
     - s01_direction
@@ -338,7 +338,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s01_direction.outputs.characters) }}
   s01_draft:
-    name: Compile readable draft and source extraction plan
+    name: Scene 1 / Compile readable draft and source extraction plan
     needs:
     - s01_design
     - s01_direction
@@ -382,7 +382,7 @@ jobs:
     env: *id004
     outputs: *id007
   s01_story_batches:
-    name: Full-scene story checks / batch ${{ matrix.batch }}
+    name: Scene 1 / Full-scene story checks / batch ${{ matrix.batch }}
     needs:
     - s01_design
     - s01_draft
@@ -432,7 +432,7 @@ jobs:
         batch:
         - 0
   s01_rhetoric_batches:
-    name: Full-scene rhetoric checks / batch ${{ matrix.batch }}
+    name: Scene 1 / Full-scene rhetoric checks / batch ${{ matrix.batch }}
     needs:
     - s01_design
     - s01_draft
@@ -467,7 +467,7 @@ jobs:
     env: *id004
     strategy: *id012
   s01_memory_extract_batches:
-    name: Extract source-supported facts / batch ${{ matrix.batch }}
+    name: Scene 1 / Extract source-supported facts / batch ${{ matrix.batch }}
     needs:
     - s01_design
     - s01_draft
@@ -510,7 +510,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s01_draft.outputs.characters) }}
   s01_memory:
-    name: Compile full memory and allocate exhaustive checks
+    name: Scene 1 / Compile full memory and allocate exhaustive checks
     needs:
     - s01_design
     - s01_draft
@@ -554,7 +554,7 @@ jobs:
     env: *id004
     outputs: *id007
   s01_memory_preflight_batches:
-    name: Check every fact/history/source partition / ${{ matrix.batch }}
+    name: Scene 1 / Check every fact/history/source partition / ${{ matrix.batch }}
     needs:
     - s01_design
     - s01_draft
@@ -602,7 +602,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s01_memory.outputs.characters) }}
   s01_memory_preflight:
-    name: Join independently verified factual findings
+    name: Scene 1 / Join independently verified factual findings
     needs:
     - s01_design
     - s01_draft
@@ -646,7 +646,7 @@ jobs:
     - *id003
     env: *id004
   s01_repair_plan:
-    name: Compile literary findings and allocate targeted edits
+    name: Scene 1 / Compile literary findings and allocate targeted edits
     needs:
     - s01_design
     - s01_draft
@@ -693,7 +693,7 @@ jobs:
     env: *id004
     outputs: *id007
   s01_repair_batches:
-    name: Repair only source-owned disputed passages / ${{ matrix.batch }}
+    name: Scene 1 / Repair only source-owned disputed passages / ${{ matrix.batch }}
     needs:
     - s01_design
     - s01_repair_plan
@@ -740,7 +740,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s01_repair_plan.outputs.characters) }}
   s01_repair:
-    name: Merge edits and plan changed-evidence refresh
+    name: Scene 1 / Merge edits and plan changed-evidence refresh
     needs:
     - s01_design
     - s01_draft
@@ -790,7 +790,7 @@ jobs:
       characters: ${{ steps.task.outputs.characters }}
       refresh_required: ${{ steps.task.outputs.refresh_required }}
   s01_final_check:
-    name: One final strict judgment; reuse only exact passing evidence
+    name: Scene 1 / One final strict judgment; reuse only exact passing evidence
     needs:
     - s01_design
     - s01_repair
@@ -836,7 +836,7 @@ jobs:
     - *id003
     env: *id004
   s01_memory_refresh_batches:
-    name: Refresh only changed source facts / ${{ matrix.batch }}
+    name: Scene 1 / Refresh only changed source facts / ${{ matrix.batch }}
     needs:
     - s01_design
     - s01_repair
@@ -883,7 +883,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s01_repair.outputs.characters) }}
   s01_final_memory:
-    name: Compile complete final memory and reuse exact factual proof
+    name: Scene 1 / Compile complete final memory and reuse exact factual proof
     needs:
     - s01_design
     - s01_repair
@@ -931,7 +931,7 @@ jobs:
       characters: ${{ steps.task.outputs.characters }}
       checks_required: ${{ steps.task.outputs.checks_required }}
   s01_memory_final_batches:
-    name: Verify changed final memory / partition ${{ matrix.batch }}
+    name: Scene 1 / Verify changed final memory / partition ${{ matrix.batch }}
     needs:
     - s01_design
     - s01_repair
@@ -980,7 +980,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s01_final_memory.outputs.characters) }}
   s01_memory_review:
-    name: Bind final factual proof to exact text and state
+    name: Scene 1 / Bind final factual proof to exact text and state
     needs:
     - s01_design
     - s01_repair
@@ -1024,15 +1024,61 @@ jobs:
         overwrite: true
     - *id003
     env: *id004
-  s01_accept:
-    name: Commit scene 1 only after literary and factual gates
+    outputs: &id018
+      repair_required: ${{ steps.task.outputs.repair_required }}
+  s01_memory_recovery_plan:
+    name: Scene 1 / Allocate one targeted final-memory correction
     needs:
     - s01_design
-    - s01_final_check
-    - s01_final_memory
+    - s01_repair
     - s01_memory_review
-    if: ${{ always() && !cancelled() && 0 < fromJSON(inputs.scene_limit) && needs.s01_design.result == 'success' && needs.s01_final_check.result
-      == 'success' && needs.s01_final_memory.result == 'success' && needs.s01_memory_review.result == 'success' }}
+    if: ${{ always() && !cancelled() && (0 < fromJSON(inputs.scene_limit) && needs.s01_memory_review.outputs.repair_required
+      == 'true') && needs.s01_design.result == 'success' && needs.s01_repair.result == 'success' && needs.s01_memory_review.result
+      == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - *id001
+    - *id002
+    - *id008
+    - name: Fetch upstream artifacts in one parallel transfer
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s01_design,s01_repair,s01_memory_review}'
+        path: incoming
+    - name: Bind downloaded artifacts to explicit source aliases
+      env:
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_repair","path":"edited","pattern":false,"condition":null},{"name":"s01_memory_review","path":"memory","pattern":false,"condition":null},{"name":"s01_memory_review","path":"memory-review","pattern":false,"condition":null}]'
+        STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+      run: python -m storyforge.living_stages arrange
+    - name: Allocate one targeted final-memory correction
+      id: task
+      env: *id006
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.living_stages memory_recovery_plan --backend "$backend" --index 0'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_memory_recovery_plan
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - *id003
+    env: *id004
+    outputs: *id007
+  s01_memory_recovery_batches:
+    name: Scene 1 / Correct only flagged memory source / ${{ matrix.batch }}
+    needs:
+    - s01_design
+    - s01_repair
+    - s01_memory_recovery_plan
+    if: ${{ always() && !cancelled() && 0 < fromJSON(inputs.scene_limit) && needs.s01_design.result == 'success' && needs.s01_repair.result
+      == 'success' && needs.s01_memory_recovery_plan.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
@@ -1042,11 +1088,201 @@ jobs:
     - name: Fetch upstream artifacts in one parallel transfer
       uses: actions/download-artifact@v4
       with:
-        pattern: '{s01_design,s01_final_check,s01_final_memory,s01_memory_review}'
+        pattern: '{s01_design,s01_repair,s01_memory_recovery_plan}'
         path: incoming
     - name: Bind downloaded artifacts to explicit source aliases
       env:
-        STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_final_check","path":"edited","pattern":false,"condition":null},{"name":"s01_final_memory","path":"memory","pattern":false,"condition":null},{"name":"s01_memory_review","path":"memory-review","pattern":false,"condition":null}]'
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_repair","path":"edited","pattern":false,"condition":null},{"name":"s01_memory_recovery_plan","path":"plan","pattern":false,"condition":null}]'
+        STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+      run: python -m storyforge.living_stages arrange
+    - name: Correct only flagged memory source / ${{ matrix.batch }}
+      id: task
+      env: *id009
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_extract_batch --backend "$backend" --index 0 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_memory_recovery_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - *id003
+    env: *id004
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s01_memory_recovery_plan.outputs.characters) }}
+  s01_memory_recovered:
+    name: Scene 1 / Compile corrected facts for independent verification
+    needs:
+    - s01_design
+    - s01_repair
+    - s01_memory_recovery_plan
+    - s01_memory_recovery_batches
+    if: ${{ always() && !cancelled() && 0 < fromJSON(inputs.scene_limit) && needs.s01_design.result == 'success' && needs.s01_repair.result
+      == 'success' && needs.s01_memory_recovery_plan.result == 'success' && needs.s01_memory_recovery_batches.result == 'success'
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - *id001
+    - *id002
+    - *id008
+    - name: Fetch upstream artifacts in one parallel transfer
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s01_design,s01_repair,s01_memory_recovery_plan,s01_memory_recovery_batches-*}'
+        path: incoming
+    - name: Bind downloaded artifacts to explicit source aliases
+      env:
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_repair","path":"edited","pattern":false,"condition":null},{"name":"s01_memory_recovery_plan","path":"plan","pattern":false,"condition":null},{"name":"s01_memory_recovery_batches-*","path":"batches","pattern":true,"condition":null}]'
+        STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+      run: python -m storyforge.living_stages arrange
+    - name: Compile corrected facts for independent verification
+      id: task
+      env: *id006
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.living_stages memory_recovered_plan --backend "$backend" --index 0'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_memory_recovered
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - *id003
+    env: *id004
+    outputs: *id007
+  s01_memory_recovery_checks:
+    name: Scene 1 / Verify corrected memory once / ${{ matrix.batch }}
+    needs:
+    - s01_design
+    - s01_repair
+    - s01_memory_recovered
+    if: ${{ always() && !cancelled() && 0 < fromJSON(inputs.scene_limit) && needs.s01_design.result == 'success' && needs.s01_repair.result
+      == 'success' && needs.s01_memory_recovered.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - *id001
+    - *id002
+    - *id005
+    - name: Fetch upstream artifacts in one parallel transfer
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s01_design,s01_repair,s01_memory_recovered}'
+        path: incoming
+    - name: Bind downloaded artifacts to explicit source aliases
+      env:
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_repair","path":"edited","pattern":false,"condition":null},{"name":"s01_memory_recovered","path":"memory","pattern":false,"condition":null},{"name":"s01_memory_recovered","path":"plan","pattern":false,"condition":null}]'
+        STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+      run: python -m storyforge.living_stages arrange
+    - name: Verify corrected memory once / ${{ matrix.batch }}
+      id: task
+      env: *id009
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_batch --backend "$backend" --index 0 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_memory_recovery_checks-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - *id003
+    env: *id004
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s01_memory_recovered.outputs.characters) }}
+  s01_memory_recovery_join:
+    name: Scene 1 / Bind recovered proof without another repair loop
+    needs:
+    - s01_design
+    - s01_repair
+    - s01_memory_recovered
+    - s01_memory_recovery_checks
+    if: ${{ always() && !cancelled() && 0 < fromJSON(inputs.scene_limit) && needs.s01_design.result == 'success' && needs.s01_repair.result
+      == 'success' && needs.s01_memory_recovered.result == 'success' && needs.s01_memory_recovery_checks.result == 'success'
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - *id001
+    - *id002
+    - *id008
+    - name: Fetch upstream artifacts in one parallel transfer
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s01_design,s01_repair,s01_memory_recovered,s01_memory_recovery_checks-*}'
+        path: incoming
+    - name: Bind downloaded artifacts to explicit source aliases
+      env:
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_repair","path":"edited","pattern":false,"condition":null},{"name":"s01_memory_recovered","path":"memory","pattern":false,"condition":null},{"name":"s01_memory_recovered","path":"plan","pattern":false,"condition":null},{"name":"s01_memory_recovery_checks-*","path":"batches","pattern":true,"condition":null}]'
+        STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+      run: python -m storyforge.living_stages arrange
+    - name: Bind recovered proof without another repair loop
+      id: task
+      env: *id006
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.living_stages memory_recovery_join --backend "$backend" --index 0'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s01_memory_recovery_join
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - *id003
+    env: *id004
+  s01_accept:
+    name: Scene 1 / Commit scene 1 only after literary and factual gates
+    needs:
+    - s01_design
+    - s01_final_check
+    - s01_memory_review
+    - s01_memory_recovery_join
+    if: ${{ always() && !cancelled() && 0 < fromJSON(inputs.scene_limit) && needs.s01_design.result == 'success' && needs.s01_final_check.result
+      == 'success' && needs.s01_memory_review.result == 'success' && (needs.s01_memory_recovery_join.result == 'success' ||
+      (needs.s01_memory_review.outputs.repair_required != 'true' && needs.s01_memory_recovery_join.result == 'skipped')) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - *id001
+    - *id002
+    - *id005
+    - name: Fetch upstream artifacts in one parallel transfer
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s01_design,s01_final_check,s01_memory_review,s01_memory_recovery_join}'
+        path: incoming
+    - name: Bind downloaded artifacts to explicit source aliases
+      env:
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_final_check","path":"edited","pattern":false,"condition":null},{"name":"s01_memory_review","path":"memory","pattern":false,"condition":null},{"name":"s01_memory_review","path":"memory-review","pattern":false,"condition":null},{"name":"s01_memory_recovery_join","path":"recovered-memory","pattern":false,"condition":"needs.s01_memory_review.outputs.repair_required
+          == ''true''"}]'
         STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
       run: python -m storyforge.living_stages arrange
     - name: Commit scene 1 only after literary and factual gates
@@ -1069,7 +1305,7 @@ jobs:
     - *id003
     env: *id004
   s02_design:
-    name: Reconcile scene 2 with verified prior memory
+    name: Scene 2 / Reconcile scene 2 with verified prior memory
     needs:
     - s01_accept
     if: ${{ always() && !cancelled() && 1 < fromJSON(inputs.scene_limit) && needs.s01_accept.result == 'success' }}
@@ -1110,7 +1346,7 @@ jobs:
     env: *id004
     outputs: *id007
   s02_characters:
-    name: Independent character ${{ matrix.character }} / scene 2
+    name: Scene 2 / Independent character ${{ matrix.character }} / scene 2
     needs:
     - s02_design
     if: ${{ always() && !cancelled() && 1 < fromJSON(inputs.scene_limit) && needs.s02_design.result == 'success' }}
@@ -1155,7 +1391,7 @@ jobs:
       matrix:
         character: ${{ fromJSON(needs.s02_design.outputs.characters) }}
   s02_direction:
-    name: Compile character direction and writing plan
+    name: Scene 2 / Compile character direction and writing plan
     needs:
     - s02_design
     - s02_characters
@@ -1198,7 +1434,7 @@ jobs:
     env: *id004
     outputs: *id007
   s02_write_batches:
-    name: Write coherent scene / batch ${{ matrix.batch }}
+    name: Scene 2 / Write coherent scene / batch ${{ matrix.batch }}
     needs:
     - s02_design
     - s02_direction
@@ -1245,7 +1481,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s02_direction.outputs.characters) }}
   s02_draft:
-    name: Compile readable draft and source extraction plan
+    name: Scene 2 / Compile readable draft and source extraction plan
     needs:
     - s02_design
     - s02_direction
@@ -1289,7 +1525,7 @@ jobs:
     env: *id004
     outputs: *id007
   s02_story_batches:
-    name: Full-scene story checks / batch ${{ matrix.batch }}
+    name: Scene 2 / Full-scene story checks / batch ${{ matrix.batch }}
     needs:
     - s02_design
     - s02_draft
@@ -1334,7 +1570,7 @@ jobs:
     env: *id004
     strategy: *id012
   s02_rhetoric_batches:
-    name: Full-scene rhetoric checks / batch ${{ matrix.batch }}
+    name: Scene 2 / Full-scene rhetoric checks / batch ${{ matrix.batch }}
     needs:
     - s02_design
     - s02_draft
@@ -1369,7 +1605,7 @@ jobs:
     env: *id004
     strategy: *id012
   s02_memory_extract_batches:
-    name: Extract source-supported facts / batch ${{ matrix.batch }}
+    name: Scene 2 / Extract source-supported facts / batch ${{ matrix.batch }}
     needs:
     - s02_design
     - s02_draft
@@ -1412,7 +1648,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s02_draft.outputs.characters) }}
   s02_memory:
-    name: Compile full memory and allocate exhaustive checks
+    name: Scene 2 / Compile full memory and allocate exhaustive checks
     needs:
     - s02_design
     - s02_draft
@@ -1456,7 +1692,7 @@ jobs:
     env: *id004
     outputs: *id007
   s02_memory_preflight_batches:
-    name: Check every fact/history/source partition / ${{ matrix.batch }}
+    name: Scene 2 / Check every fact/history/source partition / ${{ matrix.batch }}
     needs:
     - s02_design
     - s02_draft
@@ -1504,7 +1740,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s02_memory.outputs.characters) }}
   s02_memory_preflight:
-    name: Join independently verified factual findings
+    name: Scene 2 / Join independently verified factual findings
     needs:
     - s02_design
     - s02_draft
@@ -1548,7 +1784,7 @@ jobs:
     - *id003
     env: *id004
   s02_repair_plan:
-    name: Compile literary findings and allocate targeted edits
+    name: Scene 2 / Compile literary findings and allocate targeted edits
     needs:
     - s02_design
     - s02_draft
@@ -1595,7 +1831,7 @@ jobs:
     env: *id004
     outputs: *id007
   s02_repair_batches:
-    name: Repair only source-owned disputed passages / ${{ matrix.batch }}
+    name: Scene 2 / Repair only source-owned disputed passages / ${{ matrix.batch }}
     needs:
     - s02_design
     - s02_repair_plan
@@ -1642,7 +1878,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s02_repair_plan.outputs.characters) }}
   s02_repair:
-    name: Merge edits and plan changed-evidence refresh
+    name: Scene 2 / Merge edits and plan changed-evidence refresh
     needs:
     - s02_design
     - s02_draft
@@ -1690,7 +1926,7 @@ jobs:
     env: *id004
     outputs: *id016
   s02_final_check:
-    name: One final strict judgment; reuse only exact passing evidence
+    name: Scene 2 / One final strict judgment; reuse only exact passing evidence
     needs:
     - s02_design
     - s02_repair
@@ -1736,7 +1972,7 @@ jobs:
     - *id003
     env: *id004
   s02_memory_refresh_batches:
-    name: Refresh only changed source facts / ${{ matrix.batch }}
+    name: Scene 2 / Refresh only changed source facts / ${{ matrix.batch }}
     needs:
     - s02_design
     - s02_repair
@@ -1783,7 +2019,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s02_repair.outputs.characters) }}
   s02_final_memory:
-    name: Compile complete final memory and reuse exact factual proof
+    name: Scene 2 / Compile complete final memory and reuse exact factual proof
     needs:
     - s02_design
     - s02_repair
@@ -1829,7 +2065,7 @@ jobs:
     env: *id004
     outputs: *id017
   s02_memory_final_batches:
-    name: Verify changed final memory / partition ${{ matrix.batch }}
+    name: Scene 2 / Verify changed final memory / partition ${{ matrix.batch }}
     needs:
     - s02_design
     - s02_repair
@@ -1878,7 +2114,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s02_final_memory.outputs.characters) }}
   s02_memory_review:
-    name: Bind final factual proof to exact text and state
+    name: Scene 2 / Bind final factual proof to exact text and state
     needs:
     - s02_design
     - s02_repair
@@ -1922,15 +2158,60 @@ jobs:
         overwrite: true
     - *id003
     env: *id004
-  s02_accept:
-    name: Commit scene 2 only after literary and factual gates
+    outputs: *id018
+  s02_memory_recovery_plan:
+    name: Scene 2 / Allocate one targeted final-memory correction
     needs:
     - s02_design
-    - s02_final_check
-    - s02_final_memory
+    - s02_repair
     - s02_memory_review
-    if: ${{ always() && !cancelled() && 1 < fromJSON(inputs.scene_limit) && needs.s02_design.result == 'success' && needs.s02_final_check.result
-      == 'success' && needs.s02_final_memory.result == 'success' && needs.s02_memory_review.result == 'success' }}
+    if: ${{ always() && !cancelled() && (1 < fromJSON(inputs.scene_limit) && needs.s02_memory_review.outputs.repair_required
+      == 'true') && needs.s02_design.result == 'success' && needs.s02_repair.result == 'success' && needs.s02_memory_review.result
+      == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - *id001
+    - *id002
+    - *id008
+    - name: Fetch upstream artifacts in one parallel transfer
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s02_design,s02_repair,s02_memory_review}'
+        path: incoming
+    - name: Bind downloaded artifacts to explicit source aliases
+      env:
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_repair","path":"edited","pattern":false,"condition":null},{"name":"s02_memory_review","path":"memory","pattern":false,"condition":null},{"name":"s02_memory_review","path":"memory-review","pattern":false,"condition":null}]'
+        STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+      run: python -m storyforge.living_stages arrange
+    - name: Allocate one targeted final-memory correction
+      id: task
+      env: *id006
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.living_stages memory_recovery_plan --backend "$backend" --index 1'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_memory_recovery_plan
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - *id003
+    env: *id004
+    outputs: *id007
+  s02_memory_recovery_batches:
+    name: Scene 2 / Correct only flagged memory source / ${{ matrix.batch }}
+    needs:
+    - s02_design
+    - s02_repair
+    - s02_memory_recovery_plan
+    if: ${{ always() && !cancelled() && 1 < fromJSON(inputs.scene_limit) && needs.s02_design.result == 'success' && needs.s02_repair.result
+      == 'success' && needs.s02_memory_recovery_plan.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
@@ -1940,11 +2221,201 @@ jobs:
     - name: Fetch upstream artifacts in one parallel transfer
       uses: actions/download-artifact@v4
       with:
-        pattern: '{s02_design,s02_final_check,s02_final_memory,s02_memory_review}'
+        pattern: '{s02_design,s02_repair,s02_memory_recovery_plan}'
         path: incoming
     - name: Bind downloaded artifacts to explicit source aliases
       env:
-        STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_final_check","path":"edited","pattern":false,"condition":null},{"name":"s02_final_memory","path":"memory","pattern":false,"condition":null},{"name":"s02_memory_review","path":"memory-review","pattern":false,"condition":null}]'
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_repair","path":"edited","pattern":false,"condition":null},{"name":"s02_memory_recovery_plan","path":"plan","pattern":false,"condition":null}]'
+        STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+      run: python -m storyforge.living_stages arrange
+    - name: Correct only flagged memory source / ${{ matrix.batch }}
+      id: task
+      env: *id009
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_extract_batch --backend "$backend" --index 1 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_memory_recovery_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - *id003
+    env: *id004
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s02_memory_recovery_plan.outputs.characters) }}
+  s02_memory_recovered:
+    name: Scene 2 / Compile corrected facts for independent verification
+    needs:
+    - s02_design
+    - s02_repair
+    - s02_memory_recovery_plan
+    - s02_memory_recovery_batches
+    if: ${{ always() && !cancelled() && 1 < fromJSON(inputs.scene_limit) && needs.s02_design.result == 'success' && needs.s02_repair.result
+      == 'success' && needs.s02_memory_recovery_plan.result == 'success' && needs.s02_memory_recovery_batches.result == 'success'
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - *id001
+    - *id002
+    - *id008
+    - name: Fetch upstream artifacts in one parallel transfer
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s02_design,s02_repair,s02_memory_recovery_plan,s02_memory_recovery_batches-*}'
+        path: incoming
+    - name: Bind downloaded artifacts to explicit source aliases
+      env:
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_repair","path":"edited","pattern":false,"condition":null},{"name":"s02_memory_recovery_plan","path":"plan","pattern":false,"condition":null},{"name":"s02_memory_recovery_batches-*","path":"batches","pattern":true,"condition":null}]'
+        STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+      run: python -m storyforge.living_stages arrange
+    - name: Compile corrected facts for independent verification
+      id: task
+      env: *id006
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.living_stages memory_recovered_plan --backend "$backend" --index 1'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_memory_recovered
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - *id003
+    env: *id004
+    outputs: *id007
+  s02_memory_recovery_checks:
+    name: Scene 2 / Verify corrected memory once / ${{ matrix.batch }}
+    needs:
+    - s02_design
+    - s02_repair
+    - s02_memory_recovered
+    if: ${{ always() && !cancelled() && 1 < fromJSON(inputs.scene_limit) && needs.s02_design.result == 'success' && needs.s02_repair.result
+      == 'success' && needs.s02_memory_recovered.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - *id001
+    - *id002
+    - *id005
+    - name: Fetch upstream artifacts in one parallel transfer
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s02_design,s02_repair,s02_memory_recovered}'
+        path: incoming
+    - name: Bind downloaded artifacts to explicit source aliases
+      env:
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_repair","path":"edited","pattern":false,"condition":null},{"name":"s02_memory_recovered","path":"memory","pattern":false,"condition":null},{"name":"s02_memory_recovered","path":"plan","pattern":false,"condition":null}]'
+        STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+      run: python -m storyforge.living_stages arrange
+    - name: Verify corrected memory once / ${{ matrix.batch }}
+      id: task
+      env: *id009
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_batch --backend "$backend" --index 1 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_memory_recovery_checks-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - *id003
+    env: *id004
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s02_memory_recovered.outputs.characters) }}
+  s02_memory_recovery_join:
+    name: Scene 2 / Bind recovered proof without another repair loop
+    needs:
+    - s02_design
+    - s02_repair
+    - s02_memory_recovered
+    - s02_memory_recovery_checks
+    if: ${{ always() && !cancelled() && 1 < fromJSON(inputs.scene_limit) && needs.s02_design.result == 'success' && needs.s02_repair.result
+      == 'success' && needs.s02_memory_recovered.result == 'success' && needs.s02_memory_recovery_checks.result == 'success'
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - *id001
+    - *id002
+    - *id008
+    - name: Fetch upstream artifacts in one parallel transfer
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s02_design,s02_repair,s02_memory_recovered,s02_memory_recovery_checks-*}'
+        path: incoming
+    - name: Bind downloaded artifacts to explicit source aliases
+      env:
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_repair","path":"edited","pattern":false,"condition":null},{"name":"s02_memory_recovered","path":"memory","pattern":false,"condition":null},{"name":"s02_memory_recovered","path":"plan","pattern":false,"condition":null},{"name":"s02_memory_recovery_checks-*","path":"batches","pattern":true,"condition":null}]'
+        STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+      run: python -m storyforge.living_stages arrange
+    - name: Bind recovered proof without another repair loop
+      id: task
+      env: *id006
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.living_stages memory_recovery_join --backend "$backend" --index 1'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s02_memory_recovery_join
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - *id003
+    env: *id004
+  s02_accept:
+    name: Scene 2 / Commit scene 2 only after literary and factual gates
+    needs:
+    - s02_design
+    - s02_final_check
+    - s02_memory_review
+    - s02_memory_recovery_join
+    if: ${{ always() && !cancelled() && 1 < fromJSON(inputs.scene_limit) && needs.s02_design.result == 'success' && needs.s02_final_check.result
+      == 'success' && needs.s02_memory_review.result == 'success' && (needs.s02_memory_recovery_join.result == 'success' ||
+      (needs.s02_memory_review.outputs.repair_required != 'true' && needs.s02_memory_recovery_join.result == 'skipped')) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - *id001
+    - *id002
+    - *id005
+    - name: Fetch upstream artifacts in one parallel transfer
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s02_design,s02_final_check,s02_memory_review,s02_memory_recovery_join}'
+        path: incoming
+    - name: Bind downloaded artifacts to explicit source aliases
+      env:
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s02_design","path":"state","pattern":false,"condition":null},{"name":"s02_final_check","path":"edited","pattern":false,"condition":null},{"name":"s02_memory_review","path":"memory","pattern":false,"condition":null},{"name":"s02_memory_review","path":"memory-review","pattern":false,"condition":null},{"name":"s02_memory_recovery_join","path":"recovered-memory","pattern":false,"condition":"needs.s02_memory_review.outputs.repair_required
+          == ''true''"}]'
         STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
       run: python -m storyforge.living_stages arrange
     - name: Commit scene 2 only after literary and factual gates
@@ -1967,7 +2438,7 @@ jobs:
     - *id003
     env: *id004
   s03_design:
-    name: Reconcile scene 3 with verified prior memory
+    name: Scene 3 / Reconcile scene 3 with verified prior memory
     needs:
     - s02_accept
     if: ${{ always() && !cancelled() && 2 < fromJSON(inputs.scene_limit) && needs.s02_accept.result == 'success' }}
@@ -2008,7 +2479,7 @@ jobs:
     env: *id004
     outputs: *id007
   s03_characters:
-    name: Independent character ${{ matrix.character }} / scene 3
+    name: Scene 3 / Independent character ${{ matrix.character }} / scene 3
     needs:
     - s03_design
     if: ${{ always() && !cancelled() && 2 < fromJSON(inputs.scene_limit) && needs.s03_design.result == 'success' }}
@@ -2053,7 +2524,7 @@ jobs:
       matrix:
         character: ${{ fromJSON(needs.s03_design.outputs.characters) }}
   s03_direction:
-    name: Compile character direction and writing plan
+    name: Scene 3 / Compile character direction and writing plan
     needs:
     - s03_design
     - s03_characters
@@ -2096,7 +2567,7 @@ jobs:
     env: *id004
     outputs: *id007
   s03_write_batches:
-    name: Write coherent scene / batch ${{ matrix.batch }}
+    name: Scene 3 / Write coherent scene / batch ${{ matrix.batch }}
     needs:
     - s03_design
     - s03_direction
@@ -2143,7 +2614,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s03_direction.outputs.characters) }}
   s03_draft:
-    name: Compile readable draft and source extraction plan
+    name: Scene 3 / Compile readable draft and source extraction plan
     needs:
     - s03_design
     - s03_direction
@@ -2187,7 +2658,7 @@ jobs:
     env: *id004
     outputs: *id007
   s03_story_batches:
-    name: Full-scene story checks / batch ${{ matrix.batch }}
+    name: Scene 3 / Full-scene story checks / batch ${{ matrix.batch }}
     needs:
     - s03_design
     - s03_draft
@@ -2199,13 +2670,13 @@ jobs:
     - *id001
     - *id002
     - *id005
-    - &id018
+    - &id019
       name: Fetch upstream artifacts in one parallel transfer
       uses: actions/download-artifact@v4
       with:
         pattern: '{s03_design,s03_draft}'
         path: incoming
-    - &id019
+    - &id020
       name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_draft","path":"edited","pattern":false,"condition":null}]'
@@ -2232,7 +2703,7 @@ jobs:
     env: *id004
     strategy: *id012
   s03_rhetoric_batches:
-    name: Full-scene rhetoric checks / batch ${{ matrix.batch }}
+    name: Scene 3 / Full-scene rhetoric checks / batch ${{ matrix.batch }}
     needs:
     - s03_design
     - s03_draft
@@ -2244,8 +2715,8 @@ jobs:
     - *id001
     - *id002
     - *id005
-    - *id018
     - *id019
+    - *id020
     - name: Full-scene rhetoric checks / batch ${{ matrix.batch }}
       id: task
       env: *id009
@@ -2267,7 +2738,7 @@ jobs:
     env: *id004
     strategy: *id012
   s03_memory_extract_batches:
-    name: Extract source-supported facts / batch ${{ matrix.batch }}
+    name: Scene 3 / Extract source-supported facts / batch ${{ matrix.batch }}
     needs:
     - s03_design
     - s03_draft
@@ -2279,7 +2750,7 @@ jobs:
     - *id001
     - *id002
     - *id005
-    - *id018
+    - *id019
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_draft","path":"edited","pattern":false,"condition":null},{"name":"s03_draft","path":"plan","pattern":false,"condition":null}]'
@@ -2310,7 +2781,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s03_draft.outputs.characters) }}
   s03_memory:
-    name: Compile full memory and allocate exhaustive checks
+    name: Scene 3 / Compile full memory and allocate exhaustive checks
     needs:
     - s03_design
     - s03_draft
@@ -2354,7 +2825,7 @@ jobs:
     env: *id004
     outputs: *id007
   s03_memory_preflight_batches:
-    name: Check every fact/history/source partition / ${{ matrix.batch }}
+    name: Scene 3 / Check every fact/history/source partition / ${{ matrix.batch }}
     needs:
     - s03_design
     - s03_draft
@@ -2402,7 +2873,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s03_memory.outputs.characters) }}
   s03_memory_preflight:
-    name: Join independently verified factual findings
+    name: Scene 3 / Join independently verified factual findings
     needs:
     - s03_design
     - s03_draft
@@ -2446,7 +2917,7 @@ jobs:
     - *id003
     env: *id004
   s03_repair_plan:
-    name: Compile literary findings and allocate targeted edits
+    name: Scene 3 / Compile literary findings and allocate targeted edits
     needs:
     - s03_design
     - s03_draft
@@ -2493,7 +2964,7 @@ jobs:
     env: *id004
     outputs: *id007
   s03_repair_batches:
-    name: Repair only source-owned disputed passages / ${{ matrix.batch }}
+    name: Scene 3 / Repair only source-owned disputed passages / ${{ matrix.batch }}
     needs:
     - s03_design
     - s03_repair_plan
@@ -2540,7 +3011,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s03_repair_plan.outputs.characters) }}
   s03_repair:
-    name: Merge edits and plan changed-evidence refresh
+    name: Scene 3 / Merge edits and plan changed-evidence refresh
     needs:
     - s03_design
     - s03_draft
@@ -2588,7 +3059,7 @@ jobs:
     env: *id004
     outputs: *id016
   s03_final_check:
-    name: One final strict judgment; reuse only exact passing evidence
+    name: Scene 3 / One final strict judgment; reuse only exact passing evidence
     needs:
     - s03_design
     - s03_repair
@@ -2634,7 +3105,7 @@ jobs:
     - *id003
     env: *id004
   s03_memory_refresh_batches:
-    name: Refresh only changed source facts / ${{ matrix.batch }}
+    name: Scene 3 / Refresh only changed source facts / ${{ matrix.batch }}
     needs:
     - s03_design
     - s03_repair
@@ -2681,7 +3152,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s03_repair.outputs.characters) }}
   s03_final_memory:
-    name: Compile complete final memory and reuse exact factual proof
+    name: Scene 3 / Compile complete final memory and reuse exact factual proof
     needs:
     - s03_design
     - s03_repair
@@ -2727,7 +3198,7 @@ jobs:
     env: *id004
     outputs: *id017
   s03_memory_final_batches:
-    name: Verify changed final memory / partition ${{ matrix.batch }}
+    name: Scene 3 / Verify changed final memory / partition ${{ matrix.batch }}
     needs:
     - s03_design
     - s03_repair
@@ -2776,7 +3247,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s03_final_memory.outputs.characters) }}
   s03_memory_review:
-    name: Bind final factual proof to exact text and state
+    name: Scene 3 / Bind final factual proof to exact text and state
     needs:
     - s03_design
     - s03_repair
@@ -2820,15 +3291,60 @@ jobs:
         overwrite: true
     - *id003
     env: *id004
-  s03_accept:
-    name: Commit scene 3 only after literary and factual gates
+    outputs: *id018
+  s03_memory_recovery_plan:
+    name: Scene 3 / Allocate one targeted final-memory correction
     needs:
     - s03_design
-    - s03_final_check
-    - s03_final_memory
+    - s03_repair
     - s03_memory_review
-    if: ${{ always() && !cancelled() && 2 < fromJSON(inputs.scene_limit) && needs.s03_design.result == 'success' && needs.s03_final_check.result
-      == 'success' && needs.s03_final_memory.result == 'success' && needs.s03_memory_review.result == 'success' }}
+    if: ${{ always() && !cancelled() && (2 < fromJSON(inputs.scene_limit) && needs.s03_memory_review.outputs.repair_required
+      == 'true') && needs.s03_design.result == 'success' && needs.s03_repair.result == 'success' && needs.s03_memory_review.result
+      == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - *id001
+    - *id002
+    - *id008
+    - name: Fetch upstream artifacts in one parallel transfer
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s03_design,s03_repair,s03_memory_review}'
+        path: incoming
+    - name: Bind downloaded artifacts to explicit source aliases
+      env:
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_repair","path":"edited","pattern":false,"condition":null},{"name":"s03_memory_review","path":"memory","pattern":false,"condition":null},{"name":"s03_memory_review","path":"memory-review","pattern":false,"condition":null}]'
+        STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+      run: python -m storyforge.living_stages arrange
+    - name: Allocate one targeted final-memory correction
+      id: task
+      env: *id006
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.living_stages memory_recovery_plan --backend "$backend" --index 2'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_memory_recovery_plan
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - *id003
+    env: *id004
+    outputs: *id007
+  s03_memory_recovery_batches:
+    name: Scene 3 / Correct only flagged memory source / ${{ matrix.batch }}
+    needs:
+    - s03_design
+    - s03_repair
+    - s03_memory_recovery_plan
+    if: ${{ always() && !cancelled() && 2 < fromJSON(inputs.scene_limit) && needs.s03_design.result == 'success' && needs.s03_repair.result
+      == 'success' && needs.s03_memory_recovery_plan.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
@@ -2838,11 +3354,201 @@ jobs:
     - name: Fetch upstream artifacts in one parallel transfer
       uses: actions/download-artifact@v4
       with:
-        pattern: '{s03_design,s03_final_check,s03_final_memory,s03_memory_review}'
+        pattern: '{s03_design,s03_repair,s03_memory_recovery_plan}'
         path: incoming
     - name: Bind downloaded artifacts to explicit source aliases
       env:
-        STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_final_check","path":"edited","pattern":false,"condition":null},{"name":"s03_final_memory","path":"memory","pattern":false,"condition":null},{"name":"s03_memory_review","path":"memory-review","pattern":false,"condition":null}]'
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_repair","path":"edited","pattern":false,"condition":null},{"name":"s03_memory_recovery_plan","path":"plan","pattern":false,"condition":null}]'
+        STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+      run: python -m storyforge.living_stages arrange
+    - name: Correct only flagged memory source / ${{ matrix.batch }}
+      id: task
+      env: *id009
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_extract_batch --backend "$backend" --index 2 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_memory_recovery_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - *id003
+    env: *id004
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s03_memory_recovery_plan.outputs.characters) }}
+  s03_memory_recovered:
+    name: Scene 3 / Compile corrected facts for independent verification
+    needs:
+    - s03_design
+    - s03_repair
+    - s03_memory_recovery_plan
+    - s03_memory_recovery_batches
+    if: ${{ always() && !cancelled() && 2 < fromJSON(inputs.scene_limit) && needs.s03_design.result == 'success' && needs.s03_repair.result
+      == 'success' && needs.s03_memory_recovery_plan.result == 'success' && needs.s03_memory_recovery_batches.result == 'success'
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - *id001
+    - *id002
+    - *id008
+    - name: Fetch upstream artifacts in one parallel transfer
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s03_design,s03_repair,s03_memory_recovery_plan,s03_memory_recovery_batches-*}'
+        path: incoming
+    - name: Bind downloaded artifacts to explicit source aliases
+      env:
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_repair","path":"edited","pattern":false,"condition":null},{"name":"s03_memory_recovery_plan","path":"plan","pattern":false,"condition":null},{"name":"s03_memory_recovery_batches-*","path":"batches","pattern":true,"condition":null}]'
+        STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+      run: python -m storyforge.living_stages arrange
+    - name: Compile corrected facts for independent verification
+      id: task
+      env: *id006
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.living_stages memory_recovered_plan --backend "$backend" --index 2'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_memory_recovered
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - *id003
+    env: *id004
+    outputs: *id007
+  s03_memory_recovery_checks:
+    name: Scene 3 / Verify corrected memory once / ${{ matrix.batch }}
+    needs:
+    - s03_design
+    - s03_repair
+    - s03_memory_recovered
+    if: ${{ always() && !cancelled() && 2 < fromJSON(inputs.scene_limit) && needs.s03_design.result == 'success' && needs.s03_repair.result
+      == 'success' && needs.s03_memory_recovered.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - *id001
+    - *id002
+    - *id005
+    - name: Fetch upstream artifacts in one parallel transfer
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s03_design,s03_repair,s03_memory_recovered}'
+        path: incoming
+    - name: Bind downloaded artifacts to explicit source aliases
+      env:
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_repair","path":"edited","pattern":false,"condition":null},{"name":"s03_memory_recovered","path":"memory","pattern":false,"condition":null},{"name":"s03_memory_recovered","path":"plan","pattern":false,"condition":null}]'
+        STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+      run: python -m storyforge.living_stages arrange
+    - name: Verify corrected memory once / ${{ matrix.batch }}
+      id: task
+      env: *id009
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_batch --backend "$backend" --index 2 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_memory_recovery_checks-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - *id003
+    env: *id004
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s03_memory_recovered.outputs.characters) }}
+  s03_memory_recovery_join:
+    name: Scene 3 / Bind recovered proof without another repair loop
+    needs:
+    - s03_design
+    - s03_repair
+    - s03_memory_recovered
+    - s03_memory_recovery_checks
+    if: ${{ always() && !cancelled() && 2 < fromJSON(inputs.scene_limit) && needs.s03_design.result == 'success' && needs.s03_repair.result
+      == 'success' && needs.s03_memory_recovered.result == 'success' && needs.s03_memory_recovery_checks.result == 'success'
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - *id001
+    - *id002
+    - *id008
+    - name: Fetch upstream artifacts in one parallel transfer
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s03_design,s03_repair,s03_memory_recovered,s03_memory_recovery_checks-*}'
+        path: incoming
+    - name: Bind downloaded artifacts to explicit source aliases
+      env:
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_repair","path":"edited","pattern":false,"condition":null},{"name":"s03_memory_recovered","path":"memory","pattern":false,"condition":null},{"name":"s03_memory_recovered","path":"plan","pattern":false,"condition":null},{"name":"s03_memory_recovery_checks-*","path":"batches","pattern":true,"condition":null}]'
+        STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+      run: python -m storyforge.living_stages arrange
+    - name: Bind recovered proof without another repair loop
+      id: task
+      env: *id006
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.living_stages memory_recovery_join --backend "$backend" --index 2'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s03_memory_recovery_join
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - *id003
+    env: *id004
+  s03_accept:
+    name: Scene 3 / Commit scene 3 only after literary and factual gates
+    needs:
+    - s03_design
+    - s03_final_check
+    - s03_memory_review
+    - s03_memory_recovery_join
+    if: ${{ always() && !cancelled() && 2 < fromJSON(inputs.scene_limit) && needs.s03_design.result == 'success' && needs.s03_final_check.result
+      == 'success' && needs.s03_memory_review.result == 'success' && (needs.s03_memory_recovery_join.result == 'success' ||
+      (needs.s03_memory_review.outputs.repair_required != 'true' && needs.s03_memory_recovery_join.result == 'skipped')) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - *id001
+    - *id002
+    - *id005
+    - name: Fetch upstream artifacts in one parallel transfer
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s03_design,s03_final_check,s03_memory_review,s03_memory_recovery_join}'
+        path: incoming
+    - name: Bind downloaded artifacts to explicit source aliases
+      env:
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s03_design","path":"state","pattern":false,"condition":null},{"name":"s03_final_check","path":"edited","pattern":false,"condition":null},{"name":"s03_memory_review","path":"memory","pattern":false,"condition":null},{"name":"s03_memory_review","path":"memory-review","pattern":false,"condition":null},{"name":"s03_memory_recovery_join","path":"recovered-memory","pattern":false,"condition":"needs.s03_memory_review.outputs.repair_required
+          == ''true''"}]'
         STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
       run: python -m storyforge.living_stages arrange
     - name: Commit scene 3 only after literary and factual gates
@@ -2865,7 +3571,7 @@ jobs:
     - *id003
     env: *id004
   s04_design:
-    name: Reconcile scene 4 with verified prior memory
+    name: Scene 4 / Reconcile scene 4 with verified prior memory
     needs:
     - s03_accept
     if: ${{ always() && !cancelled() && 3 < fromJSON(inputs.scene_limit) && needs.s03_accept.result == 'success' }}
@@ -2906,7 +3612,7 @@ jobs:
     env: *id004
     outputs: *id007
   s04_characters:
-    name: Independent character ${{ matrix.character }} / scene 4
+    name: Scene 4 / Independent character ${{ matrix.character }} / scene 4
     needs:
     - s04_design
     if: ${{ always() && !cancelled() && 3 < fromJSON(inputs.scene_limit) && needs.s04_design.result == 'success' }}
@@ -2951,7 +3657,7 @@ jobs:
       matrix:
         character: ${{ fromJSON(needs.s04_design.outputs.characters) }}
   s04_direction:
-    name: Compile character direction and writing plan
+    name: Scene 4 / Compile character direction and writing plan
     needs:
     - s04_design
     - s04_characters
@@ -2994,7 +3700,7 @@ jobs:
     env: *id004
     outputs: *id007
   s04_write_batches:
-    name: Write coherent scene / batch ${{ matrix.batch }}
+    name: Scene 4 / Write coherent scene / batch ${{ matrix.batch }}
     needs:
     - s04_design
     - s04_direction
@@ -3041,7 +3747,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s04_direction.outputs.characters) }}
   s04_draft:
-    name: Compile readable draft and source extraction plan
+    name: Scene 4 / Compile readable draft and source extraction plan
     needs:
     - s04_design
     - s04_direction
@@ -3085,7 +3791,7 @@ jobs:
     env: *id004
     outputs: *id007
   s04_story_batches:
-    name: Full-scene story checks / batch ${{ matrix.batch }}
+    name: Scene 4 / Full-scene story checks / batch ${{ matrix.batch }}
     needs:
     - s04_design
     - s04_draft
@@ -3097,13 +3803,13 @@ jobs:
     - *id001
     - *id002
     - *id005
-    - &id020
+    - &id021
       name: Fetch upstream artifacts in one parallel transfer
       uses: actions/download-artifact@v4
       with:
         pattern: '{s04_design,s04_draft}'
         path: incoming
-    - &id021
+    - &id022
       name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_draft","path":"edited","pattern":false,"condition":null}]'
@@ -3130,7 +3836,7 @@ jobs:
     env: *id004
     strategy: *id012
   s04_rhetoric_batches:
-    name: Full-scene rhetoric checks / batch ${{ matrix.batch }}
+    name: Scene 4 / Full-scene rhetoric checks / batch ${{ matrix.batch }}
     needs:
     - s04_design
     - s04_draft
@@ -3142,8 +3848,8 @@ jobs:
     - *id001
     - *id002
     - *id005
-    - *id020
     - *id021
+    - *id022
     - name: Full-scene rhetoric checks / batch ${{ matrix.batch }}
       id: task
       env: *id009
@@ -3165,7 +3871,7 @@ jobs:
     env: *id004
     strategy: *id012
   s04_memory_extract_batches:
-    name: Extract source-supported facts / batch ${{ matrix.batch }}
+    name: Scene 4 / Extract source-supported facts / batch ${{ matrix.batch }}
     needs:
     - s04_design
     - s04_draft
@@ -3177,7 +3883,7 @@ jobs:
     - *id001
     - *id002
     - *id005
-    - *id020
+    - *id021
     - name: Bind downloaded artifacts to explicit source aliases
       env:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_draft","path":"edited","pattern":false,"condition":null},{"name":"s04_draft","path":"plan","pattern":false,"condition":null}]'
@@ -3208,7 +3914,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s04_draft.outputs.characters) }}
   s04_memory:
-    name: Compile full memory and allocate exhaustive checks
+    name: Scene 4 / Compile full memory and allocate exhaustive checks
     needs:
     - s04_design
     - s04_draft
@@ -3252,7 +3958,7 @@ jobs:
     env: *id004
     outputs: *id007
   s04_memory_preflight_batches:
-    name: Check every fact/history/source partition / ${{ matrix.batch }}
+    name: Scene 4 / Check every fact/history/source partition / ${{ matrix.batch }}
     needs:
     - s04_design
     - s04_draft
@@ -3300,7 +4006,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s04_memory.outputs.characters) }}
   s04_memory_preflight:
-    name: Join independently verified factual findings
+    name: Scene 4 / Join independently verified factual findings
     needs:
     - s04_design
     - s04_draft
@@ -3344,7 +4050,7 @@ jobs:
     - *id003
     env: *id004
   s04_repair_plan:
-    name: Compile literary findings and allocate targeted edits
+    name: Scene 4 / Compile literary findings and allocate targeted edits
     needs:
     - s04_design
     - s04_draft
@@ -3391,7 +4097,7 @@ jobs:
     env: *id004
     outputs: *id007
   s04_repair_batches:
-    name: Repair only source-owned disputed passages / ${{ matrix.batch }}
+    name: Scene 4 / Repair only source-owned disputed passages / ${{ matrix.batch }}
     needs:
     - s04_design
     - s04_repair_plan
@@ -3438,7 +4144,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s04_repair_plan.outputs.characters) }}
   s04_repair:
-    name: Merge edits and plan changed-evidence refresh
+    name: Scene 4 / Merge edits and plan changed-evidence refresh
     needs:
     - s04_design
     - s04_draft
@@ -3486,7 +4192,7 @@ jobs:
     env: *id004
     outputs: *id016
   s04_final_check:
-    name: One final strict judgment; reuse only exact passing evidence
+    name: Scene 4 / One final strict judgment; reuse only exact passing evidence
     needs:
     - s04_design
     - s04_repair
@@ -3532,7 +4238,7 @@ jobs:
     - *id003
     env: *id004
   s04_memory_refresh_batches:
-    name: Refresh only changed source facts / ${{ matrix.batch }}
+    name: Scene 4 / Refresh only changed source facts / ${{ matrix.batch }}
     needs:
     - s04_design
     - s04_repair
@@ -3579,7 +4285,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s04_repair.outputs.characters) }}
   s04_final_memory:
-    name: Compile complete final memory and reuse exact factual proof
+    name: Scene 4 / Compile complete final memory and reuse exact factual proof
     needs:
     - s04_design
     - s04_repair
@@ -3625,7 +4331,7 @@ jobs:
     env: *id004
     outputs: *id017
   s04_memory_final_batches:
-    name: Verify changed final memory / partition ${{ matrix.batch }}
+    name: Scene 4 / Verify changed final memory / partition ${{ matrix.batch }}
     needs:
     - s04_design
     - s04_repair
@@ -3674,7 +4380,7 @@ jobs:
       matrix:
         batch: ${{ fromJSON(needs.s04_final_memory.outputs.characters) }}
   s04_memory_review:
-    name: Bind final factual proof to exact text and state
+    name: Scene 4 / Bind final factual proof to exact text and state
     needs:
     - s04_design
     - s04_repair
@@ -3718,15 +4424,60 @@ jobs:
         overwrite: true
     - *id003
     env: *id004
-  s04_accept:
-    name: Commit scene 4 only after literary and factual gates
+    outputs: *id018
+  s04_memory_recovery_plan:
+    name: Scene 4 / Allocate one targeted final-memory correction
     needs:
     - s04_design
-    - s04_final_check
-    - s04_final_memory
+    - s04_repair
     - s04_memory_review
-    if: ${{ always() && !cancelled() && 3 < fromJSON(inputs.scene_limit) && needs.s04_design.result == 'success' && needs.s04_final_check.result
-      == 'success' && needs.s04_final_memory.result == 'success' && needs.s04_memory_review.result == 'success' }}
+    if: ${{ always() && !cancelled() && (3 < fromJSON(inputs.scene_limit) && needs.s04_memory_review.outputs.repair_required
+      == 'true') && needs.s04_design.result == 'success' && needs.s04_repair.result == 'success' && needs.s04_memory_review.result
+      == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - *id001
+    - *id002
+    - *id008
+    - name: Fetch upstream artifacts in one parallel transfer
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s04_design,s04_repair,s04_memory_review}'
+        path: incoming
+    - name: Bind downloaded artifacts to explicit source aliases
+      env:
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_repair","path":"edited","pattern":false,"condition":null},{"name":"s04_memory_review","path":"memory","pattern":false,"condition":null},{"name":"s04_memory_review","path":"memory-review","pattern":false,"condition":null}]'
+        STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+      run: python -m storyforge.living_stages arrange
+    - name: Allocate one targeted final-memory correction
+      id: task
+      env: *id006
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.living_stages memory_recovery_plan --backend "$backend" --index 3'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_memory_recovery_plan
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - *id003
+    env: *id004
+    outputs: *id007
+  s04_memory_recovery_batches:
+    name: Scene 4 / Correct only flagged memory source / ${{ matrix.batch }}
+    needs:
+    - s04_design
+    - s04_repair
+    - s04_memory_recovery_plan
+    if: ${{ always() && !cancelled() && 3 < fromJSON(inputs.scene_limit) && needs.s04_design.result == 'success' && needs.s04_repair.result
+      == 'success' && needs.s04_memory_recovery_plan.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     steps:
@@ -3736,11 +4487,201 @@ jobs:
     - name: Fetch upstream artifacts in one parallel transfer
       uses: actions/download-artifact@v4
       with:
-        pattern: '{s04_design,s04_final_check,s04_final_memory,s04_memory_review}'
+        pattern: '{s04_design,s04_repair,s04_memory_recovery_plan}'
         path: incoming
     - name: Bind downloaded artifacts to explicit source aliases
       env:
-        STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_final_check","path":"edited","pattern":false,"condition":null},{"name":"s04_final_memory","path":"memory","pattern":false,"condition":null},{"name":"s04_memory_review","path":"memory-review","pattern":false,"condition":null}]'
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_repair","path":"edited","pattern":false,"condition":null},{"name":"s04_memory_recovery_plan","path":"plan","pattern":false,"condition":null}]'
+        STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+      run: python -m storyforge.living_stages arrange
+    - name: Correct only flagged memory source / ${{ matrix.batch }}
+      id: task
+      env: *id009
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_extract_batch --backend "$backend" --index 3 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_memory_recovery_batches-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - *id003
+    env: *id004
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s04_memory_recovery_plan.outputs.characters) }}
+  s04_memory_recovered:
+    name: Scene 4 / Compile corrected facts for independent verification
+    needs:
+    - s04_design
+    - s04_repair
+    - s04_memory_recovery_plan
+    - s04_memory_recovery_batches
+    if: ${{ always() && !cancelled() && 3 < fromJSON(inputs.scene_limit) && needs.s04_design.result == 'success' && needs.s04_repair.result
+      == 'success' && needs.s04_memory_recovery_plan.result == 'success' && needs.s04_memory_recovery_batches.result == 'success'
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - *id001
+    - *id002
+    - *id008
+    - name: Fetch upstream artifacts in one parallel transfer
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s04_design,s04_repair,s04_memory_recovery_plan,s04_memory_recovery_batches-*}'
+        path: incoming
+    - name: Bind downloaded artifacts to explicit source aliases
+      env:
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_repair","path":"edited","pattern":false,"condition":null},{"name":"s04_memory_recovery_plan","path":"plan","pattern":false,"condition":null},{"name":"s04_memory_recovery_batches-*","path":"batches","pattern":true,"condition":null}]'
+        STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+      run: python -m storyforge.living_stages arrange
+    - name: Compile corrected facts for independent verification
+      id: task
+      env: *id006
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.living_stages memory_recovered_plan --backend "$backend" --index 3'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_memory_recovered
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - *id003
+    env: *id004
+    outputs: *id007
+  s04_memory_recovery_checks:
+    name: Scene 4 / Verify corrected memory once / ${{ matrix.batch }}
+    needs:
+    - s04_design
+    - s04_repair
+    - s04_memory_recovered
+    if: ${{ always() && !cancelled() && 3 < fromJSON(inputs.scene_limit) && needs.s04_design.result == 'success' && needs.s04_repair.result
+      == 'success' && needs.s04_memory_recovered.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - *id001
+    - *id002
+    - *id005
+    - name: Fetch upstream artifacts in one parallel transfer
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s04_design,s04_repair,s04_memory_recovered}'
+        path: incoming
+    - name: Bind downloaded artifacts to explicit source aliases
+      env:
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_repair","path":"edited","pattern":false,"condition":null},{"name":"s04_memory_recovered","path":"memory","pattern":false,"condition":null},{"name":"s04_memory_recovered","path":"plan","pattern":false,"condition":null}]'
+        STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+      run: python -m storyforge.living_stages arrange
+    - name: Verify corrected memory once / ${{ matrix.batch }}
+      id: task
+      env: *id009
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.batch_pipeline memory_check_batch --backend "$backend" --index 3 --batch "$STORY_BATCH"'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_memory_recovery_checks-${{ matrix.batch }}
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - *id003
+    env: *id004
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        batch: ${{ fromJSON(needs.s04_memory_recovered.outputs.characters) }}
+  s04_memory_recovery_join:
+    name: Scene 4 / Bind recovered proof without another repair loop
+    needs:
+    - s04_design
+    - s04_repair
+    - s04_memory_recovered
+    - s04_memory_recovery_checks
+    if: ${{ always() && !cancelled() && 3 < fromJSON(inputs.scene_limit) && needs.s04_design.result == 'success' && needs.s04_repair.result
+      == 'success' && needs.s04_memory_recovered.result == 'success' && needs.s04_memory_recovery_checks.result == 'success'
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - *id001
+    - *id002
+    - *id008
+    - name: Fetch upstream artifacts in one parallel transfer
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s04_design,s04_repair,s04_memory_recovered,s04_memory_recovery_checks-*}'
+        path: incoming
+    - name: Bind downloaded artifacts to explicit source aliases
+      env:
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_repair","path":"edited","pattern":false,"condition":null},{"name":"s04_memory_recovered","path":"memory","pattern":false,"condition":null},{"name":"s04_memory_recovered","path":"plan","pattern":false,"condition":null},{"name":"s04_memory_recovery_checks-*","path":"batches","pattern":true,"condition":null}]'
+        STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
+      run: python -m storyforge.living_stages arrange
+    - name: Bind recovered proof without another repair loop
+      id: task
+      env: *id006
+      run: 'backend=fixture
+
+        if [ "$STORY_BACKEND" = live ]; then backend=worker; fi
+
+        python -m storyforge.living_stages memory_recovery_join --backend "$backend" --index 3'
+    - name: Save outputs and execution timeline
+      uses: actions/upload-artifact@v4
+      id: artifact
+      if: always()
+      with:
+        name: s04_memory_recovery_join
+        path: out/
+        retention-days: 30
+        overwrite: true
+    - *id003
+    env: *id004
+  s04_accept:
+    name: Scene 4 / Commit scene 4 only after literary and factual gates
+    needs:
+    - s04_design
+    - s04_final_check
+    - s04_memory_review
+    - s04_memory_recovery_join
+    if: ${{ always() && !cancelled() && 3 < fromJSON(inputs.scene_limit) && needs.s04_design.result == 'success' && needs.s04_final_check.result
+      == 'success' && needs.s04_memory_review.result == 'success' && (needs.s04_memory_recovery_join.result == 'success' ||
+      (needs.s04_memory_review.outputs.repair_required != 'true' && needs.s04_memory_recovery_join.result == 'skipped')) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - *id001
+    - *id002
+    - *id005
+    - name: Fetch upstream artifacts in one parallel transfer
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s04_design,s04_final_check,s04_memory_review,s04_memory_recovery_join}'
+        path: incoming
+    - name: Bind downloaded artifacts to explicit source aliases
+      env:
+        STORY_ARTIFACT_MANIFEST: '[{"name":"s04_design","path":"state","pattern":false,"condition":null},{"name":"s04_final_check","path":"edited","pattern":false,"condition":null},{"name":"s04_memory_review","path":"memory","pattern":false,"condition":null},{"name":"s04_memory_review","path":"memory-review","pattern":false,"condition":null},{"name":"s04_memory_recovery_join","path":"recovered-memory","pattern":false,"condition":"needs.s04_memory_review.outputs.repair_required
+          == ''true''"}]'
         STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
       run: python -m storyforge.living_stages arrange
     - name: Commit scene 4 only after literary and factual gates
@@ -3788,6 +4729,11 @@ jobs:
     - s01_final_memory
     - s01_memory_final_batches
     - s01_memory_review
+    - s01_memory_recovery_plan
+    - s01_memory_recovery_batches
+    - s01_memory_recovered
+    - s01_memory_recovery_checks
+    - s01_memory_recovery_join
     - s01_accept
     - s02_design
     - s02_characters
@@ -3808,6 +4754,11 @@ jobs:
     - s02_final_memory
     - s02_memory_final_batches
     - s02_memory_review
+    - s02_memory_recovery_plan
+    - s02_memory_recovery_batches
+    - s02_memory_recovered
+    - s02_memory_recovery_checks
+    - s02_memory_recovery_join
     - s02_accept
     - s03_design
     - s03_characters
@@ -3828,6 +4779,11 @@ jobs:
     - s03_final_memory
     - s03_memory_final_batches
     - s03_memory_review
+    - s03_memory_recovery_plan
+    - s03_memory_recovery_batches
+    - s03_memory_recovered
+    - s03_memory_recovery_checks
+    - s03_memory_recovery_join
     - s03_accept
     - s04_design
     - s04_characters
@@ -3848,6 +4804,11 @@ jobs:
     - s04_final_memory
     - s04_memory_final_batches
     - s04_memory_review
+    - s04_memory_recovery_plan
+    - s04_memory_recovery_batches
+    - s04_memory_recovered
+    - s04_memory_recovery_checks
+    - s04_memory_recovery_join
     - s04_accept
     runs-on: ubuntu-latest
     steps:
@@ -3864,6 +4825,7 @@ jobs:
         name: readable-story
         path: reading/
         retention-days: 30
+        overwrite: true
     - uses: actions/upload-artifact@v4
       if: always()
       with:
@@ -3871,6 +4833,7 @@ jobs:
         path: reading/canon/
         retention-days: 30
         if-no-files-found: ignore
+        overwrite: true
     - name: Save observed API and CPU usage, including failed attempts
       if: always()
       run: python -m storyforge.usage --source results --out results/usage-summary
@@ -3882,6 +4845,7 @@ jobs:
         path: results/usage-summary/
         retention-days: 30
         if-no-files-found: warn
+        overwrite: true
     - uses: actions/upload-artifact@v4
       with:
         name: story-run-${{ github.run_id }}
@@ -3903,6 +4867,16 @@ jobs:
         \ state: **%s**'%latest.get('completion_status','in_progress')]\nwith open(os.environ['GITHUB_STEP_SUMMARY'],'a')\
         \ as summary:\n    summary.write('\\n'.join(rows)+'\\n')\nprint('Failed/cancelled jobs:', failed)\nif failed:\n  \
         \  raise SystemExit(1)\nPY\n"
+    - name: Save restart checkpoint and all scene drafts even after failure
+      if: always()
+      run: python -m storyforge.story_checkpoint --source results --out recovery --expected "${{ inputs.scene_limit }}"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: story-recovery
+        path: recovery/
+        retention-days: 30
+        overwrite: true
     - name: Require actual scene approvals and complete source-bound memory
       if: always()
       env:
@@ -3914,6 +4888,7 @@ jobs:
         name: episode-audit
         path: audit/
         retention-days: 30
+        overwrite: true
     env: *id004
 env:
   PYTHONUNBUFFERED: 1

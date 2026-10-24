@@ -15,6 +15,11 @@ def audit(source,out,expected):
     if len(scenes)!=target:errors.append(f'Expected {target} scenes; found {len(scenes)}')
     for i,scene in enumerate(scenes):
         p=f's{i+1:02}';proof_path=source/(p+'_memory_review/review.json');facts_path=source/(p+'_final_memory/memory.json');state_path=source/(p+'_design/snapshot.json')
+        recovered=source/(p+'_memory_recovery_join')
+        if recovered.exists():
+            # Acceptance consumes this exact pair after bounded recovery. Never
+            # fall back to an older passing ledger if recovered proof is invalid.
+            proof_path=recovered/'review.json';facts_path=recovered/'memory.json'
         bound=False
         if all(p.exists() for p in [proof_path,facts_path,state_path]):
             proof=load(proof_path)

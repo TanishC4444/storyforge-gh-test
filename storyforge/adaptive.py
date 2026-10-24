@@ -6,7 +6,7 @@ def enabled(req):return bool(req.get('performance',{}).get('adaptive_batches'))
 
 
 def writing_count(req):
-    return max(1,min(6,math.ceil(req['words_per_scene']/(900 if enabled(req) else 320))))
+    return max(1,min(6,math.ceil(req['words_per_scene']/(1500 if enabled(req) else 320))))
 
 
 def windows(catalog,words=450):

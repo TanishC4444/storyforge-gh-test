@@ -1,0 +1,48 @@
+name: Resume saved story
+on:
+  workflow_dispatch:
+    inputs:
+      source_run:
+        description: Failed living pipeline run ID (not the stress queue ID)
+        required: true
+        type: string
+      scene:
+        description: First unfinished scene; completed earlier scenes stay untouched
+        type: choice
+        options: [auto, '1', '2', '3', '4']
+        default: auto
+      restart_stage:
+        description: Editing keeps the saved draft; scene rebuilds only the unfinished scene
+        type: choice
+        options: [editing, memory, scene]
+        default: editing
+permissions:
+  contents: read
+  actions: write
+concurrency:
+  group: resume-story-${{ inputs.source_run }}
+  cancel-in-progress: false
+jobs:
+  resume:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SOURCE_RUN: ${{ inputs.source_run }}
+      SCENE: ${{ inputs.scene }}
+      RESTART_STAGE: ${{ inputs.restart_stage }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Back up checkpoints and choose the first unfinished stage
+        run: python -m scripts.resume_story plan
+      - name: Preserve original story and drafts before retrying
+        uses: actions/upload-artifact@v4
+        with:
+          name: saved-story-before-resume-${{ inputs.source_run }}-${{ github.run_id }}
+          path: resume/
+          retention-days: 30
+      - name: Resume only the selected scene stage and its downstream jobs
+        run: python -m scripts.resume_story apply

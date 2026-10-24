@@ -91,6 +91,10 @@ def delta(value, prose, ids):
     require(all(isinstance(m, dict) for m in value['memories']), 'Memory entries must be objects')
     value = {**value, 'memories': [dict(m) for m in value['memories']]}
     for index, m in enumerate(value['memories']):
+        # This alias exists only in compact input packets. Canonical evidence is
+        # rebound to the actual prose below; a copied transport alias must not
+        # change ledger hashes and invalidate an otherwise identical proof.
+        m.pop('evidence_source_ref',None)
         require(isinstance(m.get('kind'),str) and m['kind'] in {'event', 'belief', 'claim', 'resource', 'relationship', 'thread'}, 'Invalid memory kind')
         require(isinstance(m.get('text'), str) and bool(m['text'].strip()) and len(m['text']) <= 600, f'Invalid memory text at record {index + 1}: text is required, nonempty, and at most 600 characters')
         try:

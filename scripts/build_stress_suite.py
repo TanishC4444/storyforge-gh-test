@@ -18,10 +18,46 @@ GOALS=['Keep the ferry open while refusing to choose which household is abandone
 FOCUS={
  'fairytale':'The river spirit and purchased dawn are the central supernatural conflict. Establish their observable effects and the bargain\u2019s limits. A mundane accounting correction alone cannot resolve the missing sunrise.',
  'ensemble':'The floating city, power shortage, evacuation decision and missing ledger must causally interact. Make the science-fiction setting tangible; do not reduce the story to ordinary paperwork.',
- 'screenplay':'The stolen relief fund and guarded harbor transfer must drive an enacted heist attempt. Establish the crew\u2019s concrete tactic and its cost; a ferry permission dispute alone is not this story.',
+ 'screenplay':'Across this episode the stolen relief fund and guarded harbor transfer drive the heist. The opening must establish a concrete crew tactic through observable preparation or action. The final scene enacts the attempt and its cost. A ferry permission dispute alone is not this story; do not require the final payoff in the opening.',
  'theatre':'The inherited municipal clock and family claims must stay central, with playable comedy and a consequential inheritance choice. Medical ferry bargaining must not replace the clock story.',
  'audio':'The dead father\u2019s call sign must become an audible mystery. By the ending, enact a consequential response to its evidence; merely locating a signal is not the promised climax.',
  'comic':'The fragile seed bank must appear visually and drive the courier\u2019s journey, faction pressure and consequential delivery choice. A dialogue-only ferry dispute is not the requested adventure.'}
+CHARACTER_GOALS={
+ 'fairytale':[
+  'Learn why purchased dawn failed and choose which household promise to honor without inventing another passage token.',
+  'Test the river spirit\u2019s audible signs while hiding an unpaid family promise from Mara.',
+  'Recover evidence of the original dawn bargain while protecting the person who exposed its altered record.',
+  'Protect patients suffering under the unnatural cold without sacrificing another household\u2019s claim to dawn.',
+  'Distinguish the spirit\u2019s limited power from a mundane failure before anyone stakes a life on a false remedy.',
+  'Keep people from the black river while facing an order that conflicts with a personal vow.'],
+ 'screenplay':[
+  'Commit the ferry to one concrete relief-fund recovery tactic while keeping its two-token limit real.',
+  'Handle the crew\u2019s signals for the guarded transfer while concealing a conflicting household obligation.',
+  'Authenticate a transfer record and exploit one demonstrated weakness without claiming the money is already recovered.',
+  'Help recover the stolen fund while protecting a dependent whose needs conflict with the crew\u2019s timing.',
+  'Operate the recovery gear within its visible limits and refuse a plan that quietly invents spare power.',
+  'Choose whether to enforce the harbor transfer order or risk standing with the crew.'],
+ 'theatre':[
+  'Contest who inherits the municipal clock and who must pay its repair debt without disguising the hearing as ferry business.',
+  'Argue a sibling\u2019s claim to the clock while keeping an embarrassing household obligation out of public view.',
+  'Read the clock estate\u2019s actual terms aloud and turn a claimant\u2019s polite evasion into a playable public negotiation.',
+  'Claim a share of the clock inheritance while refusing to absorb the other claimants\u2019 repair bill.',
+  'Establish the clock\u2019s repair burden and bargain over who will perform the work rather than offer a convenient free repair.',
+  'Keep the clock inheritance hearing orderly while a private claim undermines that authority.'],
+ 'audio':[
+  'Decide whether audible evidence from the missing relative\u2019s call justifies risking the ferry and its passengers.',
+  'Verify the familiar call sign through sound while confronting a private family obligation.',
+  'Compare the audible message against actual records without declaring an unproved caller identity.',
+  'Weigh the possible rescue against the people already needing shelter and care.',
+  'Test what the receiving equipment actually heard without inventing a third outbound transmission.',
+  'Keep the crew in shelter until the evidence warrants a consequential departure.'],
+ 'comic':[
+  'Help the courier move the visible fragile seed bank across the city without treating the delivery as an ordinary fare dispute.',
+  'Relay only supported route information while choosing whether to expose a family obligation to the courier.',
+  'Establish the competing harvest claims through a drawable confrontation without revealing a private recipient by fiat.',
+  'Argue for a vulnerable district\u2019s first harvest while keeping the seed bank alive for other households.',
+  'Protect the seed bank\u2019s observable storage limits during a consequential crossing.',
+  'Decide whether to enforce a faction\u2019s crossing restriction or help the courier make a costly delivery.']}
 
 def build():
  base=json.loads((ROOT/'examples/iron-man-alternate-origin.json').read_text())
@@ -37,6 +73,7 @@ def build():
   r['execution_policy']['hosted_role_seconds']['memory_quality']=60
   r.update(project_id=project,universe_id=project,title='The Harbor Test: '+genre,medium=medium,chapters=count,scenes_per_chapter=1,words_per_scene=words,genre=genre,premise=premise+' Develop '+str(count)+' connected scenes. Invent the decisive discovery and climax yourself; no exact solution, culprit or twist is prescribed. Plant observable evidence before any revelation and make the climax change a relationship and consume a real advantage.',references=[],retrieval_query='dramatic irony competing obligations planted clues reversal consequences',reference_policy='Optional craft guidance only; never import another work\u2019s facts, genre, characters or style.',reader_experience='Distinct voices, escalating choices and a surprising but retrospectively supported turn.',pov='Present-tense filmable or performable action for scripts; close third-person past tense for prose. Limit private knowledge to actual witnesses.',tone_mood=genre+' with specific human stakes and varied emotional pacing.',sensory_detail='Select details appropriate to the medium; audio establishes action through sound, comics through drawable panels.',ending_tendency='Resolve this episode\u2019s main choice with an earned reversal and a lasting consequence; leave one meaningful unresolved thread.')
   r['style']={'narrator':'Follow the selected medium; do not add internal narration to scripts.','register':genre+'; original language, economical exposition, no generic moral.','wording':['No borrowed quotations, catchphrases or stock epic imagery.','Do not repeat earlier negotiations, discoveries or explanations.'],'interiority':'Show conflicting obligations through choices; prose may access only its focal viewpoint.','dialogue':'Distinct motives and speech patterns; use subtext and changing leverage.'}
+  r['pov']=('Close third-person past tense for all narration; dialogue keeps its natural tense. Limit private knowledge to actual witnesses.' if medium in {'book','short_story'} else 'Present-tense filmable or performable action. Limit private knowledge to actual witnesses; follow the selected script medium.')
   r['style']['figurative_language']={'density':'sparse','devices':['concrete metaphor'],'image_domains':['harbor work','weather','household objects']}
   r['adaptation']={'strength':0,'mode':'structural_echo','max_active_sources_per_scene':0,'relationship':'Entirely original test world','preserve_user_choices':True,'preserve':['Author rules and private knowledge'],'divergence':'Invent solutions and climax; do not import film or epic canon.'}
   r['length_policy']['policy']=f'{count} scenes, target {words} words each; strict allowed range {int(words*.8)}–{int(words*1.3)}. Script cues count toward words; no padding.'
@@ -46,6 +83,7 @@ def build():
    cid=f'c{i+1:02}';name=NAMES[i];job=JOBS[i]
    c=copy.deepcopy(base['characters'][i%len(base['characters'])])
    c.update(id=cid,name=name,goal=GOALS[i],value=['Reciprocity','Accuracy','Institutional accountability','Care for vulnerable people','Fair allocation','Loyalty to workers','Personal autonomy','Earned trust'][i%8],fear='Pursuing this goal at the expense of someone dependent on the '+job+'.',habitual_strategy=['Ask for proof','Trade a limited concession','Challenge an assumption','Withhold a personal cost'][i%4],limits='No unwitnessed secrets, unexplained travel or replacement of spent resources.',voice=VOICES[i%4]+'; concrete vocabulary from work as a '+job+'.',source_status='Original author-defined test character')
+   if slug in CHARACTER_GOALS and i<len(CHARACTER_GOALS[slug]):c['goal']=CHARACTER_GOALS[slug][i]
    c['arc']={'starting_belief':'Duty can be discharged without personal loss.','old_strategy':c['habitual_strategy'],'pressure_test':c['goal'],'costly_choice':'Choose whom to trust and spend a real advantage.','possible_change':'Accept responsibility through action.'}
    c['contradiction']={'tension':'Public duty conflicts with private loyalty.'};c['emotional_behavior']={'pressure':'Speech and action diverge under pressure.'};c['voice_design']={'register':c['voice'],'examples':[['Who crosses first?','Count it before you promise it.'],['I heard the words. I need their meaning.','Give me a moment before I answer.'],['That is a claim, not a record.','An impressive signature on a very empty page.'],['Sit down. Your hands are shaking.','You can ask me. You cannot volunteer my family.']][i%4]}
    r['characters'].append(c)
@@ -75,7 +113,9 @@ def build():
   r['chapter_arcs']=goals
   r['quality_contract']=['Respect the selected medium, its headings, tense, cues and representable action.','Distinct voices and conflicting aims must cause choices, not inventory exposition.','Connect all scenes through full authoritative memory, with no repetition or reset.','Check exact custody, counted resources, character knowledge, chronology and geography.','Final climax must reinterpret an earlier enacted clue or choice; surprise cannot depend on a retroactively invented fact.','The original outcome is not prescribed; assess source-supported originality and consequences rather than conformity to a hidden plot.']
   r['quality_contract'].append(FOCUS[slug])
-  for scene in r['scene_designs']:scene['development']=FOCUS[slug]+' '+scene['development']
+  for scene in r['scene_designs']:
+   scene['development']=FOCUS[slug]+' '+scene['development']
+   scene['dramatic_function']=FOCUS[slug]+' '+scene['dramatic_function']
   r['must_avoid']=['Imported Marvel, Homeric or other external canon.','Recapping an earlier negotiation instead of progressing.','Instant offstage construction, unexplained reserves, or leaks of private information.','Adding prose narration to a script or headings to prose.']
   r['creative_freedom'].update(protected_characters=['c01'],cast_limit=min(32,cast_size+2),max_new_per_scene=1,flexible_pov=True)
   r['execution_intent']={'authorized':'User requested sequential live stress tests across formats, genres, lengths and larger worlds.','workflow':'Full separate-runner pipeline; strict literary and factual gates; Gemini waits and no automatic local downgrade.'}

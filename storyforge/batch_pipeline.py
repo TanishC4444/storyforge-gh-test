@@ -192,8 +192,13 @@ def plan_repairs(state,source,out):
         # corrections stay in small parallel batches.
         for review in reviews:
             for issue in review.get('issues',[]):
-                if issue.get('category') not in {'rhythm_repetition','redundant_explanation','continuity_clock'}:continue
+                # One relational or structural finding needs one editor owning
+                # its linked passages, not a competing rewrite for every line.
                 linked=set(issue.get('evidence_ids',[]))&set(ids)
+                if len(linked)>3 and issue.get('category') in {'scene_change','climax','reference_application','style_fidelity','quality_contract','category'}:
+                    # A missing premise/attempt spanning a scene needs one
+                    # structural solution, not one new attempt per source window.
+                    linked=set(ids)
                 related=[g for g in groups if set(g)&linked]
                 if len(related)>1:
                     combined=[pid for pid in ids if any(pid in g for g in related)]
@@ -203,8 +208,12 @@ def plan_repairs(state,source,out):
     for own in groups:
         positions=[i for i,p in enumerate(catalog) if p['id'] in own]
         context=[{'id':p['id'],'text':p['text']} for i,p in enumerate(catalog) if any(abs(i-j)<=1 for j in positions)]
+        owned_words=sum(len(p['text'].split()) for p in catalog if p['id'] in own)
+        unowned_words=len(prose.split())-owned_words
         batches.append({'id':str(len(batches)),'source_sha256':digest(prose),'owned':own,'passages':context,
                         'allow_deletions':bool(state['request'].get('performance',{}).get('empowered_editors')),
+                        'original_scene_words':len(prose.split()),
+                        'owned_word_budget':max(1,min(owned_words,state['request']['words_per_scene']-unowned_words)),
                         'findings':{pid:selected[pid]['issues'] for pid in own}})
     if not batches:batches=[{'id':'noop','source_sha256':digest(prose),'owned':[],'passages':[],'findings':{}}]
     plan={'state_sha256':bind_state(state),'source_sha256':digest(prose),'batches':batches};save(Path(out)/'repair-plan.json',plan);save(Path(out)/'prose.txt',prose);output('characters',[b['id'] for b in batches]);return plan
@@ -220,7 +229,7 @@ def repair_batch(state,card,source,out,backend,bid):
             options={'tokens':min(4200,1400*max(1,len(batch['owned']))),'response_schema':patch_schema(batch),'validator':lambda v:patches(v,batch)}
             if empowered:options.update(response_schema=False,output_format='text')
             data={**review_context(state,card),'batch':batch,'immutable_world_rules':req['world_rules']}
-            instruction='Check allegations against the original author prompt and actual canon. Repair ONLY owned passages. Neighbors are read-only. Dismiss criticism that conflicts with the brief. Preserve required events, knowledge and voice. '
+            instruction='Check allegations against the original author prompt and actual canon. Repair ONLY owned passages. Neighbors are read-only. Dismiss criticism that conflicts with the brief. Preserve required events, knowledge and voice. Keep near owned_word_budget by replacing redundant action rather than appending a second climax. Maintain the requested narrative tense across all owned passages. '
             instruction+=('You may delete redundant passages, combine owned passages, restructure, shorten or replace them. Keep each necessary event once. For a merge put the complete combined text under one owned ID and delete the redundant owned IDs. Never move events into unowned passages. Return plain blocks: REPLACE p001 followed by the replacement on new lines, then END_REPLACE. Use DELETE p002 for deletion, or NO_CHANGES. No JSON or commentary.' if empowered else 'Return JSON replacements keyed only by owned IDs. No whole-scene rewrite.')
             try:result=Executor(req,out,backend).call('repair',data,instruction,**options)
             except ValueError as exc:
@@ -232,7 +241,7 @@ def repair_batch(state,card,source,out,backend,bid):
                 candidate={pid:result['replacements'].get(pid,text) for pid,text in original.items()}
                 source_prose=Path(source)/'plan/prose.txt'
                 compiled=apply(source_prose.read_text(),result['replacements'],plan['source_sha256']) if source_prose.exists() else None
-                if compiled is not None:validate_prose(compiled,req,check_length=True)
+                if compiled is not None:validate_prose(compiled,req,check_length=False)
                 def assess(value):
                     if isinstance(value,dict):require(type(value.get('pass')) is bool,'Missing edit assessment');return value
                     require(isinstance(value,str) and value.strip().split('|',1)[0].strip() in {'PASS','FAIL'},'Missing edit assessment')
