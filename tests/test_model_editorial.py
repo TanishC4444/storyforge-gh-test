@@ -40,6 +40,8 @@ class ModelEditorialTests(unittest.TestCase):
             received=[]
             def checker(executor,role,packet,instruction,**kw):
                 received.append(packet);self.assertNotIn('literary_application',packet)
+                self.assertEqual(packet['character_registry'],[{'id':c['id'],'name':c['name']} for c in s['request']['characters']])
+                self.assertIn('NOT characters',packet['coverage_policy'])
                 return kw['validator']({'pass':True,'issues':[]})
             with patch('storyforge.inference.Executor.call',autospec=True,side_effect=checker):
                 m.check(s,c,p,p/'batch','worker','0')

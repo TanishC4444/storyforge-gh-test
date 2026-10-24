@@ -32,7 +32,8 @@ def scoped(req):
 
 def scene_context(state,card,role='writer'):
     req=state['request']
-    return {'scene':card,'original_prompt':req['premise'],'world_rules':req['world_rules'],
+    from .narrative_context import context
+    return {'narrative_context':context(state,card),'scene':card,'original_prompt':req['premise'],'world_rules':req['world_rules'],
         'author_contract':contract(req),
         'scene_contract':next((c for c in req['scene_designs'] if c['id']==card['id']),{}),
         'literary_application':application_packet(req,state['retrieval'],role,card['id']),
@@ -43,11 +44,12 @@ def scene_context(state,card,role='writer'):
         'prior_scene_exit':state['accepted'][-1]['prose'][-1200:] if state['accepted'] else '',
         'author_policy':'Plans and author continuity are not automatically shared character knowledge.'}
 
-def review_context(state,card):
+def review_context(state,card,include_policy=False):
     # No duplicate style/world/contract copies; review_policy injects the exact
     # immutable author contract once. Summaries never become canonical facts.
     req=state['request']
-    return {'original_prompt':req['premise'],'scene':card,
+    from .narrative_context import context
+    return {'narrative_context':context(state,card),'original_prompt':req['premise'],'scene':card,
             'scene_contract':next((c for c in req['scene_designs'] if c['id']==card['id']),{}),
             'prior_canon':cards(continuity_history(state)),
             'prior_scene_summaries':[{'id':s['id'],'quality_status':s.get('quality_status'),'canon_committed':s.get('canon_committed',True),'source_summary':s['source_summary']} for s in state.get('universe_history',[])+state['accepted'] if s.get('source_summary') and s['source_summary'].get('source_sha256')==digest(s['prose'])],

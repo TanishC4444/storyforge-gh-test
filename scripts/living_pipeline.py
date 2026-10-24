@@ -104,6 +104,10 @@ def build():
     for job in jobs.values():
         for step in job['steps']:
             if step.get('uses')=='actions/upload-artifact@v4':step['with']['overwrite']=True
+            if step.get('uses')=='actions/download-artifact@v4':
+                spec=step.pop('with');spec.pop('github-token',None);step.pop('uses')
+                step['env']={**step.get('env',{}),'GH_TOKEN':'${{ github.token }}','STORY_ARTIFACT_FETCH':json.dumps(spec,separators=(',',':'))}
+                step['run']='python -m storyforge.artifact_fetch'
     graph['jobs']=jobs
     return dump_workflow(graph)
 
