@@ -36,6 +36,8 @@ def document_text(record: dict[str, Any]) -> str:
         "Keywords": record.get("keywords"),
         "Tags": record.get("tags"),
         "Genre": record.get("genre"),
+        "Key ideas": record.get("key_ideas"),
+        "Main characters": record.get("main_characters"),
         "Plot context": plot.get("context"),
         "Subplots and selected constituent threads": subplots.get("threads"),
         "Tone and mood": record.get("tone_mood"),

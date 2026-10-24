@@ -14,6 +14,9 @@ def build():
     inputs['recovery_probe']={'type':'boolean','default':False,'description':'Benchmark only: interrupt scene 2 once to verify checkpoint recovery'}
     inputs['fresh_run']={'type':'string','default':'','description':'Prior failed full-pipeline run: resume its approved prefix and recheck saved unfinished drafts in a NEW run'}
     graph['env']['STORY_LIVING_PIPELINE']='true'
+    prepare_task=next(s for s in jobs['prepare']['steps'] if s.get('id')=='task')
+    position=jobs['prepare']['steps'].index(prepare_task)+1
+    jobs['prepare']['steps'].insert(position,{'name':'Verify live Gemini search and writer handoff','if':"${{ inputs.request_file == 'rag-gemini-practice' }}",'run':'python -m scripts.verify_gemini_rag'})
     quick=jobs['quickstart'];steps=quick['steps'];position=next(i for i,s in enumerate(steps) if s.get('id')=='task')
     steps.insert(position,{'name':'Import prior episode artifacts into a fresh run','if':"${{ inputs.fresh_run != '' }}",'uses':'actions/download-artifact@v4','with':{'pattern':'{quickstart,s*_accept,s*_design,s*_final_check,s*_draft,s*_repair,s*_final_memory,s*_memory_review,s*_memory_recovery_join}','run-id':'${{ inputs.fresh_run }}','github-token':'${{ github.token }}','path':'inputs/restart'}})
     task=next(s for s in steps if s.get('id')=='task');task['env']['FRESH_RUN']='${{ inputs.fresh_run }}'

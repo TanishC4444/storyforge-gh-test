@@ -1,4 +1,4 @@
-"""Resume local Hugging Face indexing of every record in the corpus."""
+"""Resume Gemini embedding indexing of every record in the corpus."""
 from __future__ import annotations
 
 import argparse
@@ -32,12 +32,12 @@ def main():
     existing = indexed_contents(settings)
     pending = [r for r in records if existing.get(r["id"]) != document_text(r)]
     completed = len(records) - len(pending)
-    print(f"Local encoder: {INDEX_VERSION}", flush=True)
-    print(f"{completed}/{len(records)} up to date; {len(pending)} to embed locally.", flush=True)
+    print(f"Gemini encoder: {INDEX_VERSION}", flush=True)
+    print(f"{completed}/{len(records)} up to date; {len(pending)} to embed with Gemini.", flush=True)
     for start in range(0, len(pending), 32):
         batch = pending[start:start + 32]
         contents = [document_text(r) for r in batch]
-        print(f"Embedding {len(batch)} records on this computer…", flush=True)
+        print(f"Embedding {len(batch)} records with Gemini…", flush=True)
         vectors = encode_texts(contents)
         rows = []
         for record, content, vector in zip(batch, contents, vectors, strict=True):
@@ -57,7 +57,7 @@ def main():
     missing = expected - existing_record_ids(settings)
     if missing:
         raise SystemExit(f"Index incomplete: {len(missing)} missing records. Run again to resume.")
-    print(f"Index complete: all {len(records)}/{len(records)} source records embedded locally.", flush=True)
+    print(f"Index complete: all {len(records)}/{len(records)} source records embedded with Gemini.", flush=True)
 
 
 if __name__ == "__main__":

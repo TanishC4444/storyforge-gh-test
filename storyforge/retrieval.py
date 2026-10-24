@@ -82,13 +82,14 @@ def retrieve(req):
         if stale:raise ValueError(f'{stale} index projections are stale. Rebuild before hybrid search.')
         from rag.settings import Settings
         from rag.db import search
-        settings=Settings(str(path),'sentence-transformers/all-MiniLM-L6-v2',384)
+        from rag.identity import MODEL_NAME,EMBEDDING_DIMENSIONS
+        settings=Settings(str(path),MODEL_NAME,EMBEDDING_DIMENSIONS)
         for q in facets:
             for rank,h in enumerate(search(settings,q['text'],60 if explicit_weights else 8,1.0 if explicit_weights else .65,None,None,'Balanced'),1):
                 if explicit_weights and h.semantic_rank is None:continue
                 contribution=q.get('weight',1)*(weights['semantic_similarity']*41/(40+h.semantic_rank) if explicit_weights else 1/(40+rank))
                 scores[h.record_id]=scores.get(h.record_id,0)+contribution
-                hits.setdefault(h.record_id,[]).append({'query':q['id'],'channel':'semantic' if explicit_weights else 'hybrid','rank':h.semantic_rank if explicit_weights else rank,'score':h.score,'weighted_contribution':contribution})
+                hits.setdefault(h.record_id,[]).append({'query':q['id'],'channel':'semantic' if explicit_weights else 'hybrid','rank':h.semantic_rank if explicit_weights else rank,'score':h.score,'semantic_rank':h.semantic_rank,'keyword_rank':h.keyword_rank,'weighted_contribution':contribution})
     # Controlled mechanism labels get a traceable boost when all their words match
     # user terms, with a small general morphology/synonym map. No title-specific rules.
     for q in facets:
