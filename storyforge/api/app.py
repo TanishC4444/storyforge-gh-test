@@ -9,12 +9,13 @@ from __future__ import annotations
 
 import asyncio
 import copy
+import inspect
 import json
 import time
 from collections.abc import Iterator
 from typing import Annotated, Any
 
-from fastapi import Body, Depends, FastAPI, Header, HTTPException, Query, Request
+from fastapi import Body, Depends, FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 
@@ -39,21 +40,17 @@ app = FastAPI(
 )
 
 _settings = get_settings()
+# allow_private_network lets a hosted frontend (e.g. GitHub Pages) call an API on
+# localhost in Chromium browsers. Starlette versions without the option don't
+# block those preflights, so it is only passed when supported.
+_private_network = {'allow_private_network': True} if 'allow_private_network' in inspect.signature(CORSMiddleware.__init__).parameters else {}
 app.add_middleware(
     CORSMiddleware,
     allow_origins=list(_settings.cors_origins),
     allow_methods=['GET', 'POST'],
     allow_headers=['Authorization', 'Content-Type'],
+    **_private_network,
 )
-
-
-@app.middleware('http')
-async def allow_private_network(request: Request, call_next):
-    # Lets a hosted frontend (e.g. GitHub Pages) call an API running on localhost in Chromium browsers.
-    response = await call_next(request)
-    if request.method == 'OPTIONS' and request.headers.get('access-control-request-private-network'):
-        response.headers['Access-Control-Allow-Private-Network'] = 'true'
-    return response
 
 
 # Error mapping: backends raise plain exceptions; HTTP codes are decided here only.

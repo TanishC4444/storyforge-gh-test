@@ -108,6 +108,13 @@ class DemoApiTest(unittest.TestCase):
         self.assertTrue(self.client.post(P + '/requests/validate', json=brief).json()['valid'])
         self.assertFalse(self.client.post(P + '/requests/validate', json={'project_id': 'x'}).json()['valid'])
 
+    def test_hosted_frontend_preflight_to_localhost(self):
+        response = self.client.options(P + '/runs', headers={
+            'Origin': 'https://tanishc4444.github.io', 'Access-Control-Request-Method': 'GET',
+            'Access-Control-Request-Headers': 'authorization', 'Access-Control-Request-Private-Network': 'true'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers['access-control-allow-origin'], 'https://tanishc4444.github.io')
+
     def test_token_required(self):
         self.assertEqual(self.client.get(P + '/runs').status_code, 401)
         self.assertEqual(self.client.get(P + '/runs', headers={'Authorization': 'token abc'}).status_code, 401)
