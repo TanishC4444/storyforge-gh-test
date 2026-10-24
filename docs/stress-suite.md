@@ -45,6 +45,24 @@ tokens and increase in delayed recovery rounds after incomplete generation.
 
 ## Reports and limits
 
+## Resume a failed scene without starting over
+
+Every pipeline run saves `story-recovery`, even after a failed gate. It contains
+the last fully approved episode checkpoint with its complete memory, all available
+scene drafts, and the first unfinished scene number. Provisional text stays
+separate from accepted canon. These artifacts are retained for 30 days.
+
+Run **Resume saved story** with the failed **child pipeline run ID**. Leave the
+scene on `auto`. Choose `editing` to retain its written draft, `memory` to retry
+factual processing, or `scene` to regenerate only the unfinished scene. Completed
+earlier scenes remain unchanged. The helper uploads a backup before requesting
+one native partial rerun; downstream scenes and checks run again as needed.
+Older runs without stage labels fall back to their scene boundary. Native retries
+use the source run's original code revision; the existing universe-continuation
+input is separate and begins a new episode.
+
+## Verification and recovery costs
+
 Moderate scenes (up to 1,500 target words) use one coherent writer. Linked
 editorial findings share an editor, so one structural problem does not launch
 competing rewrites for every cited paragraph. Scene-specific genre goals keep

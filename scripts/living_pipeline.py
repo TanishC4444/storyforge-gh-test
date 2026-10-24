@@ -12,7 +12,7 @@ def build():
     inputs=graph['on']['workflow_dispatch']['inputs'];inputs['request_file']['default']='living-scale-practice';inputs['scene_limit']['default']='2'
     graph['env']['STORY_LIVING_PIPELINE']='true'
     def add(key,template,title,task,needs,files,index,*,module='living_stages',matrix=None,outputs=(),condition=None):
-        job=copy.deepcopy(old[template]);job['name']=title;job['needs']=list(dict.fromkeys(needs));job.pop('strategy',None);job.pop('outputs',None)
+        job=copy.deepcopy(old[template]);job['name']='Scene '+str(index+1)+' / '+title;job['needs']=list(dict.fromkeys(needs));job.pop('strategy',None);job.pop('outputs',None)
         job['if']=condition or '${{ always() && !cancelled() && '+str(index)+' < fromJSON(inputs.scene_limit)'+''.join(' && needs.'+name+".result == 'success'" for name in job['needs'])+' }}'
         if condition and 'always()' not in condition:
             body=condition[4:-3]
@@ -74,8 +74,13 @@ def build():
         add(p+'_accept',p+'_accept','Commit scene '+str(i+1)+' only after literary and factual gates','accept',[p+'_design',p+'_final_check',p+'_memory_review',p+'_memory_recovery_join'],state+[(p+'_final_check','edited'),(p+'_memory_review','memory'),(p+'_memory_review','memory-review'),(p+'_memory_recovery_join','recovered-memory',False,'${{ needs.'+p+'_memory_review.outputs.repair_required == \'true\' }}')],i,condition=allow)
     jobs['results']=old['results'];jobs['results']['needs']=list(jobs)[:-1] if list(jobs)[-1]=='results' else [k for k in jobs if k!='results']
     jobs['results']['steps'] += [
+        {'name':'Save restart checkpoint and all scene drafts even after failure','if':'always()','run':'python -m storyforge.story_checkpoint --source results --out recovery --expected "${{ inputs.scene_limit }}"'},
+        {'uses':'actions/upload-artifact@v4','if':'always()','with':{'name':'story-recovery','path':'recovery/','retention-days':30,'overwrite':True}},
         {'name':'Require actual scene approvals and complete source-bound memory','if':'always()','env':{'EXPECTED_SCENES':'${{ inputs.scene_limit }}'},'run':'python -m storyforge.episode_audit --source results --out audit --expected "$EXPECTED_SCENES"'},
         {'uses':'actions/upload-artifact@v4','if':'always()','with':{'name':'episode-audit','path':'audit/','retention-days':30}}]
+    for job in jobs.values():
+        for step in job['steps']:
+            if step.get('uses')=='actions/upload-artifact@v4':step['with']['overwrite']=True
     graph['jobs']=jobs
     return dump_workflow(graph)
 
