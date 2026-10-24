@@ -14,6 +14,14 @@ class GeminiRAGTests(unittest.TestCase):
         self.assertIn('scripts.verify_gemini_rag --if-hybrid',task['run'])
         self.assertIn('GEMINI_API_KEY',task['env'])
 
+    def test_live_smoke_brief_is_valid_for_living_workflow(self):
+        req=json.loads(Path('examples/rag-gemini-practice.json').read_text())
+        self.assertEqual(req['retrieval_mode'],'hybrid')
+        self.assertTrue(req['performance']['classic_expansion'])
+        self.assertTrue(req['performance']['living_universe'])
+        self.assertTrue(req['performance']['living_bounded'])
+        self.assertEqual(req['scenes_per_chapter'],1)
+
     @unittest.skipUnless(importlib.util.find_spec('numpy') and importlib.util.find_spec('dotenv'),'Optional RAG dependencies')
     def test_query_and_document_tasks_validate_and_normalize_vectors(self):
         from rag.embeddings import encode_query,encode_texts
