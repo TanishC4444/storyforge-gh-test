@@ -1,0 +1,299 @@
+{
+  "scene_id": "ch01-sc01",
+  "brief_hash": "d95e1711bf2541a095553ffaa3c5ff266a66cbf2bc0c718d09628fd36622129b",
+  "prose": "The cold sea spray smelled of scorched copper and wet rust where the pontoon bit into the harbor wall. Below Mara Venn’s boots, the floating city’s central pontoon lattice groaned against the tide, its iron ballasts ballast-pumping unevenly as the evening power draw began. Above the quay, the turbine stack gave a hollow, dying thrum. \n\nNadi Vale leaned over the dock control box, wiping salt film from the glass dials with a greasy rag. \"Generator three is dropping cycles,\" Nadi called out over the surf. \"Grid power flickers, and the dock cranes lock up by nineteen hundred. You running the raft or sitting on it?\"\n\nMara didn't answer right away. She slid her fingers into her coat pocket, feeling the cold edges of her two copper passage tokens. Each heavy coin bore the stamped crest of the floating district—single-use, unbacked by the central mint, and irreplaceable once dropped in the gate box. \n\n\"Who crosses first?\" Mara asked, stepping to the edge of the timber gangway.\n\nFootsteps clattered down the stone steps from the upper council causeway. Tomas Reed arrived, breath fogging in the damp chill. He hauled a brass-bound chest by its braided rope handles, the heavy iron frame scraping against the basalt steps. He carried a leather-bound ledger strap clipped directly to the locking bar.\n\n\"I need the ferry raft,\" Tomas said, resting the chest near the pontoon hinge. \"Council order. This is the emergency relief fund for the lower ring clinics. If the grid drops before we clear the channel, those wards go dark.\"\n\n\"Show me the seal,\" Mara said. \"I don't haul air, and I don't move council weight on a verbal promise.\"\n\nTomas bent down, turning the chest’s locking bar to reveal a red wax seal clamped inside a steel clip. \"Signed off an hour ago.\"\n\nMara knelt on the wet planking to inspect the lock. The seal was thick, but the outer edge was distorted. Under the glare of the quay’s low-voltage arc lamp, she saw a clear double impression: a crisp outer ring overlapping a flattened, smeared stamp beneath it. Someone had cracked the original seal on this ledger strap and pressed a second die over the soft wax before it set.\n\n\"This lock’s been double-stamped,\" Mara said, looking up at Tomas.\n\nTomas’s jaw tightened. \"The archivist re-sealed it after the audit. That’s standard.\"\n\n\"Not with two offset die marks,\" Mara said. She pulled one copper token from her pocket, its metallic weight cold against her palm. \"If I take you across, I lose half my fuel clearance for the night.\"\n\n\"The lower ring doesn't have until dawn, Mara,\" Tomas said softly.\n\nShe looked at the failing turbine stack, then down at the token. She dropped the copper piece into the raft’s gate box. The iron latch snapped down with a heavy mechanical click. \n\n\"Get the chest aboard,\" Mara said.",
+  "source_sha256": "c1f4353639028f972ffd787a945358ea8bc3e33b7e1633dc8e0fed53941ccf31",
+  "status": "source_checked",
+  "reused_prose": true,
+  "memory": {
+    "memories": [
+      {
+        "kind": "event",
+        "text": "Nadi Vale warns Mara Venn that power grid flickers will cause the dock cranes to lock up by nineteen hundred.",
+        "evidence_ids": [
+          "p001"
+        ],
+        "known_by": [
+          "c01",
+          "c05"
+        ],
+        "fact_key": "grid-warning",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p001",
+            "start": 0,
+            "end": 618
+          }
+        ],
+        "evidence": "The cold sea spray smelled of scorched copper and wet rust where the pontoon bit into the harbor wall. Below Mara Venn’s boots, the floating city’s central pontoon lattice groaned against the tide, its iron ballasts ballast-pumping unevenly as the evening power draw began. Above the quay, the turbine stack gave a hollow, dying thrum. \n\nNadi Vale leaned over the dock control box, wiping salt film from the glass dials with a greasy rag. \"Generator three is dropping cycles,\" Nadi called out over the surf. \"Grid power flickers, and the dock cranes lock up by nineteen hundred. You running the raft or sitting on it?\"",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "c1f4353639028f972ffd787a945358ea8bc3e33b7e1633dc8e0fed53941ccf31"
+      },
+      {
+        "kind": "event",
+        "text": "Tomas Reed arrives at the ferry quay carrying a brass-bound chest by its braided rope handles and a leather-bound ledger strap.",
+        "evidence_ids": [
+          "p003"
+        ],
+        "known_by": [
+          "c01",
+          "c04",
+          "c05"
+        ],
+        "fact_key": "tomas-arrival",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p003",
+            "start": 985,
+            "end": 1304
+          }
+        ],
+        "evidence": "Footsteps clattered down the stone steps from the upper council causeway. Tomas Reed arrived, breath fogging in the damp chill. He hauled a brass-bound chest by its braided rope handles, the heavy iron frame scraping against the basalt steps. He carried a leather-bound ledger strap clipped directly to the locking bar.",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "c1f4353639028f972ffd787a945358ea8bc3e33b7e1633dc8e0fed53941ccf31"
+      },
+      {
+        "kind": "claim",
+        "claim_source": "c04",
+        "text": "Tomas Reed claims he needs the ferry raft under council order to transport the emergency relief fund for the lower ring clinics before the grid drops.",
+        "evidence_ids": [
+          "p004"
+        ],
+        "known_by": [
+          "c01",
+          "c04",
+          "c05"
+        ],
+        "fact_key": "tomas-council-order",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p004",
+            "start": 1306,
+            "end": 1531
+          }
+        ],
+        "evidence": "\"I need the ferry raft,\" Tomas said, resting the chest near the pontoon hinge. \"Council order. This is the emergency relief fund for the lower ring clinics. If the grid drops before we clear the channel, those wards go dark.\"",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "c1f4353639028f972ffd787a945358ea8bc3e33b7e1633dc8e0fed53941ccf31"
+      },
+      {
+        "kind": "event",
+        "text": "Tomas Reed turns the chest's locking bar to reveal a red wax seal clamped inside a steel clip, stating it was signed off an hour ago.",
+        "evidence_ids": [
+          "p006"
+        ],
+        "known_by": [
+          "c01",
+          "c04",
+          "c05"
+        ],
+        "fact_key": "seal-reveal",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p006",
+            "start": 1638,
+            "end": 1766
+          }
+        ],
+        "evidence": "Tomas bent down, turning the chest’s locking bar to reveal a red wax seal clamped inside a steel clip. \"Signed off an hour ago.\"",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "c1f4353639028f972ffd787a945358ea8bc3e33b7e1633dc8e0fed53941ccf31"
+      },
+      {
+        "kind": "event",
+        "text": "Mara Venn inspects the seal and observes a double impression: a crisp outer ring overlapping a flattened, smeared stamp beneath it.",
+        "evidence_ids": [
+          "p007"
+        ],
+        "known_by": [
+          "c01",
+          "c04"
+        ],
+        "fact_key": "double-stamp-discovery",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p007",
+            "start": 1768,
+            "end": 2147
+          }
+        ],
+        "evidence": "Mara knelt on the wet planking to inspect the lock. The seal was thick, but the outer edge was distorted. Under the glare of the quay’s low-voltage arc lamp, she saw a clear double impression: a crisp outer ring overlapping a flattened, smeared stamp beneath it. Someone had cracked the original seal on this ledger strap and pressed a second die over the soft wax before it set.",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "c1f4353639028f972ffd787a945358ea8bc3e33b7e1633dc8e0fed53941ccf31"
+      },
+      {
+        "kind": "claim",
+        "claim_source": "c04",
+        "text": "Tomas Reed claims that the archivist re-sealed the lock after the audit, which is standard procedure.",
+        "evidence_ids": [
+          "p009"
+        ],
+        "known_by": [
+          "c01",
+          "c04"
+        ],
+        "fact_key": "archivist-reseal-claim",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p009",
+            "start": 2217,
+            "end": 2302
+          }
+        ],
+        "evidence": "Tomas’s jaw tightened. \"The archivist re-sealed it after the audit. That’s standard.\"",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "c1f4353639028f972ffd787a945358ea8bc3e33b7e1633dc8e0fed53941ccf31"
+      },
+      {
+        "kind": "resource",
+        "text": "Mara Venn spends one of her two copper passage tokens by dropping it into the raft's gate box, leaving her with one remaining token.",
+        "evidence_ids": [
+          "p010",
+          "p012"
+        ],
+        "known_by": [
+          "c01",
+          "c04"
+        ],
+        "fact_key": "passage-tokens",
+        "supersedes": [
+          "m00032"
+        ],
+        "evidence_spans": [
+          {
+            "id": "p010",
+            "start": 2304,
+            "end": 2504
+          },
+          {
+            "id": "p012",
+            "start": 2574,
+            "end": 2789
+          }
+        ],
+        "evidence": "\"Not with two offset die marks,\" Mara said. She pulled one copper token from her pocket, its metallic weight cold against her palm. \"If I take you across, I lose half my fuel clearance for the night.\"\n\n\"The lower ring doesn't have until dawn, Mara,\" Tomas said softly.\n\nShe looked at the failing turbine stack, then down at the token. She dropped the copper piece into the raft’s gate box. The iron latch snapped down with a heavy mechanical click. \n\n\"Get the chest aboard,\" Mara said.",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "c1f4353639028f972ffd787a945358ea8bc3e33b7e1633dc8e0fed53941ccf31"
+      },
+      {
+        "kind": "thread",
+        "text": "Tomas Reed transports a chest with a suspicious double-punched wax seal across the channel to the lower ring clinics before the grid fails.",
+        "evidence_ids": [
+          "p004",
+          "p007",
+          "p012"
+        ],
+        "known_by": [
+          "c01",
+          "c04",
+          "c05"
+        ],
+        "thread_id": "lower-ring-relief",
+        "thread_state": "escalating",
+        "fact_key": "thread:lower-ring-relief",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p004",
+            "start": 1306,
+            "end": 1531
+          },
+          {
+            "id": "p007",
+            "start": 1768,
+            "end": 2147
+          },
+          {
+            "id": "p012",
+            "start": 2574,
+            "end": 2789
+          }
+        ],
+        "evidence": "\"I need the ferry raft,\" Tomas said, resting the chest near the pontoon hinge. \"Council order. This is the emergency relief fund for the lower ring clinics. If the grid drops before we clear the channel, those wards go dark.\"\n\n\"Show me the seal,\" Mara said. \"I don't haul air, and I don't move council weight on a verbal promise.\"\n\nTomas bent down, turning the chest’s locking bar to reveal a red wax seal clamped inside a steel clip. \"Signed off an hour ago.\"\n\nMara knelt on the wet planking to inspect the lock. The seal was thick, but the outer edge was distorted. Under the glare of the quay’s low-voltage arc lamp, she saw a clear double impression: a crisp outer ring overlapping a flattened, smeared stamp beneath it. Someone had cracked the original seal on this ledger strap and pressed a second die over the soft wax before it set.\n\n\"This lock’s been double-stamped,\" Mara said, looking up at Tomas.\n\nTomas’s jaw tightened. \"The archivist re-sealed it after the audit. That’s standard.\"\n\n\"Not with two offset die marks,\" Mara said. She pulled one copper token from her pocket, its metallic weight cold against her palm. \"If I take you across, I lose half my fuel clearance for the night.\"\n\n\"The lower ring doesn't have until dawn, Mara,\" Tomas said softly.\n\nShe looked at the failing turbine stack, then down at the token. She dropped the copper piece into the raft’s gate box. The iron latch snapped down with a heavy mechanical click. \n\n\"Get the chest aboard,\" Mara said.",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "c1f4353639028f972ffd787a945358ea8bc3e33b7e1633dc8e0fed53941ccf31"
+      }
+    ]
+  },
+  "review": {
+    "pass": true,
+    "checks": {
+      "author_contract": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch01-sc01:p001",
+          "ch01-sc01:p002"
+        ],
+        "reason": "The scene adheres to close third-person past tense through focal character Mara Venn and fits short story prose conventions without medium violations.",
+        "id": "author_contract"
+      },
+      "chronology_resources_and_custody": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch01-sc01:p002",
+          "ch01-sc01:p010",
+          "ch01-sc01:p012"
+        ],
+        "reason": "Mara begins with two copper passage tokens and spends exactly one token to activate the raft gate, leaving one remaining token consistent with tracked state.",
+        "id": "chronology_resources_and_custody"
+      },
+      "knowledge_identity_and_pov": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch01-sc01:p007",
+          "ch01-sc01:p008"
+        ],
+        "reason": "Mara discovers the double-stamped seal through direct physical observation under the quay light; no unearned private knowledge is leaked.",
+        "id": "knowledge_identity_and_pov"
+      },
+      "causality_foreshadowing_and_payoff": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch01-sc01:p004",
+          "ch01-sc01:p007",
+          "ch01-sc01:p012"
+        ],
+        "reason": "The scene establishes clear causal stakes with the failing power grid deadline and plants the observable double-punched wax seal clue.",
+        "id": "causality_foreshadowing_and_payoff"
+      },
+      "voice_medium_and_detail": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch01-sc01:p001",
+          "ch01-sc01:p002",
+          "ch01-sc01:p005"
+        ],
+        "reason": "Prose uses sensory harbor details and Mara's short, practical voice register effectively for a short story medium.",
+        "id": "voice_medium_and_detail"
+      },
+      "repetition_and_pacing": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch01-sc01:p001",
+          "ch01-sc01:p012"
+        ],
+        "reason": "Pacing progresses naturally from setup to tension and commitment without redundant beats or repetitive dialogue.",
+        "id": "repetition_and_pacing"
+      },
+      "memory_extraction": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch01-sc01:p001",
+          "ch01-sc01:p007",
+          "ch01-sc01:p012"
+        ],
+        "reason": "Extracted memory items correctly reflect the facts, resource expenditures, and evidence spans from the source passage.",
+        "id": "memory_extraction"
+      }
+    },
+    "issues": []
+  },
+  "reviewed_sha256": "c1f4353639028f972ffd787a945358ea8bc3e33b7e1633dc8e0fed53941ccf31",
+  "memory_sha256": "7809c00ae46cf3cac4db6626890a4d86d3c2f7f525865b44baa866813da42e7c"
+}

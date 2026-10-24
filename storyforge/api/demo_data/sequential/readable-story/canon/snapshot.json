@@ -1,0 +1,2981 @@
+{
+ "version": 2,
+ "backend": "worker",
+ "accepted": [
+  {
+   "id": "ch01-sc01",
+   "chapter": 1,
+   "pov": "c01",
+   "participants": [
+    "c01",
+    "c02",
+    "c03"
+   ],
+   "prose": "SCENE 1: FERRY QUAY – DUSK (18:00)\n\nPAGE 1\n\nPANEL 1\nWide shot of the stone ferry quay under cold harbor drizzle. MARA VENN leans against a rusted iron mooring post, her waterproof jacket slick with mist. Beside her stands her brother, IVO VENN, holding a portable field radio unit by its canvas strap. A weathered clock tower behind the slipway shows 18:00.\n\nMARA\nTide is turning, Ivo. Water won’t wait for the archive.\n\nPANEL 2\nClose-up on Mara’s open palm. Nestled in her calloused hand are exactly two stamped brass crossing tokens, each marked with a single punch-hole. \n\nMARA (OFF-PANEL)\nTwo brass slips. That buys one run out and one run home. Nothing extra.\n\nPANEL 3\nMedium shot. Ivo checks the battery dial on the face of the radio unit. Two small green indicator pips glow on the housing.\n\nIVO\nTwo outgoing signals left on this pack. After that, the board goes cold until the dock recharges it.\n\nPANEL 4\nSera Holt approaches down the wet cobblestone slipway from the street, carrying a heavy, oilskin-wrapped volume tucked under her arm. Her coat is damp from the ten-minute walk.\n\nMARA\nYou took your time from the archive, Holt.\n\nSERA\nTen minutes at a brisk pace. Walking faster only tears the binding.\n\nPAGE 2\n\nPANEL 1\nClose-up on the ledger laid open on the wooden cap of a bollard. Sera’s gloved finger points firmly at an empty, scraped fiber patch in the relief entry row where a date once sat. The ink has been shaved clean away.\n\nSERA\nLook here. Not a misprint. A blade scraped the date off this relief log entirely.\n\nPANEL 2\nMara and Ivo lean in close over the open ledger. Mara’s jaw tightens as she examines the thinned, roughened parchment under the harbor lamp.\n\nMARA\nScraped down to the bone. Who touched the book before you took it?\n\nSERA\nThat is an accusation, not a record. The blade mark shows alteration. It does not name the hands that held the knife.\n\nPANEL 3\nIvo raises the handset to his mouth, thumb pressing the side switch. On the radio chassis, one green pip flickers and clicks out; exactly one green pip remains lit.\n\nIVO\nDock relay to Archive Desk. Page forty-four confirmed damaged. Heading out. \n\nPAGE 3\n\nPANEL 1\nMedium shot. Mara drops one brass token into the dock master’s collection box with a sharp, heavy clink. Her other hand closes tightly around the single remaining token, shoving it deep into her coat pocket.\n\nMARA\nOne token spent. We’ve got one left to get back.\n\nPANEL 2\nIvo steps back toward the quay shelter, the strap of the half-drained radio over his shoulder. He watches Mara help Sera aboard the tethered wooden ferry.\n\nIVO\nI remain on the quay. Keep your eyes on the crossing, Mara.\n\nPANEL 3\nWide shot from the quay. The ferry pushes off from the dock, churning black water in its wake as it heads into the harbor channel toward the distant lights of the council landing. Ivo stands alone on the stone slipway, watching them leave.",
+   "review": {
+    "pass": true,
+    "checks": [
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p017",
+       "p019",
+       "p023"
+      ],
+      "reason": "The scene moves from waiting at the quay to spending one transmission and one token, departing for the council landing while Ivo remains behind.",
+      "id": "scene_change",
+      "source_spans": [
+       {
+        "id": "p017",
+        "start": 1882,
+        "end": 2054
+       },
+       {
+        "id": "p019",
+        "start": 2146,
+        "end": 2361
+       },
+       {
+        "id": "p023",
+        "start": 2647,
+        "end": 2894
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p015",
+       "p016",
+       "p019"
+      ],
+      "reason": "Mara probes who touched the ledger and chooses to expend a non-refundable crossing token to transport Sera across the harbor.",
+      "id": "character_agency",
+      "source_spans": [
+       {
+        "id": "p015",
+        "start": 1685,
+        "end": 1756
+       },
+       {
+        "id": "p016",
+        "start": 1758,
+        "end": 1880
+       },
+       {
+        "id": "p019",
+        "start": 2146,
+        "end": 2361
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p004",
+       "p015",
+       "p016"
+      ],
+      "reason": "Sera resists Mara's impulse to accuse prematurely, balancing the urgency of the altered record against strict factual integrity.",
+      "id": "character_depth",
+      "source_spans": [
+       {
+        "id": "p004",
+        "start": 359,
+        "end": 419
+       },
+       {
+        "id": "p015",
+        "start": 1685,
+        "end": 1756
+       },
+       {
+        "id": "p016",
+        "start": 1758,
+        "end": 1880
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p005",
+       "p019",
+       "p021"
+      ],
+      "reason": "Mara explicitly tests their margin by tracking the two tokens, choosing to spend one now knowing only one remains for return.",
+      "id": "causal_alternatives",
+      "source_spans": [
+       {
+        "id": "p005",
+        "start": 421,
+        "end": 664
+       },
+       {
+        "id": "p019",
+        "start": 2146,
+        "end": 2361
+       },
+       {
+        "id": "p021",
+        "start": 2418,
+        "end": 2580
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p009",
+       "p010",
+       "p016"
+      ],
+      "reason": "Sera deflects Mara's impatience and subsequent accusatory questioning by strictly distinguishing physical alteration from proof of identity.",
+      "id": "dialogue_tactics",
+      "source_spans": [
+       {
+        "id": "p009",
+        "start": 1091,
+        "end": 1138
+       },
+       {
+        "id": "p010",
+        "start": 1140,
+        "end": 1212
+       },
+       {
+        "id": "p016",
+        "start": 1758,
+        "end": 1880
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p003",
+       "p008",
+       "p017"
+      ],
+      "reason": "The 18:00 start, Sera's ten-minute walk from the archive, and exact reductions of tokens and radio charges match canon precisely.",
+      "id": "continuity_clock",
+      "source_spans": [
+       {
+        "id": "p003",
+        "start": 44,
+        "end": 357
+       },
+       {
+        "id": "p008",
+        "start": 905,
+        "end": 1089
+       },
+       {
+        "id": "p017",
+        "start": 1882,
+        "end": 2054
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p012",
+       "p013",
+       "p016"
+      ],
+      "reason": "Sera discloses the shaved date on page forty-four directly to Mara and Ivo without leaking unobserved conclusions about who did it.",
+      "id": "pov_knowledge",
+      "source_spans": [
+       {
+        "id": "p012",
+        "start": 1222,
+        "end": 1445
+       },
+       {
+        "id": "p013",
+        "start": 1447,
+        "end": 1533
+       },
+       {
+        "id": "p016",
+        "start": 1758,
+        "end": 1880
+       }
+      ]
+     },
+     {
+      "verdict": "not_applicable",
+      "evidence_ids": [
+       "p001"
+      ],
+      "reason": "No secondary subplot question was assigned or active for this focused opening adaptation scene.",
+      "id": "subplot_function"
+     },
+     {
+      "verdict": "not_applicable",
+      "evidence_ids": [
+       "p001"
+      ],
+      "reason": "No external reference materials or devices were mandated for structural application in this script.",
+      "id": "reference_application"
+     }
+    ],
+    "issues": []
+   },
+   "rhetoric_review": {
+    "pass": true,
+    "checks": [
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p005",
+       "p012",
+       "p019"
+      ],
+      "reason": "Action descriptions and dialogue avoid restating obvious panel visuals, conveying necessary plot beats concisely.",
+      "id": "redundant_explanation",
+      "source_spans": [
+       {
+        "id": "p005",
+        "start": 421,
+        "end": 664
+       },
+       {
+        "id": "p012",
+        "start": 1222,
+        "end": 1445
+       },
+       {
+        "id": "p019",
+        "start": 2146,
+        "end": 2361
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p003",
+       "p012",
+       "p017"
+      ],
+      "reason": "Visual panel cues focus sharply on concrete, observable physical details appropriate to Mara's immediate perspective and the comic medium.",
+      "id": "viewpoint_specificity",
+      "source_spans": [
+       {
+        "id": "p003",
+        "start": 44,
+        "end": 357
+       },
+       {
+        "id": "p012",
+        "start": 1222,
+        "end": 1445
+       },
+       {
+        "id": "p017",
+        "start": 1882,
+        "end": 2054
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p004",
+       "p014",
+       "p019"
+      ],
+      "reason": "Emotions are dramatized through physical reactions like a tightening jaw and sharp token drops rather than abstract labels.",
+      "id": "emotional_labeling",
+      "source_spans": [
+       {
+        "id": "p004",
+        "start": 359,
+        "end": 419
+       },
+       {
+        "id": "p014",
+        "start": 1535,
+        "end": 1683
+       },
+       {
+        "id": "p019",
+        "start": 2146,
+        "end": 2361
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p004",
+       "p015"
+      ],
+      "reason": "Metaphors stay grounded in harbor and physical textures without mixing incompatible imagery domains.",
+      "id": "figurative_coherence",
+      "source_spans": [
+       {
+        "id": "p004",
+        "start": 359,
+        "end": 419
+       },
+       {
+        "id": "p015",
+        "start": 1685,
+        "end": 1756
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p005",
+       "p012",
+       "p017"
+      ],
+      "reason": "Gestures, such as pointing to erased parchment fibers and toggling the radio switch, directly advance plot and resource tracking.",
+      "id": "gesture_function",
+      "source_spans": [
+       {
+        "id": "p005",
+        "start": 421,
+        "end": 664
+       },
+       {
+        "id": "p012",
+        "start": 1222,
+        "end": 1445
+       },
+       {
+        "id": "p017",
+        "start": 1882,
+        "end": 2054
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p005",
+       "p018",
+       "p020"
+      ],
+      "reason": "Panel phrasing and character dialogue maintain a crisp, economical cadence suited to a tense graphic script.",
+      "id": "rhythm_repetition",
+      "source_spans": [
+       {
+        "id": "p005",
+        "start": 421,
+        "end": 664
+       },
+       {
+        "id": "p018",
+        "start": 2056,
+        "end": 2144
+       },
+       {
+        "id": "p020",
+        "start": 2363,
+        "end": 2416
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p003",
+       "p017",
+       "p019"
+      ],
+      "reason": "Panel directions and spoken dialogue are entirely diegetic without meta-commentary or prompt leakage.",
+      "id": "instruction_leakage",
+      "source_spans": [
+       {
+        "id": "p003",
+        "start": 44,
+        "end": 357
+       },
+       {
+        "id": "p017",
+        "start": 1882,
+        "end": 2054
+       },
+       {
+        "id": "p019",
+        "start": 2146,
+        "end": 2361
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p002",
+       "p003",
+       "p018"
+      ],
+      "reason": "The script strictly follows standard comic script format with numbered pages, numbered panels, and clear speaker cues.",
+      "id": "style_fidelity",
+      "source_spans": [
+       {
+        "id": "p002",
+        "start": 36,
+        "end": 42
+       },
+       {
+        "id": "p003",
+        "start": 44,
+        "end": 357
+       },
+       {
+        "id": "p018",
+        "start": 2056,
+        "end": 2144
+       }
+      ]
+     }
+    ],
+    "issues": []
+   },
+   "memory_review": {
+    "pass": true,
+    "issues": [],
+    "source_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+    "state_sha256": "9397018d3bae177d97672323e2a347a95ab1b96bc7b31d5b7e8ec9213e704c61",
+    "memory_sha256": "89e5c8c756780ffeb0f15a90dbd43b59172fc655f259e2a76ee7d9d07ae8ff56",
+    "phase": "final",
+    "missing_batches": [],
+    "reused_preflight": false
+   },
+   "reference_uses": [],
+   "state_version": 1,
+   "quality_status": "reviewed",
+   "memory_extraction": {
+    "quarantined_count": 0,
+    "fallback": null,
+    "verified": true
+   },
+   "canon_committed": true
+  },
+  {
+   "id": "ch02-sc01",
+   "chapter": 2,
+   "pov": "c01",
+   "participants": [
+    "c01",
+    "c03"
+   ],
+   "prose": "PAGE 1\n\nPANEL 1\nEXT. COUNCIL LANDING - NIGHT\nWide shot. At 18:20, the wooden ferry grinds against the slick timber pilings of the council landing. Drizzle glistens on the stone quay. Mara loops the wet mooring line around an iron bollard, hauling the boat tight. Sera steps ashore, pinning the oilskin-wrapped ledger tightly against her ribs.\n\nPANEL 2\nMedium shot. Mara wipes spray from her eyes. She reaches into her coat, her fingers curling around the cold, single punch-holed brass disc remaining in her pocket.\n\nMARA\nEighteen-twenty. We're at the landing. That transit cost one crossing token, Sera. I’ve got exactly one left.\n\nPANEL 3\nClose-up on Sera. Rain runs down her turned-up collar. She secures the wrapped volume with both hands.\n\nSERA\nThen we make the trip count. The archive does not hand over its records for empty guessing.\n\nPAGE 2\n\nPANEL 1\nMedium shot. Mara and Sera walk toward the iron gates leading to the council chamber stairs. A single wall-mounted lamp casts yellow light across the wet pavement. Mara glares at the volume tucked against Sera's side.\n\nMARA\nIvo radioed page forty-four in to the desk before we left. You showed us the erased date at the quay. Who did it?\n\nPANEL 2\nClose-up on Sera’s hands. She pulls back the oilskin flap to reveal the damaged leather binding, keeping her hand clamped on the spine.\n\nSERA\nI keep custody of the ledger. And I will not point a finger at anyone.\n\nPANEL 3\nMedium shot. Mara stops on the stone landing, turning to face Sera directly.\n\nMARA\nWe crossed the harbor on one token for an erased date, and you won't name a suspect?\n\nPANEL 4\nClose-up on Sera. She pulls the oilskin shut over the ledger binding.\n\nSERA\nThe scraped paper proves alteration, not who held the blade. I refuse to accuse anyone until we compare this volume against the original receipt.",
+   "review": {
+    "pass": true,
+    "checks": [
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p002",
+       "p015"
+      ],
+      "reason": "The scene successfully advances from the arrival and mooring of the ferry at the council landing to the final standoff regarding the ledger evidence and the refusal to name an unproven culprit.",
+      "id": "scene_change",
+      "source_spans": [
+       {
+        "id": "p002",
+        "start": 8,
+        "end": 342
+       },
+       {
+        "id": "p015",
+        "start": 1676,
+        "end": 1826
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p004",
+       "p013"
+      ],
+      "reason": "Mara actively tracks her remaining token and challenges Sera on the lack of a suspect, while Sera maintains strict custody of the volume and defends her refusal to accuse without receipt comparison.",
+      "id": "character_agency",
+      "source_spans": [
+       {
+        "id": "p004",
+        "start": 517,
+        "end": 631
+       },
+       {
+        "id": "p013",
+        "start": 1506,
+        "end": 1595
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p006",
+       "p015"
+      ],
+      "reason": "Sera balances her duty to the archive with her commitment to accurate proof, showing professional integrity over hasty accusations.",
+      "id": "character_depth",
+      "source_spans": [
+       {
+        "id": "p006",
+        "start": 745,
+        "end": 841
+       },
+       {
+        "id": "p015",
+        "start": 1676,
+        "end": 1826
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p004",
+       "p006"
+      ],
+      "reason": "The characters weigh the cost of their single remaining token and the risk of unverified guessing against the necessity of making the trip count.",
+      "id": "causal_alternatives",
+      "source_spans": [
+       {
+        "id": "p004",
+        "start": 517,
+        "end": 631
+       },
+       {
+        "id": "p006",
+        "start": 745,
+        "end": 841
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p009",
+       "p013"
+      ],
+      "reason": "Mara uses Ivo's radio transmission and the erased date to press Sera for a name, while Sera counters by tightening her grip on the ledger and shifting the requirement of proof to the original receipt.",
+      "id": "dialogue_tactics",
+      "source_spans": [
+       {
+        "id": "p009",
+        "start": 1078,
+        "end": 1196
+       },
+       {
+        "id": "p013",
+        "start": 1506,
+        "end": 1595
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p002",
+       "p004"
+      ],
+      "reason": "Time is fixed at 18:20 upon landing, and Mara's token count is correctly preserved at exactly one token remaining.",
+      "id": "continuity_clock",
+      "source_spans": [
+       {
+        "id": "p002",
+        "start": 8,
+        "end": 342
+       },
+       {
+        "id": "p004",
+        "start": 517,
+        "end": 631
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p009",
+       "p015"
+      ],
+      "reason": "The narrative strictly adheres to Mara's focal viewpoint and what she experiences and hears during the arrival and confrontation.",
+      "id": "pov_knowledge",
+      "source_spans": [
+       {
+        "id": "p009",
+        "start": 1078,
+        "end": 1196
+       },
+       {
+        "id": "p015",
+        "start": 1676,
+        "end": 1826
+       }
+      ]
+     },
+     {
+      "verdict": "not_applicable",
+      "evidence_ids": [
+       "p002"
+      ],
+      "reason": "No independent subplots require intersection in this concise arrival scene.",
+      "id": "subplot_function"
+     },
+     {
+      "verdict": "not_applicable",
+      "evidence_ids": [
+       "p002"
+      ],
+      "reason": "No external reference mechanisms are invoked beyond the direct source adaptation.",
+      "id": "reference_application"
+     }
+    ],
+    "issues": []
+   },
+   "rhetoric_review": {
+    "pass": true,
+    "checks": [
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p006",
+       "p011"
+      ],
+      "reason": "Dialogue and narrative captions preserve necessary interiority and character positioning without over-explaining actions already visually represented.",
+      "id": "redundant_explanation",
+      "source_spans": [
+       {
+        "id": "p006",
+        "start": 745,
+        "end": 841
+       },
+       {
+        "id": "p011",
+        "start": 1343,
+        "end": 1418
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p002",
+       "p003"
+      ],
+      "reason": "Attention and material details, such as the single punch-holed brass disc and the wet mooring line, belong strictly to Mara's observer perspective.",
+      "id": "viewpoint_specificity",
+      "source_spans": [
+       {
+        "id": "p002",
+        "start": 8,
+        "end": 342
+       },
+       {
+        "id": "p003",
+        "start": 344,
+        "end": 515
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p008",
+       "p012"
+      ],
+      "reason": "Tension is conveyed through physical gestures and dialogue rather than direct, unearned emotional adjectives.",
+      "id": "emotional_labeling",
+      "source_spans": [
+       {
+        "id": "p008",
+        "start": 851,
+        "end": 1076
+       },
+       {
+        "id": "p012",
+        "start": 1420,
+        "end": 1504
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p002",
+       "p005"
+      ],
+      "reason": "Metaphors and imagery remain sparse and grounded in harbor work and weather.",
+      "id": "figurative_coherence",
+      "source_spans": [
+       {
+        "id": "p002",
+        "start": 8,
+        "end": 342
+       },
+       {
+        "id": "p005",
+        "start": 633,
+        "end": 743
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p003",
+       "p010"
+      ],
+      "reason": "Every physical movement serves a tactical purpose in the negotiation and interaction between characters.",
+      "id": "gesture_function",
+      "source_spans": [
+       {
+        "id": "p003",
+        "start": 344,
+        "end": 515
+       },
+       {
+        "id": "p010",
+        "start": 1198,
+        "end": 1341
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p004",
+       "p013"
+      ],
+      "reason": "Pacing varies appropriately across the panels, avoiding redundant restatement while maintaining essential constraints.",
+      "id": "rhythm_repetition",
+      "source_spans": [
+       {
+        "id": "p004",
+        "start": 517,
+        "end": 631
+       },
+       {
+        "id": "p013",
+        "start": 1506,
+        "end": 1595
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p001",
+       "p007"
+      ],
+      "reason": "No prompt labels or craft instructions appear in the script prose.",
+      "id": "instruction_leakage",
+      "source_spans": [
+       {
+        "id": "p001",
+        "start": 0,
+        "end": 6
+       },
+       {
+        "id": "p007",
+        "start": 843,
+        "end": 849
+       }
+      ]
+     },
+     {
+      "verdict": "pass",
+      "evidence_ids": [
+       "p002",
+       "p004",
+       "p015"
+      ],
+      "reason": "The script medium formatting, contemporary heist thriller register, and dialogue conventions align precisely with the author contract.",
+      "id": "style_fidelity",
+      "source_spans": [
+       {
+        "id": "p002",
+        "start": 8,
+        "end": 342
+       },
+       {
+        "id": "p004",
+        "start": 517,
+        "end": 631
+       },
+       {
+        "id": "p015",
+        "start": 1676,
+        "end": 1826
+       }
+      ]
+     }
+    ],
+    "issues": []
+   },
+   "memory_review": {
+    "pass": true,
+    "issues": [],
+    "source_sha256": "35cf2c4c2ec170bfac10fb2026f90f1e59576752911ba25a257fa83e91c4f8da",
+    "state_sha256": "f1d93ff354e9a4f6a8a703fc0a075064389f50b4b6beeaca756acb76f1f1632c",
+    "memory_sha256": "5dc5a9d27be53cc62bf6b0a537917b702aff9817f0bb139ecb0bedc236f6503b",
+    "phase": "final",
+    "missing_batches": [],
+    "reused_preflight": true
+   },
+   "reference_uses": [],
+   "state_version": 2,
+   "quality_status": "reviewed",
+   "memory_extraction": {
+    "quarantined_count": 0,
+    "fallback": null,
+    "verified": true
+   },
+   "canon_committed": true
+  }
+ ],
+ "memories": [
+  {
+   "kind": "event",
+   "text": "Mara Venn is alive at the opening.",
+   "known_by": [
+    "public"
+   ],
+   "fact_key": "life:c01",
+   "subject": "c01",
+   "life_state": "alive",
+   "source": "user_input",
+   "id": "m00000"
+  },
+  {
+   "kind": "event",
+   "text": "Mara Venn begins at the Ferry quay.",
+   "known_by": [
+    "c01"
+   ],
+   "fact_key": "location:c01",
+   "source": "user_input",
+   "id": "m00001"
+  },
+  {
+   "kind": "belief",
+   "text": "Mara Venn privately fears failing a dependent and has not confessed this fear.",
+   "known_by": [
+    "c01"
+   ],
+   "holder": "c01",
+   "fact_key": "belief:c01",
+   "source": "user_input",
+   "id": "m00002"
+  },
+  {
+   "kind": "event",
+   "text": "Mara Venn knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+   "known_by": [
+    "c01"
+   ],
+   "fact_key": "promise:c01",
+   "source": "user_input",
+   "id": "m00003"
+  },
+  {
+   "kind": "event",
+   "text": "Ivo Venn is alive at the opening.",
+   "known_by": [
+    "public"
+   ],
+   "fact_key": "life:c02",
+   "subject": "c02",
+   "life_state": "alive",
+   "source": "user_input",
+   "id": "m00004"
+  },
+  {
+   "kind": "event",
+   "text": "Ivo Venn begins at the Ferry quay.",
+   "known_by": [
+    "c02"
+   ],
+   "fact_key": "location:c02",
+   "source": "user_input",
+   "id": "m00005"
+  },
+  {
+   "kind": "belief",
+   "text": "Ivo Venn privately fears failing a dependent and has not confessed this fear.",
+   "known_by": [
+    "c02"
+   ],
+   "holder": "c02",
+   "fact_key": "belief:c02",
+   "source": "user_input",
+   "id": "m00006"
+  },
+  {
+   "kind": "event",
+   "text": "Ivo Venn knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+   "known_by": [
+    "c02"
+   ],
+   "fact_key": "promise:c02",
+   "source": "user_input",
+   "id": "m00007"
+  },
+  {
+   "kind": "event",
+   "text": "Sera Holt is alive at the opening.",
+   "known_by": [
+    "public"
+   ],
+   "fact_key": "life:c03",
+   "subject": "c03",
+   "life_state": "alive",
+   "source": "user_input",
+   "id": "m00008"
+  },
+  {
+   "kind": "event",
+   "text": "Sera Holt begins at the Public archive.",
+   "known_by": [
+    "c03"
+   ],
+   "fact_key": "location:c03",
+   "source": "user_input",
+   "id": "m00009"
+  },
+  {
+   "kind": "belief",
+   "text": "Sera Holt privately fears failing a dependent and has not confessed this fear.",
+   "known_by": [
+    "c03"
+   ],
+   "holder": "c03",
+   "fact_key": "belief:c03",
+   "source": "user_input",
+   "id": "m00010"
+  },
+  {
+   "kind": "event",
+   "text": "Sera Holt knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+   "known_by": [
+    "c03"
+   ],
+   "fact_key": "promise:c03",
+   "source": "user_input",
+   "id": "m00011"
+  },
+  {
+   "kind": "event",
+   "text": "Tomas Reed is alive at the opening.",
+   "known_by": [
+    "public"
+   ],
+   "fact_key": "life:c04",
+   "subject": "c04",
+   "life_state": "alive",
+   "source": "user_input",
+   "id": "m00012"
+  },
+  {
+   "kind": "event",
+   "text": "Tomas Reed begins at the Council chamber.",
+   "known_by": [
+    "c04"
+   ],
+   "fact_key": "location:c04",
+   "source": "user_input",
+   "id": "m00013"
+  },
+  {
+   "kind": "belief",
+   "text": "Tomas Reed privately fears failing a dependent and has not confessed this fear.",
+   "known_by": [
+    "c04"
+   ],
+   "holder": "c04",
+   "fact_key": "belief:c04",
+   "source": "user_input",
+   "id": "m00014"
+  },
+  {
+   "kind": "event",
+   "text": "Tomas Reed knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+   "known_by": [
+    "c04"
+   ],
+   "fact_key": "promise:c04",
+   "source": "user_input",
+   "id": "m00015"
+  },
+  {
+   "kind": "event",
+   "text": "Nadi Vale is alive at the opening.",
+   "known_by": [
+    "public"
+   ],
+   "fact_key": "life:c05",
+   "subject": "c05",
+   "life_state": "alive",
+   "source": "user_input",
+   "id": "m00016"
+  },
+  {
+   "kind": "event",
+   "text": "Nadi Vale begins at the Ferry quay.",
+   "known_by": [
+    "c05"
+   ],
+   "fact_key": "location:c05",
+   "source": "user_input",
+   "id": "m00017"
+  },
+  {
+   "kind": "belief",
+   "text": "Nadi Vale privately fears failing a dependent and has not confessed this fear.",
+   "known_by": [
+    "c05"
+   ],
+   "holder": "c05",
+   "fact_key": "belief:c05",
+   "source": "user_input",
+   "id": "m00018"
+  },
+  {
+   "kind": "event",
+   "text": "Nadi Vale knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+   "known_by": [
+    "c05"
+   ],
+   "fact_key": "promise:c05",
+   "source": "user_input",
+   "id": "m00019"
+  },
+  {
+   "kind": "event",
+   "text": "Oren Pike is alive at the opening.",
+   "known_by": [
+    "public"
+   ],
+   "fact_key": "life:c06",
+   "subject": "c06",
+   "life_state": "alive",
+   "source": "user_input",
+   "id": "m00020"
+  },
+  {
+   "kind": "event",
+   "text": "Oren Pike begins at the Signal tower.",
+   "known_by": [
+    "c06"
+   ],
+   "fact_key": "location:c06",
+   "source": "user_input",
+   "id": "m00021"
+  },
+  {
+   "kind": "belief",
+   "text": "Oren Pike privately fears failing a dependent and has not confessed this fear.",
+   "known_by": [
+    "c06"
+   ],
+   "holder": "c06",
+   "fact_key": "belief:c06",
+   "source": "user_input",
+   "id": "m00022"
+  },
+  {
+   "kind": "event",
+   "text": "Oren Pike knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+   "known_by": [
+    "c06"
+   ],
+   "fact_key": "promise:c06",
+   "source": "user_input",
+   "id": "m00023"
+  },
+  {
+   "kind": "resource",
+   "text": "Mara holds exactly two single-use ferry passage tokens. Each token permits one ferry crossing; spent tokens cannot return.",
+   "known_by": [
+    "c01",
+    "c02"
+   ],
+   "fact_key": "passage-tokens",
+   "source": "user_input",
+   "id": "m00024"
+  },
+  {
+   "kind": "resource",
+   "text": "Ivo holds one portable radio with power for two outbound transmissions; receiving uses no counted transmission.",
+   "known_by": [
+    "c02"
+   ],
+   "fact_key": "radio-charge",
+   "source": "user_input",
+   "id": "m00025"
+  },
+  {
+   "kind": "event",
+   "text": "Mara and Ivo are siblings; neither has told the other their private household promise.",
+   "known_by": [
+    "c01",
+    "c02"
+   ],
+   "fact_key": "family:venn",
+   "source": "user_input",
+   "id": "m00026"
+  },
+  {
+   "kind": "event",
+   "text": "Sera alone knows that one archive ledger has an erased date; she has not identified who erased it or why.",
+   "known_by": [
+    "c03"
+   ],
+   "fact_key": "erased-date",
+   "source": "user_input",
+   "id": "m00027"
+  },
+  {
+   "kind": "event",
+   "text": "Travel among the four locations requires visible departure and arrival or an explicit interval of at least ten minutes.",
+   "known_by": [
+    "public"
+   ],
+   "fact_key": "travel",
+   "source": "user_input",
+   "id": "m00028"
+  },
+  {
+   "kind": "event",
+   "text": "The quay connects the districts; the tower relays calls; the archive holds records; the council chamber hosts public decisions.",
+   "known_by": [
+    "public"
+   ],
+   "fact_key": "geography",
+   "source": "user_input",
+   "id": "m00029"
+  },
+  {
+   "evidence_ids": [
+    "p003"
+   ],
+   "fact_key": "location:c01",
+   "kind": "event",
+   "known_by": [
+    "c01",
+    "c02"
+   ],
+   "supersedes": [
+    "m00001"
+   ],
+   "text": "Mara Venn is at the stone ferry quay under cold harbor drizzle at 18:00.",
+   "evidence_spans": [
+    {
+     "id": "p003",
+     "start": 44,
+     "end": 357
+    }
+   ],
+   "evidence": "PANEL 1\nWide shot of the stone ferry quay under cold harbor drizzle. MARA VENN leans against a rusted iron mooring post, her waterproof jacket slick with mist. Beside her stands her brother, IVO VENN, holding a portable field radio unit by its canvas strap. A weathered clock tower behind the slipway shows 18:00.",
+   "evidence_match": "passage_ids",
+   "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+   "id": "m00030",
+   "source": "episode-000001/ch01-sc01",
+   "state_version": 1
+  },
+  {
+   "evidence_ids": [
+    "p003"
+   ],
+   "fact_key": "location:c02",
+   "kind": "event",
+   "known_by": [
+    "c01",
+    "c02"
+   ],
+   "supersedes": [
+    "m00005"
+   ],
+   "text": "Ivo Venn stands beside Mara on the ferry quay holding a portable field radio unit at 18:00.",
+   "evidence_spans": [
+    {
+     "id": "p003",
+     "start": 44,
+     "end": 357
+    }
+   ],
+   "evidence": "PANEL 1\nWide shot of the stone ferry quay under cold harbor drizzle. MARA VENN leans against a rusted iron mooring post, her waterproof jacket slick with mist. Beside her stands her brother, IVO VENN, holding a portable field radio unit by its canvas strap. A weathered clock tower behind the slipway shows 18:00.",
+   "evidence_match": "passage_ids",
+   "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+   "id": "m00031",
+   "source": "episode-000001/ch01-sc01",
+   "state_version": 1
+  },
+  {
+   "evidence_ids": [
+    "p005"
+   ],
+   "fact_key": "passage-tokens",
+   "kind": "resource",
+   "known_by": [
+    "c01",
+    "c02"
+   ],
+   "supersedes": [
+    "m00024"
+   ],
+   "text": "Mara holds exactly two stamped brass crossing tokens in her open palm, each marked with a single punch-hole.",
+   "evidence_spans": [
+    {
+     "id": "p005",
+     "start": 421,
+     "end": 664
+    }
+   ],
+   "evidence": "PANEL 2\nClose-up on Mara’s open palm. Nestled in her calloused hand are exactly two stamped brass crossing tokens, each marked with a single punch-hole. \n\nMARA (OFF-PANEL)\nTwo brass slips. That buys one run out and one run home. Nothing extra.",
+   "evidence_match": "passage_ids",
+   "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+   "id": "m00032",
+   "source": "episode-000001/ch01-sc01",
+   "state_version": 1
+  },
+  {
+   "evidence_ids": [
+    "p006",
+    "p007"
+   ],
+   "fact_key": "radio-charge",
+   "kind": "resource",
+   "known_by": [
+    "c01",
+    "c02"
+   ],
+   "supersedes": [
+    "m00025"
+   ],
+   "text": "Ivo's radio has two outgoing signals left on its battery pack before the board goes cold.",
+   "evidence_spans": [
+    {
+     "id": "p006",
+     "start": 666,
+     "end": 797
+    },
+    {
+     "id": "p007",
+     "start": 799,
+     "end": 903
+    }
+   ],
+   "evidence": "PANEL 3\nMedium shot. Ivo checks the battery dial on the face of the radio unit. Two small green indicator pips glow on the housing.\n\nIVO\nTwo outgoing signals left on this pack. After that, the board goes cold until the dock recharges it.",
+   "evidence_match": "passage_ids",
+   "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+   "id": "m00033",
+   "source": "episode-000001/ch01-sc01",
+   "state_version": 1
+  },
+  {
+   "evidence_ids": [
+    "p008",
+    "p010"
+   ],
+   "fact_key": "location:c03",
+   "kind": "event",
+   "known_by": [
+    "c01",
+    "c02",
+    "c03"
+   ],
+   "supersedes": [
+    "m00009"
+   ],
+   "text": "Sera Holt arrives at the ferry quay on foot from the archive after a ten-minute walk, carrying an oilskin-wrapped volume.",
+   "evidence_spans": [
+    {
+     "id": "p008",
+     "start": 905,
+     "end": 1089
+    },
+    {
+     "id": "p010",
+     "start": 1140,
+     "end": 1212
+    }
+   ],
+   "evidence": "PANEL 4\nSera Holt approaches down the wet cobblestone slipway from the street, carrying a heavy, oilskin-wrapped volume tucked under her arm. Her coat is damp from the ten-minute walk.\n\nMARA\nYou took your time from the archive, Holt.\n\nSERA\nTen minutes at a brisk pace. Walking faster only tears the binding.",
+   "evidence_match": "passage_ids",
+   "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+   "id": "m00034",
+   "source": "episode-000001/ch01-sc01",
+   "state_version": 1
+  },
+  {
+   "evidence_ids": [
+    "p012",
+    "p013"
+   ],
+   "fact_key": "erased-date",
+   "kind": "event",
+   "known_by": [
+    "c01",
+    "c02",
+    "c03"
+   ],
+   "supersedes": [
+    "m00027"
+   ],
+   "text": "Sera shows the ledger to Mara and Ivo, pointing at an empty fiber patch where a date was scraped completely clean by a blade.",
+   "evidence_spans": [
+    {
+     "id": "p012",
+     "start": 1222,
+     "end": 1445
+    },
+    {
+     "id": "p013",
+     "start": 1447,
+     "end": 1533
+    }
+   ],
+   "evidence": "PANEL 1\nClose-up on the ledger laid open on the wooden cap of a bollard. Sera’s gloved finger points firmly at an empty, scraped fiber patch in the relief entry row where a date once sat. The ink has been shaved clean away.\n\nSERA\nLook here. Not a misprint. A blade scraped the date off this relief log entirely.",
+   "evidence_match": "passage_ids",
+   "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+   "id": "m00035",
+   "source": "episode-000001/ch01-sc01",
+   "state_version": 1
+  },
+  {
+   "evidence_ids": [
+    "p016"
+   ],
+   "claim_source": "c03",
+   "fact_key": "claim:ledger-alteration",
+   "kind": "claim",
+   "known_by": [
+    "c01",
+    "c02",
+    "c03"
+   ],
+   "text": "Sera Holt states that the blade mark shows alteration but does not name the hands that held the knife.",
+   "evidence_spans": [
+    {
+     "id": "p016",
+     "start": 1758,
+     "end": 1880
+    }
+   ],
+   "evidence": "SERA\nThat is an accusation, not a record. The blade mark shows alteration. It does not name the hands that held the knife.",
+   "evidence_match": "passage_ids",
+   "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+   "id": "m00036",
+   "source": "episode-000001/ch01-sc01",
+   "state_version": 1
+  },
+  {
+   "fact_key": "radio-charge",
+   "supersedes": [
+    "m00025"
+   ],
+   "kind": "resource",
+   "text": "Ivo uses the portable radio to transmit page forty-four damage to the archive desk, leaving exactly one green pip lit on the chassis.",
+   "evidence_ids": [
+    "p017",
+    "p018"
+   ],
+   "known_by": [
+    "c01",
+    "c02",
+    "c03"
+   ],
+   "evidence_spans": [
+    {
+     "id": "p017",
+     "start": 1882,
+     "end": 2054
+    },
+    {
+     "id": "p018",
+     "start": 2056,
+     "end": 2144
+    }
+   ],
+   "evidence": "PANEL 3\nIvo raises the handset to his mouth, thumb pressing the side switch. On the radio chassis, one green pip flickers and clicks out; exactly one green pip remains lit.\n\nIVO\nDock relay to Archive Desk. Page forty-four confirmed damaged. Heading out. \n\nPAGE 3",
+   "evidence_match": "passage_ids",
+   "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+   "id": "m00037",
+   "source": "episode-000001/ch01-sc01",
+   "state_version": 1
+  },
+  {
+   "fact_key": "passage-tokens",
+   "supersedes": [
+    "m00024"
+   ],
+   "kind": "resource",
+   "text": "Mara spends one brass crossing token into the dock master's collection box, leaving her with exactly one token remaining in her coat pocket.",
+   "evidence_ids": [
+    "p019",
+    "p020"
+   ],
+   "known_by": [
+    "c01",
+    "c02",
+    "c03"
+   ],
+   "evidence_spans": [
+    {
+     "id": "p019",
+     "start": 2146,
+     "end": 2361
+    },
+    {
+     "id": "p020",
+     "start": 2363,
+     "end": 2416
+    }
+   ],
+   "evidence": "PANEL 1\nMedium shot. Mara drops one brass token into the dock master’s collection box with a sharp, heavy clink. Her other hand closes tightly around the single remaining token, shoving it deep into her coat pocket.\n\nMARA\nOne token spent. We’ve got one left to get back.",
+   "evidence_match": "passage_ids",
+   "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+   "id": "m00038",
+   "source": "episode-000001/ch01-sc01",
+   "state_version": 1
+  },
+  {
+   "fact_key": "event:departure",
+   "supersedes": [],
+   "kind": "event",
+   "text": "Ivo remains on the quay while Mara helps Sera aboard the tethered wooden ferry, which pushes off into the harbor channel.",
+   "evidence_ids": [
+    "p021",
+    "p022",
+    "p023"
+   ],
+   "known_by": [
+    "c01",
+    "c02",
+    "c03"
+   ],
+   "evidence_spans": [
+    {
+     "id": "p021",
+     "start": 2418,
+     "end": 2580
+    },
+    {
+     "id": "p022",
+     "start": 2582,
+     "end": 2645
+    },
+    {
+     "id": "p023",
+     "start": 2647,
+     "end": 2894
+    }
+   ],
+   "evidence": "PANEL 2\nIvo steps back toward the quay shelter, the strap of the half-drained radio over his shoulder. He watches Mara help Sera aboard the tethered wooden ferry.\n\nIVO\nI remain on the quay. Keep your eyes on the crossing, Mara.\n\nPANEL 3\nWide shot from the quay. The ferry pushes off from the dock, churning black water in its wake as it heads into the harbor channel toward the distant lights of the council landing. Ivo stands alone on the stone slipway, watching them leave.",
+   "evidence_match": "passage_ids",
+   "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+   "id": "m00039",
+   "source": "episode-000001/ch01-sc01",
+   "state_version": 1
+  },
+  {
+   "fact_key": "location:c01",
+   "kind": "event",
+   "known_by": [
+    "c01",
+    "c03"
+   ],
+   "supersedes": [
+    "m00030"
+   ],
+   "text": "Mara Venn arrives at the council landing at 18:20, stepping ashore from the wooden ferry as drizzle glistens on the stone quay.",
+   "evidence_ids": [
+    "p002"
+   ],
+   "evidence_spans": [
+    {
+     "id": "p002",
+     "start": 8,
+     "end": 342
+    }
+   ],
+   "evidence": "PANEL 1\nEXT. COUNCIL LANDING - NIGHT\nWide shot. At 18:20, the wooden ferry grinds against the slick timber pilings of the council landing. Drizzle glistens on the stone quay. Mara loops the wet mooring line around an iron bollard, hauling the boat tight. Sera steps ashore, pinning the oilskin-wrapped ledger tightly against her ribs.",
+   "evidence_match": "passage_ids",
+   "evidence_prose_sha256": "35cf2c4c2ec170bfac10fb2026f90f1e59576752911ba25a257fa83e91c4f8da",
+   "id": "m00040",
+   "source": "episode-000001/ch02-sc01",
+   "state_version": 2
+  },
+  {
+   "fact_key": "location:c03",
+   "kind": "event",
+   "known_by": [
+    "c01",
+    "c03"
+   ],
+   "supersedes": [
+    "m00034"
+   ],
+   "text": "Sera Holt steps ashore at the council landing at 18:20, pinning the oilskin-wrapped ledger tightly against her ribs.",
+   "evidence_ids": [
+    "p002"
+   ],
+   "evidence_spans": [
+    {
+     "id": "p002",
+     "start": 8,
+     "end": 342
+    }
+   ],
+   "evidence": "PANEL 1\nEXT. COUNCIL LANDING - NIGHT\nWide shot. At 18:20, the wooden ferry grinds against the slick timber pilings of the council landing. Drizzle glistens on the stone quay. Mara loops the wet mooring line around an iron bollard, hauling the boat tight. Sera steps ashore, pinning the oilskin-wrapped ledger tightly against her ribs.",
+   "evidence_match": "passage_ids",
+   "evidence_prose_sha256": "35cf2c4c2ec170bfac10fb2026f90f1e59576752911ba25a257fa83e91c4f8da",
+   "id": "m00041",
+   "source": "episode-000001/ch02-sc01",
+   "state_version": 2
+  },
+  {
+   "fact_key": "passage-tokens",
+   "kind": "resource",
+   "known_by": [
+    "c01",
+    "c03"
+   ],
+   "supersedes": [
+    "m00038"
+   ],
+   "text": "Mara reaches into her coat and feels the single punch-holed brass crossing token remaining in her pocket after the harbor transit.",
+   "evidence_ids": [
+    "p003",
+    "p004"
+   ],
+   "evidence_spans": [
+    {
+     "id": "p003",
+     "start": 344,
+     "end": 515
+    },
+    {
+     "id": "p004",
+     "start": 517,
+     "end": 631
+    }
+   ],
+   "evidence": "PANEL 2\nMedium shot. Mara wipes spray from her eyes. She reaches into her coat, her fingers curling around the cold, single punch-holed brass disc remaining in her pocket.\n\nMARA\nEighteen-twenty. We're at the landing. That transit cost one crossing token, Sera. I’ve got exactly one left.",
+   "evidence_match": "passage_ids",
+   "evidence_prose_sha256": "35cf2c4c2ec170bfac10fb2026f90f1e59576752911ba25a257fa83e91c4f8da",
+   "id": "m00042",
+   "source": "episode-000001/ch02-sc01",
+   "state_version": 2
+  },
+  {
+   "claim_source": "c03",
+   "fact_key": "claim:ledger-alteration",
+   "kind": "claim",
+   "known_by": [
+    "c01",
+    "c03"
+   ],
+   "supersedes": [
+    "m00036"
+   ],
+   "text": "Sera Holt states that the scraped paper proves alteration rather than who held the blade, and refuses to accuse anyone until comparing the volume against the original receipt.",
+   "evidence_ids": [
+    "p011",
+    "p015"
+   ],
+   "evidence_spans": [
+    {
+     "id": "p011",
+     "start": 1343,
+     "end": 1418
+    },
+    {
+     "id": "p015",
+     "start": 1676,
+     "end": 1826
+    }
+   ],
+   "evidence": "SERA\nI keep custody of the ledger. And I will not point a finger at anyone.\n\nPANEL 3\nMedium shot. Mara stops on the stone landing, turning to face Sera directly.\n\nMARA\nWe crossed the harbor on one token for an erased date, and you won't name a suspect?\n\nPANEL 4\nClose-up on Sera. She pulls the oilskin shut over the ledger binding.\n\nSERA\nThe scraped paper proves alteration, not who held the blade. I refuse to accuse anyone until we compare this volume against the original receipt.",
+   "evidence_match": "passage_ids",
+   "evidence_prose_sha256": "35cf2c4c2ec170bfac10fb2026f90f1e59576752911ba25a257fa83e91c4f8da",
+   "id": "m00043",
+   "source": "episode-000001/ch02-sc01",
+   "state_version": 2
+  }
+ ],
+ "canon": {
+  "history": [
+   {
+    "kind": "event",
+    "text": "Mara Venn is alive at the opening.",
+    "known_by": [
+     "public"
+    ],
+    "fact_key": "life:c01",
+    "subject": "c01",
+    "life_state": "alive",
+    "source": "user_input",
+    "id": "m00000"
+   },
+   {
+    "kind": "event",
+    "text": "Mara Venn begins at the Ferry quay.",
+    "known_by": [
+     "c01"
+    ],
+    "fact_key": "location:c01",
+    "source": "user_input",
+    "id": "m00001"
+   },
+   {
+    "kind": "belief",
+    "text": "Mara Venn privately fears failing a dependent and has not confessed this fear.",
+    "known_by": [
+     "c01"
+    ],
+    "holder": "c01",
+    "fact_key": "belief:c01",
+    "source": "user_input",
+    "id": "m00002"
+   },
+   {
+    "kind": "event",
+    "text": "Mara Venn knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+    "known_by": [
+     "c01"
+    ],
+    "fact_key": "promise:c01",
+    "source": "user_input",
+    "id": "m00003"
+   },
+   {
+    "kind": "event",
+    "text": "Ivo Venn is alive at the opening.",
+    "known_by": [
+     "public"
+    ],
+    "fact_key": "life:c02",
+    "subject": "c02",
+    "life_state": "alive",
+    "source": "user_input",
+    "id": "m00004"
+   },
+   {
+    "kind": "event",
+    "text": "Ivo Venn begins at the Ferry quay.",
+    "known_by": [
+     "c02"
+    ],
+    "fact_key": "location:c02",
+    "source": "user_input",
+    "id": "m00005"
+   },
+   {
+    "kind": "belief",
+    "text": "Ivo Venn privately fears failing a dependent and has not confessed this fear.",
+    "known_by": [
+     "c02"
+    ],
+    "holder": "c02",
+    "fact_key": "belief:c02",
+    "source": "user_input",
+    "id": "m00006"
+   },
+   {
+    "kind": "event",
+    "text": "Ivo Venn knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+    "known_by": [
+     "c02"
+    ],
+    "fact_key": "promise:c02",
+    "source": "user_input",
+    "id": "m00007"
+   },
+   {
+    "kind": "event",
+    "text": "Sera Holt is alive at the opening.",
+    "known_by": [
+     "public"
+    ],
+    "fact_key": "life:c03",
+    "subject": "c03",
+    "life_state": "alive",
+    "source": "user_input",
+    "id": "m00008"
+   },
+   {
+    "kind": "event",
+    "text": "Sera Holt begins at the Public archive.",
+    "known_by": [
+     "c03"
+    ],
+    "fact_key": "location:c03",
+    "source": "user_input",
+    "id": "m00009"
+   },
+   {
+    "kind": "belief",
+    "text": "Sera Holt privately fears failing a dependent and has not confessed this fear.",
+    "known_by": [
+     "c03"
+    ],
+    "holder": "c03",
+    "fact_key": "belief:c03",
+    "source": "user_input",
+    "id": "m00010"
+   },
+   {
+    "kind": "event",
+    "text": "Sera Holt knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+    "known_by": [
+     "c03"
+    ],
+    "fact_key": "promise:c03",
+    "source": "user_input",
+    "id": "m00011"
+   },
+   {
+    "kind": "event",
+    "text": "Tomas Reed is alive at the opening.",
+    "known_by": [
+     "public"
+    ],
+    "fact_key": "life:c04",
+    "subject": "c04",
+    "life_state": "alive",
+    "source": "user_input",
+    "id": "m00012"
+   },
+   {
+    "kind": "event",
+    "text": "Tomas Reed begins at the Council chamber.",
+    "known_by": [
+     "c04"
+    ],
+    "fact_key": "location:c04",
+    "source": "user_input",
+    "id": "m00013"
+   },
+   {
+    "kind": "belief",
+    "text": "Tomas Reed privately fears failing a dependent and has not confessed this fear.",
+    "known_by": [
+     "c04"
+    ],
+    "holder": "c04",
+    "fact_key": "belief:c04",
+    "source": "user_input",
+    "id": "m00014"
+   },
+   {
+    "kind": "event",
+    "text": "Tomas Reed knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+    "known_by": [
+     "c04"
+    ],
+    "fact_key": "promise:c04",
+    "source": "user_input",
+    "id": "m00015"
+   },
+   {
+    "kind": "event",
+    "text": "Nadi Vale is alive at the opening.",
+    "known_by": [
+     "public"
+    ],
+    "fact_key": "life:c05",
+    "subject": "c05",
+    "life_state": "alive",
+    "source": "user_input",
+    "id": "m00016"
+   },
+   {
+    "kind": "event",
+    "text": "Nadi Vale begins at the Ferry quay.",
+    "known_by": [
+     "c05"
+    ],
+    "fact_key": "location:c05",
+    "source": "user_input",
+    "id": "m00017"
+   },
+   {
+    "kind": "belief",
+    "text": "Nadi Vale privately fears failing a dependent and has not confessed this fear.",
+    "known_by": [
+     "c05"
+    ],
+    "holder": "c05",
+    "fact_key": "belief:c05",
+    "source": "user_input",
+    "id": "m00018"
+   },
+   {
+    "kind": "event",
+    "text": "Nadi Vale knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+    "known_by": [
+     "c05"
+    ],
+    "fact_key": "promise:c05",
+    "source": "user_input",
+    "id": "m00019"
+   },
+   {
+    "kind": "event",
+    "text": "Oren Pike is alive at the opening.",
+    "known_by": [
+     "public"
+    ],
+    "fact_key": "life:c06",
+    "subject": "c06",
+    "life_state": "alive",
+    "source": "user_input",
+    "id": "m00020"
+   },
+   {
+    "kind": "event",
+    "text": "Oren Pike begins at the Signal tower.",
+    "known_by": [
+     "c06"
+    ],
+    "fact_key": "location:c06",
+    "source": "user_input",
+    "id": "m00021"
+   },
+   {
+    "kind": "belief",
+    "text": "Oren Pike privately fears failing a dependent and has not confessed this fear.",
+    "known_by": [
+     "c06"
+    ],
+    "holder": "c06",
+    "fact_key": "belief:c06",
+    "source": "user_input",
+    "id": "m00022"
+   },
+   {
+    "kind": "event",
+    "text": "Oren Pike knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+    "known_by": [
+     "c06"
+    ],
+    "fact_key": "promise:c06",
+    "source": "user_input",
+    "id": "m00023"
+   },
+   {
+    "kind": "resource",
+    "text": "Mara holds exactly two single-use ferry passage tokens. Each token permits one ferry crossing; spent tokens cannot return.",
+    "known_by": [
+     "c01",
+     "c02"
+    ],
+    "fact_key": "passage-tokens",
+    "source": "user_input",
+    "id": "m00024"
+   },
+   {
+    "kind": "resource",
+    "text": "Ivo holds one portable radio with power for two outbound transmissions; receiving uses no counted transmission.",
+    "known_by": [
+     "c02"
+    ],
+    "fact_key": "radio-charge",
+    "source": "user_input",
+    "id": "m00025"
+   },
+   {
+    "kind": "event",
+    "text": "Mara and Ivo are siblings; neither has told the other their private household promise.",
+    "known_by": [
+     "c01",
+     "c02"
+    ],
+    "fact_key": "family:venn",
+    "source": "user_input",
+    "id": "m00026"
+   },
+   {
+    "kind": "event",
+    "text": "Sera alone knows that one archive ledger has an erased date; she has not identified who erased it or why.",
+    "known_by": [
+     "c03"
+    ],
+    "fact_key": "erased-date",
+    "source": "user_input",
+    "id": "m00027"
+   },
+   {
+    "kind": "event",
+    "text": "Travel among the four locations requires visible departure and arrival or an explicit interval of at least ten minutes.",
+    "known_by": [
+     "public"
+    ],
+    "fact_key": "travel",
+    "source": "user_input",
+    "id": "m00028"
+   },
+   {
+    "kind": "event",
+    "text": "The quay connects the districts; the tower relays calls; the archive holds records; the council chamber hosts public decisions.",
+    "known_by": [
+     "public"
+    ],
+    "fact_key": "geography",
+    "source": "user_input",
+    "id": "m00029"
+   },
+   {
+    "evidence_ids": [
+     "p003"
+    ],
+    "fact_key": "location:c01",
+    "kind": "event",
+    "known_by": [
+     "c01",
+     "c02"
+    ],
+    "supersedes": [
+     "m00001"
+    ],
+    "text": "Mara Venn is at the stone ferry quay under cold harbor drizzle at 18:00.",
+    "evidence_spans": [
+     {
+      "id": "p003",
+      "start": 44,
+      "end": 357
+     }
+    ],
+    "evidence": "PANEL 1\nWide shot of the stone ferry quay under cold harbor drizzle. MARA VENN leans against a rusted iron mooring post, her waterproof jacket slick with mist. Beside her stands her brother, IVO VENN, holding a portable field radio unit by its canvas strap. A weathered clock tower behind the slipway shows 18:00.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+    "id": "m00030",
+    "source": "episode-000001/ch01-sc01",
+    "state_version": 1
+   },
+   {
+    "evidence_ids": [
+     "p003"
+    ],
+    "fact_key": "location:c02",
+    "kind": "event",
+    "known_by": [
+     "c01",
+     "c02"
+    ],
+    "supersedes": [
+     "m00005"
+    ],
+    "text": "Ivo Venn stands beside Mara on the ferry quay holding a portable field radio unit at 18:00.",
+    "evidence_spans": [
+     {
+      "id": "p003",
+      "start": 44,
+      "end": 357
+     }
+    ],
+    "evidence": "PANEL 1\nWide shot of the stone ferry quay under cold harbor drizzle. MARA VENN leans against a rusted iron mooring post, her waterproof jacket slick with mist. Beside her stands her brother, IVO VENN, holding a portable field radio unit by its canvas strap. A weathered clock tower behind the slipway shows 18:00.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+    "id": "m00031",
+    "source": "episode-000001/ch01-sc01",
+    "state_version": 1
+   },
+   {
+    "evidence_ids": [
+     "p005"
+    ],
+    "fact_key": "passage-tokens",
+    "kind": "resource",
+    "known_by": [
+     "c01",
+     "c02"
+    ],
+    "supersedes": [
+     "m00024"
+    ],
+    "text": "Mara holds exactly two stamped brass crossing tokens in her open palm, each marked with a single punch-hole.",
+    "evidence_spans": [
+     {
+      "id": "p005",
+      "start": 421,
+      "end": 664
+     }
+    ],
+    "evidence": "PANEL 2\nClose-up on Mara’s open palm. Nestled in her calloused hand are exactly two stamped brass crossing tokens, each marked with a single punch-hole. \n\nMARA (OFF-PANEL)\nTwo brass slips. That buys one run out and one run home. Nothing extra.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+    "id": "m00032",
+    "source": "episode-000001/ch01-sc01",
+    "state_version": 1
+   },
+   {
+    "evidence_ids": [
+     "p006",
+     "p007"
+    ],
+    "fact_key": "radio-charge",
+    "kind": "resource",
+    "known_by": [
+     "c01",
+     "c02"
+    ],
+    "supersedes": [
+     "m00025"
+    ],
+    "text": "Ivo's radio has two outgoing signals left on its battery pack before the board goes cold.",
+    "evidence_spans": [
+     {
+      "id": "p006",
+      "start": 666,
+      "end": 797
+     },
+     {
+      "id": "p007",
+      "start": 799,
+      "end": 903
+     }
+    ],
+    "evidence": "PANEL 3\nMedium shot. Ivo checks the battery dial on the face of the radio unit. Two small green indicator pips glow on the housing.\n\nIVO\nTwo outgoing signals left on this pack. After that, the board goes cold until the dock recharges it.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+    "id": "m00033",
+    "source": "episode-000001/ch01-sc01",
+    "state_version": 1
+   },
+   {
+    "evidence_ids": [
+     "p008",
+     "p010"
+    ],
+    "fact_key": "location:c03",
+    "kind": "event",
+    "known_by": [
+     "c01",
+     "c02",
+     "c03"
+    ],
+    "supersedes": [
+     "m00009"
+    ],
+    "text": "Sera Holt arrives at the ferry quay on foot from the archive after a ten-minute walk, carrying an oilskin-wrapped volume.",
+    "evidence_spans": [
+     {
+      "id": "p008",
+      "start": 905,
+      "end": 1089
+     },
+     {
+      "id": "p010",
+      "start": 1140,
+      "end": 1212
+     }
+    ],
+    "evidence": "PANEL 4\nSera Holt approaches down the wet cobblestone slipway from the street, carrying a heavy, oilskin-wrapped volume tucked under her arm. Her coat is damp from the ten-minute walk.\n\nMARA\nYou took your time from the archive, Holt.\n\nSERA\nTen minutes at a brisk pace. Walking faster only tears the binding.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+    "id": "m00034",
+    "source": "episode-000001/ch01-sc01",
+    "state_version": 1
+   },
+   {
+    "evidence_ids": [
+     "p012",
+     "p013"
+    ],
+    "fact_key": "erased-date",
+    "kind": "event",
+    "known_by": [
+     "c01",
+     "c02",
+     "c03"
+    ],
+    "supersedes": [
+     "m00027"
+    ],
+    "text": "Sera shows the ledger to Mara and Ivo, pointing at an empty fiber patch where a date was scraped completely clean by a blade.",
+    "evidence_spans": [
+     {
+      "id": "p012",
+      "start": 1222,
+      "end": 1445
+     },
+     {
+      "id": "p013",
+      "start": 1447,
+      "end": 1533
+     }
+    ],
+    "evidence": "PANEL 1\nClose-up on the ledger laid open on the wooden cap of a bollard. Sera’s gloved finger points firmly at an empty, scraped fiber patch in the relief entry row where a date once sat. The ink has been shaved clean away.\n\nSERA\nLook here. Not a misprint. A blade scraped the date off this relief log entirely.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+    "id": "m00035",
+    "source": "episode-000001/ch01-sc01",
+    "state_version": 1
+   },
+   {
+    "evidence_ids": [
+     "p016"
+    ],
+    "claim_source": "c03",
+    "fact_key": "claim:ledger-alteration",
+    "kind": "claim",
+    "known_by": [
+     "c01",
+     "c02",
+     "c03"
+    ],
+    "text": "Sera Holt states that the blade mark shows alteration but does not name the hands that held the knife.",
+    "evidence_spans": [
+     {
+      "id": "p016",
+      "start": 1758,
+      "end": 1880
+     }
+    ],
+    "evidence": "SERA\nThat is an accusation, not a record. The blade mark shows alteration. It does not name the hands that held the knife.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+    "id": "m00036",
+    "source": "episode-000001/ch01-sc01",
+    "state_version": 1
+   },
+   {
+    "fact_key": "radio-charge",
+    "supersedes": [
+     "m00025"
+    ],
+    "kind": "resource",
+    "text": "Ivo uses the portable radio to transmit page forty-four damage to the archive desk, leaving exactly one green pip lit on the chassis.",
+    "evidence_ids": [
+     "p017",
+     "p018"
+    ],
+    "known_by": [
+     "c01",
+     "c02",
+     "c03"
+    ],
+    "evidence_spans": [
+     {
+      "id": "p017",
+      "start": 1882,
+      "end": 2054
+     },
+     {
+      "id": "p018",
+      "start": 2056,
+      "end": 2144
+     }
+    ],
+    "evidence": "PANEL 3\nIvo raises the handset to his mouth, thumb pressing the side switch. On the radio chassis, one green pip flickers and clicks out; exactly one green pip remains lit.\n\nIVO\nDock relay to Archive Desk. Page forty-four confirmed damaged. Heading out. \n\nPAGE 3",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+    "id": "m00037",
+    "source": "episode-000001/ch01-sc01",
+    "state_version": 1
+   },
+   {
+    "fact_key": "passage-tokens",
+    "supersedes": [
+     "m00024"
+    ],
+    "kind": "resource",
+    "text": "Mara spends one brass crossing token into the dock master's collection box, leaving her with exactly one token remaining in her coat pocket.",
+    "evidence_ids": [
+     "p019",
+     "p020"
+    ],
+    "known_by": [
+     "c01",
+     "c02",
+     "c03"
+    ],
+    "evidence_spans": [
+     {
+      "id": "p019",
+      "start": 2146,
+      "end": 2361
+     },
+     {
+      "id": "p020",
+      "start": 2363,
+      "end": 2416
+     }
+    ],
+    "evidence": "PANEL 1\nMedium shot. Mara drops one brass token into the dock master’s collection box with a sharp, heavy clink. Her other hand closes tightly around the single remaining token, shoving it deep into her coat pocket.\n\nMARA\nOne token spent. We’ve got one left to get back.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+    "id": "m00038",
+    "source": "episode-000001/ch01-sc01",
+    "state_version": 1
+   },
+   {
+    "fact_key": "event:departure",
+    "supersedes": [],
+    "kind": "event",
+    "text": "Ivo remains on the quay while Mara helps Sera aboard the tethered wooden ferry, which pushes off into the harbor channel.",
+    "evidence_ids": [
+     "p021",
+     "p022",
+     "p023"
+    ],
+    "known_by": [
+     "c01",
+     "c02",
+     "c03"
+    ],
+    "evidence_spans": [
+     {
+      "id": "p021",
+      "start": 2418,
+      "end": 2580
+     },
+     {
+      "id": "p022",
+      "start": 2582,
+      "end": 2645
+     },
+     {
+      "id": "p023",
+      "start": 2647,
+      "end": 2894
+     }
+    ],
+    "evidence": "PANEL 2\nIvo steps back toward the quay shelter, the strap of the half-drained radio over his shoulder. He watches Mara help Sera aboard the tethered wooden ferry.\n\nIVO\nI remain on the quay. Keep your eyes on the crossing, Mara.\n\nPANEL 3\nWide shot from the quay. The ferry pushes off from the dock, churning black water in its wake as it heads into the harbor channel toward the distant lights of the council landing. Ivo stands alone on the stone slipway, watching them leave.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+    "id": "m00039",
+    "source": "episode-000001/ch01-sc01",
+    "state_version": 1
+   },
+   {
+    "fact_key": "location:c01",
+    "kind": "event",
+    "known_by": [
+     "c01",
+     "c03"
+    ],
+    "supersedes": [
+     "m00030"
+    ],
+    "text": "Mara Venn arrives at the council landing at 18:20, stepping ashore from the wooden ferry as drizzle glistens on the stone quay.",
+    "evidence_ids": [
+     "p002"
+    ],
+    "evidence_spans": [
+     {
+      "id": "p002",
+      "start": 8,
+      "end": 342
+     }
+    ],
+    "evidence": "PANEL 1\nEXT. COUNCIL LANDING - NIGHT\nWide shot. At 18:20, the wooden ferry grinds against the slick timber pilings of the council landing. Drizzle glistens on the stone quay. Mara loops the wet mooring line around an iron bollard, hauling the boat tight. Sera steps ashore, pinning the oilskin-wrapped ledger tightly against her ribs.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "35cf2c4c2ec170bfac10fb2026f90f1e59576752911ba25a257fa83e91c4f8da",
+    "id": "m00040",
+    "source": "episode-000001/ch02-sc01",
+    "state_version": 2
+   },
+   {
+    "fact_key": "location:c03",
+    "kind": "event",
+    "known_by": [
+     "c01",
+     "c03"
+    ],
+    "supersedes": [
+     "m00034"
+    ],
+    "text": "Sera Holt steps ashore at the council landing at 18:20, pinning the oilskin-wrapped ledger tightly against her ribs.",
+    "evidence_ids": [
+     "p002"
+    ],
+    "evidence_spans": [
+     {
+      "id": "p002",
+      "start": 8,
+      "end": 342
+     }
+    ],
+    "evidence": "PANEL 1\nEXT. COUNCIL LANDING - NIGHT\nWide shot. At 18:20, the wooden ferry grinds against the slick timber pilings of the council landing. Drizzle glistens on the stone quay. Mara loops the wet mooring line around an iron bollard, hauling the boat tight. Sera steps ashore, pinning the oilskin-wrapped ledger tightly against her ribs.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "35cf2c4c2ec170bfac10fb2026f90f1e59576752911ba25a257fa83e91c4f8da",
+    "id": "m00041",
+    "source": "episode-000001/ch02-sc01",
+    "state_version": 2
+   },
+   {
+    "fact_key": "passage-tokens",
+    "kind": "resource",
+    "known_by": [
+     "c01",
+     "c03"
+    ],
+    "supersedes": [
+     "m00038"
+    ],
+    "text": "Mara reaches into her coat and feels the single punch-holed brass crossing token remaining in her pocket after the harbor transit.",
+    "evidence_ids": [
+     "p003",
+     "p004"
+    ],
+    "evidence_spans": [
+     {
+      "id": "p003",
+      "start": 344,
+      "end": 515
+     },
+     {
+      "id": "p004",
+      "start": 517,
+      "end": 631
+     }
+    ],
+    "evidence": "PANEL 2\nMedium shot. Mara wipes spray from her eyes. She reaches into her coat, her fingers curling around the cold, single punch-holed brass disc remaining in her pocket.\n\nMARA\nEighteen-twenty. We're at the landing. That transit cost one crossing token, Sera. I’ve got exactly one left.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "35cf2c4c2ec170bfac10fb2026f90f1e59576752911ba25a257fa83e91c4f8da",
+    "id": "m00042",
+    "source": "episode-000001/ch02-sc01",
+    "state_version": 2
+   },
+   {
+    "claim_source": "c03",
+    "fact_key": "claim:ledger-alteration",
+    "kind": "claim",
+    "known_by": [
+     "c01",
+     "c03"
+    ],
+    "supersedes": [
+     "m00036"
+    ],
+    "text": "Sera Holt states that the scraped paper proves alteration rather than who held the blade, and refuses to accuse anyone until comparing the volume against the original receipt.",
+    "evidence_ids": [
+     "p011",
+     "p015"
+    ],
+    "evidence_spans": [
+     {
+      "id": "p011",
+      "start": 1343,
+      "end": 1418
+     },
+     {
+      "id": "p015",
+      "start": 1676,
+      "end": 1826
+     }
+    ],
+    "evidence": "SERA\nI keep custody of the ledger. And I will not point a finger at anyone.\n\nPANEL 3\nMedium shot. Mara stops on the stone landing, turning to face Sera directly.\n\nMARA\nWe crossed the harbor on one token for an erased date, and you won't name a suspect?\n\nPANEL 4\nClose-up on Sera. She pulls the oilskin shut over the ledger binding.\n\nSERA\nThe scraped paper proves alteration, not who held the blade. I refuse to accuse anyone until we compare this volume against the original receipt.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "35cf2c4c2ec170bfac10fb2026f90f1e59576752911ba25a257fa83e91c4f8da",
+    "id": "m00043",
+    "source": "episode-000001/ch02-sc01",
+    "state_version": 2
+   }
+  ],
+  "current": [
+   {
+    "kind": "event",
+    "text": "Mara Venn is alive at the opening.",
+    "known_by": [
+     "public"
+    ],
+    "fact_key": "life:c01",
+    "subject": "c01",
+    "life_state": "alive",
+    "source": "user_input",
+    "id": "m00000"
+   },
+   {
+    "kind": "belief",
+    "text": "Mara Venn privately fears failing a dependent and has not confessed this fear.",
+    "known_by": [
+     "c01"
+    ],
+    "holder": "c01",
+    "fact_key": "belief:c01",
+    "source": "user_input",
+    "id": "m00002"
+   },
+   {
+    "kind": "event",
+    "text": "Mara Venn knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+    "known_by": [
+     "c01"
+    ],
+    "fact_key": "promise:c01",
+    "source": "user_input",
+    "id": "m00003"
+   },
+   {
+    "kind": "event",
+    "text": "Ivo Venn is alive at the opening.",
+    "known_by": [
+     "public"
+    ],
+    "fact_key": "life:c02",
+    "subject": "c02",
+    "life_state": "alive",
+    "source": "user_input",
+    "id": "m00004"
+   },
+   {
+    "kind": "belief",
+    "text": "Ivo Venn privately fears failing a dependent and has not confessed this fear.",
+    "known_by": [
+     "c02"
+    ],
+    "holder": "c02",
+    "fact_key": "belief:c02",
+    "source": "user_input",
+    "id": "m00006"
+   },
+   {
+    "kind": "event",
+    "text": "Ivo Venn knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+    "known_by": [
+     "c02"
+    ],
+    "fact_key": "promise:c02",
+    "source": "user_input",
+    "id": "m00007"
+   },
+   {
+    "kind": "event",
+    "text": "Sera Holt is alive at the opening.",
+    "known_by": [
+     "public"
+    ],
+    "fact_key": "life:c03",
+    "subject": "c03",
+    "life_state": "alive",
+    "source": "user_input",
+    "id": "m00008"
+   },
+   {
+    "kind": "belief",
+    "text": "Sera Holt privately fears failing a dependent and has not confessed this fear.",
+    "known_by": [
+     "c03"
+    ],
+    "holder": "c03",
+    "fact_key": "belief:c03",
+    "source": "user_input",
+    "id": "m00010"
+   },
+   {
+    "kind": "event",
+    "text": "Sera Holt knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+    "known_by": [
+     "c03"
+    ],
+    "fact_key": "promise:c03",
+    "source": "user_input",
+    "id": "m00011"
+   },
+   {
+    "kind": "event",
+    "text": "Tomas Reed is alive at the opening.",
+    "known_by": [
+     "public"
+    ],
+    "fact_key": "life:c04",
+    "subject": "c04",
+    "life_state": "alive",
+    "source": "user_input",
+    "id": "m00012"
+   },
+   {
+    "kind": "event",
+    "text": "Tomas Reed begins at the Council chamber.",
+    "known_by": [
+     "c04"
+    ],
+    "fact_key": "location:c04",
+    "source": "user_input",
+    "id": "m00013"
+   },
+   {
+    "kind": "belief",
+    "text": "Tomas Reed privately fears failing a dependent and has not confessed this fear.",
+    "known_by": [
+     "c04"
+    ],
+    "holder": "c04",
+    "fact_key": "belief:c04",
+    "source": "user_input",
+    "id": "m00014"
+   },
+   {
+    "kind": "event",
+    "text": "Tomas Reed knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+    "known_by": [
+     "c04"
+    ],
+    "fact_key": "promise:c04",
+    "source": "user_input",
+    "id": "m00015"
+   },
+   {
+    "kind": "event",
+    "text": "Nadi Vale is alive at the opening.",
+    "known_by": [
+     "public"
+    ],
+    "fact_key": "life:c05",
+    "subject": "c05",
+    "life_state": "alive",
+    "source": "user_input",
+    "id": "m00016"
+   },
+   {
+    "kind": "event",
+    "text": "Nadi Vale begins at the Ferry quay.",
+    "known_by": [
+     "c05"
+    ],
+    "fact_key": "location:c05",
+    "source": "user_input",
+    "id": "m00017"
+   },
+   {
+    "kind": "belief",
+    "text": "Nadi Vale privately fears failing a dependent and has not confessed this fear.",
+    "known_by": [
+     "c05"
+    ],
+    "holder": "c05",
+    "fact_key": "belief:c05",
+    "source": "user_input",
+    "id": "m00018"
+   },
+   {
+    "kind": "event",
+    "text": "Nadi Vale knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+    "known_by": [
+     "c05"
+    ],
+    "fact_key": "promise:c05",
+    "source": "user_input",
+    "id": "m00019"
+   },
+   {
+    "kind": "event",
+    "text": "Oren Pike is alive at the opening.",
+    "known_by": [
+     "public"
+    ],
+    "fact_key": "life:c06",
+    "subject": "c06",
+    "life_state": "alive",
+    "source": "user_input",
+    "id": "m00020"
+   },
+   {
+    "kind": "event",
+    "text": "Oren Pike begins at the Signal tower.",
+    "known_by": [
+     "c06"
+    ],
+    "fact_key": "location:c06",
+    "source": "user_input",
+    "id": "m00021"
+   },
+   {
+    "kind": "belief",
+    "text": "Oren Pike privately fears failing a dependent and has not confessed this fear.",
+    "known_by": [
+     "c06"
+    ],
+    "holder": "c06",
+    "fact_key": "belief:c06",
+    "source": "user_input",
+    "id": "m00022"
+   },
+   {
+    "kind": "event",
+    "text": "Oren Pike knows that an earlier city promise to their household remains unpaid; the meaning must be discovered through evidence.",
+    "known_by": [
+     "c06"
+    ],
+    "fact_key": "promise:c06",
+    "source": "user_input",
+    "id": "m00023"
+   },
+   {
+    "kind": "event",
+    "text": "Mara and Ivo are siblings; neither has told the other their private household promise.",
+    "known_by": [
+     "c01",
+     "c02"
+    ],
+    "fact_key": "family:venn",
+    "source": "user_input",
+    "id": "m00026"
+   },
+   {
+    "kind": "event",
+    "text": "Travel among the four locations requires visible departure and arrival or an explicit interval of at least ten minutes.",
+    "known_by": [
+     "public"
+    ],
+    "fact_key": "travel",
+    "source": "user_input",
+    "id": "m00028"
+   },
+   {
+    "kind": "event",
+    "text": "The quay connects the districts; the tower relays calls; the archive holds records; the council chamber hosts public decisions.",
+    "known_by": [
+     "public"
+    ],
+    "fact_key": "geography",
+    "source": "user_input",
+    "id": "m00029"
+   },
+   {
+    "evidence_ids": [
+     "p003"
+    ],
+    "fact_key": "location:c02",
+    "kind": "event",
+    "known_by": [
+     "c01",
+     "c02"
+    ],
+    "supersedes": [
+     "m00005"
+    ],
+    "text": "Ivo Venn stands beside Mara on the ferry quay holding a portable field radio unit at 18:00.",
+    "evidence_spans": [
+     {
+      "id": "p003",
+      "start": 44,
+      "end": 357
+     }
+    ],
+    "evidence": "PANEL 1\nWide shot of the stone ferry quay under cold harbor drizzle. MARA VENN leans against a rusted iron mooring post, her waterproof jacket slick with mist. Beside her stands her brother, IVO VENN, holding a portable field radio unit by its canvas strap. A weathered clock tower behind the slipway shows 18:00.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+    "id": "m00031",
+    "source": "episode-000001/ch01-sc01",
+    "state_version": 1
+   },
+   {
+    "evidence_ids": [
+     "p005"
+    ],
+    "fact_key": "passage-tokens",
+    "kind": "resource",
+    "known_by": [
+     "c01",
+     "c02"
+    ],
+    "supersedes": [
+     "m00024"
+    ],
+    "text": "Mara holds exactly two stamped brass crossing tokens in her open palm, each marked with a single punch-hole.",
+    "evidence_spans": [
+     {
+      "id": "p005",
+      "start": 421,
+      "end": 664
+     }
+    ],
+    "evidence": "PANEL 2\nClose-up on Mara’s open palm. Nestled in her calloused hand are exactly two stamped brass crossing tokens, each marked with a single punch-hole. \n\nMARA (OFF-PANEL)\nTwo brass slips. That buys one run out and one run home. Nothing extra.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+    "id": "m00032",
+    "source": "episode-000001/ch01-sc01",
+    "state_version": 1
+   },
+   {
+    "evidence_ids": [
+     "p006",
+     "p007"
+    ],
+    "fact_key": "radio-charge",
+    "kind": "resource",
+    "known_by": [
+     "c01",
+     "c02"
+    ],
+    "supersedes": [
+     "m00025"
+    ],
+    "text": "Ivo's radio has two outgoing signals left on its battery pack before the board goes cold.",
+    "evidence_spans": [
+     {
+      "id": "p006",
+      "start": 666,
+      "end": 797
+     },
+     {
+      "id": "p007",
+      "start": 799,
+      "end": 903
+     }
+    ],
+    "evidence": "PANEL 3\nMedium shot. Ivo checks the battery dial on the face of the radio unit. Two small green indicator pips glow on the housing.\n\nIVO\nTwo outgoing signals left on this pack. After that, the board goes cold until the dock recharges it.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+    "id": "m00033",
+    "source": "episode-000001/ch01-sc01",
+    "state_version": 1
+   },
+   {
+    "evidence_ids": [
+     "p012",
+     "p013"
+    ],
+    "fact_key": "erased-date",
+    "kind": "event",
+    "known_by": [
+     "c01",
+     "c02",
+     "c03"
+    ],
+    "supersedes": [
+     "m00027"
+    ],
+    "text": "Sera shows the ledger to Mara and Ivo, pointing at an empty fiber patch where a date was scraped completely clean by a blade.",
+    "evidence_spans": [
+     {
+      "id": "p012",
+      "start": 1222,
+      "end": 1445
+     },
+     {
+      "id": "p013",
+      "start": 1447,
+      "end": 1533
+     }
+    ],
+    "evidence": "PANEL 1\nClose-up on the ledger laid open on the wooden cap of a bollard. Sera’s gloved finger points firmly at an empty, scraped fiber patch in the relief entry row where a date once sat. The ink has been shaved clean away.\n\nSERA\nLook here. Not a misprint. A blade scraped the date off this relief log entirely.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+    "id": "m00035",
+    "source": "episode-000001/ch01-sc01",
+    "state_version": 1
+   },
+   {
+    "fact_key": "radio-charge",
+    "supersedes": [
+     "m00025"
+    ],
+    "kind": "resource",
+    "text": "Ivo uses the portable radio to transmit page forty-four damage to the archive desk, leaving exactly one green pip lit on the chassis.",
+    "evidence_ids": [
+     "p017",
+     "p018"
+    ],
+    "known_by": [
+     "c01",
+     "c02",
+     "c03"
+    ],
+    "evidence_spans": [
+     {
+      "id": "p017",
+      "start": 1882,
+      "end": 2054
+     },
+     {
+      "id": "p018",
+      "start": 2056,
+      "end": 2144
+     }
+    ],
+    "evidence": "PANEL 3\nIvo raises the handset to his mouth, thumb pressing the side switch. On the radio chassis, one green pip flickers and clicks out; exactly one green pip remains lit.\n\nIVO\nDock relay to Archive Desk. Page forty-four confirmed damaged. Heading out. \n\nPAGE 3",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+    "id": "m00037",
+    "source": "episode-000001/ch01-sc01",
+    "state_version": 1
+   },
+   {
+    "fact_key": "event:departure",
+    "supersedes": [],
+    "kind": "event",
+    "text": "Ivo remains on the quay while Mara helps Sera aboard the tethered wooden ferry, which pushes off into the harbor channel.",
+    "evidence_ids": [
+     "p021",
+     "p022",
+     "p023"
+    ],
+    "known_by": [
+     "c01",
+     "c02",
+     "c03"
+    ],
+    "evidence_spans": [
+     {
+      "id": "p021",
+      "start": 2418,
+      "end": 2580
+     },
+     {
+      "id": "p022",
+      "start": 2582,
+      "end": 2645
+     },
+     {
+      "id": "p023",
+      "start": 2647,
+      "end": 2894
+     }
+    ],
+    "evidence": "PANEL 2\nIvo steps back toward the quay shelter, the strap of the half-drained radio over his shoulder. He watches Mara help Sera aboard the tethered wooden ferry.\n\nIVO\nI remain on the quay. Keep your eyes on the crossing, Mara.\n\nPANEL 3\nWide shot from the quay. The ferry pushes off from the dock, churning black water in its wake as it heads into the harbor channel toward the distant lights of the council landing. Ivo stands alone on the stone slipway, watching them leave.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "e6059bc8507b5598b59a3c1a7bf2aad8732aa229a26cfef7b6df81417d35c47c",
+    "id": "m00039",
+    "source": "episode-000001/ch01-sc01",
+    "state_version": 1
+   },
+   {
+    "fact_key": "location:c01",
+    "kind": "event",
+    "known_by": [
+     "c01",
+     "c03"
+    ],
+    "supersedes": [
+     "m00030"
+    ],
+    "text": "Mara Venn arrives at the council landing at 18:20, stepping ashore from the wooden ferry as drizzle glistens on the stone quay.",
+    "evidence_ids": [
+     "p002"
+    ],
+    "evidence_spans": [
+     {
+      "id": "p002",
+      "start": 8,
+      "end": 342
+     }
+    ],
+    "evidence": "PANEL 1\nEXT. COUNCIL LANDING - NIGHT\nWide shot. At 18:20, the wooden ferry grinds against the slick timber pilings of the council landing. Drizzle glistens on the stone quay. Mara loops the wet mooring line around an iron bollard, hauling the boat tight. Sera steps ashore, pinning the oilskin-wrapped ledger tightly against her ribs.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "35cf2c4c2ec170bfac10fb2026f90f1e59576752911ba25a257fa83e91c4f8da",
+    "id": "m00040",
+    "source": "episode-000001/ch02-sc01",
+    "state_version": 2
+   },
+   {
+    "fact_key": "location:c03",
+    "kind": "event",
+    "known_by": [
+     "c01",
+     "c03"
+    ],
+    "supersedes": [
+     "m00034"
+    ],
+    "text": "Sera Holt steps ashore at the council landing at 18:20, pinning the oilskin-wrapped ledger tightly against her ribs.",
+    "evidence_ids": [
+     "p002"
+    ],
+    "evidence_spans": [
+     {
+      "id": "p002",
+      "start": 8,
+      "end": 342
+     }
+    ],
+    "evidence": "PANEL 1\nEXT. COUNCIL LANDING - NIGHT\nWide shot. At 18:20, the wooden ferry grinds against the slick timber pilings of the council landing. Drizzle glistens on the stone quay. Mara loops the wet mooring line around an iron bollard, hauling the boat tight. Sera steps ashore, pinning the oilskin-wrapped ledger tightly against her ribs.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "35cf2c4c2ec170bfac10fb2026f90f1e59576752911ba25a257fa83e91c4f8da",
+    "id": "m00041",
+    "source": "episode-000001/ch02-sc01",
+    "state_version": 2
+   },
+   {
+    "fact_key": "passage-tokens",
+    "kind": "resource",
+    "known_by": [
+     "c01",
+     "c03"
+    ],
+    "supersedes": [
+     "m00038"
+    ],
+    "text": "Mara reaches into her coat and feels the single punch-holed brass crossing token remaining in her pocket after the harbor transit.",
+    "evidence_ids": [
+     "p003",
+     "p004"
+    ],
+    "evidence_spans": [
+     {
+      "id": "p003",
+      "start": 344,
+      "end": 515
+     },
+     {
+      "id": "p004",
+      "start": 517,
+      "end": 631
+     }
+    ],
+    "evidence": "PANEL 2\nMedium shot. Mara wipes spray from her eyes. She reaches into her coat, her fingers curling around the cold, single punch-holed brass disc remaining in her pocket.\n\nMARA\nEighteen-twenty. We're at the landing. That transit cost one crossing token, Sera. I’ve got exactly one left.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "35cf2c4c2ec170bfac10fb2026f90f1e59576752911ba25a257fa83e91c4f8da",
+    "id": "m00042",
+    "source": "episode-000001/ch02-sc01",
+    "state_version": 2
+   },
+   {
+    "claim_source": "c03",
+    "fact_key": "claim:ledger-alteration",
+    "kind": "claim",
+    "known_by": [
+     "c01",
+     "c03"
+    ],
+    "supersedes": [
+     "m00036"
+    ],
+    "text": "Sera Holt states that the scraped paper proves alteration rather than who held the blade, and refuses to accuse anyone until comparing the volume against the original receipt.",
+    "evidence_ids": [
+     "p011",
+     "p015"
+    ],
+    "evidence_spans": [
+     {
+      "id": "p011",
+      "start": 1343,
+      "end": 1418
+     },
+     {
+      "id": "p015",
+      "start": 1676,
+      "end": 1826
+     }
+    ],
+    "evidence": "SERA\nI keep custody of the ledger. And I will not point a finger at anyone.\n\nPANEL 3\nMedium shot. Mara stops on the stone landing, turning to face Sera directly.\n\nMARA\nWe crossed the harbor on one token for an erased date, and you won't name a suspect?\n\nPANEL 4\nClose-up on Sera. She pulls the oilskin shut over the ledger binding.\n\nSERA\nThe scraped paper proves alteration, not who held the blade. I refuse to accuse anyone until we compare this volume against the original receipt.",
+    "evidence_match": "passage_ids",
+    "evidence_prose_sha256": "35cf2c4c2ec170bfac10fb2026f90f1e59576752911ba25a257fa83e91c4f8da",
+    "id": "m00043",
+    "source": "episode-000001/ch02-sc01",
+    "state_version": 2
+   }
+  ]
+ },
+ "complete": true,
+ "completion_status": "complete",
+ "request": {
+  "project_id": "hard-adapt-comic",
+  "title": "Hard situation: adapt-comic",
+  "medium": "comic_script",
+  "genre": "Contemporary heist thriller",
+  "chapters": 2,
+  "scenes_per_chapter": 1,
+  "words_per_scene": 300
+ }
+}

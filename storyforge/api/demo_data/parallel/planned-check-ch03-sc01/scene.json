@@ -1,0 +1,370 @@
+{
+  "scene_id": "ch03-sc01",
+  "brief_hash": "d95e1711bf2541a095553ffaa3c5ff266a66cbf2bc0c718d09628fd36622129b",
+  "prose": "Act III\n\nThe clock on the signal tower face read 18:20, returning the city to the damp chill of the present. Ivo Venn adjusted the bakelite housing of his portable radio. Through the small speaker, sharp static burst in short, erratic pulses. \n\n\"Harbor locks are down,\" Oren Pike’s voice growled out of the speaker. The captain was at the perimeter gate down the lane. \"No transit permitted without council clearance.\"\n\nIvo pressed the radio’s selector switch to the main council relay band. He paused, holding his breath as the vacuum tube hummed. He pressed the broadcast button once to transmit a cross-check query to verify the lock order.\n\n\"Key code four-zero-nine,\" the radio receiver chattered back in an automated tone.\n\nIvo stared at the lit frequency dial. Four-zero-nine was an expired seasonal key code—withdrawn from municipal use two weeks ago. He checked the indicator light on the transmitter casing; the single signal had consumed one of his two remaining power charges. Exactly one transmission charge remained in the internal cell.\n\nHe hauled his heavy gear bag over his shoulder and ran. Twelve minutes of sharp footfalls on wet cobblestones brought him from the tower through the sea mist to the archway of the Public archive.\n\nNadi Vale stepped from the shadows beneath the stone vaulting. Her coat reeked of ozone. \"The quay lost main power the second that transfer order clicked over the wire,\" she said, her voice clipped. \"The dock cranes are completely cold.\"\n\n\"The council signal is bad,\" Ivo said after a careful pause. \"It’s running on an expired key.\"\n\nOren Pike stepped into the entryway, his boots heavy on the flags. He held a brass bar across the archive door. \"My order says secure the perimeter until the relief fund chest passes through.\"\n\n\"I heard the words,\" Ivo said, looking Oren in the eye. \"I need their meaning. The clearance was sent using an old key code. Someone inside the council is broadcasting invalid transfer orders.\"\n\nNadi stepped beside Ivo, leaning against the cold stone of the doorway. \"If the locks stay shut, the grid dies before dawn.\"\n\nOren looked from Ivo’s radio to Nadi’s grease-stained hands. Slowly, the captain lowered the brass bar, stepping back to let them pass into the archive court. \n\n\"I’m holding the perimeter,\" Oren said quietly. \"If the authorization is fraudulent, we take our stand here.\"\n\nIvo nodded once, stepping through the doorway. His radio sat heavy in his coat pocket, down to its final charge, but the path inside was open.",
+  "source_sha256": "7a7fa066e34ca31a390df3a9833b6c3505345c64c94835f1fb5b4c19b29eec29",
+  "status": "source_checked",
+  "reused_prose": true,
+  "memory": {
+    "memories": [
+      {
+        "kind": "event",
+        "text": "Oren Pike announces via the signal tower radio that the harbor locks are down and no transit is permitted without council clearance.",
+        "evidence_ids": [
+          "p002"
+        ],
+        "known_by": [
+          "c02",
+          "c06"
+        ],
+        "fact_key": "harbor-locks-down",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p002",
+            "start": 9,
+            "end": 418
+          }
+        ],
+        "evidence": "The clock on the signal tower face read 18:20, returning the city to the damp chill of the present. Ivo Venn adjusted the bakelite housing of his portable radio. Through the small speaker, sharp static burst in short, erratic pulses. \n\n\"Harbor locks are down,\" Oren Pike’s voice growled out of the speaker. The captain was at the perimeter gate down the lane. \"No transit permitted without council clearance.\"",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "7a7fa066e34ca31a390df3a9833b6c3505345c64c94835f1fb5b4c19b29eec29"
+      },
+      {
+        "kind": "event",
+        "text": "Ivo Venn transmits a cross-check query on the council relay band using his portable radio to verify the lock order.",
+        "evidence_ids": [
+          "p003"
+        ],
+        "known_by": [
+          "c02"
+        ],
+        "fact_key": "radio-query-sent",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p003",
+            "start": 420,
+            "end": 643
+          }
+        ],
+        "evidence": "Ivo pressed the radio’s selector switch to the main council relay band. He paused, holding his breath as the vacuum tube hummed. He pressed the broadcast button once to transmit a cross-check query to verify the lock order.",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "7a7fa066e34ca31a390df3a9833b6c3505345c64c94835f1fb5b4c19b29eec29"
+      },
+      {
+        "kind": "event",
+        "text": "The radio receiver responds with an automated tone providing key code four-zero-nine.",
+        "evidence_ids": [
+          "p004"
+        ],
+        "known_by": [
+          "c02"
+        ],
+        "fact_key": "key-code-received",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p004",
+            "start": 645,
+            "end": 727
+          }
+        ],
+        "evidence": "\"Key code four-zero-nine,\" the radio receiver chattered back in an automated tone.",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "7a7fa066e34ca31a390df3a9833b6c3505345c64c94835f1fb5b4c19b29eec29"
+      },
+      {
+        "kind": "resource",
+        "text": "Ivo Venn consumes one of his two remaining power charges on his portable radio, leaving exactly one transmission charge in the internal cell.",
+        "evidence_ids": [
+          "p005"
+        ],
+        "known_by": [
+          "c02"
+        ],
+        "fact_key": "radio-charge",
+        "supersedes": [
+          "m00033"
+        ],
+        "evidence_spans": [
+          {
+            "id": "p005",
+            "start": 729,
+            "end": 1050
+          }
+        ],
+        "evidence": "Ivo stared at the lit frequency dial. Four-zero-nine was an expired seasonal key code—withdrawn from municipal use two weeks ago. He checked the indicator light on the transmitter casing; the single signal had consumed one of his two remaining power charges. Exactly one transmission charge remained in the internal cell.",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "7a7fa066e34ca31a390df3a9833b6c3505345c64c94835f1fb5b4c19b29eec29"
+      },
+      {
+        "kind": "belief",
+        "holder": "c02",
+        "text": "Ivo Venn recognizes that key code four-zero-nine is an expired seasonal key code withdrawn from municipal use two weeks ago.",
+        "evidence_ids": [
+          "p005"
+        ],
+        "known_by": [
+          "c02"
+        ],
+        "fact_key": "expired-key-belief",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p005",
+            "start": 729,
+            "end": 1050
+          }
+        ],
+        "evidence": "Ivo stared at the lit frequency dial. Four-zero-nine was an expired seasonal key code—withdrawn from municipal use two weeks ago. He checked the indicator light on the transmitter casing; the single signal had consumed one of his two remaining power charges. Exactly one transmission charge remained in the internal cell.",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "7a7fa066e34ca31a390df3a9833b6c3505345c64c94835f1fb5b4c19b29eec29"
+      },
+      {
+        "kind": "event",
+        "text": "Ivo Venn travels on foot for twelve minutes through the sea mist from the signal tower to the archway of the Public archive.",
+        "evidence_ids": [
+          "p006"
+        ],
+        "known_by": [
+          "c02"
+        ],
+        "fact_key": "archive-arrival-ivo",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p006",
+            "start": 1052,
+            "end": 1247
+          }
+        ],
+        "evidence": "He hauled his heavy gear bag over his shoulder and ran. Twelve minutes of sharp footfalls on wet cobblestones brought him from the tower through the sea mist to the archway of the Public archive.",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "7a7fa066e34ca31a390df3a9833b6c3505345c64c94835f1fb5b4c19b29eec29"
+      },
+      {
+        "kind": "claim",
+        "claim_source": "c05",
+        "text": "Nadi Vale tells Ivo Venn that the quay lost main power the second the transfer order clicked over the wire and that the dock cranes are completely cold.",
+        "evidence_ids": [
+          "p007"
+        ],
+        "known_by": [
+          "c02",
+          "c05"
+        ],
+        "fact_key": "quay-power-claim",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p007",
+            "start": 1249,
+            "end": 1486
+          }
+        ],
+        "evidence": "Nadi Vale stepped from the shadows beneath the stone vaulting. Her coat reeked of ozone. \"The quay lost main power the second that transfer order clicked over the wire,\" she said, her voice clipped. \"The dock cranes are completely cold.\"",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "7a7fa066e34ca31a390df3a9833b6c3505345c64c94835f1fb5b4c19b29eec29"
+      },
+      {
+        "kind": "claim",
+        "claim_source": "c02",
+        "text": "Ivo Venn tells Nadi Vale that the council signal is bad and is running on an expired key.",
+        "evidence_ids": [
+          "p008"
+        ],
+        "known_by": [
+          "c02",
+          "c05"
+        ],
+        "fact_key": "expired-key-claim",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p008",
+            "start": 1488,
+            "end": 1582
+          }
+        ],
+        "evidence": "\"The council signal is bad,\" Ivo said after a careful pause. \"It’s running on an expired key.\"",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "7a7fa066e34ca31a390df3a9833b6c3505345c64c94835f1fb5b4c19b29eec29"
+      },
+      {
+        "kind": "claim",
+        "claim_source": "c06",
+        "text": "Oren Pike states that his order is to secure the perimeter until the relief fund chest passes through.",
+        "evidence_ids": [
+          "p009"
+        ],
+        "known_by": [
+          "c02",
+          "c05",
+          "c06"
+        ],
+        "fact_key": "oren-order-claim",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p009",
+            "start": 1584,
+            "end": 1776
+          }
+        ],
+        "evidence": "Oren Pike stepped into the entryway, his boots heavy on the flags. He held a brass bar across the archive door. \"My order says secure the perimeter until the relief fund chest passes through.\"",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "7a7fa066e34ca31a390df3a9833b6c3505345c64c94835f1fb5b4c19b29eec29"
+      },
+      {
+        "kind": "claim",
+        "claim_source": "c02",
+        "text": "Ivo Venn tells Oren Pike that the clearance was sent using an old key code and that someone inside the council is broadcasting invalid transfer orders.",
+        "evidence_ids": [
+          "p010"
+        ],
+        "known_by": [
+          "c02",
+          "c05",
+          "c06"
+        ],
+        "fact_key": "invalid-transfer-claim",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p010",
+            "start": 1778,
+            "end": 1971
+          }
+        ],
+        "evidence": "\"I heard the words,\" Ivo said, looking Oren in the eye. \"I need their meaning. The clearance was sent using an old key code. Someone inside the council is broadcasting invalid transfer orders.\"",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "7a7fa066e34ca31a390df3a9833b6c3505345c64c94835f1fb5b4c19b29eec29"
+      },
+      {
+        "kind": "claim",
+        "claim_source": "c05",
+        "text": "Nadi Vale tells Oren Pike and Ivo Venn that if the locks stay shut, the grid will die before dawn.",
+        "evidence_ids": [
+          "p011"
+        ],
+        "known_by": [
+          "c02",
+          "c05",
+          "c06"
+        ],
+        "fact_key": "grid-failure-claim",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p011",
+            "start": 1973,
+            "end": 2097
+          }
+        ],
+        "evidence": "Nadi stepped beside Ivo, leaning against the cold stone of the doorway. \"If the locks stay shut, the grid dies before dawn.\"",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "7a7fa066e34ca31a390df3a9833b6c3505345c64c94835f1fb5b4c19b29eec29"
+      },
+      {
+        "kind": "event",
+        "text": "Oren Pike lowers the brass bar and steps back to let Ivo Venn and Nadi Vale pass into the archive court, stating he is holding the perimeter for a stand if the authorization is fraudulent.",
+        "evidence_ids": [
+          "p012"
+        ],
+        "known_by": [
+          "c02",
+          "c05",
+          "c06"
+        ],
+        "fact_key": "archive-entry-granted",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p012",
+            "start": 2099,
+            "end": 2369
+          }
+        ],
+        "evidence": "Oren looked from Ivo’s radio to Nadi’s grease-stained hands. Slowly, the captain lowered the brass bar, stepping back to let them pass into the archive court. \n\n\"I’m holding the perimeter,\" Oren said quietly. \"If the authorization is fraudulent, we take our stand here.\"",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "7a7fa066e34ca31a390df3a9833b6c3505345c64c94835f1fb5b4c19b29eec29"
+      }
+    ]
+  },
+  "review": {
+    "pass": true,
+    "checks": {
+      "author_contract": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch03-sc01:p002",
+          "ch03-sc01:p013"
+        ],
+        "reason": "The scene adheres to close third-person past tense focused on Ivo Venn, maintains appropriate word count, and respects short story prose constraints.",
+        "id": "author_contract"
+      },
+      "chronology_resources_and_custody": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch03-sc01:p002",
+          "ch03-sc01:p005",
+          "ch03-sc01:p006"
+        ],
+        "reason": "Timeline and travel rules are accurately maintained at 18:20 today with a 12-minute transit between tower and archive. Portable radio power charge decrements correctly from two to one after a single outbound query.",
+        "id": "chronology_resources_and_custody"
+      },
+      "knowledge_identity_and_pov": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch03-sc01:p003",
+          "ch03-sc01:p005",
+          "ch03-sc01:p010"
+        ],
+        "reason": "The third-person viewpoint stays strictly within Ivo Venn's direct experience and observations, with no improper knowledge leaks or unearned revelations.",
+        "id": "knowledge_identity_and_pov"
+      },
+      "causality_foreshadowing_and_payoff": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch03-sc01:p005",
+          "ch03-sc01:p007",
+          "ch03-sc01:p012"
+        ],
+        "reason": "The detection of an expired signal key code directly motivates Ivo's trip to the archive and convinces Oren Pike to lower the perimeter bar.",
+        "id": "causality_foreshadowing_and_payoff"
+      },
+      "voice_medium_and_detail": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch03-sc01:p007",
+          "ch03-sc01:p010"
+        ],
+        "reason": "Character dialogue and behavior match established voice profiles, including Ivo's measured phrasing and Nadi's technical, direct expressions.",
+        "id": "voice_medium_and_detail"
+      },
+      "repetition_and_pacing": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch03-sc01:p006",
+          "ch03-sc01:p012"
+        ],
+        "reason": "The narrative progresses briskly from the initial signal check to physical transit and confronting the archive threshold without redundant beats.",
+        "id": "repetition_and_pacing"
+      },
+      "memory_extraction": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch03-sc01:p002",
+          "ch03-sc01:p005",
+          "ch03-sc01:p012"
+        ],
+        "reason": "Extracted memories accurately reflect the scene text, with valid passage evidence IDs and precise text spans.",
+        "id": "memory_extraction"
+      }
+    },
+    "issues": []
+  },
+  "reviewed_sha256": "7a7fa066e34ca31a390df3a9833b6c3505345c64c94835f1fb5b4c19b29eec29",
+  "memory_sha256": "7ed54584070186fb4d615e608074a05bd3b01ea60533ffaae80cdbd7597e5c18"
+}

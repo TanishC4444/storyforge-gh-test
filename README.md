@@ -23,6 +23,10 @@ Characters share an immutable starting state version and have scoped model input
 
 Actual simultaneous execution depends on available GitHub runners and account concurrency limits. Later scenes are deliberately sequential because their starting facts depend on earlier accepted scenes. Fresh runners reset context; they do not increase a model's context window.
 
+## HTTP API and frontend playground
+
+`storyforge/api` is a FastAPI layer for starting and reading Sequential, Parallel and Recovery runs with a GitHub token, and `web/` is a static playground frontend deployed to GitHub Pages. See [docs/API.md](docs/API.md).
+
 ## Run it
 
 Open Actions → **Story runners** → Run workflow.

@@ -1,0 +1,117 @@
+The cold sea spray smelled of scorched copper and wet rust where the pontoon bit into the harbor wall. Below Mara Venn’s boots, the floating city’s central pontoon lattice groaned against the tide, its iron ballasts ballast-pumping unevenly as the evening power draw began. Above the quay, the turbine stack gave a hollow, dying thrum. 
+
+Nadi Vale leaned over the dock control box, wiping salt film from the glass dials with a greasy rag. "Generator three is dropping cycles," Nadi called out over the surf. "Grid power flickers, and the dock cranes lock up by nineteen hundred. You running the raft or sitting on it?"
+
+Mara didn't answer right away. She slid her fingers into her coat pocket, feeling the cold edges of her two copper passage tokens. Each heavy coin bore the stamped crest of the floating district—single-use, unbacked by the central mint, and irreplaceable once dropped in the gate box. 
+
+"Who crosses first?" Mara asked, stepping to the edge of the timber gangway.
+
+Footsteps clattered down the stone steps from the upper council causeway. Tomas Reed arrived, breath fogging in the damp chill. He hauled a brass-bound chest by its braided rope handles, the heavy iron frame scraping against the basalt steps. He carried a leather-bound ledger strap clipped directly to the locking bar.
+
+"I need the ferry raft," Tomas said, resting the chest near the pontoon hinge. "Council order. This is the emergency relief fund for the lower ring clinics. If the grid drops before we clear the channel, those wards go dark."
+
+"Show me the seal," Mara said. "I don't haul air, and I don't move council weight on a verbal promise."
+
+Tomas bent down, turning the chest’s locking bar to reveal a red wax seal clamped inside a steel clip. "Signed off an hour ago."
+
+Mara knelt on the wet planking to inspect the lock. The seal was thick, but the outer edge was distorted. Under the glare of the quay’s low-voltage arc lamp, she saw a clear double impression: a crisp outer ring overlapping a flattened, smeared stamp beneath it. Someone had cracked the original seal on this ledger strap and pressed a second die over the soft wax before it set.
+
+"This lock’s been double-stamped," Mara said, looking up at Tomas.
+
+Tomas’s jaw tightened. "The archivist re-sealed it after the audit. That’s standard."
+
+"Not with two offset die marks," Mara said. She pulled one copper token from her pocket, its metallic weight cold against her palm. "If I take you across, I lose half my fuel clearance for the night."
+
+"The lower ring doesn't have until dawn, Mara," Tomas said softly.
+
+She looked at the failing turbine stack, then down at the token. She dropped the copper piece into the raft’s gate box. The iron latch snapped down with a heavy mechanical click. 
+
+"Get the chest aboard," Mara said.
+
+* * *
+
+Yesterday at 16:00, twenty-six hours before the harbor gates dropped, the lower stacks of the Public Archive smelled of vinegar solvent and dry cellulose. Sera Holt leaned across the sloped mahogany desk, adjusting the shaded tallow lamp until light caught the shallow valley scraped into the calfskin leaf of Ledger Eight.
+
+"That is a claim, not a record," Sera murmured to the empty row of shelves.
+
+Someone had taken a curved steel razor to the parchment leaf, shaving away three lines of iron-gall ink until the surface felt smooth as river silt. The erasure was recent; translucent scrapings still curled like pale salt flakes along the sewn gutter.
+
+Heavy boots scuffed the iron stairs behind her. Lea Sol brushed through the canvas curtain, a leather delivery satchel slung across her chest. She set a sealed packet onto the counter with a dull thud.
+
+"Council requisitions for tomorrow’s harbor transfer," Lea said, shaking sea fog from her oiled canvas sleeve. "Sign the slip, Sera. I have three more runs before the tide turns."
+
+"An impressive seal on a remarkably light parcel," Sera replied, picking up a stick of soft willow charcoal. "Give me thirty seconds. Official ledgers do not usually lose four days of entry history overnight without an administrative order."
+
+Sera turned the charcoal flat against the parchment, sweeping light, even strokes across the scraped hollow. The carbon caught in the tiny indentations left by the scribe’s original iron stylus. Where the razor had thinned the leaf, twin overlapping circle impressions emerged in shadow—the unmistakable double-punched seal pattern of the district quartermaster’s hand die, pressed twice to cover a mismatched transfer date. Beneath the double rim, the original hand-inked numerals reappeared: a disbursement authorized for the fifteenth, not the nineteenth.
+
+Lea leaned over the lamp, her dark eyes narrowing as the shaded numbers sharpened. "That alters the fund's release by four days."
+
+"It alters the entire paper chain," Sera said softly. "The quartermaster's registry shows an open account, but this leaf was backdated before the ink fully cured."
+
+"If you file that page in the public stack," Lea said, her tone flattening into dry caution, "someone will notice the missing leaf within an hour of morning roll call."
+
+"Then we shall ensure they notice something else," Sera said.
+
+She slipped a bone folder beneath the binding thread, sliced the damaged leaf clean from the spine with one silent flick, and folded the parchment twice before tucking it into her inner jacket pocket. From her desk drawer, she pulled a fresh, blank ledger leaf, slipping it loosely into the gathering without a stamp.
+
+Lea tucked her delivery slip back into her satchel. "An incomplete ledger is an administrative violation."
+
+"A complete forgery is a far more serious oversight," Sera said, signing Lea's receipt board with a dry flourish.
+
+Lea paused at the archway, glancing at the gap in the binding thread. "I never saw the leaf." She turned and vanished down the stone stairwell into the damp street.
+
+* * *
+
+Act III
+
+The clock on the signal tower face read 18:20, returning the city to the damp chill of the present. Ivo Venn adjusted the bakelite housing of his portable radio. Through the small speaker, sharp static burst in short, erratic pulses. 
+
+"Harbor locks are down," Oren Pike’s voice growled out of the speaker. The captain was at the perimeter gate down the lane. "No transit permitted without council clearance."
+
+Ivo pressed the radio’s selector switch to the main council relay band. He paused, holding his breath as the vacuum tube hummed. He pressed the broadcast button once to transmit a cross-check query to verify the lock order.
+
+"Key code four-zero-nine," the radio receiver chattered back in an automated tone.
+
+Ivo stared at the lit frequency dial. Four-zero-nine was an expired seasonal key code—withdrawn from municipal use two weeks ago. He checked the indicator light on the transmitter casing; the single signal had consumed one of his two remaining power charges. Exactly one transmission charge remained in the internal cell.
+
+He hauled his heavy gear bag over his shoulder and ran. Twelve minutes of sharp footfalls on wet cobblestones brought him from the tower through the sea mist to the archway of the Public archive.
+
+Nadi Vale stepped from the shadows beneath the stone vaulting. Her coat reeked of ozone. "The quay lost main power the second that transfer order clicked over the wire," she said, her voice clipped. "The dock cranes are completely cold."
+
+"The council signal is bad," Ivo said after a careful pause. "It’s running on an expired key."
+
+Oren Pike stepped into the entryway, his boots heavy on the flags. He held a brass bar across the archive door. "My order says secure the perimeter until the relief fund chest passes through."
+
+"I heard the words," Ivo said, looking Oren in the eye. "I need their meaning. The clearance was sent using an old key code. Someone inside the council is broadcasting invalid transfer orders."
+
+Nadi stepped beside Ivo, leaning against the cold stone of the doorway. "If the locks stay shut, the grid dies before dawn."
+
+Oren looked from Ivo’s radio to Nadi’s grease-stained hands. Slowly, the captain lowered the brass bar, stepping back to let them pass into the archive court. 
+
+"I’m holding the perimeter," Oren said quietly. "If the authorization is fraudulent, we take our stand here."
+
+Ivo nodded once, stepping through the doorway. His radio sat heavy in his coat pocket, down to its final charge, but the path inside was open.
+
+* * *
+
+Bram Keel slammed his palm onto the polished oak council table, the heavy brass ring on his middle finger striking with a loud crack. "The power grid is failing across the lower pontoons," Bram said, his voice ringing through the high vault of the chamber. "Surrender the relief fund chest to my custody now, or the district pumps stop by dawn."
+
+Mara Venn stepped up to the rail, her hand heavy in her coat pocket where her last copper token rested against her thumb. Behind her, Ivo held his small bakelite radio with his thumb hooked over the transmitter toggle. Sera Holt walked up to the clerk's table without a word, drawn from her coat the parchment leaf she had sliced from the archive ledger the afternoon before, and laid it flat beside Bram’s desktop seal stamp. 
+
+"That is a claim," Sera said dryly, pointing to the razor-thin blade marks beneath the ink. "This is a record. The ledger date was scraped free yesterday."
+
+Mara dragged the relief chest's brass ledger clip closer, aligning its wax seal with the parchment. "Look at the edge," Mara said, her voice sharp and level. "Who stamped this twice?"
+
+The offset double-punched wax impression on the chest matched the notched ring on Bram's hand down to the fraction of a millimeter. The chamber fell quiet except for the deep, low thrum of the floating city's dying bilge turbines far below the floorboards.
+
+Bram reached for the chest handles, but Lea Sol stepped between him and the table, blocking his angle with her delivery satchel. "The courier receipts carry your signature from four days ago," Lea said. "Before the power drops were even scheduled."
+
+Ivo flicked the transmitter toggle on his portable set. A sharp burst of feedback squeal echoed through the high-ceilinged room, cutting through the murmurs of the councilors as he expended his radio’s second and final outbound charge. "Relay four," Ivo broadcasted, his voice steady over the static. "The archive ledger match is confirmed. Bram Keel authorized the lock closure."
+
+Bram froze, his face hardening as he pulled his hand back from the chest. "You ruin the household claim for both of you," Bram muttered quietly toward Mara and Ivo. "The city promise to your family was tied to this transfer."
+
+Mara looked at Ivo. The realization hit her without warning—Ivo had spent his radio charge to back her, sacrificing the very leverage that could have cleared their family's unpaid debt. 
+
+"Who crosses first?" Mara asked softly, meeting Bram's glare. 
+
+She turned to the dock gate lock mounted at the chamber's side archway, lifted her single remaining copper token, and dropped it into the iron slot. The token clinked down the chute with a heavy metallic click, engaging the pontoon winch to divert emergency power to the district water pumps. The passage was gone, her token count zero, but the pontoon gear locked tight, binding the chest to the public power authority.
