@@ -1,0 +1,312 @@
+{
+  "scene_id": "ch02-sc01",
+  "brief_hash": "d95e1711bf2541a095553ffaa3c5ff266a66cbf2bc0c718d09628fd36622129b",
+  "prose": "Yesterday at 16:00, twenty-six hours before the harbor gates dropped, the lower stacks of the Public Archive smelled of vinegar solvent and dry cellulose. Sera Holt leaned across the sloped mahogany desk, adjusting the shaded tallow lamp until light caught the shallow valley scraped into the calfskin leaf of Ledger Eight.\n\n\"That is a claim, not a record,\" Sera murmured to the empty row of shelves.\n\nSomeone had taken a curved steel razor to the parchment leaf, shaving away three lines of iron-gall ink until the surface felt smooth as river silt. The erasure was recent; translucent scrapings still curled like pale salt flakes along the sewn gutter.\n\nHeavy boots scuffed the iron stairs behind her. Lea Sol brushed through the canvas curtain, a leather delivery satchel slung across her chest. She set a sealed packet onto the counter with a dull thud.\n\n\"Council requisitions for tomorrow’s harbor transfer,\" Lea said, shaking sea fog from her oiled canvas sleeve. \"Sign the slip, Sera. I have three more runs before the tide turns.\"\n\n\"An impressive seal on a remarkably light parcel,\" Sera replied, picking up a stick of soft willow charcoal. \"Give me thirty seconds. Official ledgers do not usually lose four days of entry history overnight without an administrative order.\"\n\nSera turned the charcoal flat against the parchment, sweeping light, even strokes across the scraped hollow. The carbon caught in the tiny indentations left by the scribe’s original iron stylus. Where the razor had thinned the leaf, twin overlapping circle impressions emerged in shadow—the unmistakable double-punched seal pattern of the district quartermaster’s hand die, pressed twice to cover a mismatched transfer date. Beneath the double rim, the original hand-inked numerals reappeared: a disbursement authorized for the fifteenth, not the nineteenth.\n\nLea leaned over the lamp, her dark eyes narrowing as the shaded numbers sharpened. \"That alters the fund's release by four days.\"\n\n\"It alters the entire paper chain,\" Sera said softly. \"The quartermaster's registry shows an open account, but this leaf was backdated before the ink fully cured.\"\n\n\"If you file that page in the public stack,\" Lea said, her tone flattening into dry caution, \"someone will notice the missing leaf within an hour of morning roll call.\"\n\n\"Then we shall ensure they notice something else,\" Sera said.\n\nShe slipped a bone folder beneath the binding thread, sliced the damaged leaf clean from the spine with one silent flick, and folded the parchment twice before tucking it into her inner jacket pocket. From her desk drawer, she pulled a fresh, blank ledger leaf, slipping it loosely into the gathering without a stamp.\n\nLea tucked her delivery slip back into her satchel. \"An incomplete ledger is an administrative violation.\"\n\n\"A complete forgery is a far more serious oversight,\" Sera said, signing Lea's receipt board with a dry flourish.\n\nLea paused at the archway, glancing at the gap in the binding thread. \"I never saw the leaf.\" She turned and vanished down the stone stairwell into the damp street.",
+  "source_sha256": "2e11e17224a1cc2f3732248c93520cd110f1e9e14882f195a185aa0115f184a6",
+  "status": "source_checked",
+  "reused_prose": true,
+  "memory": {
+    "memories": [
+      {
+        "kind": "event",
+        "text": "Sera Holt examines Ledger Eight in the Public Archive, discovering that parchment has been shaved with a razor to erase entry history.",
+        "evidence_ids": [
+          "p001",
+          "p003"
+        ],
+        "known_by": [
+          "c03"
+        ],
+        "fact_key": "ledger-erasure",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p001",
+            "start": 0,
+            "end": 323
+          },
+          {
+            "id": "p003",
+            "start": 402,
+            "end": 654
+          }
+        ],
+        "evidence": "Yesterday at 16:00, twenty-six hours before the harbor gates dropped, the lower stacks of the Public Archive smelled of vinegar solvent and dry cellulose. Sera Holt leaned across the sloped mahogany desk, adjusting the shaded tallow lamp until light caught the shallow valley scraped into the calfskin leaf of Ledger Eight.\n\n\"That is a claim, not a record,\" Sera murmured to the empty row of shelves.\n\nSomeone had taken a curved steel razor to the parchment leaf, shaving away three lines of iron-gall ink until the surface felt smooth as river silt. The erasure was recent; translucent scrapings still curled like pale salt flakes along the sewn gutter.",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "2e11e17224a1cc2f3732248c93520cd110f1e9e14882f195a185aa0115f184a6"
+      },
+      {
+        "kind": "event",
+        "text": "Lea Sol arrives at the Public Archive delivering council requisitions for tomorrow's harbor transfer.",
+        "evidence_ids": [
+          "p004",
+          "p005"
+        ],
+        "known_by": [
+          "c03",
+          "c07"
+        ],
+        "fact_key": "lea-delivery",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p004",
+            "start": 656,
+            "end": 857
+          },
+          {
+            "id": "p005",
+            "start": 859,
+            "end": 1038
+          }
+        ],
+        "evidence": "Heavy boots scuffed the iron stairs behind her. Lea Sol brushed through the canvas curtain, a leather delivery satchel slung across her chest. She set a sealed packet onto the counter with a dull thud.\n\n\"Council requisitions for tomorrow’s harbor transfer,\" Lea said, shaking sea fog from her oiled canvas sleeve. \"Sign the slip, Sera. I have three more runs before the tide turns.\"",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "2e11e17224a1cc2f3732248c93520cd110f1e9e14882f195a185aa0115f184a6"
+      },
+      {
+        "kind": "event",
+        "text": "Using willow charcoal, Sera Holt uncovers a double-punched quartermaster's seal and original numerals showing a fund disbursement authorized for the fifteenth rather than the nineteenth.",
+        "evidence_ids": [
+          "p006",
+          "p007"
+        ],
+        "known_by": [
+          "c03",
+          "c07"
+        ],
+        "fact_key": "seal-discovery",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p006",
+            "start": 1040,
+            "end": 1281
+          },
+          {
+            "id": "p007",
+            "start": 1283,
+            "end": 1841
+          }
+        ],
+        "evidence": "\"An impressive seal on a remarkably light parcel,\" Sera replied, picking up a stick of soft willow charcoal. \"Give me thirty seconds. Official ledgers do not usually lose four days of entry history overnight without an administrative order.\"\n\nSera turned the charcoal flat against the parchment, sweeping light, even strokes across the scraped hollow. The carbon caught in the tiny indentations left by the scribe’s original iron stylus. Where the razor had thinned the leaf, twin overlapping circle impressions emerged in shadow—the unmistakable double-punched seal pattern of the district quartermaster’s hand die, pressed twice to cover a mismatched transfer date. Beneath the double rim, the original hand-inked numerals reappeared: a disbursement authorized for the fifteenth, not the nineteenth.",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "2e11e17224a1cc2f3732248c93520cd110f1e9e14882f195a185aa0115f184a6"
+      },
+      {
+        "kind": "claim",
+        "claim_source": "c07",
+        "evidence_ids": [
+          "p008"
+        ],
+        "holder": "c07",
+        "known_by": [
+          "c03",
+          "c07"
+        ],
+        "text": "Lea Sol claims that the uncovered date alters the fund's release by four days.",
+        "fact_key": "claim-fund-alteration",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p008",
+            "start": 1843,
+            "end": 1972
+          }
+        ],
+        "evidence": "Lea leaned over the lamp, her dark eyes narrowing as the shaded numbers sharpened. \"That alters the fund's release by four days.\"",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "2e11e17224a1cc2f3732248c93520cd110f1e9e14882f195a185aa0115f184a6"
+      },
+      {
+        "kind": "claim",
+        "claim_source": "c03",
+        "evidence_ids": [
+          "p009"
+        ],
+        "holder": "c03",
+        "known_by": [
+          "c03",
+          "c07"
+        ],
+        "text": "Sera Holt claims the discovery alters the entire paper chain because the leaf was backdated before ink fully cured.",
+        "fact_key": "claim-paper-chain",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p009",
+            "start": 1974,
+            "end": 2137
+          }
+        ],
+        "evidence": "\"It alters the entire paper chain,\" Sera said softly. \"The quartermaster's registry shows an open account, but this leaf was backdated before the ink fully cured.\"",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "2e11e17224a1cc2f3732248c93520cd110f1e9e14882f195a185aa0115f184a6"
+      },
+      {
+        "kind": "event",
+        "text": "Sera Holt slices the damaged leaf clean from the spine, conceals it in her inner jacket pocket, and inserts a fresh blank leaf into the archive ledger.",
+        "evidence_ids": [
+          "p011",
+          "p012"
+        ],
+        "known_by": [
+          "c03",
+          "c07"
+        ],
+        "fact_key": "ledger-leaf-theft",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p011",
+            "start": 2309,
+            "end": 2370
+          },
+          {
+            "id": "p012",
+            "start": 2372,
+            "end": 2689
+          }
+        ],
+        "evidence": "\"Then we shall ensure they notice something else,\" Sera said.\n\nShe slipped a bone folder beneath the binding thread, sliced the damaged leaf clean from the spine with one silent flick, and folded the parchment twice before tucking it into her inner jacket pocket. From her desk drawer, she pulled a fresh, blank ledger leaf, slipping it loosely into the gathering without a stamp.",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "2e11e17224a1cc2f3732248c93520cd110f1e9e14882f195a185aa0115f184a6"
+      },
+      {
+        "kind": "event",
+        "text": "Lea Sol signs her receipt board, notes never seeing the missing leaf, and departs down the stone stairwell.",
+        "evidence_ids": [
+          "p014",
+          "p015"
+        ],
+        "known_by": [
+          "c03",
+          "c07"
+        ],
+        "fact_key": "lea-departure",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p014",
+            "start": 2799,
+            "end": 2912
+          },
+          {
+            "id": "p015",
+            "start": 2914,
+            "end": 3078
+          }
+        ],
+        "evidence": "\"A complete forgery is a far more serious oversight,\" Sera said, signing Lea's receipt board with a dry flourish.\n\nLea paused at the archway, glancing at the gap in the binding thread. \"I never saw the leaf.\" She turned and vanished down the stone stairwell into the damp street.",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "2e11e17224a1cc2f3732248c93520cd110f1e9e14882f195a185aa0115f184a6"
+      },
+      {
+        "kind": "thread",
+        "evidence_ids": [
+          "p007",
+          "p012"
+        ],
+        "known_by": [
+          "c03",
+          "c07"
+        ],
+        "text": "A forged and backdated ledger leaf has been concealed by Sera Holt while a blank substitute remains in the public archive.",
+        "thread_id": "forged-ledger",
+        "thread_state": "seeded",
+        "fact_key": "thread:forged-ledger",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p007",
+            "start": 1283,
+            "end": 1841
+          },
+          {
+            "id": "p012",
+            "start": 2372,
+            "end": 2689
+          }
+        ],
+        "evidence": "Sera turned the charcoal flat against the parchment, sweeping light, even strokes across the scraped hollow. The carbon caught in the tiny indentations left by the scribe’s original iron stylus. Where the razor had thinned the leaf, twin overlapping circle impressions emerged in shadow—the unmistakable double-punched seal pattern of the district quartermaster’s hand die, pressed twice to cover a mismatched transfer date. Beneath the double rim, the original hand-inked numerals reappeared: a disbursement authorized for the fifteenth, not the nineteenth.\n\nLea leaned over the lamp, her dark eyes narrowing as the shaded numbers sharpened. \"That alters the fund's release by four days.\"\n\n\"It alters the entire paper chain,\" Sera said softly. \"The quartermaster's registry shows an open account, but this leaf was backdated before the ink fully cured.\"\n\n\"If you file that page in the public stack,\" Lea said, her tone flattening into dry caution, \"someone will notice the missing leaf within an hour of morning roll call.\"\n\n\"Then we shall ensure they notice something else,\" Sera said.\n\nShe slipped a bone folder beneath the binding thread, sliced the damaged leaf clean from the spine with one silent flick, and folded the parchment twice before tucking it into her inner jacket pocket. From her desk drawer, she pulled a fresh, blank ledger leaf, slipping it loosely into the gathering without a stamp.",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "2e11e17224a1cc2f3732248c93520cd110f1e9e14882f195a185aa0115f184a6"
+      }
+    ]
+  },
+  "review": {
+    "pass": true,
+    "checks": {
+      "author_contract": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch02-sc01:p001",
+          "ch02-sc01:p002"
+        ],
+        "reason": "The scene strictly adheres to close third-person past tense focalized on Sera Holt in short story format.",
+        "id": "author_contract"
+      },
+      "chronology_resources_and_custody": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch02-sc01:p001",
+          "ch02-sc01:p012"
+        ],
+        "reason": "The scene clearly establishes its historical flashback timing (Yesterday at 16:00) without disturbing present resource counts or custody.",
+        "id": "chronology_resources_and_custody"
+      },
+      "knowledge_identity_and_pov": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch02-sc01:p007",
+          "ch02-sc01:p015"
+        ],
+        "reason": "Knowledge of the altered date and double-punched seal remains strictly limited to Sera Holt and Lea Sol within Sera's third-person perspective.",
+        "id": "knowledge_identity_and_pov"
+      },
+      "causality_foreshadowing_and_payoff": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch02-sc01:p007",
+          "ch02-sc01:p012"
+        ],
+        "reason": "The scene effectively plants the physical evidence of the erased ledger leaf and double-punched quartermaster's seal pattern.",
+        "id": "causality_foreshadowing_and_payoff"
+      },
+      "voice_medium_and_detail": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch02-sc01:p001",
+          "ch02-sc01:p002",
+          "ch02-sc01:p006",
+          "ch02-sc01:p014"
+        ],
+        "reason": "Rich sensory details and distinct character voices reflect the short story prose medium and formal archivist register.",
+        "id": "voice_medium_and_detail"
+      },
+      "repetition_and_pacing": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch02-sc01:p003",
+          "ch02-sc01:p007",
+          "ch02-sc01:p012"
+        ],
+        "reason": "Pacing is brisk and purposeful with clear progression from discovery to action.",
+        "id": "repetition_and_pacing"
+      },
+      "memory_extraction": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch02-sc01:p001",
+          "ch02-sc01:p007",
+          "ch02-sc01:p012"
+        ],
+        "reason": "The extracted memories accurately represent all key facts, claims, and thread states from the scene prose without extraction errors.",
+        "id": "memory_extraction"
+      }
+    },
+    "issues": []
+  },
+  "reviewed_sha256": "2e11e17224a1cc2f3732248c93520cd110f1e9e14882f195a185aa0115f184a6",
+  "memory_sha256": "790e7f1dc5a7187fa684e2221290272f5879af190ecea9f3558bbf45a74874cb"
+}

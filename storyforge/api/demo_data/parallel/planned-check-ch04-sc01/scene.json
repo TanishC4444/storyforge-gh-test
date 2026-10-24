@@ -1,0 +1,317 @@
+{
+  "scene_id": "ch04-sc01",
+  "brief_hash": "d95e1711bf2541a095553ffaa3c5ff266a66cbf2bc0c718d09628fd36622129b",
+  "prose": "Bram Keel slammed his palm onto the polished oak council table, the heavy brass ring on his middle finger striking with a loud crack. \"The power grid is failing across the lower pontoons,\" Bram said, his voice ringing through the high vault of the chamber. \"Surrender the relief fund chest to my custody now, or the district pumps stop by dawn.\"\n\nMara Venn stepped up to the rail, her hand heavy in her coat pocket where her last copper token rested against her thumb. Behind her, Ivo held his small bakelite radio with his thumb hooked over the transmitter toggle. Sera Holt walked up to the clerk's table without a word, drawn from her coat the parchment leaf she had sliced from the archive ledger the afternoon before, and laid it flat beside Bram’s desktop seal stamp. \n\n\"That is a claim,\" Sera said dryly, pointing to the razor-thin blade marks beneath the ink. \"This is a record. The ledger date was scraped free yesterday.\"\n\nMara dragged the relief chest's brass ledger clip closer, aligning its wax seal with the parchment. \"Look at the edge,\" Mara said, her voice sharp and level. \"Who stamped this twice?\"\n\nThe offset double-punched wax impression on the chest matched the notched ring on Bram's hand down to the fraction of a millimeter. The chamber fell quiet except for the deep, low thrum of the floating city's dying bilge turbines far below the floorboards.\n\nBram reached for the chest handles, but Lea Sol stepped between him and the table, blocking his angle with her delivery satchel. \"The courier receipts carry your signature from four days ago,\" Lea said. \"Before the power drops were even scheduled.\"\n\nIvo flicked the transmitter toggle on his portable set. A sharp burst of feedback squeal echoed through the high-ceilinged room, cutting through the murmurs of the councilors as he expended his radio’s second and final outbound charge. \"Relay four,\" Ivo broadcasted, his voice steady over the static. \"The archive ledger match is confirmed. Bram Keel authorized the lock closure.\"\n\nBram froze, his face hardening as he pulled his hand back from the chest. \"You ruin the household claim for both of you,\" Bram muttered quietly toward Mara and Ivo. \"The city promise to your family was tied to this transfer.\"\n\nMara looked at Ivo. The realization hit her without warning—Ivo had spent his radio charge to back her, sacrificing the very leverage that could have cleared their family's unpaid debt. \n\n\"Who crosses first?\" Mara asked softly, meeting Bram's glare. \n\nShe turned to the dock gate lock mounted at the chamber's side archway, lifted her single remaining copper token, and dropped it into the iron slot. The token clinked down the chute with a heavy metallic click, engaging the pontoon winch to divert emergency power to the district water pumps. The passage was gone, her token count zero, but the pontoon gear locked tight, binding the chest to the public power authority.",
+  "source_sha256": "126b1ed8d01bd3537ea0e59615bd5b8341a36fc8b8fd018b94bb97902d5ff585",
+  "status": "source_checked",
+  "reused_prose": true,
+  "memory": {
+    "memories": [
+      {
+        "kind": "event",
+        "text": "Bram Keel slams his hand onto the council table, demanding immediate executive transfer of the relief chest.",
+        "evidence_ids": [
+          "p001"
+        ],
+        "known_by": [
+          "c01",
+          "c02",
+          "c03",
+          "c07",
+          "c08",
+          "public"
+        ],
+        "fact_key": "council:demand-chest",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p001",
+            "start": 0,
+            "end": 345
+          }
+        ],
+        "evidence": "Bram Keel slammed his palm onto the polished oak council table, the heavy brass ring on his middle finger striking with a loud crack. \"The power grid is failing across the lower pontoons,\" Bram said, his voice ringing through the high vault of the chamber. \"Surrender the relief fund chest to my custody now, or the district pumps stop by dawn.\"",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "126b1ed8d01bd3537ea0e59615bd5b8341a36fc8b8fd018b94bb97902d5ff585"
+      },
+      {
+        "kind": "event",
+        "text": "Sera Holt places the scraped archive ledger leaf beside Bram's desktop seal stamp, showing the razor marks.",
+        "evidence_ids": [
+          "p002"
+        ],
+        "known_by": [
+          "c01",
+          "c02",
+          "c03",
+          "c07",
+          "c08",
+          "public"
+        ],
+        "fact_key": "council:sera-ledger-proof",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p002",
+            "start": 347,
+            "end": 931
+          }
+        ],
+        "evidence": "Mara Venn stepped up to the rail, her hand heavy in her coat pocket where her last copper token rested against her thumb. Behind her, Ivo held his small bakelite radio with his thumb hooked over the transmitter toggle. Sera Holt walked up to the clerk's table without a word, drawn from her coat the parchment leaf she had sliced from the archive ledger the afternoon before, and laid it flat beside Bram’s desktop seal stamp. \n\n\"That is a claim,\" Sera said dryly, pointing to the razor-thin blade marks beneath the ink. \"This is a record. The ledger date was scraped free yesterday.\"",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "126b1ed8d01bd3537ea0e59615bd5b8341a36fc8b8fd018b94bb97902d5ff585"
+      },
+      {
+        "kind": "event",
+        "text": "Mara Venn pulls the chest's ledger clip closer and points out the offset double-punched wax seal, matching it to Sera's leaf.",
+        "evidence_ids": [
+          "p003",
+          "p004"
+        ],
+        "known_by": [
+          "c01",
+          "c02",
+          "c03",
+          "c07",
+          "c08",
+          "public"
+        ],
+        "fact_key": "council:seal-match",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p003",
+            "start": 933,
+            "end": 1116
+          },
+          {
+            "id": "p004",
+            "start": 1118,
+            "end": 1374
+          }
+        ],
+        "evidence": "Mara dragged the relief chest's brass ledger clip closer, aligning its wax seal with the parchment. \"Look at the edge,\" Mara said, her voice sharp and level. \"Who stamped this twice?\"\n\nThe offset double-punched wax impression on the chest matched the notched ring on Bram's hand down to the fraction of a millimeter. The chamber fell quiet except for the deep, low thrum of the floating city's dying bilge turbines far below the floorboards.",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "126b1ed8d01bd3537ea0e59615bd5b8341a36fc8b8fd018b94bb97902d5ff585"
+      },
+      {
+        "kind": "event",
+        "text": "Ivo Venn raises his radio, flips the transmitter switch, and uses his final charge to broadcast Sera's proof across the district relays.",
+        "evidence_ids": [
+          "p006"
+        ],
+        "known_by": [
+          "c01",
+          "c02",
+          "c03",
+          "c07",
+          "c08",
+          "public"
+        ],
+        "fact_key": "council:radio-broadcast",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p006",
+            "start": 1626,
+            "end": 2006
+          }
+        ],
+        "evidence": "Ivo flicked the transmitter toggle on his portable set. A sharp burst of feedback squeal echoed through the high-ceilinged room, cutting through the murmurs of the councilors as he expended his radio’s second and final outbound charge. \"Relay four,\" Ivo broadcasted, his voice steady over the static. \"The archive ledger match is confirmed. Bram Keel authorized the lock closure.\"",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "126b1ed8d01bd3537ea0e59615bd5b8341a36fc8b8fd018b94bb97902d5ff585"
+      },
+      {
+        "kind": "resource",
+        "text": "Ivo Venn has spent his final radio transmission charge, leaving his radio with 0 remaining charges.",
+        "evidence_ids": [
+          "p006"
+        ],
+        "known_by": [
+          "c01",
+          "c02",
+          "c03",
+          "c07",
+          "c08"
+        ],
+        "fact_key": "radio-charge",
+        "supersedes": [
+          "m00033"
+        ],
+        "evidence_spans": [
+          {
+            "id": "p006",
+            "start": 1626,
+            "end": 2006
+          }
+        ],
+        "evidence": "Ivo flicked the transmitter toggle on his portable set. A sharp burst of feedback squeal echoed through the high-ceilinged room, cutting through the murmurs of the councilors as he expended his radio’s second and final outbound charge. \"Relay four,\" Ivo broadcasted, his voice steady over the static. \"The archive ledger match is confirmed. Bram Keel authorized the lock closure.\"",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "126b1ed8d01bd3537ea0e59615bd5b8341a36fc8b8fd018b94bb97902d5ff585"
+      },
+      {
+        "kind": "event",
+        "text": "Mara Venn drops her final copper token into the dock gate lock, sealing the pontoon for the power plant run and forfeiting her own household passage.",
+        "evidence_ids": [
+          "p008"
+        ],
+        "known_by": [
+          "c01",
+          "c02",
+          "c03",
+          "c07",
+          "c08",
+          "public"
+        ],
+        "fact_key": "council:token-lock",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p008",
+            "start": 2235,
+            "end": 2907
+          }
+        ],
+        "evidence": "Mara looked at Ivo. The realization hit her without warning—Ivo had spent his radio charge to back her, sacrificing the very leverage that could have cleared their family's unpaid debt. \n\n\"Who crosses first?\" Mara asked softly, meeting Bram's glare. \n\nShe turned to the dock gate lock mounted at the chamber's side archway, lifted her single remaining copper token, and dropped it into the iron slot. The token clinked down the chute with a heavy metallic click, engaging the pontoon winch to divert emergency power to the district water pumps. The passage was gone, her token count zero, but the pontoon gear locked tight, binding the chest to the public power authority.",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "126b1ed8d01bd3537ea0e59615bd5b8341a36fc8b8fd018b94bb97902d5ff585"
+      },
+      {
+        "kind": "resource",
+        "text": "Mara holds zero single-use ferry passage tokens after spending her last token in the dock gate lock.",
+        "evidence_ids": [
+          "p008"
+        ],
+        "known_by": [
+          "c01",
+          "c02",
+          "c03",
+          "c07",
+          "c08"
+        ],
+        "fact_key": "passage-tokens",
+        "supersedes": [
+          "m00032"
+        ],
+        "evidence_spans": [
+          {
+            "id": "p008",
+            "start": 2235,
+            "end": 2907
+          }
+        ],
+        "evidence": "Mara looked at Ivo. The realization hit her without warning—Ivo had spent his radio charge to back her, sacrificing the very leverage that could have cleared their family's unpaid debt. \n\n\"Who crosses first?\" Mara asked softly, meeting Bram's glare. \n\nShe turned to the dock gate lock mounted at the chamber's side archway, lifted her single remaining copper token, and dropped it into the iron slot. The token clinked down the chute with a heavy metallic click, engaging the pontoon winch to divert emergency power to the district water pumps. The passage was gone, her token count zero, but the pontoon gear locked tight, binding the chest to the public power authority.",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "126b1ed8d01bd3537ea0e59615bd5b8341a36fc8b8fd018b94bb97902d5ff585"
+      },
+      {
+        "kind": "relationship",
+        "text": "Mara and Ivo discover during the confrontation that Ivo's radio transmission sacrificed their family's unpaid household promise commitments.",
+        "evidence_ids": [
+          "p007",
+          "p008"
+        ],
+        "known_by": [
+          "c01",
+          "c02"
+        ],
+        "fact_key": "family:venn",
+        "supersedes": [],
+        "evidence_spans": [
+          {
+            "id": "p007",
+            "start": 2008,
+            "end": 2233
+          },
+          {
+            "id": "p008",
+            "start": 2235,
+            "end": 2907
+          }
+        ],
+        "evidence": "Bram froze, his face hardening as he pulled his hand back from the chest. \"You ruin the household claim for both of you,\" Bram muttered quietly toward Mara and Ivo. \"The city promise to your family was tied to this transfer.\"\n\nMara looked at Ivo. The realization hit her without warning—Ivo had spent his radio charge to back her, sacrificing the very leverage that could have cleared their family's unpaid debt. \n\n\"Who crosses first?\" Mara asked softly, meeting Bram's glare. \n\nShe turned to the dock gate lock mounted at the chamber's side archway, lifted her single remaining copper token, and dropped it into the iron slot. The token clinked down the chute with a heavy metallic click, engaging the pontoon winch to divert emergency power to the district water pumps. The passage was gone, her token count zero, but the pontoon gear locked tight, binding the chest to the public power authority.",
+        "evidence_match": "passage_ids",
+        "evidence_prose_sha256": "126b1ed8d01bd3537ea0e59615bd5b8341a36fc8b8fd018b94bb97902d5ff585"
+      }
+    ]
+  },
+  "review": {
+    "pass": true,
+    "checks": {
+      "author_contract": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch04-sc01:p001",
+          "ch04-sc01:p008"
+        ],
+        "reason": "The scene adheres strictly to short story prose form in close third-person past tense focused on Mara Venn, concluding the episode with an earned reversal and concrete personal costs.",
+        "id": "author_contract"
+      },
+      "chronology_resources_and_custody": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch04-sc01:p002",
+          "ch04-sc01:p006",
+          "ch04-sc01:p008"
+        ],
+        "reason": "Resource expenditures (Mara's final passage token and Ivo's final radio transmission charge) and item custody changes (archive ledger leaf, relief fund chest lock) strictly follow the accumulated state.",
+        "id": "chronology_resources_and_custody"
+      },
+      "knowledge_identity_and_pov": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch04-sc01:p002",
+          "ch04-sc01:p003",
+          "ch04-sc01:p008"
+        ],
+        "reason": "POV remains anchored to Mara Venn; all character knowledge updates occur through direct, on-page observation and explicit disclosure without leaks.",
+        "id": "knowledge_identity_and_pov"
+      },
+      "causality_foreshadowing_and_payoff": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch04-sc01:p003",
+          "ch04-sc01:p004",
+          "ch04-sc01:p006",
+          "ch04-sc01:p008"
+        ],
+        "reason": "The climax effectively pays off planted clues from earlier scenes—including the double-punched wax seal and scraped archive ledger leaf—to expose Bram Keel and resolve the fund transfer.",
+        "id": "causality_foreshadowing_and_payoff"
+      },
+      "voice_medium_and_detail": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch04-sc01:p001",
+          "ch04-sc01:p002",
+          "ch04-sc01:p003",
+          "ch04-sc01:p008"
+        ],
+        "reason": "Character voices reflect their established registers and work domains (Mara's practical ferry questions, Sera's dry administrative corrections, Ivo's measured operator statements) with evocative sensory grounding.",
+        "id": "voice_medium_and_detail"
+      },
+      "repetition_and_pacing": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch04-sc01:p001",
+          "ch04-sc01:p005",
+          "ch04-sc01:p008"
+        ],
+        "reason": "The pacing rapidly escalates through distinct tactical reveals without narrative repetition or stall.",
+        "id": "repetition_and_pacing"
+      },
+      "memory_extraction": {
+        "verdict": "pass",
+        "evidence_ids": [
+          "ch04-sc01:p001",
+          "ch04-sc01:p006",
+          "ch04-sc01:p008"
+        ],
+        "reason": "The extracted memory records accurately reflect the event facts and resource decrements supported by the scene prose.",
+        "id": "memory_extraction"
+      }
+    },
+    "issues": []
+  },
+  "reviewed_sha256": "126b1ed8d01bd3537ea0e59615bd5b8341a36fc8b8fd018b94bb97902d5ff585",
+  "memory_sha256": "d2815ff99ec28156ae8d0d7bb331228acb25435c13cf1f605a96f251615a23cd"
+}
