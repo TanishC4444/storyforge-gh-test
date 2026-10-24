@@ -33,7 +33,7 @@ def select_job(jobs,scene,stage):
 
 def plan(api,run_id,scene,stage,out):
     if not str(run_id).isdigit() or int(run_id)<=0:raise ValueError('A positive source run ID is required')
-    if stage not in {'scene','editing','memory'}:raise ValueError('Unknown restart stage')
+    if stage not in {'auto','scene','editing','memory'}:raise ValueError('Unknown restart stage')
     out=Path(out);run=api.api(f'actions/runs/{run_id}')
     if run['status']!='completed':raise ValueError('Wait until the source run finishes or is cancelled before resuming it')
     if run.get('conclusion')=='success':raise ValueError('This run succeeded; use universe continuation for a new episode')
@@ -49,8 +49,14 @@ def plan(api,run_id,scene,stage,out):
     number=first if scene=='auto' else int(scene)
     if not first<=number<=min(4,recovery['total_scenes'] or 4):raise ValueError('Cannot overwrite completed scenes or resume outside this episode')
     if number!=first:raise ValueError('Resume the first unfinished scene so no missing boundary is skipped')
+    requested=stage
+    if stage=='auto':
+        draft=next((d for d in recovery['drafts'] if d['scene']==number),None)
+        literary=out/'backup'/f's{number:02}_final_check/editorial-adjudication.json'
+        proof=json.loads(literary.read_text()) if literary.exists() else {}
+        stage='scene' if draft is None else 'memory' if proof.get('pass') and not proof.get('unverified') else 'editing'
     jobs=pages(api,f'actions/runs/{run_id}/jobs?filter=latest','jobs');job=select_job(jobs,number,stage)
-    value={'run_id':int(run_id),'run_attempt':run['run_attempt'],'head_sha':run['head_sha'],'job_id':job['id'],'job_name':job['name'],'scene':number,'requested_stage':stage,'completed_scenes_preserved':recovery['completed_scenes'],'backup_artifacts':[a['name'] for a in selected],'url':run['html_url']}
+    value={'run_id':int(run_id),'run_attempt':run['run_attempt'],'head_sha':run['head_sha'],'job_id':job['id'],'job_name':job['name'],'scene':number,'requested_stage':requested,'resolved_stage':stage,'completed_scenes_preserved':recovery['completed_scenes'],'backup_artifacts':[a['name'] for a in selected],'url':run['html_url']}
     (out/'resume-plan.json').write_text(json.dumps(value,indent=2)+'\n')
     return value
 

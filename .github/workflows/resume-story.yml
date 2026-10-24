@@ -12,10 +12,10 @@ on:
         options: [auto, '1', '2', '3', '4']
         default: auto
       restart_stage:
-        description: Editing keeps the saved draft; scene rebuilds only the unfinished scene
+        description: Auto chooses the earliest unfinished stage; editing keeps the saved draft
         type: choice
-        options: [editing, memory, scene]
-        default: editing
+        options: [auto, editing, memory, scene]
+        default: auto
 permissions:
   contents: read
   actions: write

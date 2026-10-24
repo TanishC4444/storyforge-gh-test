@@ -108,11 +108,13 @@ def check(state,card,source,out,backend,bid):
         text_mode=state['request'].get('performance',{}).get('memory_pair_batches')
         if text_mode:
             catalog=passages(prose)
-            evidence=evidence_context(catalog,batch['owned_passages'],facts)
             prior=memory_canon(state)
             identity_index=[{k:f[k] for k in ['id','kind','fact_key','known_by','canonical_status'] if k in f} for f in prior]
             if batch['task'] in {'continuity','coverage'}:
                 facts=[{'index':i,**{k:v for k,v in f.items() if k in {'kind','text','known_by','holder','claim_source','continuity_scope','literary_status','subject','life_state','thread_id','thread_state','fact_key','supersedes','evidence_ids'}}} for i,f in enumerate(memory['memories']) if set(f.get('evidence_ids',[])) & set(batch['owned_passages'])]
+            # Select owned facts first, then include EVERY cited anchor, even
+            # when the other end falls outside this paragraph window.
+            evidence=evidence_context(catalog,batch['owned_passages'],facts)
             prior_lookup={f['id']:f for f in prior}
             references=[{'fact_index':f['index'],'prior_id':old,'exists':old in prior_lookup,
                          'same_key_and_kind':old in prior_lookup and f.get('fact_key')==prior_lookup[old].get('fact_key') and f['kind']==prior_lookup[old]['kind']}
@@ -126,7 +128,7 @@ def check(state,card,source,out,backend,bid):
                   'application_reference_checks':references,
                   'linked_prior_facts':[f for f in prior if f['id'] in linked_ids],
                   'previous_findings_to_verify':p.get('recovery_findings',[]),
-                  'coverage_policy':'This is one exhaustive continuity partition, not a summary. canon_identity_index contains ALL prior IDs, exact keys and knowledge holders; linked_prior_facts supplies full referenced records, even outside this partition. application_reference_checks deterministically verifies exact ID existence and key/kind matching; judge semantic replacement validity, not a contradictory guess about those verified bytes. An ID absent from prior_canon is NOT nonexistent. Never renumber an ID or substitute an older fact with a different key. Records tagged draft_branch are source-verified facts of this provisional manuscript, not published universe canon. Other partitions are checked separately. Do not invent omitted facts. Historical_superseded facts describe earlier states. Previously acquired knowledge persists, but public observation of an action never grants access to private feelings. Check each atomic claim separately.'}
+                  'coverage_policy':'owned_passages defines responsibility for completeness and prose findings, not a limit on fact evidence. Judge each supplied fact against ALL its evidence_ids in evidence_passages; a multi-anchor fact may be supported outside owned_passages. This is one exhaustive continuity partition, not a summary. canon_identity_index contains ALL prior IDs, exact keys and knowledge holders; linked_prior_facts supplies full referenced records, even outside this partition. application_reference_checks deterministically verifies exact ID existence and key/kind matching; judge semantic replacement validity, not a contradictory guess about those verified bytes. An ID absent from prior_canon is NOT nonexistent. Never renumber an ID or substitute an older fact with a different key. Records tagged draft_branch are source-verified facts of this provisional manuscript, not published universe canon. Other partitions are checked separately. Do not invent omitted facts. Historical_superseded facts describe earlier states. Previously acquired knowledge persists, but public observation of an action never grants access to private feelings. Check each atomic claim separately.'}
             mode = ((mode+' Also check extraction completeness: material facts, resource changes, obligations and knowledge acquired in owned passages must appear accurately in proposed_memory. Missing facts target memory, never rewrite prose to justify them. ') if batch['task']=='continuity' else 'Check completeness of proposed_memory against owned passages. Missing material facts or unsupported knowledge target memory. No prose or style judgments. ' if batch['task']=='coverage' else 'Check ONLY supplied facts, their source evidence and knowledge holders against this canon partition. Issues target memory; no prose or style judgment. ')
         id_mode=adaptive(state['request'])
         options={'tokens':1200 if id_mode else 650 if text_mode else 1200,'response_schema':memory_review_schema()}
@@ -180,8 +182,9 @@ def extract_batch(state,card,source,out,backend,bid):
             'read_only_source_context':[{'id':x['id'],'text':x['text']} for x in evidence_context(catalog,batch['ids'],[]) if x['id'] not in batch['ids']],
             'character_registry':[{'id':c['id'],'name':c['name']} for c in state['request']['characters']],
             'characters':[c['id'] for c in state['request']['characters']],'prior_canon':cards(continuity_history(state)),
-            'original_prompt':state['request']['premise'],'scene':card,'specific_memory_findings':p.get('memory_corrections',[])}
-    instruction=MEMORY_INSTRUCTION+' Extract all material supported changes and obligations in these owned passages; do not invent or summarize away facts. Other batches cover other passages. Preserve uncertainty and individual knowledge.'
+            'original_prompt':state['request']['premise'],'scene':card,
+            'specific_memory_findings':[f for f in p.get('memory_corrections',[]) if affected_passages([f],prose)&set(batch['ids'])]}
+    instruction=MEMORY_INSTRUCTION+' Extract all material supported changes and obligations in these owned passages; do not invent or summarize away facts. Other batches cover other passages. Preserve uncertainty and individual knowledge. Findings describe alleged problems, NOT source facts. Never copy an event from a finding or read-only context into an owned passage that does not establish it. Use global passage IDs exactly as supplied; never renumber them.'
     result=None;last=None;req=scoped(state['request'])
     if not batch['ids']:result={'memories':[]}
     for attempt in range(0 if result is not None else 2):

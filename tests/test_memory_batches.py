@@ -8,6 +8,31 @@ from storyforge.storage import save,load
 from storyforge.contracts import ContractError
 
 class MemoryBatchTests(unittest.TestCase):
+    def test_coverage_receives_all_anchors_of_multi_passage_fact(self):
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d);s,c=self.scene(p);s['request']['performance'].update(memory_pair_batches=True,adaptive_batches=True)
+            prose='\n\n'.join('Paragraph '+str(i)+' '+('the rain fell on the quay '*25)+'.' for i in range(1,13))
+            save(p/'edited/prose.txt',prose)
+            save(p/'memory/memory.json',{'memories':[{'kind':'event','text':'A linked action spans the scene.','known_by':[],'evidence_ids':['p001','p012']}]})
+            plan=m.plan(s,p,p/'plan','final');batch=next(b for b in plan['batches'] if b.get('task')=='coverage' and 'p001' in b['owned_passages'])
+            self.assertNotIn('p012',batch['owned_passages'])
+            def checker(executor,role,packet,instruction,**kw):
+                self.assertEqual(packet['proposed_memory']['memories'][0]['evidence_ids'],['p001','p012'])
+                self.assertTrue({'p001','p012'}<={x['id'] for x in packet['evidence_passages']})
+                return {'pass':True,'issues':[]}
+            with patch('storyforge.inference.Executor.call',autospec=True,side_effect=checker):
+                self.assertTrue(m.check(s,c,p,p/'checked','fixture',batch['id'])['review']['pass'])
+    def test_extraction_findings_cannot_import_an_event_into_an_unrelated_batch(self):
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d);s,c=self.scene(p);prose='First source event.\n\nUnrelated later radio event.'
+            save(p/'edited/prose.txt',prose)
+            save(p/'plan/extract-plan.json',{'state_sha256':b.bind_state(s),'source_sha256':b.digest(prose),'batches':[{'id':'0','ids':['p001']}],'memory_corrections':[{'target':'memory','evidence_ids':['p002'],'problem':'Correct the radio record.'},{'target':'memory','evidence_ids':['p001'],'problem':'Correct the first event.'}]})
+            def extract(executor,req,out,text,packet,instruction):
+                self.assertEqual([i['problem'] for i in packet['specific_memory_findings']],['Correct the first event.'])
+                self.assertEqual([v['id'] for v in packet['evidence_passages']],['p001'])
+                self.assertIn('NOT source facts',instruction)
+                return {'memories':[]}
+            with patch('storyforge.resilience.memory_extract',side_effect=extract):m.extract_batch(s,c,p,p/'out','fixture','0')
     def scene(self,p):
         stage('prepare',p/'none',p/'base',request_file='classic-universe-practice',profile='fast',backend='fixture')
         s=prepare(p/'base/snapshot.json',p/'prepared');s['request']['performance']['memory_pair_batches']=False;return s,s['plan']['scenes'][0]

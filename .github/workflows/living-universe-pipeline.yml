@@ -49,6 +49,10 @@ name: Living universe / verified-memory pipeline
         default: ''
         description: 'Optional prior run: import its complete first-scene draft under the same brief/canon; recheck quality
           and memory'
+      recovery_probe:
+        type: boolean
+        default: false
+        description: 'Benchmark only: interrupt scene 2 once to verify checkpoint recovery'
 permissions:
   contents: read
   actions: read
@@ -1338,6 +1342,11 @@ jobs:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_accept","path":"state","pattern":false,"condition":null}]'
         STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
       run: python -m storyforge.living_stages arrange
+    - name: 'Controlled recovery probe: interrupt before scene 2 once'
+      if: ${{ inputs.recovery_probe && github.run_attempt == 1 }}
+      run: 'echo ''Intentional interruption; scene 1 checkpoint remains saved.''
+
+        exit 75'
     - name: Reconcile scene 2 with verified prior memory
       id: task
       env: *id006

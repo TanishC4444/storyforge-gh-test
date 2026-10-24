@@ -11,6 +11,7 @@ def build():
     graph['on']['workflow_dispatch']['inputs']['queue_tag']={'type':'string','default':'','description':'Optional correlation ID for a sequential benchmark queue'}
     inputs=graph['on']['workflow_dispatch']['inputs'];inputs['request_file']['default']='living-scale-practice';inputs['scene_limit']['default']='2'
     inputs['saved_draft_run']={'type':'string','default':'','description':'Optional prior run: import its complete first-scene draft under the same brief/canon; recheck quality and memory'}
+    inputs['recovery_probe']={'type':'boolean','default':False,'description':'Benchmark only: interrupt scene 2 once to verify checkpoint recovery'}
     graph['env']['STORY_LIVING_PIPELINE']='true'
     def add(key,template,title,task,needs,files,index,*,module='living_stages',matrix=None,outputs=(),condition=None):
         job=copy.deepcopy(old[template]);job['name']='Scene '+str(index+1)+' / '+title;job['needs']=list(dict.fromkeys(needs));job.pop('strategy',None);job.pop('outputs',None)
@@ -41,6 +42,9 @@ def build():
     for i in range(4):
         p=f's{i+1:02}';prior='quickstart' if i==0 else f's{i:02}_accept';state=[(p+'_design','state')]
         add(p+'_design',p+'_design','Reconcile scene '+str(i+1)+' with verified prior memory','scene_design',[prior],[(prior,'state')],i,module='dag',outputs=['characters'])
+        if i==1:
+            steps=jobs[p+'_design']['steps'];position=next(j for j,s in enumerate(steps) if s.get('id')=='task')
+            steps.insert(position,{'name':'Controlled recovery probe: interrupt before scene 2 once','if':"${{ inputs.recovery_probe && github.run_attempt == 1 }}",'run':"echo 'Intentional interruption; scene 1 checkpoint remains saved.'\nexit 75"})
         add(p+'_characters',p+'_characters','Independent character ${{ matrix.character }} / scene '+str(i+1),'character',[p+'_design'],state,i,module='dag',matrix='${{ fromJSON(needs.'+p+'_design.outputs.characters) }}')
         add(p+'_direction',p+'_direction','Compile character direction and writing plan','direction_plan',[p+'_design',p+'_characters'],state+[(p+'_characters-*','characters',True)],i,outputs=['characters'])
         add(p+'_write_batches',p+'_write_batches','Write coherent scene / batch ${{ matrix.batch }}','write_batch',[p+'_design',p+'_direction'],state+[(p+'_direction','plan')],i,module='batch_pipeline',matrix='${{ fromJSON(needs.'+p+'_direction.outputs.characters) }}')

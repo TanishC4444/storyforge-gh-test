@@ -112,3 +112,43 @@ provider workloads; independent role partitions inside each child remain paralle
 
 Generate briefs with `python -m scripts.build_stress_suite`; validate without
 provider calls using `python -m scripts.stress_queue --validate-only`.
+# Hard situations and adaptive completion
+
+Choose `harder-suite` in **Sequential story stress suite** to run five independent
+cases serially through the full separate-runner graph:
+
+| Case | Scenes | Target words/scene | What it challenges |
+|---|---:|---:|---|
+| Chronology / POV | 4 | 450 | Yesterday flashback between present-day scenes; reader knowledge must not leak into absent characters; historical resources cannot refill present state |
+| Ensemble novel | 4 | 750 | Sixteen stable characters, full authored memory, distributed agency and persistent costs |
+| Source adaptation: screenplay | 2 | 400 | Retell one fixed authored episode, preserving events, uncertainty, witnesses, custody and counted expenditure |
+| Source adaptation: comic | 2 | 300 | The identical source and initial canon in drawable panels, with the same event constraints |
+| Interruption / recovery | 2 | 350 | Deliberately stop before scene 2 on attempt 1; resume that boundary and compare the approved scene and full memory prefix |
+
+Rebuild fixtures with `python -m scripts.build_harder_suite`. The adaptation
+source is a fixed author-owned fixture, not output from a different generated
+story and not an adaptation after its ending. These are live model tests;
+unit fixtures do not establish literary performance.
+
+Each incomplete case has at most one automatic checkpoint retry. The queue backs
+up drafts and full canon first. Automatic stage selection rebuilds the scene only
+when no compiled draft exists, retries memory when literary adjudication passed,
+and otherwise resumes editing. It waits for the new Actions attempt before
+advancing, never redispatches an uncertain POST, and downloads retry results into
+a fresh directory to prevent an old passing audit from being reused accidentally.
+Recovery cannot count as successful unless the previously approved text and
+memory prefix are unchanged. The interruption case also requires evidence that
+the deliberate interruption actually occurred.
+
+**Queue completion is separate from story approval.** This suite completes its
+assessment and preserves partial output even if a case still needs revision;
+`report.json` retains `all_passed: false` and `quality_status: needs_revision`.
+Child quality gates remain strict and may show a failed Actions attempt. A failed
+case does not stop independent cases, and unverified prose never becomes canon.
+Provider buffers remain enabled; no immediate local-model downgrade is introduced.
+The original `stress-suite` keeps its existing failure-on-unapproved semantics.
+
+Memory checking includes every source anchor for an owned multi-passage fact.
+Recovery extraction only receives findings intersecting its owned passages, so a
+radio-event correction cannot tell an unrelated ferry-dialogue batch to invent
+that event under the wrong source IDs.
