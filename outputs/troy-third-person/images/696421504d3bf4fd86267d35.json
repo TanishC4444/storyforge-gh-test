@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "id": "696421504d3bf4fd86267d35",
+  "title": "Thestor working bronze at the Achaean shore",
+  "kind": "scene",
+  "provider": "Vultr Serverless Inference",
+  "model": "moss-image",
+  "created_at": "2026-10-24T19:18:19.379756+00:00",
+  "status": "completed",
+  "request": {
+    "model": "moss-image",
+    "prompt": "Cinematic realism, wide cinematic frame of an ancient Aegean shore at cold dawn. Thestor, a weathered smith with coarse greasy hands and a leather apron over a coarse wool tunic, works bronze at a stone anvil beside the sea. A charcoal hearth burns with warm embers beside the anvil, casting warm light against the cool morning air. Two bronze braces for a steersman’s box lie across the anvil stone, a square reamer and worn bronze tools rest nearby. His hands are weathered, focused on the metal. Grounded ancient Aegean clothing, no ornament, practical and soot-stained. Behind him the shingle stretches to a beached merchant coaster; in soft focus Ithacan rowers drag casks of pickled tunny toward the ship. Pale sky, grey shingle, sea spray, muted palette with warm ember highlights. The quiet human cost of war suggested by the empty camp feel and a thin blanket-clad figure watching in the distance. No captions, no modern objects, no text.",
+    "size": "1024x576",
+    "n": 1,
+    "response_format": "b64_json",
+    "output_format": "png"
+  },
+  "images": [
+    {
+      "index": 0,
+      "file": "696421504d3bf4fd86267d35-0.png",
+      "width": 1024,
+      "height": 576,
+      "sha256": "eff4475bbba65016b745664321f94f54d1a211c25381da4ee2a88d38d12ba356",
+      "url": "/media/images/696421504d3bf4fd86267d35/0.png"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "total_tokens": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "input_tokens_details": {
+      "text_tokens": 0,
+      "image_tokens": 0
+    },
+    "cost": 0.01179648,
+    "megapixels": 0.589824
+  },
+  "completed_at": "2026-10-24T19:18:23.109545+00:00"
+}

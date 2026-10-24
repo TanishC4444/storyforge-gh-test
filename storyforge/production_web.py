@@ -18,6 +18,7 @@ from .production_exports import export, GoogleCalendar
 from .production_research import ProviderError
 from .soundtracks import context, discover_stories
 from .storage import load, save
+from . import image_studio
 
 
 class ProductionServer(ThreadingHTTPServer):
@@ -39,6 +40,23 @@ class ProductionServer(ThreadingHTTPServer):
             self.jobs[ident]={'status':'failed','message':str(exc)[:800]}
         except Exception:
             self.jobs[ident]={'status':'failed','message':'Planning failed unexpectedly; no external bookings or calendar writes were made.'}
+        finally:
+            with self.guard:self.busy=False
+
+    def image_work(self, ident, data, prepare=False):
+        try:
+            def progress(message): self.jobs[ident]={'status':'running','message':message}
+            if prepare:
+                progress('Muse Glimmer is preparing your visual prompt')
+                result=image_studio.prepare_prompt(self.folder,data,enhance=bool(data.get('enhance',True)))
+                self.jobs[ident]={'status':'complete','prompt_result':result}
+            else:
+                result=image_studio.generate(self.folder,data,progress)
+                self.jobs[ident]={'status':'complete','image_id':result['id']}
+        except (ValueError,OSError,KeyError,TypeError) as exc:
+            self.jobs[ident]={'status':'failed','message':str(exc)[:800]}
+        except Exception:
+            self.jobs[ident]={'status':'failed','message':'Image processing failed unexpectedly. Check the gallery before repeating a potentially billable request.'}
         finally:
             with self.guard:self.busy=False
 
@@ -70,6 +88,19 @@ class Handler(BaseHTTPRequestHandler):
             if path=='/':
                 page=Path(__file__).with_name('production_ui.html').read_text(encoding='utf-8-sig').replace('__CSRF__',self.server.csrf)
                 self.send(page.encode(),'text/html; charset=utf-8')
+            elif path=='/images':
+                page=Path(__file__).with_name('image_ui.html').read_text(encoding='utf-8-sig').replace('__CSRF__',self.server.csrf)
+                self.send(page.encode(),'text/html; charset=utf-8')
+            elif path=='/api/images/models':
+                self.send({'models':image_studio.CATALOG.list()})
+            elif path=='/api/images':
+                self.send({'images':image_studio.gallery(self.server.folder)})
+            elif re.fullmatch(r'/api/images/[a-f0-9]{24}',path):
+                self.send(image_studio.read_record(self.server.folder,path.split('/')[-1]))
+            elif re.fullmatch(r'/media/images/[a-f0-9]{24}/[0-3]\.png',path):
+                parts=path.split('/')
+                image=image_studio.image_file(self.server.folder,parts[3],int(parts[4].split('.')[0]))
+                self.send(image.read_bytes(),'image/png',filename=image.name if parse_qs(urlsplit(self.path).query).get('download') else None)
             elif path=='/api/config':
                 plans=sorted((self.server.folder/'production'/'plans').glob('*.json'),key=lambda p:p.stat().st_mtime,reverse=True)[:20]
                 self.send({'story':self.server.folder.name,'vultr':bool(os.getenv('VULTR_INFERENCE_API_KEY')),'search':bool(os.getenv('SERPAPI_API_KEY')),'google':bool(self.server.google.access or self.server.google.refresh),'google_oauth':bool(os.getenv('GOOGLE_CLIENT_ID') and os.getenv('GOOGLE_CLIENT_SECRET')),'redirect_uri':self.origin+'/google/callback','plans':[p.stem for p in plans]})
@@ -121,6 +152,17 @@ class Handler(BaseHTTPRequestHandler):
                 ident=secrets.token_hex(12);self.server.jobs[ident]={'status':'queued','message':'Preparing production plan'}
                 if len(self.server.jobs)>50:self.server.jobs.pop(next(iter(self.server.jobs)))
                 self.server.pool.submit(self.server.work,ident,data)
+                self.send({'job_id':ident},code=202)
+            elif path in ('/api/images/prepare','/api/images/generate'):
+                prepare=path.endswith('/prepare')
+                if prepare:image_studio.input_spec(data)
+                else:image_studio.generation_settings(data,image_studio.CATALOG.get(data.get('model')))
+                with self.server.guard:
+                    if self.server.busy:self.send({'error':'A generation job is already running; wait for it to finish'},code=409);return
+                    self.server.busy=True
+                ident=secrets.token_hex(12);self.server.jobs[ident]={'status':'queued','message':'Preparing image request'}
+                if len(self.server.jobs)>50:self.server.jobs.pop(next(iter(self.server.jobs)))
+                self.server.pool.submit(self.server.image_work,ident,data,prepare)
                 self.send({'job_id':ident},code=202)
             elif path=='/api/recalculate':
                 original=self.server.plan(data['id']);plan=json.loads(json.dumps(original))

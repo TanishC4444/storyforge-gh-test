@@ -344,3 +344,12 @@ allowances and ordered backup-key failover. Google Calendar supports file export
 and an explicit OAuth sync action; CSV/JSON exports support other tools.
 
 See [setup, limits and integration details](docs/PRODUCTION_PLANNING.md).
+
+## Image studio
+
+Open http://127.0.0.1:8766/images in the production app to generate characters,
+scenes, locations, props, storyboard frames and custom images through Vultr.
+Muse Glimmer can prepare an editable prompt from the story; the selected image
+model renders and saves the image. Vultr currently advertises MOSS-Image rather
+than a model named Muse Image. The gallery supports downloads, prompt reuse and a
+one-click handoff to location scouting. See [the image studio guide](docs/IMAGE_STUDIO.md).

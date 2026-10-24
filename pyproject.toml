@@ -21,4 +21,4 @@ storyforge-production = "storyforge.production_web:main"
 include = ["storyforge*"]
 [tool.setuptools.package-data]
 "storyforge.api" = ["demo_data/**/*"]
-storyforge = ["production_ui.html"]
+storyforge = ["production_ui.html", "image_ui.html"]
