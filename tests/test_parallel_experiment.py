@@ -57,7 +57,7 @@ class ParallelFlowTests(unittest.TestCase):
         req=example();req.update(chapters=1,scenes_per_chapter=2)
         req['execution_policy']={'experimental':True,'continue_with_warnings':True,'gate_repair_threshold':'blocking','writer_beats':beats,'fixture_needs_repair':force,'concurrency':{'api':2,'reviews':3,'repair':2,'writer':2}}
         req['performance']={'application_plan_binding':True,'application_prompt_binding':True,'compact_packets':True,'canon_index':True}
-        (root/'examples').mkdir();(root/'skills').symlink_to(ROOT/'skills',target_is_directory=True)
+        (root/'examples').mkdir();shutil.copytree(ROOT/'skills',root/'skills')
         save(root/'examples/fixture-parallel.json',req)
         def task(name,kind,state=None,extras=(),index=0,character=None):
             inputs=root/name/'inputs';inputs.mkdir(parents=True,exist_ok=True)

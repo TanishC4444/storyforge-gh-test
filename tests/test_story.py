@@ -99,6 +99,7 @@ class WorkflowTests(unittest.TestCase):
                 shutil.copy2(ROOT/'data'/name,Path(d)/'data'/name)
             with sqlite3.connect(Path(d)/'data/literary_rag.db') as db:
                 db.execute("UPDATE rag_documents SET content='stale' WHERE record_id=(SELECT min(record_id) FROM rag_documents)")
+            db.close()
             with self.assertRaisesRegex(ValueError,'stale'):
                 retrieve(req)
 

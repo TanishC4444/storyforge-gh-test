@@ -1,6 +1,7 @@
 """Inspectable literary retrieval: ranked mechanisms, source limits, and role-specific craft."""
 from __future__ import annotations
 import hashlib
+from contextlib import closing
 import json
 from pathlib import Path
 import re
@@ -55,12 +56,12 @@ def guide_chunks(text):
 
 def retrieve(req):
     corpus=ROOT/'data/literary-corpus.json'
-    records=json.loads(corpus.read_text())['records']
+    records=json.loads(corpus.read_text(encoding='utf-8'))['records']
     source={r['id']:r for r in records}
     enabled={r['id']:r for r in records if r.get('retrieval',{}).get('enabled',True)}
     from rag.documents import document_text
     path=ROOT/'data/literary_rag.db'
-    with sqlite3.connect(f'{path.as_uri()}?mode=ro',uri=True) as db:
+    with closing(sqlite3.connect(f'{path.as_uri()}?mode=ro',uri=True)) as db:
         versions={r[0] for r in db.execute('select distinct embedding_model from rag_documents')}
         if versions!={INDEX_VERSION}:raise ValueError('Index encoder version mismatch; rebuild before searching.')
         indexed=dict(db.execute('select record_id,content from rag_documents'))
@@ -68,7 +69,7 @@ def retrieve(req):
     facets=queries(req);scores={};hits={}
     explicit_weights=req.get('retrieval_weights')
     weights=explicit_weights or {'semantic_similarity':.6,'keyword_match':.15,'narrative_mechanism_match':.25}
-    with sqlite3.connect(':memory:') as lexical:
+    with closing(sqlite3.connect(':memory:')) as lexical:
         lexical.row_factory=sqlite3.Row
         lexical.execute("create virtual table documents using fts5(record_id UNINDEXED, content, tokenize='porter unicode61')")
         lexical.executemany('insert into documents values (?,?)',[(rid,document_text(r)) for rid,r in enabled.items()])
@@ -115,7 +116,7 @@ def retrieve(req):
                          'guidance':record.get('prompt_refinement'),'limits':record.get('references',{}).get('version_notes') or record.get('notes'),
                          'retrieval_hits':hits.get(rid,[]),'requested_scopes':refs,'selection':'explicit_reference' if refs else 'ranked_match'})
         if len(selected)>=max(3,min(6,len(requested)+2)):break
-    chunks=guide_chunks((ROOT/'data/MASTER_GUIDE.md').read_text())
+    chunks=guide_chunks((ROOT/'data/MASTER_GUIDE.md').read_text(encoding='utf-8'))
     craft={}
     all_terms=set(terms(' '.join(q['text'] for q in facets)))
     preferred={'humanizer':[19,20],'rhetoric_quality':[19,20],'writer':[9,20],'story_quality':[3,5],'scene_designer':[9,26],'architect':[8,9],'refiner':[2,5]}

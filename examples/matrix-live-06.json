@@ -1,0 +1,1366 @@
+{
+  "min_words_ratio": 0.8,
+  "max_words_ratio": 1.3,
+  "auto_approve_plan": true,
+  "max_repairs": 1,
+  "max_stage_retries": 0,
+  "runner_repo": "storyforge-inference-runner",
+  "length_policy": {
+    "scene_words": "strict",
+    "chapter_words": "target",
+    "allow_compression": false
+  },
+  "project_id": "matrix-live-06",
+  "title": "matrix-live-06",
+  "brief_version": 2,
+  "medium": "book",
+  "chapters": 2,
+  "scenes_per_chapter": 1,
+  "words_per_scene": 1600,
+  "context_chars": 64000,
+  "n_ctx": 16384,
+  "profile": "expressive",
+  "retrieval_mode": "keyword",
+  "retrieval_query": "horror choices duty trust consequence",
+  "genre": "horror",
+  "reader_experience": "A consequential choice under growing pressure.",
+  "pov": "Third person, past tense. One focal character per scene.",
+  "tone_mood": "Specific and restrained; earn emotion through choices.",
+  "sensory_detail": "Use details appropriate to the chosen genre and location.",
+  "ending_tendency": "Resolve the immediate decision; preserve its costs.",
+  "premise": "An original horror book: a keeper must decide whether to open a storm-damaged refuge. Each scene changes the available options; preserve costs and private knowledge.",
+  "keywords": [
+    {
+      "term": "horror",
+      "kind": "theme",
+      "priority": 3
+    }
+  ],
+  "reference_policy": "Original story; no pinned adaptation.",
+  "references": [],
+  "adaptation": {
+    "strength": 0,
+    "mode": "mechanisms",
+    "max_active_sources_per_scene": 0,
+    "preserve_user_choices": true
+  },
+  "style": {
+    "figurative_language": {
+      "density": "sparse",
+      "devices": [
+        "metaphor"
+      ],
+      "image_domains": [
+        "weather"
+      ]
+    },
+    "interiority": "selective",
+    "dialogue": "character specific"
+  },
+  "characters": [
+    {
+      "id": "person00",
+      "name": "Keeper 0",
+      "goal": "Protect obligation 0",
+      "value": "values competent work",
+      "fear": "fears becoming useful enough to enslave",
+      "habitual_strategy": "Make a concrete offer tied to smith work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "Precise practical language; recurring concern 0.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "secure passage for his household",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values competent work but fears becoming useful enough to enslave"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    },
+    {
+      "id": "person01",
+      "name": "Keeper 1",
+      "goal": "Protect obligation 1",
+      "value": "values competent work",
+      "fear": "fears becoming useful enough to enslave",
+      "habitual_strategy": "Make a concrete offer tied to smith work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "Precise practical language; recurring concern 1.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "secure passage for his household",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values competent work but fears becoming useful enough to enslave"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    },
+    {
+      "id": "person02",
+      "name": "Keeper 2",
+      "goal": "Protect obligation 2",
+      "value": "values competent work",
+      "fear": "fears becoming useful enough to enslave",
+      "habitual_strategy": "Make a concrete offer tied to smith work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "Precise practical language; recurring concern 2.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "secure passage for his household",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values competent work but fears becoming useful enough to enslave"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    },
+    {
+      "id": "person03",
+      "name": "Keeper 3",
+      "goal": "Protect obligation 3",
+      "value": "values competent work",
+      "fear": "fears becoming useful enough to enslave",
+      "habitual_strategy": "Make a concrete offer tied to smith work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "Precise practical language; recurring concern 3.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "secure passage for his household",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values competent work but fears becoming useful enough to enslave"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    },
+    {
+      "id": "person04",
+      "name": "Keeper 4",
+      "goal": "Protect obligation 4",
+      "value": "values competent work",
+      "fear": "fears becoming useful enough to enslave",
+      "habitual_strategy": "Make a concrete offer tied to smith work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "Precise practical language; recurring concern 4.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "secure passage for his household",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values competent work but fears becoming useful enough to enslave"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    },
+    {
+      "id": "person05",
+      "name": "Keeper 5",
+      "goal": "Protect obligation 5",
+      "value": "values competent work",
+      "fear": "fears becoming useful enough to enslave",
+      "habitual_strategy": "Make a concrete offer tied to smith work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "Precise practical language; recurring concern 5.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "secure passage for his household",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values competent work but fears becoming useful enough to enslave"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    },
+    {
+      "id": "person06",
+      "name": "Keeper 6",
+      "goal": "Protect obligation 6",
+      "value": "values competent work",
+      "fear": "fears becoming useful enough to enslave",
+      "habitual_strategy": "Make a concrete offer tied to smith work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "Precise practical language; recurring concern 6.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "secure passage for his household",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values competent work but fears becoming useful enough to enslave"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    },
+    {
+      "id": "person07",
+      "name": "Keeper 7",
+      "goal": "Protect obligation 7",
+      "value": "values competent work",
+      "fear": "fears becoming useful enough to enslave",
+      "habitual_strategy": "Make a concrete offer tied to smith work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "Precise practical language; recurring concern 7.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "secure passage for his household",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values competent work but fears becoming useful enough to enslave"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    }
+  ],
+  "world_rules": [
+    "Refuge section 0 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 1 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 2 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 3 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 4 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 5 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 6 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 7 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 8 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 9 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 10 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 11 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 12 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 13 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 14 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 15 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 16 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 17 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 18 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 19 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 20 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 21 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 22 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 23 can be opened only by physical work, never by a convenient unexplained rescue."
+  ],
+  "world_design": {
+    "technology": "Manual gates and lamps",
+    "institutions": "A refuge with contested access",
+    "physical_systems": "Storm damage limits access",
+    "deadlines": "The next tide"
+  },
+  "plot_design": {
+    "central_question": "What will the keeper risk to admit a stranger?",
+    "causal_dependencies": [
+      "Each decision reduces the remaining time."
+    ],
+    "subplots": [
+      {
+        "id": "trust",
+        "owner": "person00",
+        "question": "Can duty coexist with trust?",
+        "intersection": "The gate decision",
+        "removal_cost": "Lose personal stakes"
+      }
+    ],
+    "alternatives_and_costs": [
+      "Keep the gate shut and abandon someone outside."
+    ]
+  },
+  "scene_designs": [
+    {
+      "id": "ch01-sc01",
+      "pov": "person00",
+      "participants": [
+        "person00",
+        "person01",
+        "person02",
+        "person03",
+        "person04",
+        "person05",
+        "person06",
+        "person07"
+      ],
+      "location": "Refuge gate 1",
+      "setting": "A crowded refuge during a damaging storm.",
+      "time": "Today, interval 1",
+      "dramatic_function": "Make the next distinct decision at gate 1.",
+      "development": "An observable bargain changes access and creates a cost.",
+      "restrictions": "No reuse of spent resources; do not share private information without witnessing it.",
+      "choice_and_consequence": "The keeper risks obligation 0; one gate opens and another option closes."
+    },
+    {
+      "id": "ch02-sc01",
+      "pov": "person01",
+      "participants": [
+        "person01",
+        "person02",
+        "person03",
+        "person04",
+        "person05",
+        "person06",
+        "person07",
+        "person00"
+      ],
+      "location": "Refuge gate 2",
+      "setting": "A crowded refuge during a damaging storm.",
+      "time": "Yesterday, a witnessed cause",
+      "dramatic_function": "Make the next distinct decision at gate 2.",
+      "development": "An observable bargain changes access and creates a cost.",
+      "restrictions": "No reuse of spent resources; do not share private information without witnessing it.",
+      "choice_and_consequence": "The keeper risks obligation 1; one gate opens and another option closes."
+    }
+  ],
+  "must_avoid": [
+    "Unmotivated rescue",
+    "Private knowledge leaking to other characters"
+  ],
+  "initial_facts": [
+    {
+      "kind": "event",
+      "text": "Keeper 0 holds private obligation 0.",
+      "known_by": [
+        "person00"
+      ],
+      "fact_key": "obligation:0"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 1 holds private obligation 1.",
+      "known_by": [
+        "person01"
+      ],
+      "fact_key": "obligation:1"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 2 holds private obligation 2.",
+      "known_by": [
+        "person02"
+      ],
+      "fact_key": "obligation:2"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 3 holds private obligation 3.",
+      "known_by": [
+        "person03"
+      ],
+      "fact_key": "obligation:3"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 4 holds private obligation 4.",
+      "known_by": [
+        "person04"
+      ],
+      "fact_key": "obligation:4"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 5 holds private obligation 5.",
+      "known_by": [
+        "person05"
+      ],
+      "fact_key": "obligation:5"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 6 holds private obligation 6.",
+      "known_by": [
+        "person06"
+      ],
+      "fact_key": "obligation:6"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 7 holds private obligation 7.",
+      "known_by": [
+        "person07"
+      ],
+      "fact_key": "obligation:7"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 0 holds private obligation 8.",
+      "known_by": [
+        "person00"
+      ],
+      "fact_key": "obligation:8"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 1 holds private obligation 9.",
+      "known_by": [
+        "person01"
+      ],
+      "fact_key": "obligation:9"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 2 holds private obligation 10.",
+      "known_by": [
+        "person02"
+      ],
+      "fact_key": "obligation:10"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 3 holds private obligation 11.",
+      "known_by": [
+        "person03"
+      ],
+      "fact_key": "obligation:11"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 4 holds private obligation 12.",
+      "known_by": [
+        "person04"
+      ],
+      "fact_key": "obligation:12"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 5 holds private obligation 13.",
+      "known_by": [
+        "person05"
+      ],
+      "fact_key": "obligation:13"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 6 holds private obligation 14.",
+      "known_by": [
+        "person06"
+      ],
+      "fact_key": "obligation:14"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 7 holds private obligation 15.",
+      "known_by": [
+        "person07"
+      ],
+      "fact_key": "obligation:15"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 0 holds private obligation 16.",
+      "known_by": [
+        "person00"
+      ],
+      "fact_key": "obligation:16"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 1 holds private obligation 17.",
+      "known_by": [
+        "person01"
+      ],
+      "fact_key": "obligation:17"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 2 holds private obligation 18.",
+      "known_by": [
+        "person02"
+      ],
+      "fact_key": "obligation:18"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 3 holds private obligation 19.",
+      "known_by": [
+        "person03"
+      ],
+      "fact_key": "obligation:19"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 4 holds private obligation 20.",
+      "known_by": [
+        "person04"
+      ],
+      "fact_key": "obligation:20"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 5 holds private obligation 21.",
+      "known_by": [
+        "person05"
+      ],
+      "fact_key": "obligation:21"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 6 holds private obligation 22.",
+      "known_by": [
+        "person06"
+      ],
+      "fact_key": "obligation:22"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 7 holds private obligation 23.",
+      "known_by": [
+        "person07"
+      ],
+      "fact_key": "obligation:23"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 0 holds private obligation 24.",
+      "known_by": [
+        "person00"
+      ],
+      "fact_key": "obligation:24"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 1 holds private obligation 25.",
+      "known_by": [
+        "person01"
+      ],
+      "fact_key": "obligation:25"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 2 holds private obligation 26.",
+      "known_by": [
+        "person02"
+      ],
+      "fact_key": "obligation:26"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 3 holds private obligation 27.",
+      "known_by": [
+        "person03"
+      ],
+      "fact_key": "obligation:27"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 4 holds private obligation 28.",
+      "known_by": [
+        "person04"
+      ],
+      "fact_key": "obligation:28"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 5 holds private obligation 29.",
+      "known_by": [
+        "person05"
+      ],
+      "fact_key": "obligation:29"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 6 holds private obligation 30.",
+      "known_by": [
+        "person06"
+      ],
+      "fact_key": "obligation:30"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 7 holds private obligation 31.",
+      "known_by": [
+        "person07"
+      ],
+      "fact_key": "obligation:31"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 0 holds private obligation 32.",
+      "known_by": [
+        "person00"
+      ],
+      "fact_key": "obligation:32"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 1 holds private obligation 33.",
+      "known_by": [
+        "person01"
+      ],
+      "fact_key": "obligation:33"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 2 holds private obligation 34.",
+      "known_by": [
+        "person02"
+      ],
+      "fact_key": "obligation:34"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 3 holds private obligation 35.",
+      "known_by": [
+        "person03"
+      ],
+      "fact_key": "obligation:35"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 4 holds private obligation 36.",
+      "known_by": [
+        "person04"
+      ],
+      "fact_key": "obligation:36"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 5 holds private obligation 37.",
+      "known_by": [
+        "person05"
+      ],
+      "fact_key": "obligation:37"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 6 holds private obligation 38.",
+      "known_by": [
+        "person06"
+      ],
+      "fact_key": "obligation:38"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 7 holds private obligation 39.",
+      "known_by": [
+        "person07"
+      ],
+      "fact_key": "obligation:39"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 0 holds private obligation 40.",
+      "known_by": [
+        "person00"
+      ],
+      "fact_key": "obligation:40"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 1 holds private obligation 41.",
+      "known_by": [
+        "person01"
+      ],
+      "fact_key": "obligation:41"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 2 holds private obligation 42.",
+      "known_by": [
+        "person02"
+      ],
+      "fact_key": "obligation:42"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 3 holds private obligation 43.",
+      "known_by": [
+        "person03"
+      ],
+      "fact_key": "obligation:43"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 4 holds private obligation 44.",
+      "known_by": [
+        "person04"
+      ],
+      "fact_key": "obligation:44"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 5 holds private obligation 45.",
+      "known_by": [
+        "person05"
+      ],
+      "fact_key": "obligation:45"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 6 holds private obligation 46.",
+      "known_by": [
+        "person06"
+      ],
+      "fact_key": "obligation:46"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 7 holds private obligation 47.",
+      "known_by": [
+        "person07"
+      ],
+      "fact_key": "obligation:47"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 0 holds private obligation 48.",
+      "known_by": [
+        "person00"
+      ],
+      "fact_key": "obligation:48"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 1 holds private obligation 49.",
+      "known_by": [
+        "person01"
+      ],
+      "fact_key": "obligation:49"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 2 holds private obligation 50.",
+      "known_by": [
+        "person02"
+      ],
+      "fact_key": "obligation:50"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 3 holds private obligation 51.",
+      "known_by": [
+        "person03"
+      ],
+      "fact_key": "obligation:51"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 4 holds private obligation 52.",
+      "known_by": [
+        "person04"
+      ],
+      "fact_key": "obligation:52"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 5 holds private obligation 53.",
+      "known_by": [
+        "person05"
+      ],
+      "fact_key": "obligation:53"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 6 holds private obligation 54.",
+      "known_by": [
+        "person06"
+      ],
+      "fact_key": "obligation:54"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 7 holds private obligation 55.",
+      "known_by": [
+        "person07"
+      ],
+      "fact_key": "obligation:55"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 0 holds private obligation 56.",
+      "known_by": [
+        "person00"
+      ],
+      "fact_key": "obligation:56"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 1 holds private obligation 57.",
+      "known_by": [
+        "person01"
+      ],
+      "fact_key": "obligation:57"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 2 holds private obligation 58.",
+      "known_by": [
+        "person02"
+      ],
+      "fact_key": "obligation:58"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 3 holds private obligation 59.",
+      "known_by": [
+        "person03"
+      ],
+      "fact_key": "obligation:59"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 4 holds private obligation 60.",
+      "known_by": [
+        "person04"
+      ],
+      "fact_key": "obligation:60"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 5 holds private obligation 61.",
+      "known_by": [
+        "person05"
+      ],
+      "fact_key": "obligation:61"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 6 holds private obligation 62.",
+      "known_by": [
+        "person06"
+      ],
+      "fact_key": "obligation:62"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 7 holds private obligation 63.",
+      "known_by": [
+        "person07"
+      ],
+      "fact_key": "obligation:63"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 0 holds private obligation 64.",
+      "known_by": [
+        "person00"
+      ],
+      "fact_key": "obligation:64"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 1 holds private obligation 65.",
+      "known_by": [
+        "person01"
+      ],
+      "fact_key": "obligation:65"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 2 holds private obligation 66.",
+      "known_by": [
+        "person02"
+      ],
+      "fact_key": "obligation:66"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 3 holds private obligation 67.",
+      "known_by": [
+        "person03"
+      ],
+      "fact_key": "obligation:67"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 4 holds private obligation 68.",
+      "known_by": [
+        "person04"
+      ],
+      "fact_key": "obligation:68"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 5 holds private obligation 69.",
+      "known_by": [
+        "person05"
+      ],
+      "fact_key": "obligation:69"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 6 holds private obligation 70.",
+      "known_by": [
+        "person06"
+      ],
+      "fact_key": "obligation:70"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 7 holds private obligation 71.",
+      "known_by": [
+        "person07"
+      ],
+      "fact_key": "obligation:71"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 0 holds private obligation 72.",
+      "known_by": [
+        "person00"
+      ],
+      "fact_key": "obligation:72"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 1 holds private obligation 73.",
+      "known_by": [
+        "person01"
+      ],
+      "fact_key": "obligation:73"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 2 holds private obligation 74.",
+      "known_by": [
+        "person02"
+      ],
+      "fact_key": "obligation:74"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 3 holds private obligation 75.",
+      "known_by": [
+        "person03"
+      ],
+      "fact_key": "obligation:75"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 4 holds private obligation 76.",
+      "known_by": [
+        "person04"
+      ],
+      "fact_key": "obligation:76"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 5 holds private obligation 77.",
+      "known_by": [
+        "person05"
+      ],
+      "fact_key": "obligation:77"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 6 holds private obligation 78.",
+      "known_by": [
+        "person06"
+      ],
+      "fact_key": "obligation:78"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 7 holds private obligation 79.",
+      "known_by": [
+        "person07"
+      ],
+      "fact_key": "obligation:79"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 0 holds private obligation 80.",
+      "known_by": [
+        "person00"
+      ],
+      "fact_key": "obligation:80"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 1 holds private obligation 81.",
+      "known_by": [
+        "person01"
+      ],
+      "fact_key": "obligation:81"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 2 holds private obligation 82.",
+      "known_by": [
+        "person02"
+      ],
+      "fact_key": "obligation:82"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 3 holds private obligation 83.",
+      "known_by": [
+        "person03"
+      ],
+      "fact_key": "obligation:83"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 4 holds private obligation 84.",
+      "known_by": [
+        "person04"
+      ],
+      "fact_key": "obligation:84"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 5 holds private obligation 85.",
+      "known_by": [
+        "person05"
+      ],
+      "fact_key": "obligation:85"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 6 holds private obligation 86.",
+      "known_by": [
+        "person06"
+      ],
+      "fact_key": "obligation:86"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 7 holds private obligation 87.",
+      "known_by": [
+        "person07"
+      ],
+      "fact_key": "obligation:87"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 0 holds private obligation 88.",
+      "known_by": [
+        "person00"
+      ],
+      "fact_key": "obligation:88"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 1 holds private obligation 89.",
+      "known_by": [
+        "person01"
+      ],
+      "fact_key": "obligation:89"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 2 holds private obligation 90.",
+      "known_by": [
+        "person02"
+      ],
+      "fact_key": "obligation:90"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 3 holds private obligation 91.",
+      "known_by": [
+        "person03"
+      ],
+      "fact_key": "obligation:91"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 4 holds private obligation 92.",
+      "known_by": [
+        "person04"
+      ],
+      "fact_key": "obligation:92"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 5 holds private obligation 93.",
+      "known_by": [
+        "person05"
+      ],
+      "fact_key": "obligation:93"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 6 holds private obligation 94.",
+      "known_by": [
+        "person06"
+      ],
+      "fact_key": "obligation:94"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 7 holds private obligation 95.",
+      "known_by": [
+        "person07"
+      ],
+      "fact_key": "obligation:95"
+    }
+  ],
+  "execution_intent": {
+    "authorized": "User requested two substantial scenes with a larger cast and complete memory; merge fixes and launch without confirmation.",
+    "workflow": "Full separate-runner pipeline with bounded provider failover and unchanged literary and factual approval gates."
+  },
+  "execution_policy": {
+    "experimental": false,
+    "literary_quality": true,
+    "continue_with_warnings": false,
+    "cpu_models": {
+      "humanizer": "qwen7b",
+      "repair": "qwen7b",
+      "story_quality": "qwen7b",
+      "rhetoric_quality": "qwen7b",
+      "memory": "qwen7b",
+      "memory_quality": "qwen7b",
+      "chapter_quality": "qwen7b",
+      "director": "qwen7b",
+      "scene_designer": "qwen7b",
+      "character": "qwen7b",
+      "writer": "qwen7b",
+      "writer_beat": "qwen7b"
+    },
+    "editorial_disagreement": "one_strict_check",
+    "gemini_batches": true,
+    "total_call_seconds": {
+      "humanizer": 180,
+      "repair": 180,
+      "story_quality": 120,
+      "rhetoric_quality": 120,
+      "memory": 180,
+      "memory_quality": 120,
+      "chapter_quality": 120,
+      "director": 120,
+      "scene_designer": 120,
+      "character": 120,
+      "writer": 180,
+      "writer_beat": 180
+    },
+    "hosted_route_seconds": 40,
+    "hosted_required_roles": [
+      "writer_beat",
+      "writer",
+      "repair",
+      "humanizer",
+      "story_quality",
+      "rhetoric_quality",
+      "memory",
+      "memory_quality",
+      "chapter_quality",
+      "scene_designer",
+      "director",
+      "character"
+    ],
+    "hosted_routes": {
+      "story_quality": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "rhetoric_quality": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "chapter_quality": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "writer": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "writer_beat": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "repair": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "humanizer": [
+        "flash",
+        "flash36",
+        "lite"
+      ],
+      "memory": [
+        "lite"
+      ],
+      "memory_quality": [
+        "lite"
+      ],
+      "director": [
+        "lite"
+      ],
+      "scene_designer": [
+        "lite"
+      ],
+      "character": [
+        "lite"
+      ]
+    },
+    "max_hosted_requests": 3,
+    "hosted_role_seconds": {
+      "writer": 90,
+      "writer_beat": 90,
+      "repair": 60,
+      "humanizer": 90,
+      "story_quality": 60,
+      "rhetoric_quality": 60,
+      "chapter_quality": 60
+    },
+    "provider_outage_recovery": {
+      "max_rounds": 3,
+      "delay_seconds": 45,
+      "buffer_seconds": 360,
+      "extra_requests": 6
+    }
+  },
+  "performance": {
+    "compact_packets": true,
+    "application_prompt_binding": true,
+    "hosted_failover": false,
+    "batch_development": true,
+    "canon_index": true,
+    "inherit_provider_budget": false,
+    "application_plan_binding": true,
+    "development_batch_size": 6,
+    "api_batch_probes": false,
+    "working_memory_chars": 3500,
+    "combine_direction": true,
+    "classic_expansion": true,
+    "validate_scene_prose": true,
+    "batched_prose": true,
+    "batched_repairs": true,
+    "living_universe": true,
+    "readable_editorial": true,
+    "summary_reviews": false,
+    "memory_pair_batches": true,
+    "empowered_editors": true,
+    "adaptive_batches": true,
+    "verified_draft_continuity": true,
+    "living_bounded": true,
+    "pipelined_living": true,
+    "strict_draft_handoff": true
+  },
+  "api_roles": {
+    "writer_beat": "flash",
+    "writer": "flash",
+    "repair": "flash36",
+    "humanizer": "flash36",
+    "story_quality": "flash36",
+    "rhetoric_quality": "flash36",
+    "memory": "lite",
+    "memory_quality": "lite",
+    "chapter_quality": "flash36",
+    "scene_designer": "lite",
+    "director": "lite",
+    "character": "lite"
+  },
+  "quality_contract": [],
+  "chapter_arcs": [],
+  "universe_id": "matrix-live-06",
+  "creative_freedom": {
+    "enabled": true,
+    "new_characters": false,
+    "character_deaths": false,
+    "protected_characters": [
+      "person00",
+      "person01",
+      "person02",
+      "person03",
+      "person04",
+      "person05",
+      "person06",
+      "person07"
+    ],
+    "max_new_per_scene": 0,
+    "cast_limit": 32
+  },
+  "medium_decision": {
+    "method": "explicit_medium",
+    "selected": "book",
+    "model_calls": 0
+  }
+}

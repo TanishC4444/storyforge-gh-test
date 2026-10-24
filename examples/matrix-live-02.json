@@ -1,0 +1,506 @@
+{
+  "min_words_ratio": 0.8,
+  "max_words_ratio": 1.3,
+  "auto_approve_plan": true,
+  "max_repairs": 1,
+  "max_stage_retries": 0,
+  "runner_repo": "storyforge-inference-runner",
+  "length_policy": {
+    "scene_words": "strict",
+    "chapter_words": "target",
+    "allow_compression": false
+  },
+  "project_id": "matrix-live-02",
+  "title": "matrix-live-02",
+  "brief_version": 2,
+  "medium": "screenplay",
+  "chapters": 2,
+  "scenes_per_chapter": 1,
+  "words_per_scene": 350,
+  "context_chars": 64000,
+  "n_ctx": 16384,
+  "profile": "expressive",
+  "retrieval_mode": "keyword",
+  "retrieval_query": "fantasy choices duty trust consequence",
+  "genre": "fantasy",
+  "reader_experience": "A consequential choice under growing pressure.",
+  "pov": "Third person, past tense. One focal character per scene.",
+  "tone_mood": "Specific and restrained; earn emotion through choices.",
+  "sensory_detail": "Use details appropriate to the chosen genre and location.",
+  "ending_tendency": "Resolve the immediate decision; preserve its costs.",
+  "premise": "An original fantasy screenplay: a keeper must decide whether to open a storm-damaged refuge. Each scene changes the available options; preserve costs and private knowledge.",
+  "keywords": [
+    {
+      "term": "fantasy",
+      "kind": "theme",
+      "priority": 3
+    }
+  ],
+  "reference_policy": "Original story; no pinned adaptation.",
+  "references": [],
+  "adaptation": {
+    "strength": 0,
+    "mode": "mechanisms",
+    "max_active_sources_per_scene": 0,
+    "preserve_user_choices": true
+  },
+  "style": {
+    "figurative_language": {
+      "density": "sparse",
+      "devices": [
+        "metaphor"
+      ],
+      "image_domains": [
+        "weather"
+      ]
+    },
+    "interiority": "selective",
+    "dialogue": "character specific"
+  },
+  "characters": [
+    {
+      "id": "person00",
+      "name": "Keeper 0",
+      "goal": "Protect obligation 0",
+      "value": "values competent work",
+      "fear": "fears becoming useful enough to enslave",
+      "habitual_strategy": "Make a concrete offer tied to smith work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "Precise practical language; recurring concern 0.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "secure passage for his household",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values competent work but fears becoming useful enough to enslave"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    },
+    {
+      "id": "person01",
+      "name": "Keeper 1",
+      "goal": "Protect obligation 1",
+      "value": "values competent work",
+      "fear": "fears becoming useful enough to enslave",
+      "habitual_strategy": "Make a concrete offer tied to smith work.",
+      "limits": "Cannot know unwitnessed events or override material costs.",
+      "voice": "Precise practical language; recurring concern 1.",
+      "arc": {
+        "starting_belief": "A kept obligation makes survival possible.",
+        "old_strategy": "Protect the familiar work first.",
+        "pressure_test": "secure passage for his household",
+        "costly_choice": "Risk a valued tool or standing to make a promise binding.",
+        "possible_change": "Accept a specific reciprocal duty rather than a vague assurance."
+      },
+      "contradiction": {
+        "tension": "values competent work but fears becoming useful enough to enslave"
+      },
+      "emotional_behavior": {
+        "pressure": "Attention fixes on the specific tool or person at risk."
+      },
+      "voice_design": {
+        "register": "Ancient, concrete and restrained.",
+        "examples": [
+          "The measure must be witnessed.",
+          "The tool passes only with its burden."
+        ]
+      },
+      "source_status": "original author cast"
+    }
+  ],
+  "world_rules": [
+    "Refuge section 0 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 1 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 2 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 3 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 4 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 5 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 6 can be opened only by physical work, never by a convenient unexplained rescue.",
+    "Refuge section 7 can be opened only by physical work, never by a convenient unexplained rescue."
+  ],
+  "world_design": {
+    "technology": "Manual gates and lamps",
+    "institutions": "A refuge with contested access",
+    "physical_systems": "Storm damage limits access",
+    "deadlines": "The next tide"
+  },
+  "plot_design": {
+    "central_question": "What will the keeper risk to admit a stranger?",
+    "causal_dependencies": [
+      "Each decision reduces the remaining time."
+    ],
+    "subplots": [
+      {
+        "id": "trust",
+        "owner": "person00",
+        "question": "Can duty coexist with trust?",
+        "intersection": "The gate decision",
+        "removal_cost": "Lose personal stakes"
+      }
+    ],
+    "alternatives_and_costs": [
+      "Keep the gate shut and abandon someone outside."
+    ]
+  },
+  "scene_designs": [
+    {
+      "id": "ch01-sc01",
+      "pov": "person00",
+      "participants": [
+        "person00",
+        "person01"
+      ],
+      "location": "Refuge gate 1",
+      "setting": "A crowded refuge during a damaging storm.",
+      "time": "Today, interval 1",
+      "dramatic_function": "Make the next distinct decision at gate 1.",
+      "development": "An observable bargain changes access and creates a cost.",
+      "restrictions": "No reuse of spent resources; do not share private information without witnessing it.",
+      "choice_and_consequence": "The keeper risks obligation 0; one gate opens and another option closes."
+    },
+    {
+      "id": "ch02-sc01",
+      "pov": "person01",
+      "participants": [
+        "person01",
+        "person00"
+      ],
+      "location": "Refuge gate 2",
+      "setting": "A crowded refuge during a damaging storm.",
+      "time": "Today, interval 2",
+      "dramatic_function": "Make the next distinct decision at gate 2.",
+      "development": "An observable bargain changes access and creates a cost.",
+      "restrictions": "No reuse of spent resources; do not share private information without witnessing it.",
+      "choice_and_consequence": "The keeper risks obligation 1; one gate opens and another option closes."
+    }
+  ],
+  "must_avoid": [
+    "Unmotivated rescue",
+    "Private knowledge leaking to other characters"
+  ],
+  "initial_facts": [
+    {
+      "kind": "event",
+      "text": "Keeper 0 holds private obligation 0.",
+      "known_by": [
+        "person00"
+      ],
+      "fact_key": "obligation:0"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 1 holds private obligation 1.",
+      "known_by": [
+        "person01"
+      ],
+      "fact_key": "obligation:1"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 0 holds private obligation 2.",
+      "known_by": [
+        "person00"
+      ],
+      "fact_key": "obligation:2"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 1 holds private obligation 3.",
+      "known_by": [
+        "person01"
+      ],
+      "fact_key": "obligation:3"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 0 holds private obligation 4.",
+      "known_by": [
+        "person00"
+      ],
+      "fact_key": "obligation:4"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 1 holds private obligation 5.",
+      "known_by": [
+        "person01"
+      ],
+      "fact_key": "obligation:5"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 0 holds private obligation 6.",
+      "known_by": [
+        "person00"
+      ],
+      "fact_key": "obligation:6"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 1 holds private obligation 7.",
+      "known_by": [
+        "person01"
+      ],
+      "fact_key": "obligation:7"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 0 holds private obligation 8.",
+      "known_by": [
+        "person00"
+      ],
+      "fact_key": "obligation:8"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 1 holds private obligation 9.",
+      "known_by": [
+        "person01"
+      ],
+      "fact_key": "obligation:9"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 0 holds private obligation 10.",
+      "known_by": [
+        "person00"
+      ],
+      "fact_key": "obligation:10"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 1 holds private obligation 11.",
+      "known_by": [
+        "person01"
+      ],
+      "fact_key": "obligation:11"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 0 holds private obligation 12.",
+      "known_by": [
+        "person00"
+      ],
+      "fact_key": "obligation:12"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 1 holds private obligation 13.",
+      "known_by": [
+        "person01"
+      ],
+      "fact_key": "obligation:13"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 0 holds private obligation 14.",
+      "known_by": [
+        "person00"
+      ],
+      "fact_key": "obligation:14"
+    },
+    {
+      "kind": "event",
+      "text": "Keeper 1 holds private obligation 15.",
+      "known_by": [
+        "person01"
+      ],
+      "fact_key": "obligation:15"
+    }
+  ],
+  "execution_intent": {
+    "authorized": "User requested two substantial scenes with a larger cast and complete memory; merge fixes and launch without confirmation.",
+    "workflow": "Full separate-runner pipeline with bounded provider failover and unchanged literary and factual approval gates."
+  },
+  "execution_policy": {
+    "experimental": false,
+    "literary_quality": true,
+    "continue_with_warnings": false,
+    "cpu_models": {
+      "humanizer": "qwen7b",
+      "repair": "qwen7b",
+      "story_quality": "qwen7b",
+      "rhetoric_quality": "qwen7b",
+      "memory": "qwen7b",
+      "memory_quality": "qwen7b",
+      "chapter_quality": "qwen7b",
+      "director": "qwen7b",
+      "scene_designer": "qwen7b",
+      "character": "qwen7b",
+      "writer": "qwen7b",
+      "writer_beat": "qwen7b"
+    },
+    "editorial_disagreement": "one_strict_check",
+    "gemini_batches": true,
+    "total_call_seconds": {
+      "humanizer": 180,
+      "repair": 180,
+      "story_quality": 120,
+      "rhetoric_quality": 120,
+      "memory": 180,
+      "memory_quality": 120,
+      "chapter_quality": 120,
+      "director": 120,
+      "scene_designer": 120,
+      "character": 120,
+      "writer": 180,
+      "writer_beat": 180
+    },
+    "hosted_route_seconds": 40,
+    "hosted_required_roles": [
+      "writer_beat",
+      "writer",
+      "repair",
+      "humanizer",
+      "story_quality",
+      "rhetoric_quality",
+      "memory",
+      "memory_quality",
+      "chapter_quality",
+      "scene_designer",
+      "director",
+      "character"
+    ],
+    "hosted_routes": {
+      "story_quality": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "rhetoric_quality": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "chapter_quality": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "writer": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "writer_beat": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "repair": [
+        "flash36",
+        "flash",
+        "lite"
+      ],
+      "humanizer": [
+        "flash",
+        "flash36",
+        "lite"
+      ],
+      "memory": [
+        "lite"
+      ],
+      "memory_quality": [
+        "lite"
+      ],
+      "director": [
+        "lite"
+      ],
+      "scene_designer": [
+        "lite"
+      ],
+      "character": [
+        "lite"
+      ]
+    },
+    "max_hosted_requests": 3,
+    "hosted_role_seconds": {
+      "writer": 90,
+      "writer_beat": 90,
+      "repair": 60,
+      "humanizer": 90,
+      "story_quality": 60,
+      "rhetoric_quality": 60,
+      "chapter_quality": 60
+    },
+    "provider_outage_recovery": {
+      "max_rounds": 3,
+      "delay_seconds": 45,
+      "buffer_seconds": 360,
+      "extra_requests": 6
+    }
+  },
+  "performance": {
+    "compact_packets": true,
+    "application_prompt_binding": true,
+    "hosted_failover": false,
+    "batch_development": true,
+    "canon_index": true,
+    "inherit_provider_budget": false,
+    "application_plan_binding": true,
+    "development_batch_size": 6,
+    "api_batch_probes": false,
+    "working_memory_chars": 3500,
+    "combine_direction": true,
+    "classic_expansion": true,
+    "validate_scene_prose": true,
+    "batched_prose": true,
+    "batched_repairs": true,
+    "living_universe": true,
+    "readable_editorial": true,
+    "summary_reviews": false,
+    "memory_pair_batches": true,
+    "empowered_editors": true,
+    "adaptive_batches": true,
+    "verified_draft_continuity": true,
+    "living_bounded": true,
+    "pipelined_living": true,
+    "strict_draft_handoff": true
+  },
+  "api_roles": {
+    "writer_beat": "flash",
+    "writer": "flash",
+    "repair": "flash36",
+    "humanizer": "flash36",
+    "story_quality": "flash36",
+    "rhetoric_quality": "flash36",
+    "memory": "lite",
+    "memory_quality": "lite",
+    "chapter_quality": "flash36",
+    "scene_designer": "lite",
+    "director": "lite",
+    "character": "lite"
+  },
+  "quality_contract": [],
+  "chapter_arcs": [],
+  "universe_id": "matrix-live-02",
+  "creative_freedom": {
+    "enabled": true,
+    "new_characters": false,
+    "character_deaths": false,
+    "protected_characters": [
+      "person00",
+      "person01"
+    ],
+    "max_new_per_scene": 0,
+    "cast_limit": 32
+  },
+  "medium_decision": {
+    "method": "explicit_medium",
+    "selected": "screenplay",
+    "model_calls": 0
+  }
+}

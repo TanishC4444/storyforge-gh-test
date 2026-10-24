@@ -72,7 +72,7 @@ class FullFlowTests(unittest.TestCase):
         from storyforge.full_flow import run
         req=example();req['performance']={'compact_packets':True,'application_prompt_binding':True,'batch_development':True,'canon_index':True}
         with tempfile.TemporaryDirectory() as d,redirect_stdout(io.StringIO()):
-            root=Path(d);(root/'examples').mkdir();(root/'skills').symlink_to(ROOT/'skills',target_is_directory=True)
+            root=Path(d);(root/'examples').mkdir();shutil.copytree(ROOT/'skills',root/'skills')
             (root/'examples/fixture-full.json').write_text(json.dumps(req))
             with patch('storyforge.dag.ROOT',root):result=run(root/'run','fixture-full',backend='fixture')
             self.assertTrue(result['complete'])
