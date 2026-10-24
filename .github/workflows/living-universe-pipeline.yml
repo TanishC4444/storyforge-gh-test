@@ -44,6 +44,11 @@ name: Living universe / verified-memory pipeline
         type: string
         default: ''
         description: Optional correlation ID for a sequential benchmark queue
+      saved_draft_run:
+        type: string
+        default: ''
+        description: 'Optional prior run: import its complete first-scene draft under the same brief/canon; recheck quality
+          and memory'
 permissions:
   contents: read
   actions: read
@@ -310,6 +315,14 @@ jobs:
         STORY_ARTIFACT_MANIFEST: '[{"name":"s01_design","path":"state","pattern":false,"condition":null},{"name":"s01_direction","path":"plan","pattern":false,"condition":null}]'
         STORY_UPSTREAM_NEEDS: ${{ toJSON(needs) }}
       run: python -m storyforge.living_stages arrange
+    - name: Recover saved first-scene prose without inheriting approval
+      if: ${{ inputs.saved_draft_run != '' }}
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{s01_design,s01_write_batches-0}'
+        run-id: ${{ inputs.saved_draft_run }}
+        github-token: ${{ github.token }}
+        path: inputs/reused
     - name: Write coherent scene / batch ${{ matrix.batch }}
       id: task
       env: &id009

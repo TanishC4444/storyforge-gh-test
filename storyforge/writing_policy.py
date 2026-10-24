@@ -6,7 +6,7 @@ PROSE_ROLES={'writer','writer_beat','humanizer','structural_editor','global_repa
 
 def instructions(req,role):
     if role not in PROSE_ROLES:return ''
-    brief={key:req.get(key) for key in ['pov','style','tone_mood','reader_experience','quality_contract','chapter_contract','adaptation','references']}
+    brief={key:req.get(key) for key in ['pov','style','tone_mood','reader_experience','quality_contract','chapter_contract','adaptation','references','length_policy','words_per_scene']}
     from .media import instructions as medium_instructions,contract as medium_contract
     presentation=('Return only the requested script blocks; use headings, speaker cues and directions required by the medium.' if medium_contract(req)['script'] else 'Return the requested artifact only; scene prose has no title, preface, heading, craft commentary or analysis.')
     return medium_instructions(req)+'\n'+'''The application-owned writing brief below governs the prose on every provider and local model. Develop actual action, resistance, a consequential choice and its aftermath; do not paraphrase the outline into plot summary. Specific things done, exchanged, withheld or lost must bear the emotional burden. Do not announce a 'new development', repeat the price of a decision in successive paragraphs, or append the central question as an explanatory moral.

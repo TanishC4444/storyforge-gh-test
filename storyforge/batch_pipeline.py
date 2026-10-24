@@ -99,7 +99,28 @@ def write_batch(state,card,source,out,backend,bid):
     minimum=math.ceil(beat['target_words']*local.get('min_words_ratio',.75))
     maximum=math.floor(beat['target_words']*local.get('max_words_ratio',1.3))
     length_instruction=(f' Length is mandatory: write {beat["target_words"]} words, within {minimum}–{maximum} words. Do not stop at a synopsis. Expand actual resistance, concrete action, competing motives and consequences; do not add repetitive explanation or change canon.' if local.get('length_policy',{}).get('scene_words')=='strict' else '')
-    for attempt in range(0 if backend=='fixture' else 2):
+    if local.get('length_policy',{}).get('overflow')=='advisory':
+        length_instruction=f' Aim near {beat["target_words"]} words with at least {minimum} words of developed action. Longer is acceptable when the detail serves the scene. Do not trim necessary action or rewrite solely to meet a maximum. Maintain pacing, coherence and specificity; padding and repetition remain faults.'
+    reuse=Path(source)/'reused'
+    reused=None
+    if reuse.exists():
+        require(len(plan['beats'])==1 and beat['position']==0 and card['id']==state['plan']['scenes'][0]['id'],'Saved draft import requires one complete first-scene batch')
+        old_state=load(reuse/'s01_design/snapshot.json');old=load(reuse/'s01_write_batches-0/draft-batch.json')
+        from .resilience import creative_request
+        before=creative_request(old_state['request']);after=creative_request(req)
+        before.pop('length_policy',None);after.pop('length_policy',None)
+        require(before==after,'Saved draft creative brief differs beyond length policy')
+        require(old_state.get('backend')==state.get('backend') and old_state['memories']==state['memories'] and old_state['accepted']==state['accepted']==[],'Saved draft has a different initial canon or backend')
+        require(old['state_sha256']==bind_state(old_state) and old['scene_id']==card['id'] and old['id']==bid,'Saved draft provenance does not match its checkpoint')
+        text=old['prose'];validate_prose(text,local,check_length=True)
+        require(old.get('verified_form') or bool(old.get('errors')),'Saved draft has no verified form or explained rejection')
+        if old.get('errors'):
+            try:validate_prose(text,old_state['request'],check_length=True)
+            except ValueError as exc:old_error=str(exc)
+            else:old_error=''
+            require(bool(old_error) and all(e in {old_error,'repair failed after bounded retries: '+old_error} for e in old['errors']),'Saved draft rejection was not solely the validated length error')
+        reused={'source_sha256':digest(text),'original_verified_form':old.get('verified_form',False),'policy':'Imported verbatim as unreviewed prose; all current literary and memory gates still run.'}
+    for attempt in range(0 if backend=='fixture' or reused is not None else 2):
         role='writer_beat' if attempt==0 else 'repair'
         folder=out/str(attempt);executor=Executor(req,folder,backend)
         inserting=bool(attempt and req.get('performance',{}).get('strict_draft_handoff') and local.get('length_policy',{}).get('scene_words')=='strict' and 0<len(text.split())<minimum and len(passages(text))>1)
@@ -117,8 +138,11 @@ def write_batch(state,card,source,out,backend,bid):
             if not inserting:text=cached_prose(folder) or text
             errors=[str(exc)]
             if not text:break
-    if backend=='fixture':text=f'FIXTURE writing batch {bid}: the assigned planned beat is a transport test only.'
+    if backend=='fixture' and reused is None:text=f'FIXTURE writing batch {bid}: the assigned planned beat is a transport test only.'
     result={'id':bid,'scene_id':card['id'],'state_sha256':plan['state_sha256'],'plan_sha256':plan['plan_sha256'],'prose':text,'verified_form':bool(text) and not errors,'errors':errors}
+    from .craft import length_status
+    result['length_status']=length_status(text,local)
+    if reused:result['reused_draft']=reused
     save(out/'draft-batch.json',result)
     if text:save(out/'draft.txt',text);preview(out,'Writing batch '+bid+' - unreviewed')
     return result

@@ -66,4 +66,6 @@ def decide(req,state,card,prose,reviews,out,backend,*,batch_verdict=None):
     except Exception as exc:
         failed={'pass':False,'checks':[],'issues':[],'unverified':True,'error':str(exc)}
         result={'decision_key':key,'prose_sha256':digest(prose),'chapter_sha256':digest(chapter),'judgment_calls':batch_verdict.get('batch_count',6) if batch_verdict is not None else 1,'judgment_rounds':1,'verdict':failed,'story':failed,'rhetoric':failed,'unverified':True}
+    from .craft import length_status
+    result['length_status']=length_status(prose,req)
     save(path,result);return result

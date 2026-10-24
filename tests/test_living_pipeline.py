@@ -21,7 +21,7 @@ class LivingPipelineTests(unittest.TestCase):
             if name.startswith('s'):
                 self.assertIn('always()',job['if'],name)
                 self.assertIn('!cancelled()',job['if'],name)
-                self.assertEqual(sum(step.get('uses')=='actions/download-artifact@v4' for step in job['steps']),1,name)
+                self.assertEqual(sum(step.get('uses')=='actions/download-artifact@v4' for step in job['steps']),2 if name=='s01_write_batches' else 1,name)
                 manifest=next(step for step in job['steps'] if step.get('name')=='Bind downloaded artifacts to explicit source aliases')['env']['STORY_ARTIFACT_MANIFEST']
                 self.assertNotIn('${{',manifest,name)
         self.assertEqual(jobs['s02_design']['needs'],['s01_accept'])

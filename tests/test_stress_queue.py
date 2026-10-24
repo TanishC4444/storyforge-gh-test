@@ -1,11 +1,18 @@
 import copy,io,json,tempfile,unittest,urllib.error,zipfile
 from pathlib import Path
 from unittest.mock import patch
-from scripts.stress_queue import Queue,GitHub,validate_suite,verdict
+from scripts.stress_queue import Queue,GitHub,validate_suite,verdict,select_cases
 
 ROOT=Path(__file__).resolve().parents[1]
 
 class StressQueueTests(unittest.TestCase):
+    def test_targeted_retry_retains_dependency_order_and_reuses_only_the_novel_draft(self):
+        suite=select_cases(self.suite(),'ensemble-continuation,ensemble','123')
+        validate_suite(suite)
+        self.assertEqual([c['id'] for c in suite['cases']],['ensemble','ensemble-continuation'])
+        self.assertEqual(suite['cases'][0]['saved_draft_run'],'123');self.assertNotIn('saved_draft_run',suite['cases'][1])
+        for cases,run in [('ensemble-continuation',''),('unknown',''),('ensemble,ensemble',''),('comic','123'),('ensemble','invalid')]:
+            with self.subTest(cases=cases,run=run),self.assertRaises(ValueError):select_cases(self.suite(),cases,run)
     def suite(self):return json.loads((ROOT/'examples/stress-suite.json').read_text())
     def run_record(self,case='fairytale',status='completed',conclusion='success'):
         return {'id':12,'head_sha':'tested','status':status,'conclusion':conclusion,'html_url':'https://example.invalid/12','display_title':'Living | stress-'+case+' | tag-'+case}

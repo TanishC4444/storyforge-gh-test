@@ -85,12 +85,21 @@ def author_packet(req,state,card):
     }
 
 
+def length_status(prose,req):
+    words=len(prose.split());target=req['words_per_scene']
+    minimum=target*req.get('min_words_ratio',.75);maximum=target*req.get('max_words_ratio',1.3)
+    overflow=words>maximum
+    return {'words':words,'target':target,'minimum':minimum,'suggested_maximum':maximum,
+            'overflow':overflow,'advisory':overflow and req.get('length_policy',{}).get('overflow')=='advisory',
+            'excess_words':max(0,words-int(maximum))}
+
+
 def validate_prose(prose,req,*,check_length=False):
     require(isinstance(prose,str) and bool(prose.strip()),'Empty prose')
     errors=[]
     if check_length and req.get('length_policy',{}).get('scene_words')=='strict':
         words=len(prose.split());target=req['words_per_scene']
-        if not target*req.get('min_words_ratio',.75)<=words<=target*req.get('max_words_ratio',1.3):
+        if words<target*req.get('min_words_ratio',.75) or (words>target*req.get('max_words_ratio',1.3) and req.get('length_policy',{}).get('overflow')!='advisory'):
             errors.append(f'Scene has {words} words; required range is {target*req.get("min_words_ratio",.75):g}–{target*req.get("max_words_ratio",1.3):g} words (target {target}). Develop choices and consequences without padding')
     paragraphs=[re.sub(r'\s+',' ',p).strip() for p in re.split(r'\n\s*\n',prose) if len(p.split())>=12]
     if len(paragraphs)!=len(set(paragraphs)):errors.append('Duplicate prose paragraph; revise before review')

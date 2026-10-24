@@ -5,6 +5,12 @@ full separate-runner living pipeline, waits for its terminal state, collects its
 audit and readable-story artifacts, and only then starts the next case. It does
 not replace the writing/review graph with a coordinator inference call.
 
+To retry only the novel and its continuation, set `cases` to
+`ensemble,ensemble-continuation`. Set `saved_draft_run` to the run containing its
+existing opening draft to reuse that text without another writer call. Passed
+format tests remain untouched; the continuation runs only after the novel earns
+full approval.
+
 | Order | Format / genre | Scenes | Target words/scene | Authored cast |
 |---|---|---:|---:|---:|
 | 1 | Short story / dark fairy tale | 4 | 350 | 6 |
@@ -18,8 +24,11 @@ not replace the writing/review graph with a coordinator inference call.
 Twenty planned scenes, approximately 14,400 target words across independent
 worlds plus one eight-scene continued world. Four locations and 70 initial facts
 exercise the larger case. Every authored ensemble character appears in the
-four-scene participant layout. Scene length remains 80–130% of the target, not
-an exact-word or page-count guarantee.
+four-scene participant layout. Scene length targets guide the writing, with an
+80% minimum for developed action. Exceeding the former 130% ceiling is advisory;
+quality, pacing, non-repetition and factual approval remain mandatory. Longer
+drafts are preserved for optional user shortening rather than rewritten solely
+to hit a ceiling.
 
 The author supplies conflict and dramatic function but deliberately does not
 specify the culprit, discovery or decisive twist. The model must plant and pay
@@ -60,6 +69,14 @@ one native partial rerun; downstream scenes and checks run again as needed.
 Older runs without stage labels fall back to their scene boundary. Native retries
 use the source run's original code revision; the existing universe-continuation
 input is separate and begins a new episode.
+
+The full pipeline also accepts `saved_draft_run` to import a complete first-scene
+draft into the current code without a new writer call. The source state and
+initial canon must match, and the creative brief may differ only in length
+policy. This supports the saved novel draft whose only rejection was its former
+length ceiling. Imported prose receives fresh literary and memory checks; no
+approval is inherited. Incomplete provider responses and other rejection reasons
+cannot use this shortcut.
 
 ## Verification and recovery costs
 

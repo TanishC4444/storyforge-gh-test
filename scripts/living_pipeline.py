@@ -10,6 +10,7 @@ def build():
     graph['run-name']='Living | ${{ inputs.request_file }} | ${{ inputs.queue_tag || github.run_number }}'
     graph['on']['workflow_dispatch']['inputs']['queue_tag']={'type':'string','default':'','description':'Optional correlation ID for a sequential benchmark queue'}
     inputs=graph['on']['workflow_dispatch']['inputs'];inputs['request_file']['default']='living-scale-practice';inputs['scene_limit']['default']='2'
+    inputs['saved_draft_run']={'type':'string','default':'','description':'Optional prior run: import its complete first-scene draft under the same brief/canon; recheck quality and memory'}
     graph['env']['STORY_LIVING_PIPELINE']='true'
     def add(key,template,title,task,needs,files,index,*,module='living_stages',matrix=None,outputs=(),condition=None):
         job=copy.deepcopy(old[template]);job['name']='Scene '+str(index+1)+' / '+title;job['needs']=list(dict.fromkeys(needs));job.pop('strategy',None);job.pop('outputs',None)
@@ -43,6 +44,9 @@ def build():
         add(p+'_characters',p+'_characters','Independent character ${{ matrix.character }} / scene '+str(i+1),'character',[p+'_design'],state,i,module='dag',matrix='${{ fromJSON(needs.'+p+'_design.outputs.characters) }}')
         add(p+'_direction',p+'_direction','Compile character direction and writing plan','direction_plan',[p+'_design',p+'_characters'],state+[(p+'_characters-*','characters',True)],i,outputs=['characters'])
         add(p+'_write_batches',p+'_write_batches','Write coherent scene / batch ${{ matrix.batch }}','write_batch',[p+'_design',p+'_direction'],state+[(p+'_direction','plan')],i,module='batch_pipeline',matrix='${{ fromJSON(needs.'+p+'_direction.outputs.characters) }}')
+        if i==0:
+            steps=jobs[p+'_write_batches']['steps'];position=next(j for j,s in enumerate(steps) if s.get('id')=='task')
+            steps.insert(position,{'name':'Recover saved first-scene prose without inheriting approval','if':"${{ inputs.saved_draft_run != '' }}",'uses':'actions/download-artifact@v4','with':{'pattern':'{s01_design,s01_write_batches-0}','run-id':'${{ inputs.saved_draft_run }}','github-token':'${{ github.token }}','path':'inputs/reused'}})
         add(p+'_draft',p+'_draft','Compile readable draft and source extraction plan','draft_extract_plan',[p+'_design',p+'_direction',p+'_write_batches'],state+[(p+'_direction','plan'),(p+'_write_batches-*','batches',True)],i,outputs=['characters'])
         edited=[(p+'_draft','edited')]
         for kind in ['story','rhetoric']:
