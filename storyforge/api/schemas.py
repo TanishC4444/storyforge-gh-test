@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 ModeId = Literal['sequential', 'parallel', 'recovery']
 
@@ -57,6 +57,7 @@ class Mode(BaseModel):
 
 
 class RequestSummary(BaseModel):
+    supported_modes: list[Literal['sequential', 'parallel']] = Field(default_factory=list)
     id: str
     title: str
     medium: str | None = None
@@ -75,6 +76,7 @@ class ValidationResult(BaseModel):
 
 
 class StartRun(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     mode: Literal['sequential', 'parallel']
     request_file: str = Field(description='Name of a brief in examples/ without .json, from GET /requests.')
     backend: Literal['fixture', 'live'] = 'fixture'
@@ -82,6 +84,7 @@ class StartRun(BaseModel):
 
 
 class RecoverRun(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     strategy: Literal['fresh', 'rerun'] = Field(
         'fresh',
         description='"fresh" starts a new run that reuses the approved prefix; "rerun" re-executes the failed stage inside the original run.',

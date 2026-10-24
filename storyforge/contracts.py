@@ -13,6 +13,8 @@ def require(condition, message):
 
 def request(value):
     require(isinstance(value, dict), 'Request must be an object')
+    for name in ('execution_policy','performance','api_roles'):
+        require(isinstance(value.get(name,{}),dict), f'{name} must be an object')
     require(bool(re.fullmatch(r'[a-zA-Z0-9_-]{1,64}', value.get('project_id', ''))), 'Invalid project ID')
     require(isinstance(value.get('premise'), str) and bool(value['premise'].strip()), 'Premise required')
     for name, low, high, default in [('chapters', 1, 12, 3), ('scenes_per_chapter', 1, 8, 3), ('words_per_scene', 100, 1600, 850), ('max_repairs', 0, 3, 1), ('max_stage_retries', 0, 3, 1), ('context_chars', 4000, 192000, 22000), ('n_ctx', 4096, 16384, 8192)]:

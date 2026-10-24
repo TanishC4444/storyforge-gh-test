@@ -55,7 +55,7 @@
             }
           },
           "422": {
-            "description": "Unprocessable Content",
+            "description": "Unprocessable Entity",
             "content": {
               "application/json": {
                 "schema": {
@@ -131,7 +131,7 @@
             }
           },
           "422": {
-            "description": "Unprocessable Content",
+            "description": "Unprocessable Entity",
             "content": {
               "application/json": {
                 "schema": {
@@ -207,7 +207,7 @@
             }
           },
           "422": {
-            "description": "Unprocessable Content",
+            "description": "Unprocessable Entity",
             "content": {
               "application/json": {
                 "schema": {
@@ -298,7 +298,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Unprocessable Entity"
           },
           "502": {
             "content": {
@@ -375,7 +375,7 @@
             }
           },
           "422": {
-            "description": "Unprocessable Content",
+            "description": "Unprocessable Entity",
             "content": {
               "application/json": {
                 "schema": {
@@ -474,7 +474,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Unprocessable Entity"
           },
           "502": {
             "content": {
@@ -521,6 +521,14 @@
             "schema": {
               "anyOf": [
                 {
+                  "enum": [
+                    "queued",
+                    "running",
+                    "succeeded",
+                    "succeeded_with_warnings",
+                    "failed",
+                    "cancelled"
+                  ],
                   "type": "string"
                 },
                 {
@@ -630,7 +638,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Unprocessable Entity"
           },
           "502": {
             "content": {
@@ -730,7 +738,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Unprocessable Entity"
           },
           "502": {
             "content": {
@@ -759,6 +767,7 @@
             "required": true,
             "schema": {
               "type": "integer",
+              "exclusiveMinimum": 0,
               "title": "Run Id"
             }
           },
@@ -830,7 +839,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Unprocessable Entity"
           },
           "502": {
             "content": {
@@ -860,6 +869,7 @@
             "required": true,
             "schema": {
               "type": "integer",
+              "exclusiveMinimum": 0,
               "title": "Run Id"
             }
           },
@@ -940,7 +950,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Unprocessable Entity"
           },
           "502": {
             "content": {
@@ -969,6 +979,7 @@
             "required": true,
             "schema": {
               "type": "integer",
+              "exclusiveMinimum": 0,
               "title": "Run Id"
             }
           },
@@ -1044,7 +1055,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Unprocessable Entity"
           },
           "502": {
             "content": {
@@ -1074,6 +1085,7 @@
             "required": true,
             "schema": {
               "type": "integer",
+              "exclusiveMinimum": 0,
               "title": "Run Id"
             }
           },
@@ -1141,7 +1153,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Unprocessable Entity"
           },
           "502": {
             "content": {
@@ -1171,6 +1183,7 @@
             "required": true,
             "schema": {
               "type": "integer",
+              "exclusiveMinimum": 0,
               "title": "Run Id"
             }
           },
@@ -1242,7 +1255,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Unprocessable Entity"
           },
           "502": {
             "content": {
@@ -1271,6 +1284,7 @@
             "required": true,
             "schema": {
               "type": "integer",
+              "exclusiveMinimum": 0,
               "title": "Run Id"
             }
           },
@@ -1351,7 +1365,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Unprocessable Entity"
           },
           "502": {
             "content": {
@@ -1381,6 +1395,7 @@
             "required": true,
             "schema": {
               "type": "integer",
+              "exclusiveMinimum": 0,
               "title": "Run Id"
             }
           },
@@ -1452,7 +1467,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Unprocessable Entity"
           },
           "502": {
             "content": {
@@ -1481,6 +1496,7 @@
             "required": true,
             "schema": {
               "type": "integer",
+              "exclusiveMinimum": 0,
               "title": "Run Id"
             }
           },
@@ -1552,7 +1568,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Unprocessable Entity"
           },
           "502": {
             "content": {
@@ -1581,6 +1597,7 @@
             "required": true,
             "schema": {
               "type": "integer",
+              "exclusiveMinimum": 0,
               "title": "Run Id"
             }
           },
@@ -1657,7 +1674,7 @@
                 }
               }
             },
-            "description": "Unprocessable Content"
+            "description": "Unprocessable Entity"
           },
           "502": {
             "content": {
@@ -2134,11 +2151,23 @@
             "description": "Fresh strategy only: sequential-mode inputs such as profile or scene_limit."
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "title": "RecoverRun"
       },
       "RequestSummary": {
         "properties": {
+          "supported_modes": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "sequential",
+                "parallel"
+              ]
+            },
+            "type": "array",
+            "title": "Supported Modes"
+          },
           "id": {
             "type": "string",
             "title": "Id"
@@ -2546,6 +2575,7 @@
             "description": "Other mode inputs listed by GET /modes, e.g. profile or scene_limit."
           }
         },
+        "additionalProperties": false,
         "type": "object",
         "required": [
           "mode",

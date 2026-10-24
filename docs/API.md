@@ -216,3 +216,39 @@ python -m scripts.export_openapi   # keeps web/openapi.json current
 - **Custom briefs.** Runs start only from briefs already committed in `examples/`. A future `POST /requests` could commit a validated brief through the GitHub Contents API.
 - **Multiple users and accounts.** The API trusts whoever holds a working token and keeps no user records.
 - **Rate limits.** Each `GET /runs/{id}` costs 2 to 3 GitHub API calls. A personal token allows 5,000 per hour.
+
+## Validation and regression checks
+
+`GET /requests` includes `supported_modes` for each brief. The playground offers
+only compatible briefs and disables scene limits beyond the authored scene count.
+The API rejects incompatible mode/brief combinations before dispatch, invalid run
+IDs and status filters, unknown launch/recovery fields, and invalid continuation
+IDs. An omitted sequential scene limit is bounded by the selected brief. Fresh
+recovery inherits the saved episode length and original backend when omitted;
+it rejects a limit that would skip the failure or an explicit backend mismatch.
+
+The story endpoint and collector preserve approved scenes imported during fresh
+recovery, even when those scenes have no new preview artifacts. Saved unfinished
+scenes remain readable with their provisional status; they do not become canon.
+Corrupt upstream artifacts return a gateway error, and corrupt zip cache entries
+are removed so a later fetch can recover.
+
+Both HTML pages use the same API client. Requests time out with an actionable
+message; timed-out POST requests are never automatically retried. Event parsing
+supports CRLF, split UTF-8 and multiline data, releases readers on exit, and
+reports a dropped stream rather than treating it as completion. Refresh the run
+view to reconnect after an interrupted stream. Switching views or forgetting a
+token invalidates stale asynchronous callbacks.
+
+Run backend and client regressions with:
+
+```sh
+python -m pip install -e '.[api,test]'
+python -m unittest discover -s tests -v
+node --test tests/test_web_client.mjs
+```
+
+Demo launches, cancellation and recovery are simulated. They test the HTTP/UI
+contract without consuming inference quota; completed real-run artifacts should
+also be backtested through the API before a release. Local concurrent-request
+measurements are not a production capacity guarantee.

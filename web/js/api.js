@@ -16,9 +16,11 @@ export class ApiError extends Error {
 }
 
 export class StoryforgeClient {
-  constructor({ baseUrl, token }) {
+  constructor({ baseUrl, token, timeoutMs = 30000 }) {
     this.baseUrl = baseUrl.replace(/\/+$/, '');
     this.token = token || '';
+    this.timeoutMs = timeoutMs;
+    this.lastStatus = null;
   }
 
   url(path) {
@@ -32,23 +34,32 @@ export class StoryforgeClient {
   }
 
   async request(method, path, body) {
-    let response;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), this.timeoutMs);
+    this.lastStatus = null;
     try {
-      response = await fetch(this.url(path), {
-        method,
+      const response = await fetch(this.url(path), {
+        method, signal: controller.signal,
         headers: this.headers(body === undefined ? {} : { 'Content-Type': 'application/json' }),
         body: body === undefined ? undefined : JSON.stringify(body),
       });
+      this.lastStatus = response.status;
+      const text = await response.text();
+      let data;
+      try { data = text ? JSON.parse(text) : null; }
+      catch { throw new ApiError(response.status, response.ok ? 'The API returned invalid JSON.' : `The API returned HTTP ${response.status}.`); }
+      if (!response.ok) {
+        const detail = Array.isArray(data?.detail) ? data.detail.map((d) => d.msg).join('; ') : data?.detail;
+        throw new ApiError(response.status, typeof detail === 'string' ? detail : undefined);
+      }
+      return data;
     } catch (err) {
+      if (err instanceof ApiError) throw err;
+      if (controller.signal.aborted) throw new ApiError(0, method === 'POST'
+        ? 'Request timed out. A submitted run may still have started; check the run list before retrying.'
+        : 'Request timed out. Check the connection and try again.');
       throw new ApiError(0, `Cannot reach the API at ${this.baseUrl}. Is the server running?`);
-    }
-    const text = await response.text();
-    const data = text ? JSON.parse(text) : null;
-    if (!response.ok) {
-      const detail = Array.isArray(data?.detail) ? data.detail.map((d) => d.msg).join('; ') : data?.detail;
-      throw new ApiError(response.status, detail);
-    }
-    return data;
+    } finally { clearTimeout(timer); }
   }
 
   // Public
@@ -82,9 +93,18 @@ export class StoryforgeClient {
   artifacts(id) { return this.request('GET', `/runs/${id}/artifacts`); }
 
   async downloadArtifact(id, name) {
-    const response = await fetch(this.url(`/runs/${id}/artifacts/${encodeURIComponent(name)}`), { headers: this.headers() });
-    if (!response.ok) throw new ApiError(response.status, (await response.json().catch(() => ({}))).detail);
-    return response.blob();
+    this.lastStatus = null;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), Math.max(this.timeoutMs, 120000));
+    try {
+      const response = await fetch(this.url(`/runs/${id}/artifacts/${encodeURIComponent(name)}`), { headers: this.headers(), signal: controller.signal });
+      this.lastStatus = response.status;
+      if (!response.ok) throw new ApiError(response.status, (await response.json().catch(() => ({}))).detail);
+      return await response.blob();
+    } catch (err) {
+      if (err instanceof ApiError) throw err;
+      throw new ApiError(0, controller.signal.aborted ? 'Artifact download timed out.' : 'Artifact download failed. Check the API connection.');
+    } finally { clearTimeout(timer); }
   }
 
   // Follow a run live. EventSource cannot send the token, so this reads the
@@ -93,29 +113,39 @@ export class StoryforgeClient {
   watchRun(id, { onRun, onEnd, onError } = {}) {
     const controller = new AbortController();
     (async () => {
+      let reader;
       try {
         const response = await fetch(this.url(`/runs/${id}/events`), { headers: this.headers(), signal: controller.signal });
+        this.lastStatus = response.status;
         if (!response.ok) throw new ApiError(response.status, (await response.json().catch(() => ({}))).detail);
-        const reader = response.body.getReader();
+        if (!response.body) throw new ApiError(0, 'Live updates are unavailable in this response.');
+        reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
         for (;;) {
           const { value, done } = await reader.read();
-          if (done) break;
+          if (controller.signal.aborted) return;
+          if (done) throw new ApiError(0, 'Live update connection closed before completion; refresh to reconnect.');
           buffer += decoder.decode(value, { stream: true });
+          if (buffer.length > 2000000) throw new ApiError(0, 'Live update exceeded the supported event size.');
           let boundary;
-          while ((boundary = buffer.indexOf('\n\n')) >= 0) {
-            const block = buffer.slice(0, boundary);
-            buffer = buffer.slice(boundary + 2);
-            const event = /^event: (.*)$/m.exec(block)?.[1];
-            const data = /^data: (.*)$/m.exec(block)?.[1];
+          while ((boundary = /\r?\n\r?\n/.exec(buffer))) {
+            const block = buffer.slice(0, boundary.index);
+            buffer = buffer.slice(boundary.index + boundary[0].length);
+            const lines = block.split(/\r?\n/);
+            const event = lines.find((line) => line.startsWith('event:'))?.slice(6).trim();
+            const data = lines.filter((line) => line.startsWith('data:')).map((line) => line.slice(5).replace(/^ /, '')).join('\n');
             if (event === 'run' && data) onRun?.(JSON.parse(data));
             if (event === 'end') { onEnd?.(); return; }
           }
         }
-        onEnd?.();
       } catch (err) {
-        if (err.name !== 'AbortError') onError?.(err);
+        if (!controller.signal.aborted) onError?.(err);
+      } finally {
+        if (reader) {
+          await reader.cancel().catch(() => {});
+          reader.releaseLock();
+        }
       }
     })();
     return () => controller.abort();

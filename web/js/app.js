@@ -30,6 +30,8 @@ const state = {
   modes: [],
   requests: [],
   stopWatch: null,
+  routeVersion: 0,
+  connectionVersion: 0,
 };
 
 const STATUS_LABEL = {
@@ -58,14 +60,21 @@ function ago(iso) {
 // Connection
 
 async function connect(token) {
+  state.stopWatch?.();
+  state.stopWatch = null;
+  state.routeVersion++;
+  const attempt = ++state.connectionVersion;
   const msg = $('#connect-msg');
   state.apiUrl = $('#api-url').value.trim();
   write('local', 'sf.api', state.apiUrl);
-  state.client = new StoryforgeClient({ baseUrl: state.apiUrl, token });
+  const client = new StoryforgeClient({ baseUrl: state.apiUrl, token });
+  state.client = client;
   message(msg, 'Connecting…');
   try {
-    const [health, auth] = await Promise.all([state.client.health(), state.client.authCheck()]);
-    [state.modes, state.requests] = await Promise.all([state.client.modes(), state.client.listRequests()]);
+    const [health, auth] = await Promise.all([client.health(), client.authCheck()]);
+    const [modes, requests] = await Promise.all([client.modes(), client.listRequests()]);
+    if (attempt !== state.connectionVersion) return;
+    [state.modes, state.requests] = [modes, requests];
     state.token = token;
     write('session', 'sf.token', token);
     const pill = $('#conn-pill');
@@ -75,6 +84,7 @@ async function connect(token) {
     if (auth.can_dispatch) $('#connect').classList.add('collapsed');
     route();
   } catch (err) {
+    if (attempt !== state.connectionVersion) return;
     state.client = null;
     $('#conn-pill').textContent = 'Not connected';
     $('#conn-pill').classList.remove('on');
@@ -92,6 +102,7 @@ function setupConnect() {
   $('#conn-pill').addEventListener('click', () => $('#connect').classList.toggle('collapsed'));
   $('#use-demo').addEventListener('click', () => { $('#token').value = ''; connect('demo'); });
   $('#disconnect').addEventListener('click', () => {
+    state.connectionVersion++;
     write('session', 'sf.token', '');
     state.token = '';
     state.client = null;
@@ -130,6 +141,11 @@ function renderHome() {
   brief.replaceChildren(...state.requests.map((r) => el('option', { value: r.id }, `${r.title} (${r.id})`)));
   const showBrief = () => {
     const r = state.requests.find((x) => x.id === brief.value);
+    const limit = $('#mode-inputs [name=scene_limit]');
+    if (limit && r) {
+      for (const option of limit.options) option.disabled = Number(option.value) > r.chapters * r.scenes_per_chapter;
+      if (limit.selectedOptions[0]?.disabled) limit.value = [...limit.options].find((o) => !o.disabled)?.value || '';
+    }
     $('#brief-card').replaceChildren(...(r ? [
       el('strong', {}, r.title), el('br'),
       `${r.medium || 'story'} · ${r.chapters}×${r.scenes_per_chapter} scenes · ~${r.words_per_scene} words/scene · ${r.characters} characters`,
@@ -143,6 +159,8 @@ function renderHome() {
     for (const tab of $('#mode-tabs').children) tab.classList.toggle('active', tab.dataset.mode === mode.id);
     $('#mode-desc').textContent = mode.description;
     $('#mode-inputs').replaceChildren(...mode.inputs.filter((s) => s.name !== 'request_file').map(inputField));
+    const available = state.requests.filter((r) => !r.supported_modes || r.supported_modes.includes(mode.id));
+    brief.replaceChildren(...available.map((r) => el('option', { value: r.id }, `${r.title} (${r.id})`)));
     const defaultBrief = { sequential: 'living-scale-practice', parallel: 'hard-chronology' }[mode.id];
     if (state.requests.some((r) => r.id === defaultBrief)) brief.value = defaultBrief;
     showBrief();
@@ -220,7 +238,9 @@ const tabs = {
     const story = await state.client.story(run.id);
     const prose = el('div', { class: 'prose' }, story.text || '(No prose yet.)');
     const showScene = async (id) => {
-      const scene = await state.client.scene(run.id, id);
+      let scene;
+      try { scene = await state.client.scene(run.id, id); }
+      catch (err) { prose.textContent = errorText(err); return; }
       prose.replaceChildren(el('p', { class: 'muted' }, `${scene.id} · ${scene.status} · ${scene.words} words`), scene.prose);
     };
     body.replaceChildren(
@@ -247,8 +267,12 @@ const tabs = {
       el('span', {}, a.name),
       a.expired ? el('span', { class: 's-skipped' }, 'expired') : el('button', {
         type: 'button', class: 'ghost',
-        onclick: async () => {
-          const url = URL.createObjectURL(await state.client.downloadArtifact(run.id, a.name));
+        onclick: async (event) => {
+          const button = event.currentTarget;
+          let blob;
+          try { blob = await state.client.downloadArtifact(run.id, a.name); }
+          catch (err) { button.parentElement?.append(el('p', {class:'msg error'}, errorText(err))); return; }
+          const url = URL.createObjectURL(blob);
           el('a', { href: url, download: `${a.name}.zip` }).click();
           setTimeout(() => URL.revokeObjectURL(url), 10000);
         },
@@ -257,6 +281,8 @@ const tabs = {
 };
 
 async function renderRun(id) {
+  const version = state.routeVersion;
+  const currentView = () => version === state.routeVersion;
   const view = $('#view');
   view.replaceChildren($('#tpl-run').content.cloneNode(true));
   let run;
@@ -267,8 +293,11 @@ async function renderRun(id) {
     for (const button of view.querySelectorAll('[data-tab]')) button.classList.toggle('active', button.dataset.tab === name);
     body.replaceChildren(el('p', { class: 'muted' }, 'Loading…'));
     try {
-      await tabs[name](body, run);
+      const content = el('div');
+      await tabs[name](content, run);
+      if (currentView() && activeTab === name) body.replaceChildren(...content.childNodes);
     } catch (err) {
+      if (!currentView() || activeTab !== name) return;
       const pending = err.status === 404 && ['queued', 'running'].includes(run.status);
       body.replaceChildren(el('p', { class: 'muted' }, pending ? 'Appears here once the run uploads it.' : errorText(err)));
     }
@@ -277,7 +306,9 @@ async function renderRun(id) {
 
   try {
     run = await state.client.getRun(id);
+    if (!currentView()) return;
   } catch (err) {
+    if (!currentView()) return;
     view.replaceChildren(el('section', { class: 'panel' }, el('a', { href: '#/', class: 'back' }, '← All runs'), el('p', {}, errorText(err))));
     return;
   }
@@ -289,8 +320,13 @@ async function renderRun(id) {
     try { await state.client.cancelRun(id); } catch (err) { alert(errorText(err)); }
     event.target.disabled = false;
   });
+  let recoveryPending = false;
   $('#recover-form').addEventListener('submit', async (event) => {
     event.preventDefault();
+    if (recoveryPending) return;
+    recoveryPending = true;
+    const submit = event.submitter;
+    if (submit) submit.disabled = true;
     const form = new FormData(event.target);
     const msg = $('#recover-msg');
     message(msg, 'Starting recovery…');
@@ -302,18 +338,22 @@ async function renderRun(id) {
       if (!next) message(msg, 'Dispatched; refresh the run list in a moment.', 'ok');
     } catch (err) {
       message(msg, errorText(err), 'error');
+    } finally {
+      recoveryPending = false;
+      if (submit) submit.disabled = false;
     }
   });
 
   if (['queued', 'running'].includes(run.status)) {
     state.stopWatch = state.client.watchRun(id, {
       onRun: (detail) => {
+        if (!currentView()) return;
         const finished = !['queued', 'running'].includes(detail.status);
         run = detail;
         renderRunDetail(detail);
         if (activeTab === 'jobs' || finished) showTab(activeTab);
       },
-      onError: (err) => { $('#progress-text').textContent = `Live updates stopped: ${errorText(err)}`; },
+      onError: (err) => { if (currentView()) $('#progress-text').textContent = `Live updates stopped: ${errorText(err)}`; },
     });
   }
 }
@@ -321,6 +361,7 @@ async function renderRun(id) {
 // Routing
 
 function route() {
+  state.routeVersion++;
   state.stopWatch?.();
   state.stopWatch = null;
   const view = $('#view');

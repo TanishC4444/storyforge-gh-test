@@ -14,22 +14,23 @@ import time
 from collections.abc import Iterator
 from typing import Annotated, Any
 
-from fastapi import Body, Depends, FastAPI, Header, HTTPException, Query, Request
+from fastapi import Body, Depends, FastAPI, Header, HTTPException, Query, Request, Path as RoutePath
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response, StreamingResponse
 
 from ..contracts import ContractError, request as validate_request
-from .artifacts import NotAvailable
+from .artifacts import NotAvailable, InvalidArtifact
 from .config import Settings, get_settings
 from .demo import DemoBackend
 from .github import GitHubError
 from .modes import MODES
 from .schemas import (ArtifactList, AuthCheck, Canon, ErrorBody, Health, Mode, RecoverRun, RequestSummary,
-                      RunDetail, RunList, Scene, StartedRun, StartRun, Story, ValidationResult)
-from .service import Backend, Conflict, GitHubBackend, NotFound, request_files
+                      RunDetail, RunList, RunStatus, Scene, StartedRun, StartRun, Story, ValidationResult)
+from .service import Backend, Conflict, GitHubBackend, NotFound, request_files, supported_modes
 
 API_VERSION = '0.1.0'
 PREFIX = '/api/v1'
+RunId = Annotated[int, RoutePath(gt=0)]
 
 app = FastAPI(
     title='Storyforge API',
@@ -71,6 +72,11 @@ async def _not_available(_, exc):
 @app.exception_handler(Conflict)
 async def _conflict(_, exc):
     return JSONResponse({'detail': str(exc)}, status_code=409)
+
+
+@app.exception_handler(InvalidArtifact)
+async def _invalid_artifact(_, exc):
+    return JSONResponse({'detail':str(exc)},status_code=502)
 
 
 @app.exception_handler(ValueError)
@@ -143,7 +149,7 @@ def list_requests(config: Settings = Depends(settings)):
     for name in request_files(config):
         value = _load_request(config, name)
         out.append(RequestSummary(
-            id=name, title=value.get('title') or name, medium=value.get('medium'), genre=value.get('genre'),
+            supported_modes=supported_modes(value), id=name, title=value.get('title') or name, medium=value.get('medium'), genre=value.get('genre'),
             chapters=value.get('chapters', 3), scenes_per_chapter=value.get('scenes_per_chapter', 3),
             words_per_scene=value.get('words_per_scene', 850), characters=len(value.get('characters') or []), premise=value['premise'],
         ))
@@ -160,7 +166,7 @@ def validate(brief: dict[str, Any] = Body(...)):
     """Check a brief against the pipeline contract without starting anything."""
     try:
         return ValidationResult(valid=True, normalized=validate_request(copy.deepcopy(brief)))
-    except (ContractError, ValueError, TypeError, KeyError) as exc:
+    except (ContractError, ValueError, TypeError, KeyError, AttributeError) as exc:
         return ValidationResult(valid=False, error=str(exc))
 
 
@@ -175,7 +181,7 @@ def auth_check(api: BackendDep):
 @app.get(f'{PREFIX}/runs', response_model=RunList, tags=['runs'])
 def list_runs(api: BackendDep,
               mode: Annotated[str | None, Query(pattern='^(sequential|parallel|recovery)$')] = None,
-              status: Annotated[str | None, Query(description='Filter by RunStatus')] = None,
+              status: Annotated[RunStatus | None, Query(description='Filter by RunStatus')] = None,
               tag: Annotated[str | None, Query(description='tracking_tag returned by POST /runs')] = None,
               limit: Annotated[int, Query(ge=1, le=50)] = 20):
     runs = api.list_runs(mode, tag, limit)
@@ -191,25 +197,25 @@ def start_run(body: StartRun, api: BackendDep):
 
 
 @app.get(f'{PREFIX}/runs/{{run_id}}', response_model=RunDetail, tags=['runs'])
-def get_run(run_id: int, api: BackendDep):
+def get_run(run_id: RunId, api: BackendDep):
     return api.get_run(run_id)
 
 
 @app.post(f'{PREFIX}/runs/{{run_id}}/recover', response_model=StartedRun, status_code=202, tags=['runs'])
-def recover_run(run_id: int, api: BackendDep, body: RecoverRun = Body(default_factory=RecoverRun)):
+def recover_run(run_id: RunId, api: BackendDep, body: RecoverRun = Body(default_factory=RecoverRun)):
     """Recovery mode: continue a failed sequential run."""
     return api.recover_run(run_id, body)
 
 
 @app.post(f'{PREFIX}/runs/{{run_id}}/cancel', status_code=202, tags=['runs'])
-def cancel_run(run_id: int, api: BackendDep) -> dict[str, bool]:
+def cancel_run(run_id: RunId, api: BackendDep) -> dict[str, bool]:
     api.cancel_run(run_id)
     return {'cancel_requested': True}
 
 
 @app.get(f'{PREFIX}/runs/{{run_id}}/events', tags=['runs'], response_class=StreamingResponse,
          responses={200: {'content': {'text/event-stream': {}}, 'description': 'Server-sent events: "run" carries a RunDetail; "end" closes the stream.'}})
-async def run_events(run_id: int, authorization: AuthHeader = None, config: Settings = Depends(settings)):
+async def run_events(run_id: RunId, authorization: AuthHeader = None, config: Settings = Depends(settings)):
     """Stream run updates. Browsers must read this with fetch() (EventSource cannot send the token)."""
     # The stream owns its backend, so the client stays open for the stream's whole life.
     api = make_backend(authorization, config)
@@ -243,29 +249,29 @@ async def run_events(run_id: int, authorization: AuthHeader = None, config: Sett
 
 
 @app.get(f'{PREFIX}/runs/{{run_id}}/story', response_model=Story, tags=['content'])
-def get_story(run_id: int, api: BackendDep):
+def get_story(run_id: RunId, api: BackendDep):
     """The readable manuscript and per-scene status. 404 until the run uploads it."""
     return api.story(run_id)
 
 
 @app.get(f'{PREFIX}/runs/{{run_id}}/scenes/{{scene_id}}', response_model=Scene, tags=['content'])
-def get_scene(run_id: int, scene_id: str, api: BackendDep):
+def get_scene(run_id: RunId, scene_id: str, api: BackendDep):
     return api.scene(run_id, scene_id)
 
 
 @app.get(f'{PREFIX}/runs/{{run_id}}/canon', response_model=Canon, tags=['content'])
-def get_canon(run_id: int, api: BackendDep):
+def get_canon(run_id: RunId, api: BackendDep):
     """Committed facts and memory (sequential runs)."""
     return api.canon(run_id)
 
 
 @app.get(f'{PREFIX}/runs/{{run_id}}/artifacts', response_model=ArtifactList, tags=['content'])
-def list_artifacts(run_id: int, api: BackendDep):
+def list_artifacts(run_id: RunId, api: BackendDep):
     return ArtifactList(artifacts=api.list_artifacts(run_id))
 
 
 @app.get(f'{PREFIX}/runs/{{run_id}}/artifacts/{{name}}', tags=['content'], response_class=Response,
          responses={200: {'content': {'application/zip': {}}}})
-def download_artifact(run_id: int, name: str, api: BackendDep):
+def download_artifact(run_id: RunId, name: str, api: BackendDep):
     return Response(api.artifact_zip(run_id, name), media_type='application/zip',
                     headers={'Content-Disposition': f'attachment; filename="{name}.zip"'})

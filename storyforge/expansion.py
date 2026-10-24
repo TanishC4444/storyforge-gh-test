@@ -82,9 +82,13 @@ def collect(source,out):
         # Only top-level scene jobs, not their repeated upstream input artifacts.
         job=p.relative_to(root).parts[0]
         if re.fullmatch(r's\d+_(draft|edit|repair)',job):previews[job]=load(p)
-    ids=sorted({j.split('_')[0] for j in previews})
+    ids=sorted({j.split('_')[0] for j in previews} | {f's{i+1:02}' for i in range(len(accepted))})
     sections=[]
     for sid in ids:
+        position=int(sid[1:])-1
+        if not any(sid+'_'+phase in previews for phase in ['repair','edit','draft']):
+            sections.append((sid,accepted[position]['prose'],'reviewed'))
+            continue
         item=next(previews[sid+'_'+phase] for phase in ['repair','edit','draft'] if sid+'_'+phase in previews)
         position=int(sid[1:])-1
         known=accepted[position] if position<len(accepted) else None

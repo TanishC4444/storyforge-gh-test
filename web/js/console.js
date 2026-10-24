@@ -8,15 +8,6 @@ const storage = {
   set(kind, key, value) { try { (kind === 'local' ? localStorage : sessionStorage).setItem(key, value); } catch { /* blocked */ } },
 };
 
-// Record the HTTP status of the last API response so it can be shown next to the body.
-let lastStatus = null;
-const nativeFetch = window.fetch.bind(window);
-window.fetch = async (...args) => {
-  const response = await nativeFetch(...args);
-  lastStatus = response.status;
-  return response;
-};
-
 $('c-api').value = new URLSearchParams(location.search).get('api') || storage.get('local', 'sf.api') || 'http://localhost:8000';
 $('c-token').value = storage.get('session', 'sf.token');
 
@@ -114,15 +105,16 @@ for (const button of document.querySelectorAll('[data-call]')) {
     const started = performance.now();
     button.disabled = true;
     let label = button.textContent;
+    let api;
     try {
-      const [name, promise] = calls[button.dataset.call](client());
+      const [name, promise] = calls[button.dataset.call](api = client());
       label = name;
       $('c-status').textContent = `${label} …`;
       $('c-status').className = '';
       const body = await promise;
-      show(label, lastStatus, Math.round(performance.now() - started), body ?? '(empty body)', true);
+      show(label, api.lastStatus, Math.round(performance.now() - started), body ?? '(empty body)', true);
     } catch (err) {
-      show(label, err.status || lastStatus, Math.round(performance.now() - started), { error: err.message, status: err.status }, false);
+      show(label, err.status ?? api?.lastStatus ?? null, Math.round(performance.now() - started), { error: err.message, status: err.status }, false);
     } finally {
       button.disabled = false;
     }
