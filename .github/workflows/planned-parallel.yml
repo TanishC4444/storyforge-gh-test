@@ -45,7 +45,7 @@ jobs:
       if: ${{ inputs.fresh_run != '' }}
       uses: actions/download-artifact@v4
       with:
-        pattern: '{planned-lock,planned-write-*}'
+        pattern: '{planned-lock,planned-write-*,planned-check-*}'
         run-id: ${{ inputs.fresh_run }}
         github-token: ${{ github.token }}
         path: inputs/previous

@@ -36,6 +36,22 @@ class FreshAndParallelTests(unittest.TestCase):
                     pp.refine(restored,c['id'],p/'descriptions'/c['id'],'worker')
                     scene=pp.write(restored,c['id'],p/'new-drafts'/c['id'],'worker')
                     self.assertEqual(scene['prose'],texts[c['id']]);self.assertEqual(scene['status'],'unreviewed')
+    def test_global_packet_retains_every_fact_without_repeating_source_paragraphs(self):
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d);bundle=pp.prepare('hard-chronology',p/'prepared');bundle=pp.outline(bundle,p/'outline','fixture')
+            scenes={}
+            for c in bundle['plan']['scenes']:
+                prose='The rain struck the quay. '*200
+                facts=[{'kind':'event','text':'Recorded fact '+str(i),'known_by':['c01'],'evidence_ids':['p001'],'evidence':prose,'evidence_spans':[{'id':'p001','start':0,'end':len(prose)}]} for i in range(20)]
+                scenes[c['id']]={'scene_id':c['id'],'prose':prose,'memory':{'memories':facts}}
+            seen={}
+            def capture(bundle,out,role,packet,instruction,schema,validate,backend,fixture,**kw):
+                seen.update(packet);return validate(fixture)
+            with patch('storyforge.planned_parallel.call',side_effect=capture):pp.assess(bundle,scenes,p/'review','fixture',True)
+            self.assertEqual(sum(len(s['extracted_memory']['memories']) for s in seen['actual_scenes']),80)
+            self.assertTrue(all('evidence' not in f and f['evidence_ids']==['p001'] for s in seen['actual_scenes'] for f in s['extracted_memory']['memories']))
+            self.assertLess(len(json.dumps(seen)),bundle['request']['context_chars'])
+            self.assertTrue(all(len(s['memory']['memories'])==20 and s['memory']['memories'][0]['evidence'] for s in scenes.values()))
     def test_existing_cast_alias_is_normalized_without_overwriting_profile(self):
         req={'characters':[{'id':'c05','name':'Nadi Vale','goal':'Immutable goal.'}]}
         proposal={'new_characters':[{'id':'c05','name':'Nadi Vale','goal':'Wrong replacement goal.'}]}

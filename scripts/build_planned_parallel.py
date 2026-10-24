@@ -8,7 +8,7 @@ def build():
     jobs=graph['jobs']
     def job(key,task,needs,downloads=(),matrix=False,outputs=False):
         steps=[{'uses':'actions/checkout@v4'},{'uses':'./.github/actions/setup-worker','with':{'backend':'${{ inputs.backend }}','hosted-only':'true'}}]
-        if key=='prepare':steps.append({'name':'Import saved board and drafts for fresh review','if':"${{ inputs.fresh_run != '' }}",'uses':'actions/download-artifact@v4','with':{'pattern':'{planned-lock,planned-write-*}','run-id':'${{ inputs.fresh_run }}','github-token':'${{ github.token }}','path':'inputs/previous'}})
+        if key=='prepare':steps.append({'name':'Import saved board and drafts for fresh review','if':"${{ inputs.fresh_run != '' }}",'uses':'actions/download-artifact@v4','with':{'pattern':'{planned-lock,planned-write-*,planned-check-*}','run-id':'${{ inputs.fresh_run }}','github-token':'${{ github.token }}','path':'inputs/previous'}})
         steps += [{'uses':'actions/download-artifact@v4','with':{'name':name,'path':'inputs/'+alias}} for name,alias in downloads]
         if key in {'lock','audit','publish'}:
             pattern={'lock':'planned-description-*','audit':'planned-check-*','publish':'planned-patch-*'}[key]

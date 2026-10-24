@@ -36,11 +36,16 @@ def prepare(name,out,resume_source=None):
     if resume_source:
         previous=Path(resume_source);old=load(previous/'planned-lock/bundle.json')
         require(old['brief_hash']==bundle['brief_hash'],'Parallel fresh import brief mismatch')
-        bundle['board']=old['board'];bundle['recovered_parallel_drafts']={}
+        bundle['board']=old['board'];bundle['recovered_parallel_drafts']={};bundle['recovered_parallel_checks']={}
         for p in previous.glob('planned-write-*/scene.json'):
             scene=load(p);require(scene['brief_hash']==bundle['brief_hash'] and scene['source_sha256']==digest(scene['prose']),'Changed parallel source draft')
             bundle['recovered_parallel_drafts'][scene['scene_id']]={'prose':scene['prose'],'source_sha256':scene['source_sha256']}
         require(len(bundle['recovered_parallel_drafts'])==len(bundle['plan']['scenes']),'Incomplete parallel draft import')
+        for p in previous.glob('planned-check-*/scene.json'):
+            scene=load(p);sid=scene['scene_id'];original=bundle['recovered_parallel_drafts'].get(sid,{})
+            if scene.get('brief_hash')==bundle['brief_hash'] and scene.get('review',{}).get('pass') and not scene['review'].get('unverified') and scene.get('reviewed_sha256')==digest(scene['prose'])==original.get('source_sha256') and scene.get('memory_sha256')==fingerprint(scene.get('memory')):
+                delta(scene['memory'],scene['prose'],[c['id'] for c in req['characters']])
+                bundle['recovered_parallel_checks'][sid]=scene
     save(out/'bundle.json',bundle)
     if os.getenv('GITHUB_OUTPUT'):
         with open(os.environ['GITHUB_OUTPUT'],'a') as f:f.write('scenes='+json.dumps([c['id'] for c in bundle['plan']['scenes']])+'\n')
@@ -154,14 +159,22 @@ def assess(bundle,scenes,out,backend,global_check=False):
         return v
     first=next(iter(allowed))
     fixture={'pass':True,'checks':{k:{'verdict':'pass','evidence_ids':[first],'reason':'Synthetic transport test only.'} for k in CHECKS},'issues':[]}
-    packet={'author_brief':bundle['request'],'full_initial_memory':bundle['initial_memory'],'locked_proposed_board':bundle['board'],'required_checks':CHECKS,'actual_scenes':[{'scene_id':s['scene_id'],'source':[{'id':s['scene_id']+':'+p['id'],'text':p['text']} for p in payload(s['prose'])['evidence_passages']],'extracted_memory':s.get('memory')} for s in scenes.values()]}
+    # Keep every atomic fact and all source IDs. Exact paragraph text appears
+    # ONCE in source, not once again for every memory citing that paragraph.
+    req=bundle['request'];brief={k:req[k] for k in ['premise','world_rules','pov','style','quality_contract','chapter_contract','medium','scene_designs','plot_design']}
+    brief['characters']=[{k:c[k] for k in ['id','name','goal','voice'] if k in c} for c in req['characters']]
+    packet={'author_brief':brief,'full_initial_memory':bundle['initial_memory'],'locked_proposed_board':bundle['board'],'required_checks':CHECKS,'actual_scenes':[{'scene_id':s['scene_id'],'source_sha256':digest(s['prose']),'source':[{'id':s['scene_id']+':'+p['id'],'text':p['text']} for p in payload(s['prose'])['evidence_passages']],'extracted_memory':{'memories':[{k:v for k,v in f.items() if k not in {'evidence','evidence_spans','evidence_match'}} for f in s.get('memory',{}).get('memories',[])]}} for s in scenes.values()]}
+    save(out/'input-size.json',{'packet_characters':len(json.dumps(packet)),'fact_count':sum(len(s.get('memory',{}).get('memories',[])) for s in scenes.values()),'source_paragraphs':sum(len(payload(s['prose'])['evidence_passages']) for s in scenes.values())})
     return call(bundle,out,'chapter_quality',packet,
         ('Independently check the COMPLETE actual story in reading order and event time. Planned handoffs are not evidence; compare the actual scenes against each other. ' if global_check else 'Check this actual scene against its author task and branch entry assumptions. Later global review must establish that neighboring prose enacts those assumptions. ')+
         'Assess every required dimension with exact supplied scene:passage IDs. Check all initial facts, limited resources, custody, names, private knowledge and source-supported memory records. Distinguish flashbacks from present events and reader knowledge from character knowledge. Historical locations are not current arrivals; an explicit earlier time permits earlier state. Look for repeated discoveries, decorative tension, inconsistent POV, weak agency and unearned twists. Early scenes need meaningful setup, not the final climax. Preserve author freedom; do not invent a hidden required solution. Every failing check needs a specific repair finding in the correct scene. PASS only if every dimension passes. Return only the requested review schema; do not add or omit dimensions.',
         schema,validate,backend,fixture,tokens=4200)
 
 
-def check_scene(bundle,scene,out,backend):
+def check_scene(bundle,scene,out,backend,force=False):
+    previous=bundle.get('recovered_parallel_checks',{}).get(scene['scene_id'])
+    if not force and previous and previous['reviewed_sha256']==digest(scene['prose']):
+        value={**previous,'reused_verified_check':True};save(out/'scene.json',value);save(out/'prose.txt',value['prose']);return value
     sid=scene['scene_id'];prose=scene['prose'];req=bundle['request']
     card=next(c for c in bundle['plan']['scenes'] if c['id']==sid)
     packet={**payload(prose),'characters':[c['id'] for c in req['characters']],'character_registry':[{'id':c['id'],'name':c['name']} for c in req['characters']],'prior_canon':bundle['initial_memory'],'branch_entry_conditions':next(s for s in bundle['board']['scenes'] if s['scene_id']==sid)}
@@ -190,7 +203,7 @@ def patch(bundle,scene,audit_value,out,backend):
     # Correct extraction-only errors without rewriting valid narrative.
     if any(f['category']!='memory_extraction' for f in findings):
         scene=write(bundle,scene['scene_id'],out/'revision',backend,scene['prose'],findings)
-    return check_scene(bundle,scene,out,backend)
+    return check_scene(bundle,scene,out,backend,force=True)
 
 
 def publish(bundle,source,out,backend):
