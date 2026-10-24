@@ -3,7 +3,7 @@ name: Rebuild RAG index
 on:
   workflow_dispatch:
   push:
-    branches: [rag-gemini-embeddings]
+    branches: [main, rag-gemini-embeddings]
     paths:
       - 'rag/**'
       - 'data/literary-corpus.json'
