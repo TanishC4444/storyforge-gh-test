@@ -49,10 +49,11 @@ class MemoryBatchTests(unittest.TestCase):
             m.plan(s,p,p/'plan','preflight')
             with patch('storyforge.inference.Executor.call',side_effect=AssertionError('No unverifiable call')):
                 self.assertTrue(m.check(s,c,p,p/'unavailable','worker','0')['review']['unverified'])
-    def test_final_memory_cannot_reopen_style_or_prose_review_and_source_is_bound(self):
+    def test_late_prose_finding_is_preserved_as_failure_and_source_is_bound(self):
         with tempfile.TemporaryDirectory() as d:
             p=Path(d);s,c=self.scene(p);prose,plan=self.make_inputs(p,s,'final')
             issue={'severity':'blocking','category':'style','quote':'Paragraph 1 records an action.','problem':'Imagery repeats.','fix':'Rewrite simile.','target':'prose'}
-            with self.assertRaises(ContractError):m.validate({'pass':False,'issues':[issue]},prose,plan['batches'][0],'final')
+            result=m.validate({'pass':False,'issues':[issue]},prose,plan['batches'][0],'final')
+            self.assertFalse(result['pass']);self.assertTrue(result['issues'][0]['outside_requested_scope']);self.assertFalse(result.get('unverified',False))
             save(p/'edited/prose.txt',prose+' Changed.')
             with self.assertRaises(ContractError):m.check(s,c,p,p/'stale','fixture','0')

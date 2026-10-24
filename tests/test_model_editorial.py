@@ -79,6 +79,24 @@ class ModelEditorialTests(unittest.TestCase):
             self.assertEqual(received[0]['evidence_passages'][0]['text'],'First action.')
             save(p/'edited/prose.txt',text+' Changed.')
             with self.assertRaises(ContractError):sr.join_summaries(s,p,p/'stale')
+    def test_short_replacement_is_assessed_with_compiled_scene_length(self):
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d);s,c=self.scene(p);s['request']['words_per_scene']=350
+            s['request']['min_words_ratio']=.8;s['request']['max_words_ratio']=1.3
+            s['request']['length_policy']={'scene_words':'strict'}
+            text='\n\n'.join(' '.join(['Action'+str(i)]+['moves']*49) for i in range(7))
+            batch={'id':'0','owned':['p007'],'passages':[{'id':'p006','text':b.passages(text)[5]['text']},{'id':'p007','text':b.passages(text)[6]['text']}],'findings':{'p007':[{'category':'climax','problem':'No payoff','fix':'Enact the consequence.'}]},'allow_deletions':True,'source_sha256':b.digest(text)}
+            save(p/'input/plan/prose.txt',text);save(p/'input/plan/repair-plan.json',{'state_sha256':b.bind_state(s),'source_sha256':b.digest(text),'batches':[batch]})
+            replacement=' '.join(['Consequence']+['unfolds']*148);seen=[]
+            def model(executor,role,packet,instruction,**kw):
+                if 'candidate_patch' in packet:
+                    seen.append(packet);self.assertEqual(packet['compiled_scene_words'],449)
+                    self.assertEqual(packet['assessment_scope'],'paragraph_patch');self.assertEqual(len(packet['context_passages']),2)
+                    return kw['validator']('PASS | The replacement enacts the consequence without changing the earlier action.')
+                return kw['validator']('REPLACE p007\n'+replacement+'\nEND_REPLACE')
+            with patch('storyforge.inference.Executor.call',autospec=True,side_effect=model):b.repair_batch(s,c,p/'input',p/'result','worker','0')
+            result=load(p/'result/repair-batch.json');self.assertFalse(result['unverified']);self.assertEqual(len(seen),1)
+            self.assertEqual(result['replacements']['p007'],replacement)
     def test_source_extraction_recovery_corrects_only_failed_batch(self):
         with tempfile.TemporaryDirectory() as d:
             p=Path(d);s,c=self.scene(p);text='The smith refuses.\n\nThe tide rises.';save(p/'edited/prose.txt',text)

@@ -11,6 +11,27 @@ from storyforge.provider_recovery import configuration
 
 class StressRecoveryTests(unittest.TestCase):
     def req(self):return request(json.loads(Path('examples/stress-screenplay.json').read_text()))
+    def test_distant_memory_citations_keep_exact_spans_and_blocking_verdict(self):
+        from storyforge.editorial_transport import factual_ids
+        prose='Mara holds two tokens.\n\nThe river rises.\n\nMara gives away three tokens.'
+        v=factual_ids('FAIL\nISSUE blocking | prose | resources | p003,p001 | More tokens spent than held. | Preserve the established inventory.',prose,{'p001','p003'})
+        issue=v['issues'][0];self.assertFalse(v['pass']);self.assertEqual(issue['target'],'prose')
+        self.assertEqual(issue['evidence_ids'],['p001','p003']);self.assertEqual(issue['quote'],'Mara holds two tokens.')
+        for span in issue['evidence_spans']:self.assertEqual(prose[span['start']:span['end']],span['text'])
+        with self.assertRaises(ContractError):factual_ids('FAIL\nISSUE blocking | prose | resources | p002 | Wrong count. | Fix it.',prose,{'p001','p003'})
+    def test_fact_review_policy_does_not_reopen_literary_climax(self):
+        from storyforge.review_policy import prepare
+        req=self.req();_,_,policy=prepare(req,'memory_quality',{'check_phase':'final'},'',Path('.'))
+        self.assertIn('extraction only',policy);self.assertNotIn('check that the promised climax',policy)
+        packet,_,policy=prepare(req,'story_quality',{'assessment_scope':'paragraph_patch'},'',Path('.'))
+        self.assertIn('Never compare replacement-only length',policy);self.assertIn('author_review_contract',packet)
+    def test_fact_checks_receive_listener_context_without_changing_ownership(self):
+        from storyforge.memory_batches import evidence_context
+        from storyforge.evidence import passages
+        prose='Mara and Ivo stand beside Sera.\n\nSera opens the ledger.\n\nSera reads the altered date aloud.'
+        facts=[{'evidence_ids':['p003'],'known_by':['c01','c02','c03']}];original=copy.deepcopy(facts)
+        evidence=evidence_context(passages(prose),[],facts)
+        self.assertEqual([p['id'] for p in evidence],['p001','p002','p003']);self.assertEqual(facts,original)
     def test_location_metadata_can_be_removed_without_overwriting_life_or_location(self):
         req=self.req();prose='Mara stands at the quay with two tokens.'
         old={'id':'m1','kind':'event','fact_key':'location:c01','text':'Mara starts at the quay.','known_by':['c01']}

@@ -25,6 +25,12 @@ def prepare(req,role,packet,skill,root):
     rules=contract(req)
     # Supplied packets cannot replace application-owned reviewer instructions.
     packet={**packet,'author_review_contract':rules}
+    if role=='memory_quality' and packet.get('check_phase') in {'preflight','final'}:
+        # Literary instructions used to make fact workers reopen the climax and
+        # style reviews, then fail their own facts-only response contract.
+        policy='''Verify only the requested factual partition against supplied source evidence and canon. Preserve uncertainty, individual knowledge, resource counts, lifecycle changes and supersession. Historical facts are not necessarily current facts. Planned future events are not established facts. Never invent an omitted record or require a literary climax, style change, different genre or longer prose. Missing or inaccurate extraction targets memory; never rewrite prose to justify extraction. Only a preflight continuity task may report a demonstrated prose contradiction in its owned passages. Final facts and coverage tasks assess extraction only. Preserve every demonstrated finding and use the requested evidence protocol. The application-owned author contract governs factual constraints, not additional editorial tasks.'''
+        policy+=' Author contract (application-owned). Form: '+rules['nonnegotiable_form']+' Missing quoted speech is not itself a failure. During formatting repair preserve judgments; during substantive factual assessment either pass or fail remains possible.'
+        return packet,skill or 'Verify facts, source evidence and knowledge boundaries.',policy
     if not skill:
         name={'story_quality':'story_quality','chapter_quality':'story_quality',
               'rhetoric_quality':'rhetoric_quality','memory_quality':'memory_quality'}.get(role)
@@ -41,4 +47,6 @@ During formatting-only repair, preserve judgments and reasons; do not conduct a 
 Author contract (application-owned) is in author_review_contract in the input. Form: '''+rules['nonnegotiable_form']
     if req.get('performance',{}).get('pipelined_living'):
         policy+='\n'+'Resource purpose matters as much as quantity: a ferry passage token is not automatically a door toll, a key or currency. Require an established conversion or rule before a resource changes function. Every decrease must follow an enacted expenditure, never an inferred payment between scenes. Genre fidelity requires developing the supplied central premise; do not approve a fairy tale about a river spirit and missing sunrise merely because its prose resolves a mundane ledger dispute. For an episode-ending scene, check that the promised climax and immediate consequential choice occur on the page; a clue alone is not resolution when the brief requests a climax. In audio scripts, decisive evidence must be audible or spoken, not accessible only through silent looking or visual stage directions.'
+    if packet.get('assessment_scope')=='paragraph_patch':
+        policy+='\nThis is a paragraph patch assessment, not a complete scene. Candidate passages are only the owned replacements. The application supplies the compiled scene word count and validates full-scene length separately. Never compare replacement-only length against the scene word target. Read unchanged neighboring passages as context; assess whether the changes resolve the specific findings and preserve causality, facts and voice.'
     return packet,skill,policy

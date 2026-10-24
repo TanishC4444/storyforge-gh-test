@@ -60,16 +60,32 @@ def inputs(state,source):
     return p,prose,memory
 
 
-def validate(value,prose,batch,phase):
+def validate(value,prose,batch,phase,allowed=None):
     value=review(value,prose);catalog=passages(prose)
     for issue in value['issues']:
         require(issue.get('target') in {'memory','prose'},'Memory issue requires target')
-        require(phase=='preflight' or issue['target']=='memory','Final memory check assesses facts only; prose belongs to final adjudication')
         if issue['target']=='prose':
-            ids=[p['id'] for p in catalog if issue['quote'] in p['text']] or issue.get('evidence_ids',[])
-            require(bool(set(ids)&set(batch['owned_passages'])),'Prose issue outside owned memory batch')
-            issue['evidence_ids']=[pid for pid in ids if pid in batch['owned_passages']]
+            ids=issue.get('evidence_ids') or [p['id'] for p in catalog if issue['quote'] in p['text']]
+            owned=set(batch['owned_passages']) if phase=='preflight' else set(allowed or batch['owned_passages'])
+            require(bool(set(ids)&owned),'Prose issue outside owned memory batch')
+            issue['evidence_ids']=[pid for pid in ids if pid in owned]
+            if phase=='final':
+                # Preserve late findings and their original verdict rather than
+                # losing them as a transport error or silently granting approval.
+                issue['outside_requested_scope']=True
     return value
+
+
+def evidence_context(catalog,owned,facts):
+    ids=set(owned)|{pid for f in facts for pid in f.get('evidence_ids',[])}
+    # Fact quotations alone omit entrances and listeners established earlier in
+    # the conversation. Supply their coherent source window as read-only context;
+    # factual ownership and canon partitions remain unchanged.
+    for group in windows(catalog,450):
+        if any(p['id'] in ids for p in group):
+            ids.update(p['id'] for p in group)
+    positions=[i for i,p in enumerate(catalog) if p['id'] in ids]
+    return [p for i,p in enumerate(catalog) if any(abs(i-j)<=1 for j in positions)]
 
 
 def check(state,card,source,out,backend,bid):
@@ -91,9 +107,8 @@ def check(state,card,source,out,backend,bid):
               'proposed_memory':{'memories':facts},'check_phase':p['phase']}
         text_mode=state['request'].get('performance',{}).get('memory_pair_batches')
         if text_mode:
-            catalog=passages(prose);ids={pid for f in facts for pid in f.get('evidence_ids',[])}|set(batch['owned_passages'])
-            positions=[i for i,x in enumerate(catalog) if x['id'] in batch['owned_passages']]
-            evidence=[x for i,x in enumerate(catalog) if x['id'] in ids or any(abs(i-j)<=1 for j in positions)]
+            catalog=passages(prose)
+            evidence=evidence_context(catalog,batch['owned_passages'],facts)
             prior=memory_canon(state)
             if batch['task'] in {'continuity','coverage'}:
                 facts=[{'index':i,**{k:v for k,v in f.items() if k in {'kind','text','known_by','holder','claim_source','continuity_scope','literary_status','subject','life_state','thread_id','thread_state','fact_key','supersedes','evidence_ids'}}} for i,f in enumerate(memory['memories']) if set(f.get('evidence_ids',[])) & set(batch['owned_passages'])]
@@ -112,7 +127,7 @@ def check(state,card,source,out,backend,bid):
                 'Verify every supplied fact, uncertainty, chronology and knowledge holder against actual prose and established canon. Other paragraphs are read-only context. Never rewrite prose to make a false extraction true. '+mode+
                 'Do not flag stylistic repetition or require changes contrary to the author brief. A passing result may contain advisory issues only. '+
                 (('Return PASS or FAIL, followed only when necessary by lines: ISSUE blocking/advisory | memory/prose | category | p001,p002 source IDs | specific problem | specific fix. Use existing supplied IDs, never write quotes. No JSON.' if id_mode else 'Return PASS or FAIL, followed only when necessary by lines: ISSUE blocking/advisory | memory/prose | category | exact source quote | specific problem | specific fix. No JSON.') if text_mode and backend!='fixture' else 'Return pass and issues with exact source quotations, target memory or prose, and specific fixes.'),
-                validator=lambda v:validate(factual_ids(v,prose,{x['id'] for x in evidence}) if id_mode and text_mode and backend!='fixture' else factual(v,prose),prose,batch,p['phase']),**options)
+                validator=lambda v:validate(factual_ids(v,prose,{x['id'] for x in evidence}) if id_mode and text_mode and backend!='fixture' else factual(v,prose),prose,batch,p['phase'],{x['id'] for x in evidence} if text_mode else None),**options)
         except Exception as exc:verdict={'pass':False,'issues':[],'unverified':True,'error':str(exc)}
     value={'id':bid,'plan_sha256':bind_state(p),'review':verdict}
     save(Path(out)/'memory-check-batch.json',value);return value
