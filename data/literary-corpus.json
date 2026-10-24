@@ -270,7 +270,13 @@
         ],
         "unresolved_input_citation_markers": [
           "[cite: 1, 2]"
-        ]
+        ],
+        "enrichment": {
+          "version": "story-detail-v1",
+          "model": "gemini-3.8-flash",
+          "verification_status": "model_knowledge_draft",
+          "date": "2026-10-24"
+        }
       },
       "notes": [
         "The earlier extended analysis uses the Olcott-edited English telling; other Grimm editions differ."
@@ -452,7 +458,48 @@
         "survival_and_scarcity"
       ],
       "narrative_mechanism": "false_refuge",
-      "location": null
+      "location": null,
+      "summary": "During a severe famine, a woodcutter and his wife abandon their two children, Hansel and Gretel, in the deep forest. After following a trail of white pebbles back home the first time, a second abandonment leaves the children stranded when birds eat their breadcrumb trail. Wandering hungry, they encounter a house made of gingerbread and sugar inhabited by a cannibalistic witch who cages Hansel to fatten him up and enslaves Gretel. When the witch prepares to bake them, Gretel outwits her by shoving her into the fiery oven, and the children escape with her hoard of jewels to reunite with their now-widowed father.",
+      "genre": [
+        "Fairy tale",
+        "Folklore"
+      ],
+      "key_ideas": [
+        "Extreme deprivation strains familial loyalty and moral duty.",
+        "Ingenuity and mutual cooperation can overcome physically superior adversaries.",
+        "Greed and consumer temptation conceal existential threats."
+      ],
+      "main_characters": [
+        "Hansel: Resourceful older brother",
+        "Gretel: Observant sister who defeats the witch",
+        "The Woodcutter: Weak-willed, impoverished father",
+        "The Stepmother: Cold instigator of the abandonment",
+        "The Witch: Cannibalistic crone living in a confection house"
+      ],
+      "plot": {
+        "context": "A rural cottage on the verge of starvation during a regional famine, forcing parents to choose between their own survival and feeding their children."
+      },
+      "subplots": {
+        "threads": [
+          "The first failed abandonment using moonlit pebbles",
+          "Hansel's trick of offering a dried bone instead of a finger to feign leanness",
+          "The crossing of a wide body of water with the help of a helpful duck on the return journey"
+        ]
+      },
+      "tone_mood": "Dark, suspenseful, and ultimately triumphant",
+      "detail_and_sensory": {
+        "documented_cues": [
+          "Gleaming white pebbles shining in the moonlight",
+          "Roofed cottage built of gingerbread and window panes of clear sugar",
+          "A thin, dry chicken bone extended through iron cage bars",
+          "Roaring heat from the mouth of the brick bake-oven"
+        ],
+        "coverage": "Model-drafted from general knowledge of the best-known version; verify before quoting."
+      },
+      "adaptability": "Transfers readily into survival thrillers, dystopias where resource scarcity drives social abandonment, or horror narratives centered on predatory hospitality.",
+      "references": {
+        "version_notes": "Follows the Brothers Grimm final edition (KHM 15), featuring the wicked stepmother and the waterfowl crossing; earlier versions featured the biological mother."
+      }
     },
     {
       "id": "work_002",
@@ -475,7 +522,13 @@
         "source_ids": [],
         "unresolved_input_citation_markers": [
           "[cite: 1, 2]"
-        ]
+        ],
+        "enrichment": {
+          "version": "story-detail-v1",
+          "model": "gemini-3.8-flash",
+          "verification_status": "model_knowledge_draft",
+          "date": "2026-10-24"
+        }
       },
       "notes": [],
       "retrieval": {
@@ -493,7 +546,48 @@
         "trust_and_betrayal"
       ],
       "narrative_mechanism": "predator_impersonation",
-      "location": null
+      "location": null,
+      "summary": "A young girl named Little Red-Cap is sent by her mother to deliver wine and cake to her sick grandmother in the woods, with strict instructions to stay on the main path. Along the way, a cunning wolf intercepts her, coaxes her into straying off the trail to pick flowers, and rushes ahead to swallow the grandmother whole. Disguised in the grandmother's cap and bedclothes, the wolf then dupes and devours the arriving girl. A passing huntsman notices the creature snoring, shears open the sleeping beast's stomach with shears to rescue both survivors unharmed, and fills the hollow belly with heavy stones that kill the wolf when it awakes.",
+      "genre": [
+        "Fairy tale",
+        "Fable",
+        "Cautionary tale"
+      ],
+      "key_ideas": [
+        "Disobedience to maternal instruction exposes youth to predatory dangers.",
+        "Predators use flattery and disguise to mask destructive intentions.",
+        "Vigilance and external intervention can reverse catastrophe."
+      ],
+      "main_characters": [
+        "Little Red-Cap: Naive young girl",
+        "The Wolf: Manipulative apex predator",
+        "The Grandmother: Sickly elder dwelling isolated in the woods",
+        "The Huntsman: Observant rescuer",
+        "The Mother: Protective parent giving protective warnings"
+      ],
+      "plot": {
+        "context": "A rustic village adjacent to an ancient forest, where a vulnerable child must carry medicinal provisions to an isolated relative."
+      },
+      "subplots": {
+        "threads": [
+          "The lingering diversion in the meadow to gather wildflowers",
+          "A secondary coda in Grimm where the girl encounters a second wolf and drowns it with sausage water"
+        ]
+      },
+      "tone_mood": "Foreboding, didactic, and restorative",
+      "detail_and_sensory": {
+        "documented_cues": [
+          "A cape of red velvet",
+          "A wicker basket carrying cake and an earthen bottle of wine",
+          "Sunbeams dancing through the woodland canopy onto blooming flowers",
+          "The wolf's hairy ears, large eyes, clutching hands, and terrible maw"
+        ],
+        "coverage": "Model-drafted from general knowledge of the best-known version; verify before quoting."
+      },
+      "adaptability": "Translates directly to modern predator alerts, coming-of-age allegories, urban crime dramas, or psychological thrillers dealing with false trust.",
+      "references": {
+        "version_notes": "Follows Brothers Grimm (KHM 26), which includes the huntsman rescue and stone-stuffing ending, unlike Charles Perrault's moralistic tale where the girl is eaten with no rescue."
+      }
     },
     {
       "id": "work_003",
@@ -516,7 +610,13 @@
         "source_ids": [],
         "unresolved_input_citation_markers": [
           "[cite: 2]"
-        ]
+        ],
+        "enrichment": {
+          "version": "story-detail-v1",
+          "model": "gemini-3.8-flash",
+          "verification_status": "model_knowledge_draft",
+          "date": "2026-10-24"
+        }
       },
       "notes": [],
       "retrieval": {
@@ -534,7 +634,47 @@
         "love_and_attachment"
       ],
       "narrative_mechanism": "restricted_access",
-      "location": null
+      "location": null,
+      "summary": "A pregnant woman craves rampion from the walled garden of the sorceress Dame Gothel, driving her husband to trespass and barter away their unborn child in exchange for the herb. Dame Gothel claims the infant girl, names her Rapunzel, and at age twelve imprisons her in an isolated, doorless tower in the forest, ascending daily via the girl's long, golden braids. A passing prince hears Rapunzel singing, discovers the sorceress's secret incantation to climb the tower, and courts Rapunzel in secret until Dame Gothel discovers their tryst. The enraged sorceress shears Rapunzel's hair, exiles her to a barren wasteland, and lures the prince to climb the severed braids, driving him to jump in despair and blind himself on forest thorns until his wanderings reunite him with Rapunzel, whose tears restore his sight.",
+      "genre": [
+        "Fairy tale",
+        "Romance"
+      ],
+      "key_ideas": [
+        "Parental indiscretions and illicit desires can forfeit a child's freedom.",
+        "Overprotective isolation invites catastrophic rebellion.",
+        "Enduring loyalty and suffering can bring restoration after tragic loss."
+      ],
+      "main_characters": [
+        "Rapunzel: Cloistered maiden with golden hair and a melodic voice",
+        "Dame Gothel: Possessive sorceress guarding her isolation",
+        "The Prince: Enamored royal seeker who falls into blindness",
+        "Rapunzel's Father: Desperate husband who trades his child for food"
+      ],
+      "plot": {
+        "context": "A high, doorless stone tower deep in the wilderness, maintained by a powerful enchantress to sever a maiden from the outside world."
+      },
+      "subplots": {
+        "threads": [
+          "The theft of rampion salad greens across a high garden wall",
+          "Rapunzel giving birth to twins in exile during her wilderness period",
+          "The prince wandering blind and subsisting on roots and berries"
+        ]
+      },
+      "tone_mood": "Melancholic, romantic, and redemptive",
+      "detail_and_sensory": {
+        "documented_cues": [
+          "Crisp, verdant green leaves of fresh rampion",
+          "Twenty yards of spun-gold, braided tresses",
+          "The wind whistling through a single high window in a stone cylinder",
+          "Sharp forest briars piercing sightless eyes"
+        ],
+        "coverage": "Model-drafted from general knowledge of the best-known version; verify before quoting."
+      },
+      "adaptability": "Applies directly to captive-custody drama, abusive helicopter parenting narratives, cyber-isolation stories, or long-distance forbidden romances.",
+      "references": {
+        "version_notes": "Follows the Brothers Grimm 1857 edition (KHM 12); the 1812 edition explicitly reveals the affair when Rapunzel notices her clothes tightening around her pregnant waist."
+      }
     },
     {
       "id": "work_004",
@@ -558,7 +698,13 @@
         "source_ids": [],
         "unresolved_input_citation_markers": [
           "[cite: 2]"
-        ]
+        ],
+        "enrichment": {
+          "version": "story-detail-v1",
+          "model": "gemini-3.8-flash",
+          "verification_status": "model_knowledge_draft",
+          "date": "2026-10-24"
+        }
       },
       "notes": [],
       "retrieval": {
@@ -577,7 +723,47 @@
         "reciprocity_and_promises"
       ],
       "narrative_mechanism": "escalating_price",
-      "location": null
+      "location": null,
+      "summary": "A poor miller seeking status falsely brags to the king that his daughter can spin ordinary straw into pure gold, prompting the monarch to lock her in a room under penalty of death. Desperate and weeping, the girl is saved by a strange impish man who performs the miraculous transformation across three nights in exchange for her necklace, her ring, and finally the promise of her firstborn child. Now married to the king, the new queen gives birth and begs to keep her baby; the imp relents on the condition that she discover his name within three days. After sending messengers across the kingdom, a scout discovers the creature dancing around a nocturnal bonfire chanting his name, allowing the queen to declare it and drive an enraged Rumpelstiltskin to tear himself in two.",
+      "genre": [
+        "Fairy tale",
+        "Folklore"
+      ],
+      "key_ideas": [
+        "Reckless boasts impose life-threatening obligations on innocents.",
+        "Unchecked greed exploits desperation through extortionate bargains.",
+        "Knowledge of an antagonist's true name provides absolute mastery."
+      ],
+      "main_characters": [
+        "The Miller's Daughter / Queen: Cornered pawn who turns ruler",
+        "Rumpelstiltskin: Demonic imp possessing supernatural craft and extortionate demands",
+        "The King: Avaricious ruler demanding endless wealth",
+        "The Miller: Foolish father whose boast sparks the crisis"
+      ],
+      "plot": {
+        "context": "A royal dungeon room filled from floor to ceiling with bundles of straw, backed by a royal threat of execution if impossible wealth is not generated by dawn."
+      },
+      "subplots": {
+        "threads": [
+          "The escalating three-tier trade of personal heirlooms",
+          "The dispatching of royal messengers to collect regional names and odd monikers",
+          "The night scout witnessing the solitary mountain fire ritual"
+        ]
+      },
+      "tone_mood": "Tense, mysterious, and darkly comical",
+      "detail_and_sensory": {
+        "documented_cues": [
+          "Whirring hum of a spinning wheel operating through the night",
+          "Dry, scratchy bundles of straw turning into gleaming spools of gold wire",
+          "A leaping fire flickering high on a desolate wooded ridge",
+          "A foot stamping so hard into the earth that it sinks to the waist"
+        ],
+        "coverage": "Model-drafted from general knowledge of the best-known version; verify before quoting."
+      },
+      "adaptability": "Excellent model for predatory financial loan stories, high-stakes white-collar embezzlement concealment, or occult pacts involving true names.",
+      "references": {
+        "version_notes": "Brothers Grimm final edition (KHM 55); in the 1812 first edition, Rumpelstiltskin merely flies out of the window on a cooking ladle rather than ripping himself in two."
+      }
     },
     {
       "id": "work_005",
@@ -602,7 +788,13 @@
         "source_ids": [],
         "unresolved_input_citation_markers": [
           "[cite: 2]"
-        ]
+        ],
+        "enrichment": {
+          "version": "story-detail-v1",
+          "model": "gemini-3.8-flash",
+          "verification_status": "model_knowledge_draft",
+          "date": "2026-10-24"
+        }
       },
       "notes": [
         "Grimm/Ashputtel tradition; do not substitute Perrault's glass slipper, fairy godmother, or midnight rule without labeling the change."
@@ -623,7 +815,49 @@
         "justice_and_law"
       ],
       "narrative_mechanism": "recognition_token",
-      "location": null
+      "location": null,
+      "summary": "Following her mother's death, Ashputtel is forced by her cruel stepmother and two haughty stepsisters to sleep in the fireplace cinders and perform domestic drudgery. Rather than a fairy godmother, she receives magical aid from a white bird nesting in a hazel tree planted above her mother's grave, watered by her grief. When the king hosts a three-day festival for the prince to choose a bride, the bird provides Ashputtel with radiant gowns and slippers, allowing her to captivate the prince each evening before fleeing into hiding. When the prince pursues her with her lost golden slipper, the stepsisters cut off their heel and toe to force the fit, but carrier doves expose the bloody deceit and guide the prince to Ashputtel, ending with the stepsisters blinded by doves at the royal wedding.",
+      "genre": [
+        "Fairy tale",
+        "Folklore"
+      ],
+      "key_ideas": [
+        "Filial devotion and grief can channel protective ancestral grace.",
+        "Inherent nobility cannot be obscured by manufactured poverty.",
+        "Deceitful social climbing results in self-mutilation and poetic retribution."
+      ],
+      "main_characters": [
+        "Ashputtel: Oppressed, devout maiden",
+        "The Stepmother: Spiteful matriarch advancing her own bloodline",
+        "The Two Stepsisters: Vain rivals willing to mutilate themselves for power",
+        "The Prince: Royal pursuer seeking an authentic partner",
+        "The White Bird / Maternal Spirit: Avian protector nesting in the hazel tree"
+      ],
+      "plot": {
+        "context": "A patriarchal estate fallen under the tyrannical rule of an antagonistic second wife, where an heir is reduced to an unwashed chimney-sweep."
+      },
+      "subplots": {
+        "threads": [
+          "The father bringing home a hazel twig that Ashputtel plants and waters with her tears",
+          "The stepmother's impossible tasks of picking lentils out of the hearth ashes with help from doves",
+          "Ashputtel escaping the prince by hiding inside a pigeon house and pear tree",
+          "The stepsisters amputating portions of their feet to trick the prince"
+        ]
+      },
+      "tone_mood": "Earthy, somber, lyrical, and retributive",
+      "detail_and_sensory": {
+        "documented_cues": [
+          "Gray hearth ashes and dirty lentils scattered on the stones",
+          "Dew and tears dropping onto a budding hazel twig",
+          "A golden slipper overflowing with thick dark blood",
+          "Doves plucking out eyes during the wedding procession"
+        ],
+        "coverage": "Model-drafted from general knowledge of the best-known version; verify before quoting."
+      },
+      "adaptability": "Easily transposed to corporate underling triumph, inheritance disputes, period class warfare, or gritty psychological dramas about scapegoated family members.",
+      "references": {
+        "version_notes": "Follows the Brothers Grimm text (Aschenputtel, KHM 21); distinct from Perrault's version by lacking a fairy godmother, pumpkin carriage, or glass slippers, and retaining graphic body horror."
+      }
     },
     {
       "id": "work_006",
@@ -648,7 +882,13 @@
         "source_ids": [],
         "unresolved_input_citation_markers": [
           "[cite: 2]"
-        ]
+        ],
+        "enrichment": {
+          "version": "story-detail-v1",
+          "model": "gemini-3.8-flash",
+          "verification_status": "model_knowledge_draft",
+          "date": "2026-10-24"
+        }
       },
       "notes": [],
       "retrieval": {
@@ -667,7 +907,48 @@
         "trust_and_betrayal"
       ],
       "narrative_mechanism": "repeated_disguised_attack",
-      "location": null
+      "location": null,
+      "summary": "Envious of Snowdrop's surpassing beauty, an evil queen orders a huntsman to kill her stepdaughter, but he spares the girl, who finds refuge keeping house for seven dwarfs in the mountains. Informed by her magic mirror that Snowdrop still lives, the queen disguises herself and makes three attempts on her life, finally causing her to fall into a deathlike slumber with a poisoned apple. The dwarfs place her body in a glass coffin, which a passing prince persuades them to give him; while his servants carry it, a jolt dislodges the poisoned piece of apple from her throat and revives her. At the prince and Snowdrop's wedding, the wicked queen is forced to dance in red-hot iron shoes until she falls down dead.",
+      "genre": [
+        "Fairy tale",
+        "Folklore",
+        "Gothic fantasy"
+      ],
+      "key_ideas": [
+        "Unchecked vanity leads to self-destructive obsession.",
+        "Innocence survives through accidental fortune and community solidarity.",
+        "Retribution is exacted physically and publicly upon the abuser."
+      ],
+      "main_characters": [
+        "Snowdrop: beautiful, naive princess",
+        "The Evil Queen: vain, murderous stepmother",
+        "The Seven Dwarfs: industrious miners and protectors",
+        "The Prince: royal suitor who claims the coffin",
+        "The Huntsman: reluctant servant who spares Snowdrop"
+      ],
+      "plot": {
+        "context": "A fairy-tale kingdom where a queen's magical mirror determines the hierarchy of beauty, triggering a deadly rivalry when a young princess matures."
+      },
+      "subplots": {
+        "threads": [
+          "The huntsman deceiving the queen with boar's lungs and liver.",
+          "The queen's repeated infiltration attempts using suffocating bodice laces and a poisoned comb."
+        ]
+      },
+      "tone_mood": "Eerie, moralistic, and suspenseful.",
+      "detail_and_sensory": {
+        "documented_cues": [
+          "Drops of blood on white snow framed by black ebony",
+          "Red-and-white poisoned apple skin",
+          "Red-hot iron slippers sizzling on coals",
+          "Clear glass coffin resting on the mountain"
+        ],
+        "coverage": "Model-drafted from general knowledge of the best-known version; verify before quoting."
+      },
+      "adaptability": "Transfers seamlessly to corporate, political, or psychological thrillers where an aging mentor seeks to neutralize an emergent protege.",
+      "references": {
+        "version_notes": "Follows the Brothers Grimm text (KHM 53, Sneewittchen). Unlike modern adaptations, she is awakened by a jostled coffin rather than a romantic kiss, and the queen faces a violent execution."
+      }
     },
     {
       "id": "work_007",
@@ -690,7 +971,13 @@
         "source_ids": [],
         "unresolved_input_citation_markers": [
           "[cite: 2]"
-        ]
+        ],
+        "enrichment": {
+          "version": "story-detail-v1",
+          "model": "gemini-3.8-flash",
+          "verification_status": "model_knowledge_draft",
+          "date": "2026-10-24"
+        }
       },
       "notes": [],
       "retrieval": {
@@ -709,7 +996,48 @@
         "time_and_memory"
       ],
       "narrative_mechanism": "delayed_resolution",
-      "location": null
+      "location": null,
+      "summary": "After long longing, a king and queen celebrate the birth of their daughter Briar Rose, but they omit the thirteenth wise woman from the feast, provoking her to curse the child to die by a spindle prick at age fifteen. A twelfth wise woman softens the doom to a hundred-year sleep, and despite the king ordering all spindles burned, the princess finds an old woman spinning in a remote tower on her fifteenth birthday, pricks her finger, and falls asleep along with the entire castle. A dense hedge of briars encloses the court and ensnares prospective rescuers until the exact century elapses, turning the thorns into blooming flowers for a destined prince. He discovers Briar Rose, wakes her with a kiss, and the whole court revives to celebrate their marriage.",
+      "genre": [
+        "Fairy tale",
+        "Folklore",
+        "Romance"
+      ],
+      "key_ideas": [
+        "Fate cannot be avoided through sheltering or denial.",
+        "Time operates under supernatural cycles beyond human intervention.",
+        "Spurning social bonds or rituals invites destructive fallout."
+      ],
+      "main_characters": [
+        "Briar Rose: cursed princess destined to sleep",
+        "The Thirteenth Wise Woman: slighted guest who pronounces the curse",
+        "The Twelfth Wise Woman: softens the curse to slumber",
+        "The King and Queen: protective parents",
+        "The Prince: traveler who arrives at the appointed time"
+      ],
+      "plot": {
+        "context": "A royal kingdom rejoicing over a miraculous birth, shadowed by an inescapable supernatural decree that prompts state-wide censorship of spinning tools."
+      },
+      "subplots": {
+        "threads": [
+          "The failed attempts and gruesome deaths of earlier princes trapped in the briar wall.",
+          "The instantaneous suspension of castle domestic life, from roasting flies to sleeping horses."
+        ]
+      },
+      "tone_mood": "Dreamlike, ominous, and fateful.",
+      "detail_and_sensory": {
+        "documented_cues": [
+          "Spinning spindle whirling in a dusty tower",
+          "Sharp wall of dense, impenetrable briar thorns",
+          "Fresh pink blossoms parting for the prince",
+          "Flickering fire in the kitchen freezing mid-flame"
+        ],
+        "coverage": "Model-drafted from general knowledge of the best-known version; verify before quoting."
+      },
+      "adaptability": "Useful for speculative fiction involving suspended animation, quarantined civilizations, or generational crises that must wait out an incubation period.",
+      "references": {
+        "version_notes": "Follows the Brothers Grimm version (KHM 50, Dornröschen). Unlike Perrault's earlier version, the Grimm narrative ends with the wedding, omitting the ogre mother-in-law subplot."
+      }
     },
     {
       "id": "work_008",
@@ -732,7 +1060,13 @@
         "source_ids": [],
         "unresolved_input_citation_markers": [
           "[cite: 2]"
-        ]
+        ],
+        "enrichment": {
+          "version": "story-detail-v1",
+          "model": "gemini-3.8-flash",
+          "verification_status": "model_knowledge_draft",
+          "date": "2026-10-24"
+        }
       },
       "notes": [
         "Grimm variants differ from familiar modern kiss endings."
@@ -753,7 +1087,46 @@
         "resilience_and_change"
       ],
       "narrative_mechanism": "unwanted_obligation",
-      "location": null
+      "location": null,
+      "summary": "A spoiled princess accidentally drops her golden ball into a deep forest spring and secures the assistance of an ugly frog by promising to let him live with her as a companion. After retrieving the toy, she flees and ignores her word, but the frog arrives at the palace, where the king insists that his daughter honor her vow to a benefactor in times of need. Repulsed after letting the creature eat from her plate and enter her bedchamber, the furious princess hurls the frog against the wall rather than lie beside him. Upon impact, the frog transforms into an enchanted prince, and with the king's blessing, the pair marry and depart with the prince's loyal servant, Faithful Heinrich.",
+      "genre": [
+        "Fairy tale",
+        "Folklore",
+        "Fable"
+      ],
+      "key_ideas": [
+        "Promises made under distress must be honored regardless of pride.",
+        "Transformation can be triggered by sudden violent rejection as well as intimacy.",
+        "Loyalty endures through deep psychological and physical strain."
+      ],
+      "main_characters": [
+        "The Princess: selfish royal forced to keep her word",
+        "The Frog Prince: transformed royal bound by enchantment",
+        "The King: strict father enforcing moral obligation",
+        "Faithful Heinrich: devoted servant with iron bands around his heart"
+      ],
+      "plot": {
+        "context": "A cool well under a linden tree near a royal castle, where an idle royal toy triggers an awkward binding contract with an unsightly creature."
+      },
+      "subplots": {
+        "threads": [
+          "Faithful Heinrich's joy, whose iron bands binding his grieving heart snap open upon his master's liberation."
+        ]
+      },
+      "tone_mood": "Petulant, moralistic, and startling.",
+      "detail_and_sensory": {
+        "documented_cues": [
+          "Gleaming golden ball sinking into murky water",
+          "Cold, wet frog slapping against marble stairs",
+          "Sound of a body smashing against a stone wall",
+          "Cracking iron bands around a servant's chest"
+        ],
+        "coverage": "Model-drafted from general knowledge of the best-known version; verify before quoting."
+      },
+      "adaptability": "Applies directly to stories regarding reluctant political deals, transactional alliances, or repulsive obligations that yield unexpected partnerships.",
+      "references": {
+        "version_notes": "Follows the Brothers Grimm text (KHM 1, Der Froschkönig). Unlike popular retellings involving a kiss, the transformation occurs when the princess throws the frog against the wall."
+      }
     },
     {
       "id": "work_009",
@@ -778,7 +1151,13 @@
         "source_ids": [],
         "unresolved_input_citation_markers": [
           "[cite: 2]"
-        ]
+        ],
+        "enrichment": {
+          "version": "story-detail-v1",
+          "model": "gemini-3.8-flash",
+          "verification_status": "model_knowledge_draft",
+          "date": "2026-10-24"
+        }
       },
       "notes": [],
       "retrieval": {
@@ -797,7 +1176,47 @@
         "social_hierarchy"
       ],
       "narrative_mechanism": "productive_misinterpretation",
-      "location": null
+      "location": null,
+      "summary": "After killing seven flies in one stroke over a pot of jam, a humble tailor embroiders 'Seven at One Blow' on his belt and sets out to win his fortune, leading everyone to believe he vanquished seven warriors. A king seeks to be rid of the apparently terrifying boaster by promising his daughter and half his kingdom if the tailor can defeat two destructive giants, a unicorn, and a wild boar. Relying strictly on trickery, the tailor incites the sleeping giants to kill one another, pins the unicorn's horn into a tree trunk, and traps the boar inside a chapel. Despite discovering his true trade, the royal family is forced to concede, and the clever tailor rules as a wealthy king.",
+      "genre": [
+        "Picaresque",
+        "Fairy tale",
+        "Trickster tale"
+      ],
+      "key_ideas": [
+        "Cunning and psychological bluffing overcome brute physical strength.",
+        "Social identity is often dictated by confidence and perceived reputation.",
+        "Underestimating an opponent based on social status is fatal."
+      ],
+      "main_characters": [
+        "The Little Tailor: brazen, resourceful craftsman and trickster",
+        "The King: suspicious monarch trying to eliminate the tailor",
+        "The Princess: reluctant prize wary of the tailor's low birth",
+        "The Giants: dim-witted brutes defeated by internal squabbling"
+      ],
+      "plot": {
+        "context": "A humble artisan's workshop where an incidental act of annoyance launches a lowborn worker into the highest circles of feudal power through bluffing."
+      },
+      "subplots": {
+        "threads": [
+          "The tailor's initial strength trials against an isolated giant, where he squeezes cheese instead of stone and hides inside a thrown bird.",
+          "The tailor foiling a palace plot to assassinate him in bed by feigning loud sleep-talking threats."
+        ]
+      },
+      "tone_mood": "Comedic, irreverent, and fast-paced.",
+      "detail_and_sensory": {
+        "documented_cues": [
+          "Sweet jam spread on dark bread attracting flies",
+          "Stitched white belt reading 'Seven at One Blow'",
+          "Soft white cheese squeezed like a river stone",
+          "Massive tree trunk crushing a furious stuck unicorn"
+        ],
+        "coverage": "Model-drafted from general knowledge of the best-known version; verify before quoting."
+      },
+      "adaptability": "An archetype for social engineering, confidence games, underdog military victories, and modern corporate impostor narratives.",
+      "references": {
+        "version_notes": "Follows the standard Brothers Grimm text (KHM 20, Das tapfere Schneiderlein)."
+      }
     },
     {
       "id": "work_010",
@@ -820,7 +1239,13 @@
         "source_ids": [],
         "unresolved_input_citation_markers": [
           "[cite: 2]"
-        ]
+        ],
+        "enrichment": {
+          "version": "story-detail-v1",
+          "model": "gemini-3.8-flash",
+          "verification_status": "model_knowledge_draft",
+          "date": "2026-10-24"
+        }
       },
       "notes": [],
       "retrieval": {
@@ -838,7 +1263,47 @@
         "identity_and_belonging"
       ],
       "narrative_mechanism": "complementary_weaknesses",
-      "location": null
+      "location": null,
+      "summary": "Facing abuse and execution after outliving their utility to their masters, an aging donkey, dog, cat, and rooster band together to seek livelihoods as musicians in the town of Bremen. Finding a warm, food-filled cottage in the dark forest occupied by robbers, the four companions stand on one another's backs and raise an unholy din through the window, terrifying the bandits into fleeing. Later that night, a scout sent to reclaim the hideout mistakes the cat's glowing eyes for hot coals and is scratched, bitten, kicked, and crowed out into the wilderness. Convinced that the cottage is overrun by a murderous witch and monstrous demons, the robbers never return, and the elderly animals live out their remaining days together in peace.",
+      "genre": [
+        "Fable",
+        "Animal tale",
+        "Folklore"
+      ],
+      "key_ideas": [
+        "Solidarity among the vulnerable creates protection against common threats.",
+        "Utility and dignity do not vanish with old age.",
+        "Fear distorts the imagination of the wicked."
+      ],
+      "main_characters": [
+        "The Donkey: discarded pack animal and leader",
+        "The Hound: aging hunting dog",
+        "The Cat: worn-out mouser",
+        "The Rooster: condemned barnyard fowl",
+        "The Robbers: superstitious outlaws driven from their hideout"
+      ],
+      "plot": {
+        "context": "A harsh agrarian countryside where domesticated animals are systematically discarded or butchered once their physical labor declines."
+      },
+      "subplots": {
+        "threads": [
+          "The individual accounts of betrayal recounted by each animal as they join the caravan along the road."
+        ]
+      },
+      "tone_mood": "Whimsical, resilient, and triumphant.",
+      "detail_and_sensory": {
+        "documented_cues": [
+          "A pyramid of animal silhouettes silhouetted in a lit window",
+          "Cat's eyes glowing like burning embers in a dark hearth",
+          "Deafening discord of braying, barking, mewing, and crowing",
+          "Splintering window glass collapsing onto the floor"
+        ],
+        "coverage": "Model-drafted from general knowledge of the best-known version; verify before quoting."
+      },
+      "adaptability": "Easily transposed to stories of discarded veterans, retired union laborers, or obsolete machines who pool their remaining skills to seize independence.",
+      "references": {
+        "version_notes": "Follows the Brothers Grimm text (KHM 27, Die Bremer Stadtmusikanten). Despite their goal, the animals never actually arrive in Bremen, settling in the cottage instead."
+      }
     },
     {
       "id": "work_011",
@@ -26341,6 +26806,17 @@
     "retrieval": "Controls indexing, aliases, and conditional title matches.",
     "children_ids": "Named or editorially labeled units selected for independent retrieval.",
     "extended_insights": "Optional richer original sample, preserved on work_001.",
-    "location": "Story setting or geographic place, when known. Null means the supplied record does not specify a location."
+    "location": "Story setting or geographic place, when known. Null means the supplied record does not specify a location.",
+    "summary": "Model-drafted synopsis of the best-known version, including the ending.",
+    "genre": "Short genre labels.",
+    "key_ideas": "Central ideas or morals, one sentence each.",
+    "main_characters": "Principal characters as \"Name: role\".",
+    "plot.context": "Setting, situation and stakes at the start.",
+    "subplots.threads": "Secondary threads or embedded episodes.",
+    "tone_mood": "Overall tone and mood.",
+    "detail_and_sensory": "Concrete images from the source plus a coverage caveat.",
+    "adaptability": "How the mechanism transfers to new settings.",
+    "references.version_notes": "Which version the enrichment follows and notable variants.",
+    "provenance.enrichment": "Records which model and enrichment version drafted the fields above."
   }
 }
