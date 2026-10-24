@@ -15,6 +15,10 @@ run-name: Planned parallel | ${{ inputs.request_file }} | ${{ inputs.queue_tag |
       queue_tag:
         type: string
         default: ''
+      fresh_run:
+        type: string
+        default: ''
+        description: 'Optional prior planned-parallel run: retain its locked board and four drafts; rebuild reviews'
 permissions:
   contents: read
   actions: read
@@ -37,6 +41,14 @@ jobs:
       with:
         backend: ${{ inputs.backend }}
         hosted-only: 'true'
+    - name: Import saved board and drafts for fresh review
+      if: ${{ inputs.fresh_run != '' }}
+      uses: actions/download-artifact@v4
+      with:
+        pattern: '{planned-lock,planned-write-*,planned-check-*}'
+        run-id: ${{ inputs.fresh_run }}
+        github-token: ${{ github.token }}
+        path: inputs/previous
     - name: prepare
       id: task
       env:
@@ -44,12 +56,17 @@ jobs:
         GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         STORY_REQUEST: ${{ inputs.request_file }}
         BACKEND: ${{ inputs.backend }}
+        FRESH_RUN: ${{ inputs.fresh_run }}
         SCENE_ID: ''
-      run: 'backend=fixture
+      run: 'extra=()
+
+        if [ -n "$FRESH_RUN" ]; then extra=(--resume-source inputs/previous); fi
+
+        backend=fixture
 
         if [ "$BACKEND" = live ]; then backend=worker; fi
 
-        python -m storyforge.planned_parallel prepare --backend "$backend" --request-file "$STORY_REQUEST"'
+        python -m storyforge.planned_parallel prepare --backend "$backend" --request-file "$STORY_REQUEST" "${extra[@]}"'
     - uses: actions/upload-artifact@v4
       if: always()
       with:
@@ -79,6 +96,7 @@ jobs:
         GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         STORY_REQUEST: ${{ inputs.request_file }}
         BACKEND: ${{ inputs.backend }}
+        FRESH_RUN: ${{ inputs.fresh_run }}
         SCENE_ID: ''
       run: 'backend=fixture
 
@@ -114,6 +132,7 @@ jobs:
         GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         STORY_REQUEST: ${{ inputs.request_file }}
         BACKEND: ${{ inputs.backend }}
+        FRESH_RUN: ${{ inputs.fresh_run }}
         SCENE_ID: ${{ matrix.scene }}
       run: 'backend=fixture
 
@@ -159,6 +178,7 @@ jobs:
         GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         STORY_REQUEST: ${{ inputs.request_file }}
         BACKEND: ${{ inputs.backend }}
+        FRESH_RUN: ${{ inputs.fresh_run }}
         SCENE_ID: ''
       run: 'backend=fixture
 
@@ -195,6 +215,7 @@ jobs:
         GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         STORY_REQUEST: ${{ inputs.request_file }}
         BACKEND: ${{ inputs.backend }}
+        FRESH_RUN: ${{ inputs.fresh_run }}
         SCENE_ID: ${{ matrix.scene }}
       run: 'backend=fixture
 
@@ -240,6 +261,7 @@ jobs:
         GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         STORY_REQUEST: ${{ inputs.request_file }}
         BACKEND: ${{ inputs.backend }}
+        FRESH_RUN: ${{ inputs.fresh_run }}
         SCENE_ID: ${{ matrix.scene }}
       run: 'backend=fixture
 
@@ -286,6 +308,7 @@ jobs:
         GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         STORY_REQUEST: ${{ inputs.request_file }}
         BACKEND: ${{ inputs.backend }}
+        FRESH_RUN: ${{ inputs.fresh_run }}
         SCENE_ID: ''
       run: 'backend=fixture
 
@@ -330,6 +353,7 @@ jobs:
         GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         STORY_REQUEST: ${{ inputs.request_file }}
         BACKEND: ${{ inputs.backend }}
+        FRESH_RUN: ${{ inputs.fresh_run }}
         SCENE_ID: ${{ matrix.scene }}
       run: 'backend=fixture
 
@@ -377,6 +401,7 @@ jobs:
         GEMINI_API_KEYS: ${{ secrets.GEMINI_API_KEYS }}
         STORY_REQUEST: ${{ inputs.request_file }}
         BACKEND: ${{ inputs.backend }}
+        FRESH_RUN: ${{ inputs.fresh_run }}
         SCENE_ID: ''
       run: 'backend=fixture
 
