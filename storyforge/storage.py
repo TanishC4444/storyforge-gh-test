@@ -23,7 +23,7 @@ def save(path, value):
 
 
 def load(path):
-    return json.loads(Path(path).read_text())
+    return json.loads(Path(path).read_text(encoding='utf-8-sig'))
 
 
 @contextmanager
