@@ -63,6 +63,9 @@ def packet(req, state, card):
         'style_and_controls': {k: req.get(k) for k in ['tone_mood', 'sensory_detail', 'creative_freedom', 'surprise', 'ending_tendency', 'reference_policy']},
         'target_words': req['words_per_scene'],
     }
+    if req.get('performance',{}).get('pipelined_living'):
+        from .narrative_context import context
+        result['narrative_context']=context(state,card)
     if req.get('performance',{}).get('canon_index'):
         from .canon import working
         result['author_continuity']['current_state']=working(state,query=json.dumps(card),budget=None if req.get('performance',{}).get('classic_expansion') else req.get('performance',{}).get('working_memory_chars',6500))

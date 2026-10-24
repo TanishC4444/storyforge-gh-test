@@ -118,6 +118,10 @@ def factual_ids(value,prose,allowed):
     for line in value.splitlines():
         if line.strip().startswith('ISSUE '):
             fields=[x.strip() for x in line.strip()[6:].split('|',5)]
+            # A complete advisory sometimes omits its nonblocking suggestion.
+            # Preserve its source and judgment without spending another API call.
+            if len(fields)==5 and fields[0]=='advisory' and fields[1] in {'memory','prose'} and fields[2] and fields[4]:
+                fields.append('Retain this advisory for editorial attention; no blocking correction was requested.')
             require(len(fields)==6,'Malformed memory issue')
             ids=re.findall(r'p\d+',fields[3]);require(bool(ids) and set(ids)<=set(allowed),'Memory issue cites unsupplied source')
             require(len(ids)==len(set(ids)) and set(ids)<=set(catalog),'Invalid memory evidence IDs')
