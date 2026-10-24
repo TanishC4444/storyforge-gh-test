@@ -47,7 +47,7 @@ _RECOVERY_JOBS = ['resume']
 
 
 def _load_dir(folder: Path) -> dict[str, Files]:
-    return {child.name: {str(p.relative_to(child)): p.read_bytes() for p in child.rglob('*') if p.is_file()}
+    return {child.name: {p.relative_to(child).as_posix(): p.read_bytes() for p in child.rglob('*') if p.is_file()}
             for child in sorted(folder.iterdir()) if child.is_dir()}
 
 

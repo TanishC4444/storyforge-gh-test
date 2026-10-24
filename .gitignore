@@ -14,3 +14,6 @@ runs/
 model_cache/
 
 recovered/
+
+# Local production research cache
+search-cache.sqlite*

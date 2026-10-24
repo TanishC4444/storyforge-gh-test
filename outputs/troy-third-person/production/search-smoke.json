@@ -1,0 +1,34 @@
+{
+  "query": "film commission location library production scouting permits",
+  "purpose": "location",
+  "results": [
+    {
+      "title": "Chicago Film Office - Permits for Filming",
+      "url": "https://www.chicago.gov/city/en/depts/dca/supp_info/permits.html",
+      "snippet": "Permits are issued by the City of Chicago for filming on streets, sidewalks, alleys, and other public properties. Permit fees are $250 per day/per location. For ..."
+    },
+    {
+      "title": "Michigan Film & Digital Media Office | Film",
+      "url": "https://www.michiganbusiness.org/industries/mfdmo/film/",
+      "snippet": "The MFDMO is here to assist with any and all permitting questions and we can be reached at (800) 477-3456. required for production on federal, state, and ..."
+    },
+    {
+      "title": "Locations to CinemaScout - California Film Commission",
+      "url": "https://film.ca.gov/locations/locations-to-cinemascout/",
+      "snippet": "Please contact the local film liaison office direct before you start to scout their region. California Film Commission 7080 Hollywood Blvd., Suite 900. Los ..."
+    },
+    {
+      "title": "Location Scout: Guide to Film & Photo Locations",
+      "url": "https://www.theheadspacestudios.com/location-scout-the-complete-guide-to-scouting-film-photo-locations/",
+      "snippet": "Filming permits are required by local governments, and obtaining permits varies by city, state, and local film commission. Scouts must secure permission to ..."
+    },
+    {
+      "title": "Location Scouting",
+      "url": "https://yamdu.com/en/learn/preproduction/location-scouting/",
+      "snippet": "a location manager or scout will be responsible for obtaining all the necessary permits and permission from the property owner to film at the said location(s). ..."
+    }
+  ],
+  "retrieved_at": 1792867792.8394341,
+  "cached": false,
+  "evidence_level": "search_snippet_only"
+}
