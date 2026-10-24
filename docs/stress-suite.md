@@ -30,13 +30,18 @@ memory. Independent cases continue after ordinary child failures.
 
 ## Provider policy
 
-The suite requires the existing 45-second exponential Gemini outage backoff,
-three bounded rounds and a maximum nine HTTP attempts per role call. Respect
+The suite requires 45-second exponential Gemini outage backoff,
+three bounded rounds and a maximum eighteen HTTP attempts per role call. Two
+independent projects per model route may be tried; Flash-Lite remains the smaller
+hosted fallback. Successful calls stop immediately. Respect
 Retry-After; actual cooldown may be longer. All hosted roles remain hosted-only:
 there is no silent or immediate local-model downgrade. Daily exhaustion, auth
 errors and invalid output are not mistaken for temporary capacity; inputs and
 partial drafts stay available instead of manufacturing approval. Sustained daily
-exhaustion may require a later rerun after reset.
+exhaustion may require a later rerun after reset. The hosted context ceiling is
+96,000 characters (192,000 for the hosted-only ensemble and its continuation); no memory is truncated to fit. Repeated source hashes are
+shared losslessly in the request. Output ceilings reserve room for thinking
+tokens and increase in delayed recovery rounds after incomplete generation.
 
 ## Reports and limits
 

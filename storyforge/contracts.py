@@ -15,7 +15,7 @@ def request(value):
     require(isinstance(value, dict), 'Request must be an object')
     require(bool(re.fullmatch(r'[a-zA-Z0-9_-]{1,64}', value.get('project_id', ''))), 'Invalid project ID')
     require(isinstance(value.get('premise'), str) and bool(value['premise'].strip()), 'Premise required')
-    for name, low, high, default in [('chapters', 1, 12, 3), ('scenes_per_chapter', 1, 8, 3), ('words_per_scene', 100, 1600, 850), ('max_repairs', 0, 3, 1), ('max_stage_retries', 0, 3, 1), ('context_chars', 4000, 96000, 22000), ('n_ctx', 4096, 16384, 8192)]:
+    for name, low, high, default in [('chapters', 1, 12, 3), ('scenes_per_chapter', 1, 8, 3), ('words_per_scene', 100, 1600, 850), ('max_repairs', 0, 3, 1), ('max_stage_retries', 0, 3, 1), ('context_chars', 4000, 192000, 22000), ('n_ctx', 4096, 16384, 8192)]:
         value.setdefault(name, default)
         require(type(value[name]) is int and low <= value[name] <= high, f'Invalid {name}')
     if value['context_chars']>48000:
@@ -102,10 +102,10 @@ def delta(value, prose, ids):
         if 'supersedes' in m:
             links=m['supersedes']
             require(isinstance(links,list) and len(links)<=3 and all(isinstance(x,str) for x in links) and len(links)==len(set(links)),'Invalid supersedes links')
-        if 'life_state' in m or 'subject' in m:
+        if 'life_state' in m or 'subject' in m or isinstance(m.get('fact_key'),str) and m['fact_key'].startswith('life:'):
             require(m.get('kind')=='event' and m.get('subject') in ids and m.get('life_state') in {'alive','dead','missing','unknown'},'Invalid lifecycle memory')
             require(m.get('fact_key')=='life:'+m['subject'],'Lifecycle memory needs stable life:<id> fact key')
-        if 'thread_id' in m or 'thread_state' in m:
+        if m['kind']=='thread' or 'thread_id' in m or 'thread_state' in m:
             require(m.get('kind')=='thread' and isinstance(m.get('thread_id'),str) and bool(re.fullmatch(r'[a-zA-Z0-9_-]{1,64}',m['thread_id'])) and m.get('thread_state') in {'seeded','escalating','payoff','closed'},'Invalid plot thread memory')
             require(m.get('fact_key')=='thread:'+m['thread_id'],'Thread needs stable thread:<id> fact key')
         if m['kind'] == 'belief':

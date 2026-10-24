@@ -3904,6 +3904,7 @@ jobs:
         \ as summary:\n    summary.write('\\n'.join(rows)+'\\n')\nprint('Failed/cancelled jobs:', failed)\nif failed:\n  \
         \  raise SystemExit(1)\nPY\n"
     - name: Require actual scene approvals and complete source-bound memory
+      if: always()
       env:
         EXPECTED_SCENES: ${{ inputs.scene_limit }}
       run: python -m storyforge.episode_audit --source results --out audit --expected "$EXPECTED_SCENES"

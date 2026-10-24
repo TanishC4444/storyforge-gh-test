@@ -16,8 +16,8 @@ def fields_for(error,record):
     if 'unknown prior fact' in message:return {'supersedes'}
     if 'changed fact identity' in message:return {'fact_key','supersedes'}
     if 'evidence' in message.lower():return {'evidence_ids'}
-    if 'plot thread' in message or 'Thread needs' in message:return {'thread_id','thread_state','fact_key'}
-    if 'lifecycle' in message.lower() or 'Lifecycle' in message:return {'subject','life_state','fact_key'}
+    if 'plot thread' in message or 'Thread needs' in message:return {'kind','thread_id','thread_state','fact_key','supersedes'}
+    if 'lifecycle' in message.lower():return {'kind','subject','life_state','fact_key','supersedes'}
     return set()
 
 
@@ -54,6 +54,10 @@ def malformed_fields(record,req,packet):
         if not isinstance(record.get('life_state'),str) or record['life_state'] not in {'alive','dead','missing','unknown'}:fields.add('life_state')
         if kind!='event':fields.add('kind')
         if not isinstance(subject,str) or record.get('fact_key')!='life:'+subject:fields.add('fact_key')
+        if fields & {'subject','life_state','fact_key','kind'}:
+            fields.update({'kind','subject','life_state','fact_key','supersedes'})
+    if ('thread_id' in record or 'thread_state' in record) and kind!='thread':
+        fields.update({'kind','thread_id','thread_state','fact_key','supersedes'})
     evidence=record.get('evidence_ids')
     allowed={p['id'] for p in packet['evidence_passages']}
     if evidence is not None and (not isinstance(evidence,list) or not 1<=len(evidence)<=3 or not all(isinstance(p,str) and p in allowed for p in evidence) or len(set(evidence))!=len(evidence)):fields.add('evidence_ids')
@@ -86,7 +90,10 @@ def repair(executor,req,out,prose,packet,raw,validate):
     properties={}
     for problem in problems:
         i=problem['record_index'];fields=problem['editable_fields']
-        properties['r'+str(i)]={'type':'object','properties':{f:item['properties'][f] for f in fields},'required':fields,'additionalProperties':False}
+        props={f:copy.deepcopy(item['properties'][f]) for f in fields}
+        for field in {'subject','life_state','thread_id','thread_state'} & set(fields):
+            props[field]={'anyOf':[props[field],{'type':'null'}]}
+        properties['r'+str(i)]={'type':'object','properties':props,'required':fields,'additionalProperties':False}
     schema={'type':'object','properties':{'repairs':{'type':'object','properties':properties,'required':list(properties),'additionalProperties':False}},'required':['repairs'],'additionalProperties':False}
     data={'records_needing_repair':[{**p,'record':raw['memories'][p['record_index']]} for p in problems],
           'evidence_passages':packet['evidence_passages'],'prior_canon':packet.get('prior_canon',[]),
@@ -99,15 +106,22 @@ def repair(executor,req,out,prose,packet,raw,validate):
         for problem in problems:
             i=problem['record_index'];fields=set(problem['editable_fields']);patch=fixes['r'+str(i)]
             require(isinstance(patch,dict) and set(patch)==fields,'Patch changed an immutable record field')
-            merged['memories'][i].update(patch)
+            apply_patch(merged['memories'][i],patch)
         validate(merged)  # Full source, cast, belief, lifecycle and identity contracts.
         return value
     from .inference import Executor
+    data['optional_field_policy']='Set subject/life_state to null to REMOVE accidental lifecycle metadata from a location or ordinary event; preserve its real key and prior identity. Actual death or life-status changes must retain correct lifecycle metadata. Set thread_id/thread_state to null to REMOVE accidental thread metadata from an ordinary event or claim.'
     result=Executor(options,Path(out)/'record-repair',executor.backend).call('memory',data,
         'Repair ONLY each record’s editable_fields using actual source evidence and registered character IDs. Return repairs keyed by r plus record_index; every requested field is required. Never alter other fields or create/delete records. known_by lists actual supported witnesses or holders, not everyone present in the wider world; never guess a default witness list. Preserve uncertainty. A state update may supersede only the same prior kind and fact_key. For a new event that incorrectly replaces a resource or deadline, use supersedes=[] and retain its distinct event fact_key instead of overwriting state; this does not assert a resource reset. For an actual update of the same state, copy the exact prior key. Thread descriptions, states and knowledge holders must be supplied independently. Do not change prose to justify a memory. All patched records must pass the same original validators and later independent factual review.',
         tokens=min(4200,600*len(problems)+300),response_schema=schema,validator=check)
     merged=copy.deepcopy(raw)
     for problem in problems:
-        i=problem['record_index'];merged['memories'][i].update(result['repairs']['r'+str(i)])
+        i=problem['record_index'];apply_patch(merged['memories'][i],result['repairs']['r'+str(i)])
     save(Path(out)/'memory-record-repairs.json',{'repairs':result['repairs'],'valid_record_indices_preserved':valid,'diagnostics':problems})
     return merged
+
+
+def apply_patch(record,patch):
+    for key,value in patch.items():
+        if key in {'subject','life_state','thread_id','thread_state'} and value is None:record.pop(key,None)
+        else:record[key]=value

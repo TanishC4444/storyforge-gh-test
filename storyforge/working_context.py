@@ -55,6 +55,21 @@ def concise_packet(packet,req):
                 result['direction']=direction
         if result.get('your_beat') in result.get('ordered_beat_plan',[]):
             result['your_beat']={'id':result['your_beat']['id'],'source':'ordered_beat_plan'}
+        # Share repeated provenance fingerprints without removing a single fact
+        # or source hash. The immutable history and all knowledge allowlists stay.
+        fingerprints={}
+        def share_hashes(value):
+            if isinstance(value,dict):
+                h=value.get('evidence_prose_sha256')
+                if isinstance(h,str) and len(h)==64:
+                    key=next((k for k,v in fingerprints.items() if v==h),None)
+                    if key is None:key='h'+str(len(fingerprints)+1);fingerprints[key]=h
+                    value.pop('evidence_prose_sha256');value['evidence_source_ref']=key
+                for child in value.values():share_hashes(child)
+            elif isinstance(value,list):
+                for child in value:share_hashes(child)
+        share_hashes(result)
+        if fingerprints:result['evidence_source_fingerprints']=fingerprints
     # Chapter excerpts already contain these endings; keep one source projection.
     if result.get('completed_events') and isinstance(result.get('author_continuity'),dict):
         covered={s['id'] for s in result['completed_events']}

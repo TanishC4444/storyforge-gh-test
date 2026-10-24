@@ -43,16 +43,17 @@ class ProviderRecoveryTests(unittest.TestCase):
         self.assertEqual(record['state'],'awaiting_provider_resume');self.assertFalse(record['approval_granted']);self.assertTrue(checkpoint)
         self.assertGreaterEqual(sum(waits),135)
     def test_auth_daily_quota_and_generation_errors_are_not_capacity_retries(self):
-        for error in [HostedError('Google HTTP 400'),HostedError('Google HTTP 401'),HostedError('Google HTTP 403'),HostedError('Google HTTP 429',daily=True),HostedError('Hosted generation did not finish naturally: MAX_TOKENS'),ContractError('Invalid source evidence')]:
+        for error in [HostedError('Google HTTP 400'),HostedError('Google HTTP 401'),HostedError('Google HTTP 403'),HostedError('Google HTTP 429',daily=True),ContractError('Invalid source evidence')]:
             self.assertFalse(transient(error))
         self.assertTrue(transient(HostedError('Google HTTP 503 UNAVAILABLE')))
         self.assertTrue(transient(HostedError('Google connection failed or timed out')))
+        self.assertTrue(transient(HostedError('Hosted generation did not finish naturally: MAX_TOKENS')))
     def test_expired_shared_deadline_saves_resume_status_without_waiting(self):
         with tempfile.TemporaryDirectory() as d,patch('storyforge.runtime.worker_timeout_seconds',return_value=20),patch('storyforge.provider_recovery.time.sleep',side_effect=AssertionError('No time for a retry')):
             self.assertFalse(wait_to_retry([HostedError('Google HTTP 503')],d,'writer_beat',1,configuration(self.req())))
             self.assertEqual(load(Path(d)/'provider-recovery.json')['state'],'awaiting_provider_resume')
     def test_unbounded_or_implicit_retry_settings_are_rejected(self):
-        for change in [{'max_rounds':100},{'buffer_seconds':100000},{'extra_requests':10},{'delay_seconds':True}]:
+        for change in [{'max_rounds':100},{'buffer_seconds':100000},{'extra_requests':19},{'delay_seconds':True}]:
             req=self.req();req['execution_policy']['provider_outage_recovery'].update(change)
             with self.assertRaises(ContractError):configuration(req)
 

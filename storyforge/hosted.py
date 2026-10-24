@@ -206,7 +206,9 @@ class GoogleHosted:
         estimate=count or math.ceil(size/3)
         print('Hosted '+model+': reserving '+str(estimate)+' input tokens',flush=True)
         self.reserve(kind,estimate+tokens)
-        config={'maxOutputTokens':tokens,'thinkingConfig':{'thinkingLevel':'minimal' if kind=='gemma' else 'low'}}
+        # Thinking shares the output ceiling; do not starve short script output.
+        thinking_reserve=(2048+policy.get('output_retry_reserve',0)) if policy and policy.get('quality_routing') and kind!='gemma' else 0
+        config={'maxOutputTokens':min(16384,tokens+thinking_reserve),'thinkingConfig':{'thinkingLevel':'minimal' if kind=='gemma' else 'low'}}
         if policy:config['thinkingConfig']['thinkingLevel']='minimal' if kind=='gemma' else policy.get('thinking','low')
         if policy and policy.get('literary_quality'):
             config['temperature']=.7 if role in {'writer','writer_beat','humanizer','structural_editor','global_repair'} else .2
@@ -255,7 +257,11 @@ class GoogleHosted:
                 self.circuit(kind,exc)
                 raise
         candidates=result.get('candidates',[])
-        if not candidates or candidates[0].get('finishReason')!='STOP':raise HostedError('Hosted generation did not finish naturally: '+str(candidates[0].get('finishReason') if candidates else 'NO_CANDIDATE'))
+        if not candidates or candidates[0].get('finishReason')!='STOP':
+            if candidates:
+                partial=''.join(p.get('text','') for p in candidates[0].get('content',{}).get('parts',[]) if not p.get('thought'))
+                if partial.strip():save(self.folder/'incomplete-generation.json',{'role':role,'model':model,'text':partial,'finish_reason':candidates[0].get('finishReason'),'verified':False})
+            raise HostedError('Hosted generation did not finish naturally: '+str(candidates[0].get('finishReason') if candidates else 'NO_CANDIDATE'))
         text=''.join(p.get('text','') for p in candidates[0]['content']['parts'] if not p.get('thought'))
         if not text.strip():raise HostedError('Hosted response was empty')
         return text,{'model':model,'provider':'google','seconds':round(time.monotonic()-started,3),'input_tokens':estimate,'usage':result.get('usageMetadata',{}),'finish_reason':'stop'}

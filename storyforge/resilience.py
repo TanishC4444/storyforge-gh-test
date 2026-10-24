@@ -68,6 +68,7 @@ def memory_extract(executor,req,out,prose,packet,instruction,allow_public=True):
         prior=packet.get('prior_canon',[])
         instruction+=' For a changed resource, relationship or obligation, copy the exact fact_key and kind of the same prior fact when using its ID in supersedes. Prior facts without fact_key are immutable and cannot appear in supersedes. New events, consequences, and discoveries use a new fact_key and supersedes=[]; they do not replace the prior character or world premise. Never infer an update or erase history. Include unresolved callbacks and obligations, not only recent motion.'
     instruction+=' Every memory, including each thread update, MUST include a nonempty text description of at most 600 characters, evidence_ids and explicit known_by. Thread IDs and states supplement text; they never replace it. Never guess missing witnesses, outcomes or source evidence.'
+    instruction+=' subject/life_state are ONLY for actual lifecycle changes with life:<character_id> keys. Do NOT attach them to arrival, location, presence or ordinary action records. thread_id/thread_state are ONLY for kind=thread with a matching thread:<id> key. Omit unrelated optional metadata entirely.'
     from .adaptive import enabled as adaptive
     schema=memory_schema(packet,ids,allow_public=allow_public,prior_memories=prior)
     if adaptive(req):

@@ -10,23 +10,27 @@ def configuration(req):
     raw=req.get('execution_policy',{}).get('provider_outage_recovery',{})
     require(isinstance(raw,dict),'Invalid provider outage recovery')
     if not raw:return {}
-    limits={'max_rounds':(1,3),'delay_seconds':(5,120),'buffer_seconds':(30,600),'extra_requests':(0,6)}
+    limits={'max_rounds':(1,3),'delay_seconds':(5,120),'buffer_seconds':(30,600),'extra_requests':(0,12)}
     require(set(raw)==set(limits),'Outage recovery needs explicit bounded settings')
     for key,(low,high) in limits.items():
         require(type(raw[key]) is int and low<=raw[key]<=high,'Invalid provider outage '+key)
     cap=req.get('execution_policy',{}).get('max_hosted_requests')
-    require(type(cap) is int and 1<=cap<=6 and cap+raw['extra_requests']<=9,'Invalid total outage request cap')
+    require(type(cap) is int and 1<=cap<=6 and cap+raw['extra_requests']<=18,'Invalid total outage request cap')
     return raw
 
 
 def transient(error):
     if getattr(error,'daily',False):return False
     text=str(error)
-    return any(code in text for code in ['HTTP 408','HTTP 429','HTTP 500','HTTP 502','HTTP 503','HTTP 504','connection failed or timed out'])
+    return any(code in text for code in ['HTTP 408','HTTP 429','HTTP 500','HTTP 502','HTTP 503','HTTP 504','connection failed or timed out','MAX_TOKENS'])
 
 
 def wait_to_retry(errors,folder,role,round_number,config):
     if not errors or not all(transient(e) for e in errors):return False
+    # An output-only truncation is not a provider outage. Mixed 503/truncation
+    # rounds may wait and retry with expanded output room; never sleep merely
+    # because every healthy model returned an incomplete artifact.
+    if all('MAX_TOKENS' in str(e) for e in errors):return False
     from .runtime import worker_timeout_seconds
     base=config['delay_seconds']*2**(round_number-1)
     delay=max(base,max(getattr(e,'retry_after',0) for e in errors))+random.uniform(0,5)
