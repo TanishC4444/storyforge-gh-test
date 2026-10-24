@@ -230,13 +230,16 @@ def repair_batch(state,card,source,out,backend,bid):
             if empowered and result['replacements']:
                 original={x['id']:x['text'] for x in batch['passages'] if x['id'] in batch['owned']}
                 candidate={pid:result['replacements'].get(pid,text) for pid,text in original.items()}
+                source_prose=Path(source)/'plan/prose.txt'
+                compiled=apply(source_prose.read_text(),result['replacements'],plan['source_sha256']) if source_prose.exists() else None
+                if compiled is not None:validate_prose(compiled,req,check_length=True)
                 def assess(value):
                     if isinstance(value,dict):require(type(value.get('pass')) is bool,'Missing edit assessment');return value
                     require(isinstance(value,str) and value.strip().split('|',1)[0].strip() in {'PASS','FAIL'},'Missing edit assessment')
                     return {'pass':value.strip().startswith('PASS'),'reason':value.strip()}
                 assessment=Executor(req,Path(out)/'candidate-check',backend).call('story_quality',
-                    {**review_context(state,card),'original_passages':original,'candidate_patch':candidate,'findings':batch['findings']},
-                    'Compare the original with this proposed edit against the actual author prompt and canon. Check that the specific faults are resolved and no new repetition, contradictions, missing necessary action, forbidden form or knowledge leaks are introduced. Deletion and consolidation are allowed. Do not demand dialogue against a no-dialogue brief. Return PASS or FAIL | one concrete reason. No JSON; do not rewrite.',
+                    {**review_context(state,card),'assessment_scope':'paragraph_patch','original_passages':original,'candidate_patch':candidate,'context_passages':batch['passages'],'compiled_scene_words':len(compiled.split()) if compiled is not None else None,'findings':batch['findings']},
+                    'Compare the original with this proposed paragraph edit against the actual author prompt and canon. Candidate_patch is ONLY the owned excerpt, not the whole scene; do not apply the scene word target to it. Check that the specific faults are resolved and no new repetition, contradictions, missing necessary action, forbidden form or knowledge leaks are introduced. Deletion and consolidation are allowed. Do not demand dialogue against a no-dialogue brief. Return PASS or FAIL | one concrete reason. No JSON; do not rewrite.',
                     tokens=250,response_schema=False,output_format='text',skill='Independently judge whether the proposed edit is an improvement grounded in the author brief and actual facts.',validator=assess)
                 require(assessment['pass'],'Candidate edit rejected: '+assessment.get('reason','Unresolved editorial faults'))
                 save(Path(out)/'candidate-assessment.json',assessment)

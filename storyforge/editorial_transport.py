@@ -114,17 +114,24 @@ def factual_ids(value,prose,allowed):
     try:parsed=parse_json(value)
     except (ValueError,TypeError):parsed=None
     if parsed is not None:return factual(parsed,prose)
-    catalog={p['id']:p['text'] for p in passages(prose)};lines=[]
+    catalog={p['id']:p for p in passages(prose)};lines=[]
     for line in value.splitlines():
         if line.strip().startswith('ISSUE '):
             fields=[x.strip() for x in line.strip()[6:].split('|',5)]
             require(len(fields)==6,'Malformed memory issue')
             ids=re.findall(r'p\d+',fields[3]);require(bool(ids) and set(ids)<=set(allowed),'Memory issue cites unsupplied source')
-            # Each issue has one contiguous source span. Adjacent IDs are joined exactly.
-            ordered=list(catalog);positions=[ordered.index(pid) for pid in ids]
-            require(positions==list(range(min(positions),max(positions)+1)),'Memory evidence must be contiguous')
-            fields[3]='\n\n'.join(catalog[pid] for pid in ids)
-            issue={**dict(zip(['severity','target','category','quote','problem','fix'],fields)),'evidence_ids':ids}
+            require(len(ids)==len(set(ids)) and set(ids)<=set(catalog),'Invalid memory evidence IDs')
+            ids=sorted(ids,key=lambda pid:catalog[pid]['start'])
+            # A continuity finding can compare distant passages. Keep every exact
+            # span, with one contiguous anchor for consumers requiring a quote;
+            # never fabricate a quotation by joining nonadjacent paragraphs.
+            ordered=list(catalog);anchor=[ids[0]]
+            for pid in ids[1:]:
+                if ordered.index(pid)!=ordered.index(anchor[-1])+1:break
+                anchor.append(pid)
+            fields[3]=prose[catalog[anchor[0]]['start']:catalog[anchor[-1]]['end']]
+            issue={**dict(zip(['severity','target','category','quote','problem','fix'],fields)),
+                   'evidence_ids':ids,'evidence_spans':[dict(catalog[pid]) for pid in ids]}
             lines.append(issue)
         elif line.strip() in {'PASS','FAIL'}:status=line.strip()=='PASS'
     require('status' in locals(),'Missing memory verdict')
