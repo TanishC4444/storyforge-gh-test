@@ -39,7 +39,7 @@ def plan(api,run_id,scene,stage,out):
     if run.get('conclusion')=='success':raise ValueError('This run succeeded; use universe continuation for a new episode')
     if run['path'].split('@')[0]!='.github/workflows/living-universe-pipeline.yml':raise ValueError('Resume requires a full living pipeline run, not the stress controller')
     artifacts=pages(api,f'actions/runs/{run_id}/artifacts','artifacts')
-    selected=[a for a in artifacts if not a.get('expired') and (a['name'] in {'quickstart','readable-story','universe-canon'} or re.fullmatch(r's\d+_(accept|draft|repair|final_check|final_memory|memory_review|memory_recovery_join|design)',a['name']))]
+    selected=[a for a in artifacts if not a.get('expired') and (a['name'] in {'quickstart','readable-story','universe-canon'} or re.fullmatch(r's\d+_(accept|draft|repair|final_check|final_memory|memory_review|memory_recovery_join|design|write_batches-[0-9]+)',a['name']))]
     if not selected:raise ValueError('No saved checkpoints remain; download recovery artifacts before their 30-day expiry')
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
         list(pool.map(lambda a:api.artifact(a,out/'backup'/a['name']),selected))

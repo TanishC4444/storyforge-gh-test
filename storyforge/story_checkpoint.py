@@ -21,7 +21,7 @@ def preserve(source,out,expected=None):
     if state is not None:save(out/'checkpoint/snapshot.json',state)
     total=len(state.get('plan',{}).get('scenes',[])) if state else 0
     if expected is not None:total=min(total,expected)
-    drafts=[]
+    drafts=[];partial_batches=[]
     for number in range(1,5):
         prefix=f's{number:02}';chosen=None
         for suffix in ['final_check','repair','draft']:
@@ -33,7 +33,18 @@ def preserve(source,out,expected=None):
             for name in ['repair.json','editorial-adjudication.json']:
                 if (folder/name).exists():shutil.copy2(folder/name,target/name)
             drafts.append({'scene':number,'source_artifact':folder.name,'words':len(prose.split()),'sha256':hashlib.sha256(prose.encode()).hexdigest(),'approved':number<=count})
-    result={'version':1,'mode':'retry_same_episode','completed_scenes':count,'completed_scene_ids':[s['id'] for s in state.get('accepted',[])] if state else [],'total_scenes':total,'resume_scene':count+1 if count<total or not total else None,'drafts':drafts,'checkpoint_available':state is not None,'policy':'Completed approved scenes and full memory are retained. Failed scene prose is saved separately and never promoted to canon. Resume saved story can restart the unfinished scene, editing, or memory stage using the original run artifacts.'}
+        for folder in sorted(source.glob(prefix+'_write_batches-*')):
+            batch=folder/'draft-batch.json';texts=[]
+            if batch.exists():
+                text=load(batch).get('prose','')
+                if isinstance(text,str) and text.strip():texts.append(('draft.txt',text))
+            for i,path in enumerate(sorted(folder.rglob('incomplete-generation.json'))):
+                item=load(path)
+                if item.get('role') in {'writer','writer_beat','repair','humanizer'} and isinstance(item.get('text'),str) and item['text'].strip():texts.append((f'incomplete-{i}.txt',item['text']))
+            for name,text in texts:
+                save(out/'partial-batches'/folder.name/name,text)
+                partial_batches.append({'scene':number,'source_artifact':folder.name,'file':name,'words':len(text.split()),'approved':False})
+    result={'version':1,'mode':'retry_same_episode','completed_scenes':count,'completed_scene_ids':[s['id'] for s in state.get('accepted',[])] if state else [],'total_scenes':total,'resume_scene':count+1 if count<total or not total else None,'drafts':drafts,'partial_batches':partial_batches,'checkpoint_available':state is not None,'policy':'Completed approved scenes and full memory are retained. Failed scene prose is saved separately and never promoted to canon. Resume saved story can restart the unfinished scene, editing, or memory stage using the original run artifacts.'}
     save(out/'recovery.json',result)
     save(out/'RECOVERY.md',f'# Saved story recovery\n\n{count} completed scene(s) retained. '+(f'Resume at scene {result["resume_scene"]}.' if result['resume_scene'] else 'This episode is complete.')+'\n\nUse **Resume saved story** in Actions with the original run ID. Choose **editing** to keep the written draft, **memory** to retry factual processing, or **scene** to rebuild only the unfinished scene and its dependents. Completed earlier scenes are reused. The backup is uploaded before any retry. GitHub retries use the original run revision. The universe continuation input is separate; it starts a new episode.\n')
     return result

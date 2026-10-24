@@ -42,6 +42,15 @@ class StoryResumeTests(unittest.TestCase):
             self.assertEqual(load(p/'saved-story/checkpoint/snapshot.json')['memories'],self.state()['memories'])
             self.assertTrue((p/'backup/s02_draft/prose.txt').exists())
             apply(api,p);self.assertEqual(api.posts,[('actions/jobs/42/rerun',{})])
+    def test_partial_writer_output_survives_without_a_compiled_scene(self):
+        with tempfile.TemporaryDirectory() as d:
+            p=Path(d);save(p/'input/s01_accept/snapshot.json',self.state())
+            save(p/'input/s02_write_batches-0/draft-batch.json',{'prose':'A rejected but readable scene opening.','verified_form':False})
+            save(p/'input/s02_write_batches-0/0/incomplete-generation.json',{'role':'writer_beat','text':'An earlier unfinished sentence, but'})
+            result=preserve(p/'input',p/'out')
+            self.assertEqual(result['resume_scene'],2);self.assertEqual(len(result['partial_batches']),2)
+            self.assertEqual((p/'out/partial-batches/s02_write_batches-0/draft.txt').read_text(),'A rejected but readable scene opening.')
+            self.assertTrue(all(not item['approved'] for item in result['partial_batches']))
     def test_resume_cannot_overwrite_completed_scenes_or_skip_missing_boundaries(self):
         with tempfile.TemporaryDirectory() as d:
             api=self.fake()
